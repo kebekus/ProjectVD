@@ -387,7 +387,7 @@ theorem jensen
     simp [this]
     intro h₁R
 
-    let A := MeromorphicNFAt.makeStronglyMeromorphic_id h₁f'
+    let A := MeromorphicNFAt.toNF_eq_id h₁f'
     simp_rw [A]
   rw [← this]
   rw [← this] at h₂f

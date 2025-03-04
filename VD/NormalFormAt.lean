@@ -205,3 +205,45 @@ theorem MeromorphicAt.MeromorphicNFAt_of_toNF (hf : MeromorphicAt f x) :
         by_contra hCon
         simp only [WithTop.untopD_eq_self_iff, WithTop.coe_zero] at hCon
         tauto
+
+/- If `f` has normal form at `x`, then `f` equals `f.toNF`. -/
+theorem MeromorphicNFAt.toNF_eq_id (hf : MeromorphicNFAt f x) :
+    f = hf.meromorphicAt.toNF := by
+  funext z
+  by_cases hz : z = x
+  · rw [hz]
+    unfold MeromorphicAt.toNF
+    simp only [WithTop.coe_zero, ne_eq, Function.update_self]
+    have h₀f := hf
+    rcases hf with h₁f | h₁f
+    · simp only [(h₀f.meromorphicAt.order_eq_top_iff).2 (h₁f.filter_mono nhdsWithin_le_nhds),
+        LinearOrderedAddCommGroupWithTop.top_ne_zero, ↓reduceDIte]
+      exact Filter.EventuallyEq.eq_of_nhds h₁f
+    · obtain ⟨n, g, h₁g, h₂g, h₃g⟩ := h₁f
+      rw [Filter.EventuallyEq.eq_of_nhds h₃g]
+      have : h₀f.meromorphicAt.order = n := by
+        rw [MeromorphicAt.order_eq_int_iff (MeromorphicNFAt.meromorphicAt h₀f) n]
+        use g, h₁g, h₂g
+        exact eventually_nhdsWithin_of_eventually_nhds h₃g
+      by_cases h₃f : h₀f.meromorphicAt.order = 0
+      · simp only [Pi.smul_apply', Pi.pow_apply, sub_self, h₃f, ↓reduceDIte]
+        have hn : n = (0 : ℤ) := by
+          rw [h₃f] at this
+          exact WithTop.coe_eq_zero.mp this.symm
+        simp_rw [hn]
+        simp only [zpow_zero, one_smul]
+        have : g =ᶠ[𝓝 x] (Classical.choose ((h₀f.meromorphicAt.order_eq_int_iff 0).1 h₃f)) := by
+          obtain ⟨h₀, h₁, h₂⟩ := Classical.choose_spec
+            ((h₀f.meromorphicAt.order_eq_int_iff 0).1 h₃f)
+          apply h₁g.localIdentity h₀
+          rw [hn] at h₃g
+          simp only [zpow_zero, one_smul, ne_eq] at h₃g h₂
+          exact (h₃g.filter_mono nhdsWithin_le_nhds).symm.trans h₂
+        exact Filter.EventuallyEq.eq_of_nhds this
+      · simp only [Pi.smul_apply', Pi.pow_apply, sub_self, h₃f, ↓reduceDIte, smul_eq_zero]
+        left
+        apply zero_zpow n
+        by_contra hn
+        rw [hn] at this
+        tauto
+  · exact (MeromorphicNFAt.meromorphicAt hf).toNF_id_on_complement hz

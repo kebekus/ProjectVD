@@ -106,7 +106,7 @@ theorem makeStronglyMeromorphicOn_changeDiscrete [CompleteSpace 𝕜]
     unfold MeromorphicOn.makeStronglyMeromorphicOn
     by_cases h₂v : v ∈ U
     · simp [h₂v]
-      rw [← MeromorphicNFAt.makeStronglyMeromorphic_id]
+      rw [← MeromorphicNFAt.toNF_eq_id]
       exact AnalyticAt.MeromorphicNFAt (h₂V v hv)
     · simp [h₂v]
 
@@ -138,7 +138,7 @@ theorem makeStronglyMeromorphicOn_changeDiscrete'' [CompleteSpace 𝕜]
   rw [MeromorphicOn.makeStronglyMeromorphicOn]
   by_cases h₁x : x ∈ U
   · simp [h₁x]
-    rw [← MeromorphicNFAt.makeStronglyMeromorphic_id hx.MeromorphicNFAt]
+    rw [← MeromorphicNFAt.toNF_eq_id hx.MeromorphicNFAt]
   · simp [h₁x]
 
 

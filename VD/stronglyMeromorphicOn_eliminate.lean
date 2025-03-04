@@ -106,7 +106,7 @@ theorem MeromorphicOn.decompose₁
       have h₄g₁ : MeromorphicNFAt g₁ z₀ := by
         rwa [h₃g₁]
       unfold g
-      rw [← h₄g₁.makeStronglyMeromorphic_id, h₃g₁]
+      rw [← h₄g₁.toNF_eq_id, h₃g₁]
     · rw [zero_zpow (h₁f.divisor z₀) h]
       simp
       let A := h₂f.order_eq_zero_iff.not
