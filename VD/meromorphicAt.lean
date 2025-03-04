@@ -136,10 +136,8 @@ theorem AnalyticAt.meromorphicAt_order_nonneg
   {z₀ : 𝕜}
   (hf : AnalyticAt 𝕜 f z₀) :
   0 ≤ hf.meromorphicAt.order := by
-  rw [hf.meromorphicAt_order]
-  rw [(by rfl : (0 : WithTop ℤ) = WithTop.map Nat.cast (0 : ℕ∞))]
-  erw [WithTop.map_le_iff]
-  simp; simp
+  rw [hf.meromorphicAt_order, (by rfl : (0 : WithTop ℤ) = WithTop.map Nat.cast (0 : ℕ∞))]
+  simp
 
 
 theorem MeromorphicAt.order_add
@@ -359,6 +357,3 @@ theorem MeromorphicAt.order_add_const
     simp [h.le]
     rw [this]
     exact h.ne
-
-
--- might want theorem MeromorphicAt.order_zpow
