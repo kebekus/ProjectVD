@@ -13,8 +13,6 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 
 -- TODO: AnalyticAt is a codiscrete property within MeromorphicAt
 
-/-- The order multiplies by `n` when taking an analytic function to its `n`th power -/
-
 theorem MeromorphicAt.order_pow (hf : MeromorphicAt f z₀) {n : ℕ} :
     (hf.pow n).order = n * hf.order := by
   induction' n with n hn
@@ -31,15 +29,57 @@ theorem MeromorphicAt.order_pow (hf : MeromorphicAt f z₀) {n : ℕ} :
       simp
       ring
 
--- TODO: `order_zpow`
-
--- TODO: `order_inv`
-
-
 theorem MeromorphicAt.order_ne_top_iff {f : 𝕜 → E} {z₀ : 𝕜} (hf : MeromorphicAt f z₀) :
     hf.order ≠ ⊤ ↔ ∃ (g : 𝕜 → E), AnalyticAt 𝕜 g z₀ ∧ g z₀ ≠ 0 ∧ f =ᶠ[𝓝[≠] z₀] fun z ↦ (z - z₀) ^ (hf.order.untopD 0) • g z :=
   ⟨fun h ↦ (hf.order_eq_int_iff (hf.order.untopD 0)).1 (untop'_of_ne_top h).symm,
     fun h ↦ Option.ne_none_iff_exists'.2 ⟨hf.order.untopD 0, (hf.order_eq_int_iff (hf.order.untopD 0)).2 h⟩⟩
+
+theorem MeromorphicAt.order_zpow (hf : MeromorphicAt f z₀) {n : ℤ} :
+    (hf.zpow n).order = n * hf.order := by
+  by_cases hn : n = 0
+  · rw [hn]
+    simp only [zpow_zero, WithTop.coe_zero, zero_mul]
+    rw [← WithTop.coe_zero]
+    rw [MeromorphicAt.order_eq_int_iff]
+    use 1
+    simp
+    apply analyticAt_const
+  by_cases h : hf.order = ⊤
+  · rw [h]
+    simp [hn]
+    rw [MeromorphicAt.order_eq_top_iff]
+    rw [MeromorphicAt.order_eq_top_iff] at h
+    filter_upwards [h]
+    intro y hy
+    simp [hy]
+    exact zero_zpow n hn
+  · obtain ⟨g, h₁g, h₂g, h₃g⟩ := hf.order_ne_top_iff.1 h
+    have : (zpow hf n).order = ↑((WithTop.untopD 0 hf.order) * n) := by
+      rw [MeromorphicAt.order_eq_int_iff]
+      use g ^ n
+      constructor
+      · exact AnalyticAt.zpow h₁g h₂g
+      · constructor
+        · simp
+          rw [zpow_eq_zero_iff hn]
+          exact h₂g
+        · filter_upwards [h₃g]
+          intro y hy
+          simp
+          rw [hy]
+          simp
+          rw [mul_zpow]
+          congr 1
+          rw [zpow_mul]
+    rw [this, mul_comm]
+    simp [hn]
+    congr
+    exact untop'_of_ne_top h
+
+
+-- TODO: `order_inv`
+
+
 
 /-
 theorem MeromorphicAt.order_ne_top_iff' {f : ℂ → ℂ} {z₀ : ℂ} (hf : MeromorphicAt f z₀) :

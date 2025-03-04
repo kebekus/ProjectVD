@@ -181,6 +181,8 @@ theorem MeromorphicOn.decompose₂
 
   have h₅g₀ : MeromorphicNFAt g₀ u := by
     rw [MeromorphicNFAt_of_mul_analytic h₀ h₁]
+    rw [mul_comm] at h₄g₀
+    rw [smul_eq_mul]
     rw [← h₄g₀]
     exact hf u u.2
 
@@ -365,7 +367,7 @@ theorem MeromorphicOn.decompose₃'
         funext z
         by_cases hz : z ∈ U
         · apply Filter.EventuallyEq.eq_of_nhds
-          apply MeromorphicNFAt.localIdentity (h₁f z hz) (t₀ z hz)
+          rw [← MeromorphicNFAt.localIdentity (h₁f z hz) (t₀ z hz)]
           have h₅g : g =ᶠ[𝓝[≠] z] g' := makeStronglyMeromorphicOn_changeDiscrete h₁g' hz
           have Y' : (g' * ∏ᶠ (u : ℂ), fun z => (z - u) ^ (h₁f.meromorphicOn.divisor u)) =ᶠ[𝓝[≠] z] g * ∏ᶠ (u : ℂ), fun z => (z - u) ^ (h₁f.meromorphicOn.divisor u) := by
             apply Filter.EventuallyEq.symm

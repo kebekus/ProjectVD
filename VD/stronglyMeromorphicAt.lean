@@ -8,65 +8,46 @@ variable {𝕜 : Type u_1} [NontriviallyNormedField 𝕜] {E : Type u_2} [Normed
 -- TODO: MeromorphicNF is an open property
 -- TODO: MeromorphicNF is a codiscrete property
 
-lemma MeromorphicNFAt_of_mul_analytic'
-  {f : 𝕜 → 𝕜}
-  {g : 𝕜 → 𝕜}
-  {z₀ : 𝕜}
-  (h₁g : AnalyticAt 𝕜 g z₀)
-  (h₂g : g z₀ ≠ 0) :
-  MeromorphicNFAt f z₀ → MeromorphicNFAt (f • g) z₀ := by
-
+lemma MeromorphicNFAt_of_mul_analytic' {f : 𝕜 → E} {g : 𝕜 → 𝕜} {z₀ : 𝕜} (h₁g : AnalyticAt 𝕜 g z₀)
+    (h₂g : g z₀ ≠ 0) :
+    MeromorphicNFAt f z₀ → MeromorphicNFAt (g • f) z₀ := by
   intro hf
-  --unfold MeromorphicNFAt at hf
-  rcases hf with h₁f|h₁f
+  rcases hf with h₁f | h₁f
   · left
-    rw [Filter.EventuallyEq, eventually_nhds_iff] at h₁f
-    obtain ⟨t, ht⟩ := h₁f
-    rw [Filter.EventuallyEq, eventually_nhds_iff]
-    use t
-    constructor
-    · intro y hy
-      simp [ht.1 y hy]
-    · exact ht.2
+    filter_upwards [h₁f]
+    simp_all
   · right
     obtain ⟨n, g_f, h₁g_f, h₂g_f, h₃g_f⟩ := h₁f
-    use n, g * g_f, h₁g.mul h₁g_f
+    use n, g • g_f, h₁g.smul h₁g_f
     constructor
-    · simp
-      exact ⟨h₂g, h₂g_f⟩
-    · rw [Filter.EventuallyEq, eventually_nhds_iff] at h₃g_f
-      obtain ⟨t, ht⟩ := h₃g_f
-      rw [Filter.EventuallyEq, eventually_nhds_iff]
-      use t
-      constructor
-      · intro y hy
-        simp
-        rw [ht.1]
-        simp
-        ring
-        exact hy
-      · exact ht.2
+    · simp only [Pi.smul_apply', smul_eq_mul, ne_eq, mul_eq_zero, not_or]
+      exact smul_ne_zero h₂g h₂g_f
+    · filter_upwards [h₃g_f]
+      intro y hy
+      simp [hy]
+      exact smul_comm (g y) ((y - z₀) ^ n) (g_f y)
 
 /- A function is strongly meromorphic at a point iff it is strongly meromorphic
    after multiplication with a non-vanishing analytic function
 -/
 theorem MeromorphicNFAt_of_mul_analytic
-  {f g : 𝕜 → 𝕜}
+  {g : 𝕜 → 𝕜}
+  {f : 𝕜 → E}
   {z₀ : 𝕜}
   (h₁g : AnalyticAt 𝕜 g z₀)
   (h₂g : g z₀ ≠ 0) :
-  MeromorphicNFAt f z₀ ↔ MeromorphicNFAt (f * g) z₀ := by
+  MeromorphicNFAt f z₀ ↔ MeromorphicNFAt (g • f) z₀ := by
   constructor
   · apply MeromorphicNFAt_of_mul_analytic' h₁g h₂g
   · intro hprod
-    have : f =ᶠ[𝓝 z₀] f * g * g⁻¹ := by
+    have : f =ᶠ[𝓝 z₀] g⁻¹ • g • f := by
       filter_upwards [h₁g.continuousAt.preimage_mem_nhds (compl_singleton_mem_nhds_iff.mpr h₂g)]
       intro y hy
       rw [Set.preimage_compl, Set.mem_compl_iff, Set.mem_preimage,
         Set.mem_singleton_iff] at hy
       simp [hy]
     rw [meromorphicNFAt_congr this]
-    exact MeromorphicNFAt_of_mul_analytic' (h₁g.inv h₂g) (inv_ne_zero h₂g) (f := f * g) hprod
+    apply MeromorphicNFAt_of_mul_analytic' (h₁g.inv h₂g) (inv_ne_zero h₂g) hprod
 
 theorem MeromorphicNFAt.order_eq_zero_iff {f : 𝕜 → E} {x : 𝕜} (hf : MeromorphicNFAt f x) :
     hf.meromorphicAt.order = 0 ↔ f x ≠ 0 := by

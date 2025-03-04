@@ -72,7 +72,7 @@ theorem stronglyMeromorphicOn_of_mul_analytic'
   (h₁f : StronglyMeromorphicOn f U) :
   StronglyMeromorphicOn (g * f) U := by
   intro z hz
-  rw [mul_comm]
+  rw [← smul_eq_mul]
   apply (MeromorphicNFAt_of_mul_analytic (h₁g z hz) ?h₂g).mp (h₁f z hz)
   exact h₂g ⟨z, hz⟩
 
