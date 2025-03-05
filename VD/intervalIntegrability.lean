@@ -19,11 +19,11 @@ theorem integrability_congr_changeDiscrete
   constructor
   · apply (intervalIntegrable_congr_codiscreteWithin _).1
     filter_upwards [Filter.codiscreteWithin.mono (by tauto : (Ι 0 (2 * π)) ⊆ Set.univ)
-      (circleMap_preimg_codiscrete hR (Filter.codiscreteWithin.mono hU hf))]
+      (circleMap_preimage_codiscrete hR (Filter.codiscreteWithin.mono hU hf))]
     tauto
   · apply (intervalIntegrable_congr_codiscreteWithin _).1
     filter_upwards [Filter.codiscreteWithin.mono (by tauto : (Ι 0 (2 * π)) ⊆ Set.univ)
-      (circleMap_preimg_codiscrete hR (Filter.codiscreteWithin.mono hU hf.symm))]
+      (circleMap_preimage_codiscrete hR (Filter.codiscreteWithin.mono hU hf.symm))]
     tauto
 
 theorem integral_congr_changeDiscrete
@@ -36,7 +36,7 @@ theorem integral_congr_changeDiscrete
   ∫ (x : ℝ) in (0)..(2 * π), f₁ (circleMap 0 r x) = ∫ (x : ℝ) in (0)..(2 * π), f₂ (circleMap 0 r x) := by
   apply intervalIntegral.integral_congr_codiscreteWithin
   filter_upwards [Filter.codiscreteWithin.mono (by tauto : (Ι 0 (2 * π)) ⊆ Set.univ)
-    (circleMap_preimg_codiscrete hr (Filter.codiscreteWithin.mono hU hf))]
+    (circleMap_preimage_codiscrete hr (Filter.codiscreteWithin.mono hU hf))]
   tauto
 
 lemma circleMap_neg

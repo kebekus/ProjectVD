@@ -13,18 +13,6 @@ theorem codiscreteWithin_congr_inter
   rw [mem_codiscreteWithin, mem_codiscreteWithin, ← Set.diff_inter_self_eq_diff, hST,
     Set.diff_inter_self_eq_diff]
 
-/-- If `s` is codiscrete within `U`, then `sᶜ ∩ U` has discrete topology. -/
-theorem discreteTopology_of_codiscreteWithin
-    {X : Type u_1} [TopologicalSpace X]
-    {U s : Set X}
-    (h: s ∈ Filter.codiscreteWithin U) :
-  DiscreteTopology ((sᶜ ∩ U) : Set X) := by
-  rw [(by simp : ((sᶜ ∩ U) : Set X) = ((s ∪ Uᶜ)ᶜ : Set X)), discreteTopology_subtype_iff]
-  simp_rw [mem_codiscreteWithin, Filter.disjoint_principal_right] at h
-  intro x hx
-  rw [← Filter.mem_iff_inf_principal_compl, ← Set.compl_diff]
-  simp_all only [h x, Set.compl_union, compl_compl, Set.mem_inter_iff, Set.mem_compl_iff]
-
 /-- Helper lemma for `codiscreteWithin_iff_locallyFiniteComplementWithin`:
   A set `s` is codiscreteWithin `U` iff
   every point `z ∈ U` has a punctured neighborhood that does not intersect `U \ s`. -/
