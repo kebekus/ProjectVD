@@ -93,7 +93,6 @@ theorem MeromorphicOn.divisor_def₁ [CompleteSpace E]
   unfold MeromorphicOn.divisor
   simp [hz]
 
-
 theorem MeromorphicOn.divisor_def₂ [CompleteSpace E]
   {f : 𝕜 → E}
   {U : Set 𝕜}
@@ -108,7 +107,6 @@ theorem MeromorphicOn.divisor_def₂ [CompleteSpace E]
   left
   exact Eq.symm (WithTop.coe_untop (hf z hz).order h₂f)
 
-
 theorem MeromorphicOn.divisor_mul₀  [CompleteSpace 𝕜]
   {f₁ f₂ : 𝕜 → 𝕜}
   {U : Set 𝕜}
@@ -119,12 +117,14 @@ theorem MeromorphicOn.divisor_mul₀  [CompleteSpace 𝕜]
   (h₁f₂ : MeromorphicOn f₂ U)
   (h₂f₂ : (h₁f₂ z hz).order ≠ ⊤) :
   (h₁f₁.mul h₁f₂).divisor.toFun z = h₁f₁.divisor.toFun z + h₁f₂.divisor.toFun z := by
+
   by_cases h₁z : z ∈ U
   · rw [MeromorphicOn.divisor_def₂ h₁f₁ hz h₂f₁]
     rw [MeromorphicOn.divisor_def₂ h₁f₂ hz h₂f₂]
     have B : ((h₁f₁.mul h₁f₂) z hz).order ≠ ⊤ := by
       rw [MeromorphicAt.order_mul (h₁f₁ z hz) (h₁f₂ z hz)]
-      simp; tauto
+      simp only [ne_eq, LinearOrderedAddCommGroupWithTop.add_eq_top, not_or]
+      tauto
     rw [MeromorphicOn.divisor_def₂ (h₁f₁.mul h₁f₂) hz B]
     simp_rw [MeromorphicAt.order_mul (h₁f₁ z hz) (h₁f₂ z hz)]
     rw [untop_add]
@@ -144,7 +144,7 @@ theorem MeromorphicOn.divisor_mul [CompleteSpace 𝕜]
   by_cases hz : z ∈ U
   · rw [MeromorphicOn.divisor_mul₀ hz h₁f₁ (h₂f₁ z hz) h₁f₂ (h₂f₂ z hz)]
     simp
-  · simp
+  · simp only [Pi.add_apply]
     rw [Function.nmem_support.mp (fun a => hz (h₁f₁.divisor.supportWithinDomain a))]
     rw [Function.nmem_support.mp (fun a => hz (h₁f₂.divisor.supportWithinDomain a))]
     rw [Function.nmem_support.mp (fun a => hz ((h₁f₁.mul h₁f₂).divisor.supportWithinDomain a))]
