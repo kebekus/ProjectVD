@@ -91,31 +91,25 @@ theorem AnalyticAt.order_add (hf₁ : AnalyticAt 𝕜 f₁ z₀) (hf₂ : Analyt
   -- General case
   lift hf₁.order to ℕ using h₁f₁ with n₁ hn₁
   lift hf₂.order to ℕ using h₁f₂ with n₂ hn₂
-  rw [eq_comm] at hn₁ hn₂
-  rw [AnalyticAt.order_eq_nat_iff] at *
+  rw [eq_comm, AnalyticAt.order_eq_nat_iff] at *
   obtain ⟨g₁, h₁g₁, h₂g₁, h₃g₁⟩ := hn₁
   obtain ⟨g₂, h₁g₂, h₂g₂, h₃g₂⟩ := hn₂
-  have m := min n₁ n₂
+  let m := min n₁ n₂
   let G := fun z ↦ (z - z₀) ^ (n₁ - m) • g₁ z + (z - z₀) ^ (n₂ - m) • g₂ z
-  have hG : AnalyticAt 𝕜 G z₀ := by
-    dsimp [G]
-    fun_prop
+  have hG : AnalyticAt 𝕜 G z₀ := by fun_prop
   have : f₁ + f₂ =ᶠ[𝓝 z₀] (· - z₀) ^ m • G := by
-    sorry
+    dsimp [G]
+    filter_upwards [h₃g₁, h₃g₂]
+    intro a h₁a h₂a
+    simp [h₁a, h₂a]
+    congr 1
+    repeat
+      simp [← smul_assoc, smul_eq_mul, ← pow_add, m]
   have : (hf₁.add hf₂).order = m + hG.order := by
     rw [← AnalyticAt.order_congr (hf₁.add hf₂) this]
 
     sorry
-  use g₁ + (· - z₀) ^ (n₂ - n₁) • g₂
-  constructor
-  · apply h₁g₁.add
-    apply AnalyticAt.smul _ h₁g₂
-    apply AnalyticAt.pow
-    fun_prop
-  · constructor
-    · simpa [Nat.sub_ne_zero_iff_lt.mpr h]
-    · filter_upwards [h₃g₁, h₃g₂]
-      intro a h₁a h₂a
-      simp only [Pi.add_apply, h₁a, h₂a, Pi.smul_apply', Pi.pow_apply, smul_add, ← smul_assoc,
-        smul_eq_mul, add_right_inj]
-      rw [← pow_add, add_comm, eq_comm, Nat.sub_add_cancel (Nat.le_of_succ_le h)]
+  rw [this]
+  simp [m]
+  apply inf_le_iff.1
+  exact le_self_add
