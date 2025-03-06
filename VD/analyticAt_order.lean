@@ -1,4 +1,5 @@
 import Mathlib.Analysis.Analytic.Order
+import VD.ToMathlib.analyticAt
 
 open scoped Interval Topology
 open Filter
@@ -65,3 +66,56 @@ theorem AnalyticAt.order_add₂ (hf₁ : AnalyticAt 𝕜 f₁ z₀) (hf₂ : Ana
   · rw [min_eq_right (le_of_not_lt h₁)]
     simp_rw [AddCommMagma.add_comm f₁ f₂]
     exact hf₂.order_add₁ hf₁ (lt_of_le_of_ne (le_of_not_lt h₁) h.symm)
+
+lemma AnalyticAt.order_add_top (hf₁ : AnalyticAt 𝕜 f₁ z₀) (hf₂ : AnalyticAt 𝕜 f₂ z₀)
+    (h : hf₂.order = ⊤) :
+    (hf₁.add hf₂).order = hf₁.order := by
+  apply AnalyticAt.order_congr hf₁
+  filter_upwards [hf₂.order_eq_top_iff.1 h]
+  intro a h₁a
+  simp [h₁a]
+
+theorem AnalyticAt.order_add (hf₁ : AnalyticAt 𝕜 f₁ z₀) (hf₂ : AnalyticAt 𝕜 f₂ z₀) :
+    min hf₁.order hf₂.order ≤ (hf₁.add hf₂).order := by
+  -- Trivial case: f₁ vanishes identically around z₀
+  by_cases h₁f₁ : hf₁.order = ⊤
+  · rw [h₁f₁]
+    simp only [le_top, inf_of_le_right]
+    simp_rw [AddCommMagma.add_comm f₁ f₂]
+    rw [AnalyticAt.order_add_top hf₂ hf₁ h₁f₁]
+  -- Trivial case: f₂ vanishes identically around z₀
+  by_cases h₁f₂ : hf₂.order = ⊤
+  · rw [h₁f₂]
+    simp only [le_top, inf_of_le_left]
+    rw [AnalyticAt.order_add_top hf₁ hf₂ h₁f₂]
+  -- General case
+  lift hf₁.order to ℕ using h₁f₁ with n₁ hn₁
+  lift hf₂.order to ℕ using h₁f₂ with n₂ hn₂
+  rw [eq_comm] at hn₁ hn₂
+  rw [AnalyticAt.order_eq_nat_iff] at *
+  obtain ⟨g₁, h₁g₁, h₂g₁, h₃g₁⟩ := hn₁
+  obtain ⟨g₂, h₁g₂, h₂g₂, h₃g₂⟩ := hn₂
+  have m := min n₁ n₂
+  let G := fun z ↦ (z - z₀) ^ (n₁ - m) • g₁ z + (z - z₀) ^ (n₂ - m) • g₂ z
+  have hG : AnalyticAt 𝕜 G z₀ := by
+    dsimp [G]
+    fun_prop
+  have : f₁ + f₂ =ᶠ[𝓝 z₀] (· - z₀) ^ m • G := by
+    sorry
+  have : (hf₁.add hf₂).order = m + hG.order := by
+    rw [← AnalyticAt.order_congr (hf₁.add hf₂) this]
+
+    sorry
+  use g₁ + (· - z₀) ^ (n₂ - n₁) • g₂
+  constructor
+  · apply h₁g₁.add
+    apply AnalyticAt.smul _ h₁g₂
+    apply AnalyticAt.pow
+    fun_prop
+  · constructor
+    · simpa [Nat.sub_ne_zero_iff_lt.mpr h]
+    · filter_upwards [h₃g₁, h₃g₂]
+      intro a h₁a h₂a
+      simp only [Pi.add_apply, h₁a, h₂a, Pi.smul_apply', Pi.pow_apply, smul_add, ← smul_assoc,
+        smul_eq_mul, add_right_inj]
+      rw [← pow_add, add_comm, eq_comm, Nat.sub_add_cancel (Nat.le_of_succ_le h)]
