@@ -3,7 +3,6 @@ import Mathlib.MeasureTheory.Integral.CircleIntegral
 import Mathlib.MeasureTheory.Integral.IntervalAverage
 import Mathlib.MeasureTheory.Integral.Periodic
 import VD.ToMathlib.codiscreteWithin
-import VD.ToMathlib.intervalIntegrability
 
 open scoped Interval Topology
 open Real Filter MeasureTheory intervalIntegral
