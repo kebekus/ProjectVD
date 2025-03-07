@@ -22,6 +22,7 @@ import VD.leftovers.holomorphic
 import VD.leftovers.holomorphic_zero
 import VD.mathlibAddOn
 import VD.meromorphicAt
+import VD.meromorphicAt_topology
 import VD.meromorphicOn
 import VD.meromorphicOn_divisor
 import VD.meromorphicOn_integrability
