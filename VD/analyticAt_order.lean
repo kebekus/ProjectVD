@@ -9,7 +9,7 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 /-- If two functions agree in a neighborhood of `z₀`, then their orders at `z₀` agree. -/
 theorem AnalyticAt.order_congr (hf₁ : AnalyticAt 𝕜 f₁ z₀) (h : f₁ =ᶠ[𝓝 z₀] f₂):
     (hf₁.congr h).order = hf₁.order := by
-  -- Trivial case: f vanishes identially around z₀
+  -- Trivial case: f₁ vanishes identially around z₀
   by_cases h₁f₁ : hf₁.order = ⊤
   · rw [h₁f₁, order_eq_top_iff]
     filter_upwards [hf₁.order_eq_top_iff.1 h₁f₁, h]
@@ -130,7 +130,7 @@ theorem AnalyticAt.order_add (hf₁ : AnalyticAt 𝕜 f₁ z₀) (hf₂ : Analyt
     dsimp [G]
     filter_upwards [h₃g₁, h₃g₂]
     intro a h₁a h₂a
-    simp [h₁a, h₂a]
+    simp only [Pi.add_apply, h₁a, h₂a, Pi.smul_apply', Pi.pow_apply, smul_add, G]
     congr 1
     repeat
       simp [← smul_assoc, smul_eq_mul, ← pow_add, m]
@@ -157,19 +157,14 @@ lemma AnalyticAt.order_add_of_order_lt_order (hf₁ : AnalyticAt 𝕜 f₁ z₀)
   rw [AnalyticAt.order_eq_nat_iff] at *
   obtain ⟨g₁, h₁g₁, h₂g₁, h₃g₁⟩ := hn₁
   obtain ⟨g₂, h₁g₂, h₂g₂, h₃g₂⟩ := hn₂
-  use g₁ + (· - z₀) ^ (n₂ - n₁) • g₂
+  use g₁ + (· - z₀) ^ (n₂ - n₁) • g₂, by fun_prop
   constructor
-  · apply h₁g₁.add
-    apply AnalyticAt.smul _ h₁g₂
-    apply AnalyticAt.pow
-    fun_prop
-  · constructor
-    · simpa [Nat.sub_ne_zero_iff_lt.mpr h]
-    · filter_upwards [h₃g₁, h₃g₂]
-      intro a h₁a h₂a
-      simp only [Pi.add_apply, h₁a, h₂a, Pi.smul_apply', Pi.pow_apply, smul_add, ← smul_assoc,
-        smul_eq_mul, add_right_inj]
-      rw [← pow_add, add_comm, eq_comm, Nat.sub_add_cancel (Nat.le_of_succ_le h)]
+  · simpa [Nat.sub_ne_zero_iff_lt.mpr h]
+  · filter_upwards [h₃g₁, h₃g₂]
+    intro a h₁a h₂a
+    simp only [Pi.add_apply, h₁a, h₂a, Pi.smul_apply', Pi.pow_apply, smul_add, ← smul_assoc,
+      smul_eq_mul, add_right_inj]
+    rw [← pow_add, add_comm, eq_comm, Nat.sub_add_cancel (Nat.le_of_succ_le h)]
 
 /-- If two functions have unequal orders, then the order of their sum is exactly the minimum
 of the orders of the summands. -/
