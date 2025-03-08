@@ -50,7 +50,7 @@ theorem MeromorphicOn.integrable_log_abs_f₀
     apply Continuous.intervalIntegrable
     apply continuous_iff_continuousAt.2
     intro x
-    have : (fun x => log ‖g (circleMap 0 r x)‖) = log ∘ Complex.abs ∘ g ∘ (fun x ↦ circleMap 0 r x) :=
+    have : (fun x => log ‖g (circleMap 0 r x)‖) = log ∘ norm ∘ g ∘ (fun x ↦ circleMap 0 r x) :=
       rfl
     rw [this]
     apply ContinuousAt.comp
@@ -61,7 +61,7 @@ theorem MeromorphicOn.integrable_log_abs_f₀
         exact hr.le
       exact h₂g ⟨(circleMap 0 r x), this⟩
     apply ContinuousAt.comp
-    · apply Continuous.continuousAt Complex.continuous_abs
+    · apply Continuous.continuousAt continuous_norm
     apply ContinuousAt.comp
     · have : (circleMap 0 r x) ∈ (Metric.closedBall (0 : ℂ) r) := by
         apply circleMap_mem_closedBall (0 : ℂ) hr.le x

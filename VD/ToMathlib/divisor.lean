@@ -4,7 +4,11 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Normed.Field.Basic
-import VD.codiscreteWithin
+import Mathlib.Analysis.SpecialFunctions.Log.Basic
+import VD.ToMathlib.codiscreteWithin
+
+open Metric Real
+
 
 /-!
 # Divisors on subsets of normed fields
@@ -76,14 +80,6 @@ instance : FunLike (Divisor U) 𝕜 ℤ where
 associated functions agree. -/
 @[ext]
 theorem ext {D₁ D₂ : Divisor U} (h : ∀ a, D₁.toFun a = D₂.toFun a) : D₁ = D₂ := DFunLike.ext _ _ h
-
-/-!
-## Degree
--/
-
-/-- The degree of a divisor is the sum of its values, or 0 if the support is
-infinite. -/
-noncomputable def deg (D : Divisor U) : ℤ := ∑ᶠ z, D z
 
 /-!
 ## Elementary properties of the support
@@ -410,3 +406,21 @@ noncomputable def restrict_latticeHom {V : Set 𝕜} (h : V ⊆ U) :
 @[simp]
 lemma restrict_latticeHom_fun {V : Set 𝕜} (D : Divisor U) (h : V ⊆ U) :
     restrict_latticeHom h D = D.restrict h := by rfl
+
+/-!
+## Derived invariants
+-/
+
+/-- The degree of a divisor is the sum of its values, or 0 if the support is
+infinite. -/
+noncomputable def deg (D : Divisor U) : ℤ := ∑ᶠ z, D z
+
+/-- The counting function for a divisor defined on ⊤ -/
+noncomputable def counting (D : Divisor (⊤ : Set 𝕜)) :
+    ℝ → ℝ :=
+  fun r ↦ ∑ᶠ z, D.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤) z
+
+/-- The logarithmic counting function for a divisor defined on ⊤ -/
+noncomputable def logCounting (D : Divisor (⊤ : Set 𝕜)) :
+    ℝ → ℝ :=
+  fun r ↦ ∑ᶠ z, D.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤) z * (log r - log ‖z‖)

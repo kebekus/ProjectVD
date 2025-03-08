@@ -19,11 +19,8 @@ theorem harmonic_meanValue
     intro x hx
     exact gt_trans hρ hx
 
-  have reg₀F : DifferentiableOn ℂ F (Metric.ball z ρ) := by
-    intro x hx
-    apply DifferentiableAt.differentiableWithinAt
-    apply HolomorphicAt.differentiableAt (h₁F x _)
-    exact hx
+  have reg₀F : DifferentiableOn ℂ F (Metric.ball z ρ) :=
+    fun x hx ↦ (h₁F x hx).differentiableAt.differentiableWithinAt
 
   have reg₁F : DifferentiableOn ℂ F (Metric.ball z R) := by
     intro x hx

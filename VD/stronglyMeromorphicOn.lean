@@ -72,7 +72,7 @@ theorem stronglyMeromorphicOn_of_mul_analytic'
   (h₁f : StronglyMeromorphicOn f U) :
   StronglyMeromorphicOn (g * f) U := by
   intro z hz
-  rw [mul_comm]
+  rw [← smul_eq_mul]
   apply (MeromorphicNFAt_of_mul_analytic (h₁g z hz) ?h₂g).mp (h₁f z hz)
   exact h₂g ⟨z, hz⟩
 
@@ -106,7 +106,7 @@ theorem makeStronglyMeromorphicOn_changeDiscrete [CompleteSpace 𝕜]
     unfold MeromorphicOn.makeStronglyMeromorphicOn
     by_cases h₂v : v ∈ U
     · simp [h₂v]
-      rw [← MeromorphicNFAt.makeStronglyMeromorphic_id]
+      rw [← MeromorphicNFAt.toNF_eq_id]
       exact AnalyticAt.MeromorphicNFAt (h₂V v hv)
     · simp [h₂v]
 
@@ -132,16 +132,14 @@ theorem makeStronglyMeromorphicOn_changeDiscrete'' [CompleteSpace 𝕜]
   f =ᶠ[Filter.codiscreteWithin U] hf.makeStronglyMeromorphicOn := by
 
   rw [Filter.eventuallyEq_iff_exists_mem]
-  use { x | AnalyticAt 𝕜 f x }
-  constructor
-  · exact MeromorphicOn.analyticOnCodiscreteWithin hf
-  · intro x hx
-    simp at hx
-    rw [MeromorphicOn.makeStronglyMeromorphicOn]
-    by_cases h₁x : x ∈ U
-    · simp [h₁x]
-      rw [← MeromorphicNFAt.makeStronglyMeromorphic_id hx.MeromorphicNFAt]
-    · simp [h₁x]
+  use { x | AnalyticAt 𝕜 f x }, hf.analyticOnCodiscreteWithin
+  intro x hx
+  simp at hx
+  rw [MeromorphicOn.makeStronglyMeromorphicOn]
+  by_cases h₁x : x ∈ U
+  · simp [h₁x]
+    rw [← MeromorphicNFAt.toNF_eq_id hx.MeromorphicNFAt]
+  · simp [h₁x]
 
 
 theorem stronglyMeromorphicOn_of_makeStronglyMeromorphicOn [CompleteSpace 𝕜]
@@ -152,7 +150,7 @@ theorem stronglyMeromorphicOn_of_makeStronglyMeromorphicOn [CompleteSpace 𝕜]
   intro z hz
   let A := makeStronglyMeromorphicOn_changeDiscrete' hf hz
   rw [meromorphicNFAt_congr A]
-  exact  MeromorphicAt.MeromorphicNFAt_of_toNF (hf z hz)
+  exact (hf z hz).MeromorphicNFAt_of_toNF
 
 
 theorem makeStronglyMeromorphicOn_changeOrder [CompleteSpace 𝕜]

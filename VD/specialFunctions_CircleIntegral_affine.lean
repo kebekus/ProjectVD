@@ -18,7 +18,7 @@ lemma l₀ {x₁ x₂ : ℝ} : (circleMap 0 1 x₁) * (circleMap 0 1 x₂) = cir
   rw [add_mul, Complex.exp_add]
 
 lemma l₁ {x : ℝ} : ‖circleMap 0 1 x‖ = 1 := by
-  rw [Complex.norm_eq_abs, abs_circleMap_zero]
+  rw [norm_circleMap_zero]
   simp
 
 lemma l₂ {x : ℝ} : ‖(circleMap 0 1 x) - a‖ = ‖1 - (circleMap 0 1 (-x)) * a‖ := by
@@ -52,6 +52,7 @@ lemma int'₀
   simp
   intro x
   by_contra h₁a
+  rw [sub_eq_zero] at h₁a
   rw [← h₁a] at ha
   simp at ha
 
@@ -118,7 +119,7 @@ lemma int₀
       _ = 1 := by
         dsimp [ρ]
         apply inv_mul_cancel₀
-        exact (AbsoluteValue.ne_zero_iff Complex.abs).mpr h₁a
+        exact norm_ne_zero_iff.mpr h₁a
     rw [← h] at this
     simp at this
 
@@ -165,7 +166,7 @@ lemma int₁₁ : ∫ (x : ℝ) in (0)..π, log (4 * sin x ^ 2) = 0 := by
   exact intervalIntegrable_log_sin
 
 lemma logAffineHelper {x : ℝ} : log ‖circleMap 0 1 x - 1‖ = log (4 * sin (x / 2) ^ 2) / 2 := by
-  dsimp [Complex.abs]
+  rw [Complex.norm_def]
   rw [log_sqrt (Complex.normSq_nonneg (circleMap 0 1 x - 1))]
   congr
   calc Complex.normSq (circleMap 0 1 x - 1)
@@ -296,18 +297,19 @@ lemma int'₂
   rw [this]
   have : 0 = ζ - ζ := by ring
   rw [this]
-  have : (fun w => log (Complex.abs (1 - circleMap 0 1 (w + ζ)))) = fun x ↦ (fun w ↦ log (Complex.abs (1 - circleMap 0 1 (w)))) (x + ζ) := rfl
+  have : (fun w => log (norm (1 - circleMap 0 1 (w + ζ)))) = fun x ↦ (fun w ↦ log (norm (1 - circleMap 0 1 (w)))) (x + ζ) := rfl
   rw [this]
-  apply IntervalIntegrable.comp_add_right (f := (fun w ↦ log (Complex.abs (1 - circleMap 0 1 (w))))) _ ζ
+  apply IntervalIntegrable.comp_add_right (f := (fun w ↦ log (norm (1 - circleMap 0 1 (w))))) _ ζ
 
-  have : Function.Periodic (fun x ↦ log (Complex.abs (1 - circleMap 0 1 x))) (2 * π) := by
-    have : (fun x ↦ log (Complex.abs (1 - circleMap 0 1 x))) = ( (fun x ↦ log (Complex.abs (1 - x))) ∘ (circleMap 0 1) ) := by rfl
+  have : Function.Periodic (fun x ↦ log (norm (1 - circleMap 0 1 x))) (2 * π) := by
+    have : (fun x ↦ log (norm (1 - circleMap 0 1 x))) = ( (fun x ↦ log (norm (1 - x))) ∘ (circleMap 0 1) ) := by rfl
     rw [this]
     apply Function.Periodic.comp
     exact periodic_circleMap 0 1
 
   let A := int''₁ (2 * π + ζ) ζ
-  have {x : ℝ} : ‖circleMap 0 1 x - 1‖ = Complex.abs (1 - circleMap 0 1 x) := AbsoluteValue.map_sub Complex.abs (circleMap 0 1 x) 1
+  have {x : ℝ} : ‖circleMap 0 1 x - 1‖ = norm (1 - circleMap 0 1 x) := by
+    exact norm_sub_rev (circleMap 0 1 x) 1
   simp_rw [this] at A
   exact A
 
@@ -351,10 +353,10 @@ lemma int₂
   rw [hζ]
   simp_rw [l₀]
 
-  rw [intervalIntegral.integral_comp_add_right (f := fun x ↦ log (Complex.abs (1 - circleMap 0 1 (x))))]
+  rw [intervalIntegral.integral_comp_add_right (f := fun x ↦ log (norm (1 - circleMap 0 1 (x))))]
 
-  have : Function.Periodic (fun x ↦ log (Complex.abs (1 - circleMap 0 1 x))) (2 * π) := by
-    have : (fun x ↦ log (Complex.abs (1 - circleMap 0 1 x))) = ( (fun x ↦ log (Complex.abs (1 - x))) ∘ (circleMap 0 1) ) := by rfl
+  have : Function.Periodic (fun x ↦ log (norm (1 - circleMap 0 1 x))) (2 * π) := by
+    have : (fun x ↦ log (norm (1 - circleMap 0 1 x))) = ( (fun x ↦ log (norm (1 - x))) ∘ (circleMap 0 1) ) := by rfl
     rw [this]
     apply Function.Periodic.comp
     exact periodic_circleMap 0 1
@@ -365,9 +367,10 @@ lemma int₂
   rw [add_comm]
   rw [A]
 
-  have {x : ℝ} : log (Complex.abs (1 - circleMap 0 1 x)) = log ‖circleMap 0 1 x - 1‖ := by
-    rw [← AbsoluteValue.map_neg Complex.abs]
-    simp
+  have {x : ℝ} : log (norm (1 - circleMap 0 1 x)) = log ‖circleMap 0 1 x - 1‖ := by
+    congr 1
+    exact norm_sub_rev 1 (circleMap 0 1 x)
+
   simp_rw [this]
   exact int₁
 
@@ -381,7 +384,6 @@ lemma int₃
   · apply int₂
     simp at ha
     simp at h₁a
-    simp
     linarith
 
 -- integral
@@ -427,6 +429,7 @@ lemma int₄
     simp
     rw [t₀] at hx
     by_contra hCon
+    rw [sub_eq_zero] at hCon
     rw [hCon] at hx
     simp at hx
     rw [mul_div_cancel₀] at hx
@@ -480,7 +483,7 @@ lemma intervalIntegrable_logAbs_circleMap_sub_const
   have {z : ℂ} : z ≠ a → log ‖z - a‖ = log ‖r⁻¹ * z - r⁻¹ * a‖ + log ‖r‖ := by
     intro hz
     rw [← mul_sub, norm_mul]
-    rw [log_mul (by simp [hr]) (by simp [hz])]
+    rw [log_mul (by simp [hr]) (by apply norm_ne_zero_iff.mpr; exact sub_ne_zero_of_ne hz)]
     simp
 
   have : (fun z ↦ log ‖z - a‖) =ᶠ[Filter.codiscreteWithin ⊤] (fun z ↦ log ‖r⁻¹ * z - r⁻¹ * a‖ + log ‖r‖) := by
@@ -503,8 +506,6 @@ lemma intervalIntegrable_logAbs_circleMap_sub_const
           · tauto
     · intro x hx
       simp at hx
-      simp only [Complex.norm_eq_abs]
-      repeat rw [← Complex.norm_eq_abs]
       apply this hx
 
   have hU : Metric.sphere (0 : ℂ) |r| ⊆ ⊤ := by

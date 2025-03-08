@@ -1,4 +1,4 @@
-import VD.divisor
+import VD.ToMathlib.divisor
 import VD.meromorphicAt
 import VD.stronglyMeromorphicOn
 import VD.mathlibAddOn

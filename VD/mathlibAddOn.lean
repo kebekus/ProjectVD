@@ -18,18 +18,6 @@ variable {L L₁ L₂ : Filter E}
 variable {R : Type*} [Semiring R] [Module R F] [SMulCommClass 𝕜 R F] [ContinuousConstSMul R F]
 
 
--- import Mathlib.Analysis.Calculus.FDeriv.Add
-
-@[fun_prop]
-theorem Differentiable.const_smul' (h : Differentiable 𝕜 f) (c : R) :
-    Differentiable 𝕜 (c • f) := Differentiable.const_smul h c
-
-
--- Mathlib.Analysis.Calculus.ContDiff.Basic
-
-theorem ContDiff.const_smul' {f : E → F} (c : R) (hf : ContDiff 𝕜 n f) :
-    ContDiff 𝕜 n (c • f) := ContDiff.const_smul c hf
-
 
 
 open Topology Filter

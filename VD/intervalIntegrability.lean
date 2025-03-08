@@ -2,16 +2,13 @@ import Mathlib.Analysis.Analytic.Linear
 import Mathlib.MeasureTheory.Integral.CircleIntegral
 import Mathlib.MeasureTheory.Integral.IntervalAverage
 import Mathlib.MeasureTheory.Integral.Periodic
-import VD.ToMathlib.analyticAt_preimgCodiscrete
 import VD.ToMathlib.codiscreteWithin
-import VD.ToMathlib.intervalIntegrability
 
 open scoped Interval Topology
 open Real Filter MeasureTheory intervalIntegral
 
 
 /- Integral and Integrability up to changes on codiscrete sets -/
-
 theorem integrability_congr_changeDiscrete
     {f₁ f₂ : ℂ → ℝ} {U : Set ℂ} {r : ℝ}
     (hU : Metric.sphere (0 : ℂ) |r| ⊆ U)
@@ -21,11 +18,11 @@ theorem integrability_congr_changeDiscrete
   constructor
   · apply (intervalIntegrable_congr_codiscreteWithin _).1
     filter_upwards [Filter.codiscreteWithin.mono (by tauto : (Ι 0 (2 * π)) ⊆ Set.univ)
-      (circleMap_preimg_codiscrete hR (Filter.codiscreteWithin.mono hU hf))]
+      (circleMap_preimage_codiscrete hR (Filter.codiscreteWithin.mono hU hf))]
     tauto
   · apply (intervalIntegrable_congr_codiscreteWithin _).1
     filter_upwards [Filter.codiscreteWithin.mono (by tauto : (Ι 0 (2 * π)) ⊆ Set.univ)
-      (circleMap_preimg_codiscrete hR (Filter.codiscreteWithin.mono hU hf.symm))]
+      (circleMap_preimage_codiscrete hR (Filter.codiscreteWithin.mono hU hf.symm))]
     tauto
 
 theorem integral_congr_changeDiscrete
@@ -38,7 +35,7 @@ theorem integral_congr_changeDiscrete
   ∫ (x : ℝ) in (0)..(2 * π), f₁ (circleMap 0 r x) = ∫ (x : ℝ) in (0)..(2 * π), f₂ (circleMap 0 r x) := by
   apply intervalIntegral.integral_congr_codiscreteWithin
   filter_upwards [Filter.codiscreteWithin.mono (by tauto : (Ι 0 (2 * π)) ⊆ Set.univ)
-    (circleMap_preimg_codiscrete hr (Filter.codiscreteWithin.mono hU hf))]
+    (circleMap_preimage_codiscrete hr (Filter.codiscreteWithin.mono hU hf))]
   tauto
 
 lemma circleMap_neg

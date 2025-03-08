@@ -1,6 +1,6 @@
 import Mathlib.Analysis.SpecialFunctions.Log.PosLog
 import Mathlib.MeasureTheory.Integral.CircleIntegral
-import VD.divisor
+import VD.ToMathlib.divisor
 import VD.meromorphicOn_divisor
 import VD.meromorphicOn_integrability
 import VD.stronglyMeromorphicOn
@@ -242,7 +242,7 @@ theorem Nevanlinna_firstMain₁
   by_cases h₁r : r = 0
   rw [h₁r]
   simp
-  have : π⁻¹ * 2⁻¹ * (2 * π * log (Complex.abs (f 0))) = (π⁻¹ * (2⁻¹ * 2) * π) * log (Complex.abs (f 0)) := by
+  have : π⁻¹ * 2⁻¹ * (2 * π * log (norm (f 0))) = (π⁻¹ * (2⁻¹ * 2) * π) * log (norm (f 0)) := by
     ring
   rw [this]
   clear this
@@ -281,7 +281,7 @@ theorem Nevanlinna_firstMain₁
 
   congr 1
   congr 1
-  let A := integrabl_congr_negRadius (f := (fun z ↦ log (Complex.abs (f z)))) (r := r)
+  let A := integrabl_congr_negRadius (f := (fun z ↦ log (norm (f z)))) (r := r)
   rw [A]
   have : |r| = -r := by
     rw [← abs_of_pos h₂r]

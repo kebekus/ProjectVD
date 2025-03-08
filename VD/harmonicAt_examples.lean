@@ -161,21 +161,13 @@ theorem log_normSq_of_holomorphicAt_is_harmonicAt
     · rw [← harmonicAt_iff_comp_CLE_is_harmonicAt]
       apply holomorphicAt_is_harmonicAt
       apply HolomorphicAt_comp
-      use Complex.slitPlane
-      constructor
-      · apply IsOpen.mem_nhds
-        exact Complex.isOpen_slitPlane
-        assumption
-      · exact fun z a => Complex.differentiableAt_log a
+      use Complex.slitPlane, Complex.isOpen_slitPlane.mem_nhds h₃g,
+        fun _ a ↦ Complex.differentiableAt_log a
       exact h₁g
     · apply holomorphicAt_is_harmonicAt
       apply HolomorphicAt_comp
-      use Complex.slitPlane
-      constructor
-      · apply IsOpen.mem_nhds
-        exact Complex.isOpen_slitPlane
-        assumption
-      · exact fun z a => Complex.differentiableAt_log a
+      use Complex.slitPlane, Complex.isOpen_slitPlane.mem_nhds h₃g,
+        fun _ a ↦ Complex.differentiableAt_log a
       exact h₁g
 
   by_cases h₃f : f z ∈ Complex.slitPlane
@@ -199,10 +191,9 @@ theorem logabs_of_holomorphicAt_is_harmonic
   have : (fun z ↦ Real.log ‖f z‖) = (2 : ℝ)⁻¹ • (Real.log ∘ Complex.normSq ∘ f) := by
     funext z
     simp
-    unfold Complex.abs
-    simp
+    rw [Complex.norm_def]
     rw [Real.log_sqrt]
-    rw [div_eq_inv_mul (Real.log (Complex.normSq (f z))) 2]
+    linarith
     exact Complex.normSq_nonneg (f z)
   rw [this]
 

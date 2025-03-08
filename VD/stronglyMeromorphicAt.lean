@@ -8,80 +8,56 @@ variable {𝕜 : Type u_1} [NontriviallyNormedField 𝕜] {E : Type u_2} [Normed
 -- TODO: MeromorphicNF is an open property
 -- TODO: MeromorphicNF is a codiscrete property
 
-lemma MeromorphicNFAt_of_mul_analytic'
-  {f : 𝕜 → 𝕜}
-  {g : 𝕜 → 𝕜}
-  {z₀ : 𝕜}
-  (h₁g : AnalyticAt 𝕜 g z₀)
-  (h₂g : g z₀ ≠ 0) :
-  MeromorphicNFAt f z₀ → MeromorphicNFAt (f • g) z₀ := by
-
+lemma MeromorphicNFAt_of_mul_analytic' {f : 𝕜 → E} {g : 𝕜 → 𝕜} {z₀ : 𝕜} (h₁g : AnalyticAt 𝕜 g z₀)
+    (h₂g : g z₀ ≠ 0) :
+    MeromorphicNFAt f z₀ → MeromorphicNFAt (g • f) z₀ := by
   intro hf
-  --unfold MeromorphicNFAt at hf
-  rcases hf with h₁f|h₁f
+  rcases hf with h₁f | h₁f
   · left
-    rw [Filter.EventuallyEq, eventually_nhds_iff] at h₁f
-    obtain ⟨t, ht⟩ := h₁f
-    rw [Filter.EventuallyEq, eventually_nhds_iff]
-    use t
-    constructor
-    · intro y hy
-      simp [ht.1 y hy]
-    · exact ht.2
+    filter_upwards [h₁f]
+    simp_all
   · right
     obtain ⟨n, g_f, h₁g_f, h₂g_f, h₃g_f⟩ := h₁f
-    use n, g * g_f, h₁g.mul h₁g_f
+    use n, g • g_f, h₁g.smul h₁g_f
     constructor
-    · simp
-      exact ⟨h₂g, h₂g_f⟩
-    · rw [Filter.EventuallyEq, eventually_nhds_iff] at h₃g_f
-      obtain ⟨t, ht⟩ := h₃g_f
-      rw [Filter.EventuallyEq, eventually_nhds_iff]
-      use t
-      constructor
-      · intro y hy
-        simp
-        rw [ht.1]
-        simp
-        ring
-        exact hy
-      · exact ht.2
+    · simp only [Pi.smul_apply', smul_eq_mul, ne_eq, mul_eq_zero, not_or]
+      exact smul_ne_zero h₂g h₂g_f
+    · filter_upwards [h₃g_f]
+      intro y hy
+      simp [hy]
+      exact smul_comm (g y) ((y - z₀) ^ n) (g_f y)
 
 /- A function is strongly meromorphic at a point iff it is strongly meromorphic
    after multiplication with a non-vanishing analytic function
 -/
 theorem MeromorphicNFAt_of_mul_analytic
-  {f g : 𝕜 → 𝕜}
+  {g : 𝕜 → 𝕜}
+  {f : 𝕜 → E}
   {z₀ : 𝕜}
   (h₁g : AnalyticAt 𝕜 g z₀)
   (h₂g : g z₀ ≠ 0) :
-  MeromorphicNFAt f z₀ ↔ MeromorphicNFAt (f * g) z₀ := by
+  MeromorphicNFAt f z₀ ↔ MeromorphicNFAt (g • f) z₀ := by
   constructor
   · apply MeromorphicNFAt_of_mul_analytic' h₁g h₂g
   · intro hprod
-    have : f =ᶠ[𝓝 z₀] f * g * g⁻¹ := by
+    have : f =ᶠ[𝓝 z₀] g⁻¹ • g • f := by
       filter_upwards [h₁g.continuousAt.preimage_mem_nhds (compl_singleton_mem_nhds_iff.mpr h₂g)]
       intro y hy
       rw [Set.preimage_compl, Set.mem_compl_iff, Set.mem_preimage,
         Set.mem_singleton_iff] at hy
       simp [hy]
     rw [meromorphicNFAt_congr this]
-    exact MeromorphicNFAt_of_mul_analytic' (h₁g.inv h₂g) (inv_ne_zero h₂g) (f := f * g) hprod
+    apply MeromorphicNFAt_of_mul_analytic' (h₁g.inv h₂g) (inv_ne_zero h₂g) hprod
 
-theorem MeromorphicNFAt.order_eq_zero_iff
-  {f : 𝕜 → 𝕜}
-  {z₀ : 𝕜}
-  (hf : MeromorphicNFAt f z₀) :
-  hf.meromorphicAt.order = 0 ↔ f z₀ ≠ 0 := by
+theorem MeromorphicNFAt.order_eq_zero_iff {f : 𝕜 → E} {x : 𝕜} (hf : MeromorphicNFAt f x) :
+    hf.meromorphicAt.order = 0 ↔ f x ≠ 0 := by
   constructor
   · intro h₁f
-    let A := hf.analyticAt (le_of_eq h₁f.symm)
-    apply A.order_eq_zero_iff.1
-    let B := A.meromorphicAt_order
-    rw [h₁f] at B
+    have h₂f := hf.analyticAt (le_of_eq h₁f.symm)
+    apply h₂f.order_eq_zero_iff.1
     apply WithTopCoe
-    rw [eq_comm]
-    exact B
+    simp_all only [h₂f.meromorphicAt_order]
+    exact h₁f
   · intro h
     have hf' := hf
     rcases hf with h₁ | h₁
@@ -90,82 +66,34 @@ theorem MeromorphicNFAt.order_eq_zero_iff
     · obtain ⟨n, g, h₁g, h₂g, h₃g⟩ := h₁
       have : n = 0 := by
         by_contra hContra
-        have A := Filter.EventuallyEq.eq_of_nhds h₃g
-        simp [zero_zpow n hContra] at A
+        have := Filter.EventuallyEq.eq_of_nhds h₃g
+        simp [zero_zpow n hContra] at this
         tauto
-      simp [this] at h₃g
-
+      simp only [this, zpow_zero, smul_eq_mul, one_mul] at h₃g
       apply (hf'.meromorphicAt.order_eq_int_iff 0).2
       use g, h₁g, h₂g
       simp only [zpow_zero, smul_eq_mul, one_mul]
       exact h₃g.filter_mono nhdsWithin_le_nhds
 
 theorem MeromorphicNFAt.localIdentity
-  {f g : 𝕜 → 𝕜}
-  {z₀ : 𝕜}
-  (hf : MeromorphicNFAt f z₀)
-  (hg : MeromorphicNFAt g z₀) :
-  f =ᶠ[𝓝[≠] z₀] g → f =ᶠ[𝓝 z₀] g := by
-  intro h
-  have t₀ := hf.meromorphicAt.order_congr h
-  by_cases cs : hf.meromorphicAt.order = 0
-  · rw [cs] at t₀
-    exact (hf.analyticAt (le_of_eq cs.symm)).localIdentity (hg.analyticAt (le_of_eq t₀)) h
-  · apply eventuallyEq_nhdsWithin_of_eventuallyEq_nhds h
-    let A := cs
-    rw [hf.order_eq_zero_iff] at A
-    simp at A
-    let B := cs
-    rw [t₀] at B
-    rw [hg.order_eq_zero_iff] at B
-    simp at B
-    simp [A, B]
-
-
-
-theorem MeromorphicNFAt.makeStronglyMeromorphic_id
-  {f : 𝕜 → 𝕜}
-  {z₀ : 𝕜}
-  (hf : MeromorphicNFAt f z₀) :
-  f = hf.meromorphicAt.toNF := by
-
-  funext z
-  by_cases hz : z = z₀
-  · rw [hz]
-    unfold MeromorphicAt.toNF
-    simp
-    have h₀f := hf
-    rcases hf with h₁f | h₁f
-    · simp [(h₀f.meromorphicAt.order_eq_top_iff).2 (h₁f.filter_mono nhdsWithin_le_nhds)]
-      exact Filter.EventuallyEq.eq_of_nhds h₁f
-    · obtain ⟨n, g, h₁g, h₂g, h₃g⟩ := h₁f
-      rw [Filter.EventuallyEq.eq_of_nhds h₃g]
-      have : h₀f.meromorphicAt.order = n := by
-        rw [MeromorphicAt.order_eq_int_iff (MeromorphicNFAt.meromorphicAt h₀f) n]
-        use g, h₁g, h₂g
-        exact eventually_nhdsWithin_of_eventually_nhds h₃g
-      by_cases h₃f : h₀f.meromorphicAt.order = 0
-      · simp [h₃f]
-        have hn : n = (0 : ℤ) := by
-          rw [h₃f] at this
-          exact WithTop.coe_eq_zero.mp (id (Eq.symm this))
-        simp_rw [hn]
-        simp
-        let A := (h₀f.meromorphicAt.order_eq_int_iff 0).1 h₃f
-        have : g =ᶠ[𝓝 z₀] (Classical.choose A) := by
-          obtain ⟨h₀, h₁, h₂⟩ := Classical.choose_spec A
-          apply h₁g.localIdentity h₀
-          rw [hn] at h₃g
-          simp at h₃g h₂
-          exact (Filter.EventuallyEq.symm (h₃g.filter_mono nhdsWithin_le_nhds)).trans h₂
-        exact Filter.EventuallyEq.eq_of_nhds this
-      · simp [h₃f]
-        left
-        apply zero_zpow n
-        by_contra hn
-        rw [hn] at this
-        tauto
-  · exact (MeromorphicNFAt.meromorphicAt hf).toNF_id_on_complement hz
+  {f g : 𝕜 → E}
+  {x : 𝕜}
+  (hf : MeromorphicNFAt f x)
+  (hg : MeromorphicNFAt g x) :
+  f =ᶠ[𝓝[≠] x] g ↔ f =ᶠ[𝓝 x] g := by
+  constructor
+  · intro h
+    have t₀ := hf.meromorphicAt.order_congr h
+    by_cases cs : hf.meromorphicAt.order = 0
+    · rw [cs] at t₀
+      exact (hf.analyticAt (le_of_eq cs.symm)).localIdentity (hg.analyticAt (le_of_eq t₀)) h
+    · apply eventuallyEq_nhdsWithin_of_eventuallyEq_nhds h
+      let h₁f := cs
+      rw [hf.order_eq_zero_iff] at h₁f
+      let h₁g := cs
+      rw [t₀, hg.order_eq_zero_iff] at h₁g
+      simp_all
+  · exact (Filter.EventuallyEq.filter_mono · nhdsWithin_le_nhds)
 
 
 theorem MeromorphicNFAt.eliminate
@@ -192,11 +120,9 @@ theorem MeromorphicNFAt.eliminate
         simp [g₁₁]
   have h₁g₁ : MeromorphicAt g₁ z₀ := h₁g₁₁.mul h₁f.meromorphicAt
   have h₂g₁ : h₁g₁.order = 0 := by
-    rw [h₁g₁₁.order_mul h₁f.meromorphicAt]
-    rw [h₂g₁₁]
-    simp
-    rw [add_comm]
-    rw [LinearOrderedAddCommGroupWithTop.add_neg_cancel_of_ne_top h₂f]
+    rw [h₁g₁₁.order_mul h₁f.meromorphicAt, h₂g₁₁]
+    simp only [WithTop.coe_untop, g₁₁]
+    rw [add_comm, LinearOrderedAddCommGroupWithTop.add_neg_cancel_of_ne_top h₂f]
   let g := h₁g₁.toNF
   use g
   have h₁g : MeromorphicNFAt g z₀ := by
@@ -223,8 +149,7 @@ theorem MeromorphicNFAt.eliminate
             rwa [this]
           rw [hz]
           unfold g
-          let A := makeStronglyMeromorphic_id this
-          rw [← A]
+          rw [← toNF_eq_id this]
           unfold g₁
           rw [hOrd]
           simp
@@ -237,16 +162,13 @@ theorem MeromorphicNFAt.eliminate
           rw [hz, A]
           simp
           left
-          rw [zpow_eq_zero_iff]
-          assumption
+          rwa [zpow_eq_zero_iff]
       · simp
-        have : g z = g₁ z := by
-          exact Eq.symm (h₁g₁.toNF_id_on_complement hz)
+        have : g z = g₁ z := (h₁g₁.toNF_id_on_complement hz).symm
         rw [this]
         unfold g₁
         simp [hz]
-        rw [← mul_assoc]
-        rw [mul_inv_cancel₀]
+        rw [← mul_assoc, mul_inv_cancel₀]
         simp
         apply zpow_ne_zero
         exact sub_ne_zero_of_ne hz

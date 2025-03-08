@@ -79,8 +79,8 @@ theorem primitive_fderivAtBasepointZero
       · intro x hx
         apply (h₂ε' _).1
         simp
-        calc Complex.abs x
-        _ ≤ |x.re| + |x.im| := Complex.abs_le_abs_re_add_abs_im x
+        calc ‖x‖
+        _ ≤ |x.re| + |x.im| := Complex.norm_le_abs_re_add_abs_im x
         _ < (2 : ℝ)⁻¹ * ε' + |x.im| := by
           apply (add_lt_add_iff_right |x.im|).mpr
           have : x.re ∈ Metric.ball 0 (2⁻¹ * ε') := (Complex.mem_reProdIm.1 hx).1
@@ -98,8 +98,8 @@ theorem primitive_fderivAtBasepointZero
       · intro x hx
         apply (h₂ε' _).2
         simp
-        calc Complex.abs x
-        _ ≤ |x.re| + |x.im| := Complex.abs_le_abs_re_add_abs_im x
+        calc ‖x‖
+        _ ≤ |x.re| + |x.im| := Complex.norm_le_abs_re_add_abs_im x
         _ < (2 : ℝ)⁻¹ * ε' + |x.im| := by
           apply (add_lt_add_iff_right |x.im|).mpr
           have : x.re ∈ Metric.ball 0 (2⁻¹ * ε') := (Complex.mem_reProdIm.1 hx).1
@@ -166,7 +166,7 @@ theorem primitive_fderivAtBasepointZero
       · simp
         calc |x|
         _ ≤ |y.re| := by apply intervalComputation_uIcc hx
-        _ ≤ Complex.abs y := by exact Complex.abs_re_le_abs y
+        _ ≤ ‖y‖ := by exact Complex.abs_re_le_norm y
         _ < ε / 4 := by simp at hy; assumption
         _ < ε := by linarith
       · simpa
@@ -199,13 +199,13 @@ theorem primitive_fderivAtBasepointZero
       constructor
       · simp
         calc |y.re|
-        _ ≤ Complex.abs y := by exact Complex.abs_re_le_abs y
+        _ ≤ ‖y‖ := by exact Complex.abs_re_le_norm y
         _ < ε / 4 := by simp at hy; assumption
         _ < ε := by linarith
       · simp
         calc |x|
         _ ≤ |y.im| := by apply intervalComputation_uIcc hx
-        _ ≤ Complex.abs y := by exact Complex.abs_im_le_abs y
+        _ ≤ ‖y‖ := by exact Complex.abs_im_le_norm y
         _ < ε / 4 := by simp at hy; assumption
         _ < ε := by linarith
     have t₃ : IntervalIntegrable (fun _ => f 0) MeasureTheory.volume 0 y.im := by
@@ -223,14 +223,14 @@ theorem primitive_fderivAtBasepointZero
 
     have h₁y : |y.re| < ε / 4 := by
       calc |y.re|
-      _ ≤ Complex.abs y := by apply Complex.abs_re_le_abs
+      _ ≤ ‖y‖ := by apply Complex.abs_re_le_norm
       _ < ε / 4 := by
         let A := mem_ball_iff_norm.1 hy
         simp at A
         linarith
     have h₂y : |y.im| < ε / 4 := by
       calc |y.im|
-      _ ≤ Complex.abs y := by apply Complex.abs_im_le_abs
+      _ ≤ ‖y‖ := by apply Complex.abs_im_le_norm
       _ < ε / 4 := by
         let A := mem_ball_iff_norm.1 hy
         simp at A
@@ -304,8 +304,8 @@ theorem primitive_fderivAtBasepointZero
           calc |y.re| + |y.im|
             _ ≤ ‖y‖ + ‖y‖ := by
               apply add_le_add
-              apply Complex.abs_re_le_abs
-              apply Complex.abs_im_le_abs
+              apply Complex.abs_re_le_norm
+              apply Complex.abs_im_le_norm
             _ ≤ 4 * ‖y‖ := by
               rw [← two_mul]
               apply mul_le_mul

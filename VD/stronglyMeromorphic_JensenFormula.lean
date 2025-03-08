@@ -99,7 +99,8 @@ theorem jensen₀
       simp [h₁z] at hx
       tauto
     apply zpow_ne_zero
-    simpa
+    simp
+    rwa [sub_eq_zero]
     -- Complex.abs (F z) ≠ 0
     simp
     exact h₃F ⟨z, h₁z⟩
@@ -115,7 +116,8 @@ theorem jensen₀
       simp [h₁z] at hx
       tauto
     apply zpow_ne_zero
-    simpa
+    simp
+    rwa [sub_eq_zero]
 
 
   have int_logAbs_f_eq_int_G : ∫ (x : ℝ) in (0)..2 * π, log ‖f (circleMap 0 R x)‖ = ∫ (x : ℝ) in (0)..2 * π, G (circleMap 0 R x) := by
@@ -163,13 +165,13 @@ theorem jensen₀
 
 
   have decompose_int_G : ∫ (x : ℝ) in (0)..2 * π, G (circleMap 0 R x)
-    = (∫ (x : ℝ) in (0)..2 * π, log (Complex.abs (F (circleMap 0 R x))))
-        + ∑ᶠ x, (h₁f.meromorphicOn.divisor x) * ∫ (x_1 : ℝ) in (0)..2 * π, log (Complex.abs (circleMap 0 R x_1 - ↑x)) := by
+    = (∫ (x : ℝ) in (0)..2 * π, log (norm (F (circleMap 0 R x))))
+        + ∑ᶠ x, (h₁f.meromorphicOn.divisor x) * ∫ (x_1 : ℝ) in (0)..2 * π, log (norm (circleMap 0 R x_1 - ↑x)) := by
     dsimp [G]
 
     rw [intervalIntegral.integral_add]
     congr
-    have t₀ {x : ℝ} : Function.support (fun s ↦ (h₁f.meromorphicOn.divisor s) * log (Complex.abs (circleMap 0 R x - s))) ⊆ h₃f.toFinset := by
+    have t₀ {x : ℝ} : Function.support (fun s ↦ (h₁f.meromorphicOn.divisor s) * log (norm (circleMap 0 R x - s))) ⊆ h₃f.toFinset := by
       intro s hs
       simp at hs
       simp [hs.1]
@@ -179,8 +181,8 @@ theorem jensen₀
       intro x
       rw [finsum_eq_sum_of_support_subset _ t₀]
     rw [intervalIntegral.integral_finset_sum]
-    let G' := fun x ↦ ((h₁f.meromorphicOn.divisor x) : ℂ) * ∫ (x_1 : ℝ) in (0)..2 * π, log (Complex.abs (circleMap 0 R x_1 - x))
-    have t₁ : (Function.support fun x ↦ (h₁f.meromorphicOn.divisor x) * ∫ (x_1 : ℝ) in (0)..2 * π, log (Complex.abs (circleMap 0 R x_1 - x))) ⊆ h₃f.toFinset := by
+    let G' := fun x ↦ ((h₁f.meromorphicOn.divisor x) : ℂ) * ∫ (x_1 : ℝ) in (0)..2 * π, log (norm (circleMap 0 R x_1 - x))
+    have t₁ : (Function.support fun x ↦ (h₁f.meromorphicOn.divisor x) * ∫ (x_1 : ℝ) in (0)..2 * π, log (norm (circleMap 0 R x_1 - x))) ⊆ h₃f.toFinset := by
       simp
       intro s
       contrapose!
@@ -203,7 +205,7 @@ theorem jensen₀
     apply Continuous.intervalIntegrable
     apply continuous_iff_continuousAt.2
     intro x
-    have : (fun x => log (Complex.abs ( F (circleMap 0 R x)))) = log ∘ Complex.abs ∘ F ∘ circleMap 0 R :=
+    have : (fun x => log (norm ( F (circleMap 0 R x)))) = log ∘ norm ∘ F ∘ circleMap 0 R :=
       rfl
     rw [this]
     apply ContinuousAt.comp
@@ -213,14 +215,14 @@ theorem jensen₀
     exact A
     --
     apply ContinuousAt.comp
-    apply Complex.continuous_abs.continuousAt
+    apply continuous_norm.continuousAt
     apply ContinuousAt.comp
     let A := h₂F (circleMap 0 R x) (circleMap_mem_closedBall 0 hR.le x)
     apply A.continuousAt
     exact (continuous_circleMap 0 R).continuousAt
     -- IntervalIntegrable (fun x => ∑ᶠ (s : ℂ), ↑(↑⋯.divisor s) * log (Complex.abs (circleMap 0 1 x - s))) MeasureTheory.volume 0 (2 * π)
     --simp? at h₁G
-    have h₁G' {z : ℂ} : (Function.support fun s => (h₁f.meromorphicOn.divisor s) * log (Complex.abs (z - s))) ⊆ ↑h₃f.toFinset := by
+    have h₁G' {z : ℂ} : (Function.support fun s => (h₁f.meromorphicOn.divisor s) * log (norm (z - s))) ⊆ ↑h₃f.toFinset := by
       exact h₁G
     conv =>
       arg 1
@@ -242,7 +244,7 @@ theorem jensen₀
     apply Continuous.intervalIntegrable
     apply continuous_iff_continuousAt.2
     intro x
-    have : (fun x => log (Complex.abs (circleMap 0 R x - ↑i))) = log ∘ Complex.abs ∘ (fun x ↦ circleMap 0 R x - ↑i) :=
+    have : (fun x => log (norm (circleMap 0 R x - ↑i))) = log ∘ norm ∘ (fun x ↦ circleMap 0 R x - ↑i) :=
       rfl
     rw [this]
     apply ContinuousAt.comp
@@ -250,15 +252,15 @@ theorem jensen₀
     simp
 
     by_contra ha'
+    rw [sub_eq_zero] at ha'
     conv at h₂i =>
       arg 1
       rw [← ha']
-      rw [Complex.norm_eq_abs]
-      rw [abs_circleMap_zero R x]
+      rw [norm_circleMap_zero R x]
       simp
     linarith
     apply ContinuousAt.comp
-    apply Complex.continuous_abs.continuousAt
+    apply continuous_norm.continuousAt
     fun_prop
 
   have t₁ : (∫ (x : ℝ) in (0)..2 * Real.pi, log ‖F (circleMap 0 R x)‖) = 2 * Real.pi * log ‖F 0‖ := by
@@ -272,7 +274,6 @@ theorem jensen₀
     apply harmonic_meanValue₁ R hR t₀
 
 
-  simp_rw [← Complex.norm_eq_abs] at decompose_int_G
   rw [t₁] at decompose_int_G
 
 
@@ -295,7 +296,7 @@ theorem jensen₀
   rw [this] at decompose_int_G
 
 
-  simp at decompose_int_G
+  --simp at decompose_int_G
 
   rw [int_logAbs_f_eq_int_G]
   rw [decompose_int_G]
@@ -354,6 +355,7 @@ theorem jensen₀
   --
   simp only [ne_eq, map_eq_zero]
   rw [← ne_eq]
+  simp
   exact h₃F ⟨0, (by simp; exact hR.le)⟩
   --
   rw [Finset.prod_ne_zero_iff]
@@ -385,7 +387,7 @@ theorem jensen
     simp [this]
     intro h₁R
 
-    let A := MeromorphicNFAt.makeStronglyMeromorphic_id h₁f'
+    let A := MeromorphicNFAt.toNF_eq_id h₁f'
     simp_rw [A]
   rw [← this]
   rw [← this] at h₂f
