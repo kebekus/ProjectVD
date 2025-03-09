@@ -8,6 +8,7 @@ import Mathlib.Analysis.Meromorphic.Order
 import Mathlib.Analysis.Meromorphic.Divisor.Basic
 import VD.stronglyMeromorphicOn
 import VD.ToMathlib.meromorphicOn_levelSetOfOrder
+import VD.ToBase
 
 open Classical
 
@@ -30,9 +31,11 @@ variable
 
 namespace MeromorphicOn
 
+
+
 noncomputable def divisor {f : 𝕜 → E} (hf : MeromorphicOn f U) :
     DivisorOn U where
-  toFun := fun z ↦ if hz : z ∈ U then ((hf z hz).order.untopD 0 : ℤ) else 0
+  toFun := fun z ↦ if hz : z ∈ U then ((hf z hz).order.toBase) else 0
   supportWithinDomain' := by
     intro z hz
     simp at hz
@@ -43,8 +46,7 @@ noncomputable def divisor {f : 𝕜 → E} (hf : MeromorphicOn f U) :
       hf.codiscrete_setOf_order_eq_zero_or_top]
     intro _ _
     simp_all only [Set.mem_image, Set.mem_setOf_eq, Subtype.exists, exists_and_right,
-      exists_eq_right, Pi.zero_apply, dite_eq_right_iff, WithTop.untopD_eq_self_iff,
-      WithTop.coe_zero]
+      exists_eq_right, Pi.zero_apply, dite_eq_right_iff, WithTop.toBase_eq_zero_iff]
     tauto
 
 theorem divisor_def {f : 𝕜 → E} (hf : MeromorphicOn f U) :
