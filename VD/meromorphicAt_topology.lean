@@ -82,10 +82,14 @@ lemma baz (e : E) (f : E) (he : e ≠ 0) : ¬(Tendsto (fun (x : 𝕜) ↦ x⁻¹
   have := NormedField.nhdsNE_neBot (0 : 𝕜)
   exact Filter.NeBot.ne' h₆
 
-#loogle Filter.Tendsto, "smul"
-lemma fuga (hf : MeromorphicAt f z₀) (fneg : hf.order < 0)
-    (h : ∃ (g : 𝕜 → E), ContinuousAt g z₀ ∧ f =ᶠ[𝓝[≠] z₀] g) : False := by
-  let n := (hf.order).untop (by exact LT.lt.ne_top fneg)
+#loogle Filter.Tendsto, "smul", (fun _ ↦ ?f _ • ?g _)
+
+/-- A meromorphic function has non-negative order if there exists a continuous extension. -/
+theorem MeromorphicAt.order_nonneg_if_exists_continuous_extension (hf : MeromorphicAt f z₀)
+    (h : ∃ (g : 𝕜 → E), ContinuousAt g z₀ ∧ f =ᶠ[𝓝[≠] z₀] g) : 0 ≤ hf.order := by
+  by_contra h₀
+  push_neg at h₀
+  let n := (hf.order).untop (by exact LT.lt.ne_top h₀)
   have h₀ : hf.order = n := by simp [n]
   obtain ⟨g, hg, hfg⟩ := h
   obtain ⟨h, hh₁, hh₂, hfh⟩ := (hf.order_eq_int_iff n).mp h₀
@@ -94,13 +98,6 @@ lemma fuga (hf : MeromorphicAt f z₀) (fneg : hf.order < 0)
     (tendsto_nhdsWithin_of_tendsto_nhds hg).congr' (hfg.symm.trans hfh)
   have h₅ : ¬(Tendsto (fun z ↦ (z - z₀) ^ n • h z) (𝓝[≠] z₀) (𝓝 (g z₀))) := by sorry
   contradiction
-
-/-- A meromorphic function has non-negative order if there exists a continuous extension. -/
-theorem MeromorphicAt.order_nonneg_if_exists_continuous_extension (hf : MeromorphicAt f z₀)
-    (h : ∃ (g : 𝕜 → E), ContinuousAt g z₀ ∧ f =ᶠ[𝓝[≠] z₀] g) : 0 ≤ hf.order := by
-  by_contra h₀
-  push_neg at h₀
-  exact fuga hf h₀ h
 
 /-- A meromorphic function has non-negative order then there exists an analytic extension. -/
 theorem MeromorphicAt.exists_analytic_extension_if_order_nonneg (hf : MeromorphicAt f z₀) (nneg : 0 ≤ hf.order) :
@@ -117,7 +114,7 @@ theorem MeromorphicAt.exists_analytic_extension_if_order_nonneg (hf : Meromorphi
       · simp [h₀] at nneg
         obtain ⟨a, ha⟩ := Int.eq_ofNat_of_zero_le nneg
         simp [ha]
-        apply AnalyticAt.pow (AnalyticAt.sub' analyticAt_id analyticAt_const)
+        apply (analyticAt_id.sub' analyticAt_const).pow
     · exact hfg.2
 
 /-- A meromorphic function has non-negative order iff there exists a continuous extension. -/
