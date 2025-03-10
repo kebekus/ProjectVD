@@ -31,7 +31,7 @@ theorem jensen₀
     rwa [h'₁f.order_eq_zero_iff]
 
   have h'''₂f : h₁f.meromorphicOn.divisor 0 = 0 := by
-    unfold MeromorphicOn.divisor
+    rw [MeromorphicOn.divisor_def]
     simp
     tauto
 
@@ -95,7 +95,7 @@ theorem jensen₀
       rw [← hCon] at hx
       simp at hx
       rw [← (h₁f z h₁z).order_eq_zero_iff] at h₂z
-      unfold MeromorphicOn.divisor at hx
+      rw [MeromorphicOn.divisor_def] at hx
       simp [h₁z] at hx
       tauto
     apply zpow_ne_zero
@@ -112,7 +112,7 @@ theorem jensen₀
       rw [← hCon] at hx
       simp at hx
       rw [← (h₁f z h₁z).order_eq_zero_iff] at h₂z
-      unfold MeromorphicOn.divisor at hx
+      rw [MeromorphicOn.divisor_def] at hx
       simp [h₁z] at hx
       tauto
     apply zpow_ne_zero
@@ -139,9 +139,9 @@ theorem jensen₀
       have t₁ : f (circleMap 0 R a) ≠ 0 := by
         let A := h₁f (circleMap 0 R a) t₀
         rw [← A.order_eq_zero_iff]
-        unfold MeromorphicOn.divisor at C
+        rw [MeromorphicOn.divisor_def] at C
         simp [t₀] at C
-        rcases C with C₁|C₂
+        rcases C with C₁ | C₂
         · assumption
         · let B := h₁f.meromorphicOn.exists_order_ne_top_iff_forall h₁U
           let C := fun q ↦ B.1 q ⟨(circleMap 0 R a), t₀⟩
