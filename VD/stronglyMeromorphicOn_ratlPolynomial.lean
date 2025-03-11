@@ -184,9 +184,9 @@ theorem stronglyMeromorphicOn_ratlPolynomial₃order
 theorem stronglyMeromorphicOn_divisor_ratlPolynomial
   (d : ℂ → ℤ)
   (h₁d : Set.Finite d.support) :
-  (stronglyMeromorphicOn_ratlPolynomial₃ d).meromorphicOn.divisor = d := by
+  (stronglyMeromorphicOn_ratlPolynomial₃ d).meromorphicOn.divisorOn = d := by
   ext z
-  rw [MeromorphicOn.divisor_def]
+  rw [MeromorphicOn.divisorOn_def]
   simp
   rw [stronglyMeromorphicOn_divisor_ratlPolynomial₁ d h₁d]
   simp
@@ -197,9 +197,9 @@ theorem stronglyMeromorphicOn_divisor_ratlPolynomial_U
   (d : ℂ → ℤ)
   (h₁d : Set.Finite d.support)
   (h₂d : d.support ⊆ U) :
-  (stronglyMeromorphicOn_ratlPolynomial₃U d U).meromorphicOn.divisor = d := by
+  (stronglyMeromorphicOn_ratlPolynomial₃U d U).meromorphicOn.divisorOn = d := by
   ext z
-  rw [MeromorphicOn.divisor_def]
+  rw [MeromorphicOn.divisorOn_def]
   by_cases hz : z ∈ U
   · simp [hz]
     rw [stronglyMeromorphicOn_divisor_ratlPolynomial₁ d h₁d]

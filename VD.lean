@@ -1,6 +1,6 @@
-import VD.Divisor_MeromorphicOn
 import VD.NormalFormAt
 import VD.ToBase
+import VD.ToMathlib.Divisor_MeromorphicOn
 import VD.ToMathlib.analyticAt
 import VD.ToMathlib.analyticAt_order
 import VD.ToMathlib.bilinear
