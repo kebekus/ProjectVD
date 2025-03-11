@@ -30,14 +30,14 @@ noncomputable def MeromorphicOn.N_zero
   {f : ℂ → ℂ}
   (hf : MeromorphicOn f ⊤) :
   ℝ → ℝ :=
-  fun r ↦ ∑ᶠ z, (max 0 ((hf.restrict |r|).divisorOn z)) * log (r * ‖z‖⁻¹)
+  fun r ↦ ∑ᶠ z, (max 0 ((MeromorphicOn.divisor f (hf.restrict |r|)) z)) * log (r * ‖z‖⁻¹)
   --hf.divisor⁺.logCounting
 
 noncomputable def MeromorphicOn.N_infty
   {f : ℂ → ℂ}
   (hf : MeromorphicOn f ⊤) :
   ℝ → ℝ :=
-  fun r ↦ ∑ᶠ z, (max 0 (-((hf.restrict |r|).divisorOn z))) * log (r * ‖z‖⁻¹)
+  fun r ↦ ∑ᶠ z, (max 0 (-((MeromorphicOn.divisor f (hf.restrict |r|)) z))) * log (r * ‖z‖⁻¹)
 
 
 theorem Nevanlinna_counting₁₁
@@ -48,20 +48,20 @@ theorem Nevanlinna_counting₁₁
 
   funext r
   unfold MeromorphicOn.N_infty
-  let A := (hf.restrict |r|).divisorOn.finiteSupport (isCompact_closedBall 0 |r|)
+  let A := (MeromorphicOn.divisor f (hf.restrict |r|)).finiteSupport (isCompact_closedBall 0 |r|)
   repeat
     rw [finsum_eq_sum_of_support_subset (s := A.toFinset)]
   apply Finset.sum_congr rfl
   intro x hx; simp at hx
   congr 2
 
-  by_cases h : 0 ≤ (hf.restrict |r|).divisorOn x
+  by_cases h : 0 ≤ (MeromorphicOn.divisor f (hf.restrict |r|)) x
   · simp [h]
     let A := (hf.restrict |r|).divisor_add_const₁ a h
     exact A
 
   · simp at h
-    have h' : 0 ≤ -((hf.restrict |r|).divisorOn x) := by
+    have h' : 0 ≤ -((MeromorphicOn.divisor f (hf.restrict |r|)) x) := by
       apply Int.le_neg_of_le_neg
       simp
       exact h.le
@@ -69,7 +69,7 @@ theorem Nevanlinna_counting₁₁
     clear h'
 
     have A := (hf.restrict |r|).divisor_add_const₂ a h
-    have A' : 0 ≤ -((MeromorphicOn.add (MeromorphicOn.restrict hf |r|) (MeromorphicOn.const a)).divisorOn x) := by
+    have A' : 0 ≤ -(MeromorphicOn.divisor (f + fun _ ↦ a) (MeromorphicOn.add (MeromorphicOn.restrict hf |r|) (MeromorphicOn.const a)) x) := by
       apply Int.le_neg_of_le_neg
       simp
       exact A.le
@@ -89,7 +89,7 @@ theorem Nevanlinna_counting₁₁
   contrapose
   simp
   intro hx
-  have : 0 ≤ (hf.restrict |r|).divisorOn x := by
+  have : 0 ≤ MeromorphicOn.divisor f (hf.restrict |r|) x := by
     rw [hx]
   have G := (hf.restrict |r|).divisor_add_const₁ a this
   clear this
@@ -115,7 +115,7 @@ theorem Nevanlinna_counting₀
 
   funext r
   unfold MeromorphicOn.N_zero MeromorphicOn.N_infty
-  let A := (hf.restrict |r|).divisorOn.finiteSupport (isCompact_closedBall 0 |r|)
+  let A := (MeromorphicOn.divisor f (hf.restrict |r|)).finiteSupport (isCompact_closedBall 0 |r|)
   repeat
     rw [finsum_eq_sum_of_support_subset (s := A.toFinset)]
   apply Finset.sum_congr rfl
@@ -147,13 +147,13 @@ theorem Nevanlinna_counting₀
 theorem Nevanlinna_counting
   {f : ℂ → ℂ}
   (hf : MeromorphicOn f ⊤) :
-  hf.N_zero - hf.N_infty = fun r ↦ ∑ᶠ z, ((hf.restrict |r|).divisorOn z) * log (r * ‖z‖⁻¹) := by
+  hf.N_zero - hf.N_infty = fun r ↦ ∑ᶠ z, (MeromorphicOn.divisor f (hf.restrict |r|) z) * log (r * ‖z‖⁻¹) := by
 
   funext r
   simp only [Pi.sub_apply]
   unfold  MeromorphicOn.N_zero MeromorphicOn.N_infty
 
-  let A := (hf.restrict |r|).divisorOn.finiteSupport (isCompact_closedBall 0 |r|)
+  let A := (MeromorphicOn.divisor f (hf.restrict |r|)).finiteSupport (isCompact_closedBall 0 |r|)
   repeat
     rw [finsum_eq_sum_of_support_subset (s := A.toFinset)]
   rw [← Finset.sum_sub_distrib]
@@ -161,9 +161,9 @@ theorem Nevanlinna_counting
   congr
   funext x
   congr
-  by_cases h : 0 ≤ (hf.restrict |r|).divisorOn x
+  by_cases h : 0 ≤ MeromorphicOn.divisor f (hf.restrict |r|) x
   · simp [h]
-  · have h' : 0 ≤ -((hf.restrict |r|).divisorOn x) := by
+  · have h' : 0 ≤ -(MeromorphicOn.divisor f (hf.restrict |r|) x) := by
       simp at h
       apply Int.le_neg_of_le_neg
       simp
