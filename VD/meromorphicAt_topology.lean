@@ -2,102 +2,52 @@ import Mathlib.Analysis.Meromorphic.Order
 
 open Filter Topology
 
-section
-
-#loogle Filter.HasBasis
-
-variable {α β ι : Type*} (x : α) (f : α → β) (p : ι → Prop) (s : ι → Set β)
-    [Preorder β] [Preorder α] [TopologicalSpace α]
-    [IsDirected α fun x1 x2 ↦ x1 ≤ x2] [IsDirected β fun x1 x2 ↦ x1 ≤ x2]
-    [Nonempty α] [Nonempty β]
-
-example (h : HasBasis (map f (𝓝 x)) p s) (h' : ∃ i', p i') :
-    Disjoint atTop ((𝓝 x).map f) := by
-  rw [Filter.HasBasis.disjoint_iff Filter.atTop_basis h]
-  use (f x)
-  constructor
-  · simp
-  · obtain ⟨i', hi'⟩ := h'
-    use i'
-    constructor
-    · exact hi'
-    · rw [Set.disjoint_iff_inter_eq_empty]
-      ext y
-      constructor
-      · intro hh
-        simp at hh
-        sorry
-      · exact fun a ↦ False.elim a
-
-end
+lemma tendsto_nhdsWithin_of_tendsto_nhds' {α β : Type*}
+    [TopologicalSpace α] [TopologicalSpace β] {a : α} {f : α → β}
+    (hf : Tendsto f (𝓝 a) (𝓝 (f a))) (hfa : Set.MapsTo f {a}ᶜ {f a}ᶜ) :
+    Tendsto f (𝓝[≠] a) (𝓝[≠] (f a)) := by
+  apply ContinuousWithinAt.tendsto_nhdsWithin
+  exact tendsto_nhdsWithin_of_tendsto_nhds hf
+  exact hfa
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   {f : 𝕜 → E} {z₀ : 𝕜}
-
-lemma bar {c : ℝ} (hc : 0 < c) : Tendsto (fun (x : 𝕜) ↦ ‖x⁻¹‖ * c) (𝓝[≠] 0) atTop := by
-  apply Filter.Tendsto.comp (f := fun x ↦ ‖x⁻¹‖) (g := fun x ↦ x * c) (y := atTop)
-  · apply Filter.tendsto_atTop_atTop_of_monotone
-    · apply monotone_mul_right_of_nonneg (by linarith)
-    · intro b
-      use b * c⁻¹
-      field_simp [mul_assoc]
-  · apply NormedField.tendsto_norm_inv_nhdsNE_zero_atTop
-
-lemma hoge (f : E) : ((𝓝 f).map norm).HasBasis
-    (fun ε ↦ 0 < ε) (fun ε ↦ norm '' {y | ‖y - f‖ < ε}) :=
-  Filter.HasBasis.map _ (NormedAddCommGroup.nhds_basis_norm_lt _)
-
-lemma foo (f : E) : Disjoint atTop (map Norm.norm (𝓝 f)) := by
-  rw [Filter.HasBasis.disjoint_iff Filter.atTop_basis (hoge f)]
-  use ‖f‖ + 1
-  constructor
-  · simp
-  · use 1
-    constructor
-    · simp
-    · rw [Set.disjoint_iff_inter_eq_empty]
-      ext x
-      constructor
-      · intro h
-        simp at h
-        obtain ⟨x₁, hx₁, hx₂⟩ := h.2
-        have : ‖x₁‖ ≤ ‖f‖ + ‖x₁ - f‖ := by apply norm_le_insert'
-        linarith
-      · exact fun a ↦ False.elim a
-
-lemma baz (e : E) (f : E) (he : e ≠ 0) : ¬(Tendsto (fun (x : 𝕜) ↦ x⁻¹ • e) (𝓝[≠] 0) (𝓝 f)) := by
-  intro h
-  have h₀ : Tendsto (fun (x : 𝕜) ↦ ‖x⁻¹‖ * ‖e‖) (𝓝[≠] 0) ((𝓝 f).map norm) := by
-    have : (norm ∘ (fun (x : 𝕜) ↦ x⁻¹ • e)) = (fun (x : 𝕜) ↦ ‖x⁻¹‖ * ‖e‖) := by
-      funext x
-      simp [norm_smul]
-    rw [← this]
-    intro U hU
-    rw [← Filter.map_compose]
-    exact h hU
-  have h₂ := bar (𝕜 := 𝕜) (norm_pos_iff.mpr he)
-  have h₆ := foo f h₂ h₀
-  rw [le_bot_iff, Filter.map_eq_bot_iff] at h₆
-  have := NormedField.nhdsNE_neBot (0 : 𝕜)
-  exact Filter.NeBot.ne' h₆
-
-#loogle Filter.Tendsto, "smul", (fun _ ↦ ?f _ • ?g _)
 
 /-- A meromorphic function has non-negative order if there exists a continuous extension. -/
 theorem MeromorphicAt.order_nonneg_if_exists_continuous_extension (hf : MeromorphicAt f z₀)
     (h : ∃ (g : 𝕜 → E), ContinuousAt g z₀ ∧ f =ᶠ[𝓝[≠] z₀] g) : 0 ≤ hf.order := by
   by_contra h₀
   push_neg at h₀
-  let n := (hf.order).untop (by exact LT.lt.ne_top h₀)
-  have h₀ : hf.order = n := by simp [n]
+  set n := (hf.order).untop (by exact LT.lt.ne_top h₀) with h₁
+  have h₁ : hf.order = n := by simp [n]
+  simp [h₁] at h₀
+  have nneg : 0 < -n := by linarith
+  obtain ⟨a, ha⟩ := Int.eq_succ_of_zero_lt nneg
   obtain ⟨g, hg, hfg⟩ := h
-  obtain ⟨h, hh₁, hh₂, hfh⟩ := (hf.order_eq_int_iff n).mp h₀
-  -- have h₃ : Tendsto g (𝓝 z₀) (𝓝 (g z₀)) := hg
-  have h₄ : Tendsto (fun z ↦ (z - z₀) ^ n • h z) (𝓝[≠] z₀) (𝓝 (g z₀)) :=
-    (tendsto_nhdsWithin_of_tendsto_nhds hg).congr' (hfg.symm.trans hfh)
-  have h₅ : ¬(Tendsto (fun z ↦ (z - z₀) ^ n • h z) (𝓝[≠] z₀) (𝓝 (g z₀))) := by sorry
-  contradiction
+  obtain ⟨h, hh₁, hh₂, hfh⟩ := (hf.order_eq_int_iff n).mp h₁
+  have h₂ : Tendsto (fun z ↦ ‖(z - z₀) ^ n • h z‖) (𝓝[≠] z₀) (𝓝 ‖g z₀‖) := by
+    apply tendsto_norm.comp
+    exact (tendsto_nhdsWithin_of_tendsto_nhds hg).congr' (hfg.symm.trans hfh)
+  apply not_tendsto_atTop_of_tendsto_nhds h₂
+  have h₃ : (fun z ↦ ‖(z - z₀) ^ n • h z‖) =
+      ((fun x ↦ ‖x⁻¹‖) ∘ (fun z ↦ (z - z₀) ^ a.succ)) * (fun z ↦ ‖h z‖) := by
+    funext z
+    simp [norm_pow, norm_smul, ← zpow_natCast, ← ha]
+  rw [h₃]
+  have h₄ : Tendsto ((fun x ↦ ‖x⁻¹‖) ∘ (fun z ↦ (z - z₀) ^ a.succ)) (𝓝[≠] z₀) atTop := by
+    apply NormedField.tendsto_norm_inv_nhdsNE_zero_atTop.comp (y := 𝓝[≠] 0)
+    have hh₁ : ContinuousAt (fun z ↦ (z - z₀)) z₀ := by
+      apply continuousAt_id.sub continuousAt_const
+    have hh₂ : (z₀ - z₀) ^ a.succ = 0 := by simp
+    rw [← hh₂]
+    apply tendsto_nhdsWithin_of_tendsto_nhds' (hh₁.pow a.succ).tendsto
+    intro x hx h
+    simp [sub_eq_zero] at h
+    apply hx h
+  apply h₄.atTop_mul (norm_pos_iff.mpr hh₂)
+  apply tendsto_nhdsWithin_of_tendsto_nhds
+  exact hh₁.continuousAt.norm
 
 /-- A meromorphic function has non-negative order then there exists an analytic extension. -/
 theorem MeromorphicAt.exists_analytic_extension_if_order_nonneg (hf : MeromorphicAt f z₀) (nneg : 0 ≤ hf.order) :
