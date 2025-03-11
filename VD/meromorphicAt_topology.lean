@@ -5,10 +5,8 @@ open Filter Topology
 lemma tendsto_nhdsWithin_of_tendsto_nhds' {α β : Type*}
     [TopologicalSpace α] [TopologicalSpace β] {a : α} {f : α → β}
     (hf : Tendsto f (𝓝 a) (𝓝 (f a))) (hfa : Set.MapsTo f {a}ᶜ {f a}ᶜ) :
-    Tendsto f (𝓝[≠] a) (𝓝[≠] (f a)) := by
-  apply ContinuousWithinAt.tendsto_nhdsWithin
-  exact tendsto_nhdsWithin_of_tendsto_nhds hf
-  exact hfa
+    Tendsto f (𝓝[≠] a) (𝓝[≠] (f a)) :=
+  ContinuousWithinAt.tendsto_nhdsWithin (tendsto_nhdsWithin_of_tendsto_nhds hf) hfa
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
