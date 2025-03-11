@@ -7,7 +7,16 @@ Authors: Stefan Kebekus
 import Mathlib.Algebra.Order.AddGroupWithTop
 import Mathlib.Algebra.Order.Ring.WithTop
 
-open Classical
+/-!
+# Conversion from WithTop to Base Type
+
+For types α that are instances of `Zero`, we provide a convenient conversion,
+`WithTop.toBase`, that maps elements `a : WithTop α` to `α`, by mapping `⊤` to
+zero.
+
+For settings where `α` has additional structure, we provide a large number of
+simplifier lemmas, akin to those that already exists for `ENat.toNat`.
+-/
 
 variable {α : Type*}
 
