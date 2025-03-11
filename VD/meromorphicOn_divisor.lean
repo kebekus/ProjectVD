@@ -20,7 +20,7 @@ theorem MeromorphicOn.divisor_add_const₁  [CompleteSpace 𝕜]
   {z : 𝕜}
   (hf : MeromorphicOn f U)
   (a : 𝕜) :
-  0 ≤ hf.divisorOn z → 0 ≤ (hf.add (MeromorphicOn.const a)).divisorOn z := by
+  0 ≤ divisor f hf z → 0 ≤ divisor (f + fun _ ↦ a) (hf.add (MeromorphicOn.const a)) z := by
   intro h
 
   -- Trivial case: z ∉ U
@@ -75,11 +75,11 @@ theorem MeromorphicOn.divisor_add_const₂ [CompleteSpace 𝕜]
   {z : 𝕜}
   (hf : MeromorphicOn f U)
   (a : 𝕜) :
-  hf.divisorOn z < 0 → (hf.add (MeromorphicOn.const a)).divisorOn z < 0 := by
+  divisor f hf z < 0 → divisor (f + fun _ ↦ a) (hf.add (MeromorphicOn.const a)) z < 0 := by
   intro h
 
   by_cases hz : z ∉ U
-  · have : hf.divisorOn z = 0 := by
+  · have : divisor f hf z = 0 := by
       rw [MeromorphicOn.divisorOn_def]
       simp_all
     rw [this] at h
@@ -122,11 +122,11 @@ theorem MeromorphicOn.divisor_add_const₃ [CompleteSpace 𝕜]
   {z : 𝕜}
   (hf : MeromorphicOn f U)
   (a : 𝕜) :
-  hf.divisorOn z < 0 → (hf.add (MeromorphicOn.const a)).divisorOn z = hf.divisorOn z := by
+  divisor f hf z < 0 → divisor (f + fun _ ↦ a) (hf.add (MeromorphicOn.const a)) z = divisor f hf z := by
   intro h
 
   by_cases hz : z ∉ U
-  · have : hf.divisorOn z = 0 := by
+  · have : divisor f hf z = 0 := by
       rw [MeromorphicOn.divisorOn_def]
       simp_all
     rw [this] at h
@@ -168,8 +168,8 @@ theorem MeromorphicOn.divisor_of_makeStronglyMeromorphicOn [CompleteSpace 𝕜]
   {f : 𝕜 → 𝕜}
   {U : Set 𝕜}
   (hf : MeromorphicOn f U) :
-  hf.divisorOn = (stronglyMeromorphicOn_of_makeStronglyMeromorphicOn hf).meromorphicOn.divisorOn := by
-  unfold MeromorphicOn.divisorOn
+  divisor f hf = divisor hf.makeStronglyMeromorphicOn (stronglyMeromorphicOn_of_makeStronglyMeromorphicOn hf).meromorphicOn := by
+  unfold MeromorphicOn.divisor
   simp
   funext z
   by_cases hz : z ∈ U
@@ -188,7 +188,7 @@ theorem StronglyMeromorphicOn.analyticOnNhd [CompleteSpace 𝕜]
   {f : 𝕜 → 𝕜}
   {U : Set 𝕜}
   (h₁f : StronglyMeromorphicOn f U)
-  (h₂f : ∀ x, (hx : x ∈ U) → 0 ≤ h₁f.meromorphicOn.divisorOn x) :
+  (h₂f : ∀ x, (hx : x ∈ U) → 0 ≤ MeromorphicOn.divisor f h₁f.meromorphicOn x) :
   AnalyticOnNhd 𝕜 f U := by
 
   apply StronglyMeromorphicOn.analytic
@@ -212,7 +212,7 @@ theorem StronglyMeromorphicOn.support_divisor [CompleteSpace 𝕜]
   (h₁f : StronglyMeromorphicOn f U)
   (h₂f : ∃ u : U, f u ≠ 0)
   (hU : IsConnected U) :
-  U ∩ f⁻¹' {0} = (Function.support h₁f.meromorphicOn.divisorOn) := by
+  U ∩ f⁻¹' {0} = (Function.support (MeromorphicOn.divisor f h₁f.meromorphicOn)) := by
 
   ext u
   constructor
@@ -228,9 +228,9 @@ theorem StronglyMeromorphicOn.support_divisor [CompleteSpace 𝕜]
       exact h₁f.order_ne_top hU this ⟨u, hu.1⟩
   · intro hu
     simp at hu
-    let A := h₁f.meromorphicOn.divisorOn.supportWithinDomain hu
+    let A := (MeromorphicOn.divisor f h₁f.meromorphicOn).supportWithinDomain hu
     constructor
-    · exact h₁f.meromorphicOn.divisorOn.supportWithinDomain hu
+    · exact (MeromorphicOn.divisor f h₁f.meromorphicOn).supportWithinDomain hu
     · simp
       let B := (h₁f u A).order_eq_zero_iff.not
       simp at B
