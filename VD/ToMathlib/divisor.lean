@@ -19,11 +19,9 @@ infinite. -/
 noncomputable def deg (D : DivisorOn U) : ℤ := ∑ᶠ z, D z
 
 /-- The counting function for a divisor defined on ⊤ -/
-noncomputable def counting (D : Divisor 𝕜) :
-    ℝ → ℝ :=
+noncomputable def counting (D : Divisor 𝕜) : ℝ → ℝ :=
   fun r ↦ ∑ᶠ z, D.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤) z
 
 /-- The logarithmic counting function for a divisor defined on ⊤ -/
-noncomputable def logCounting (D : Divisor 𝕜) :
-    ℝ → ℝ :=
+noncomputable def logCounting (D : Divisor 𝕜) : ℝ → ℝ :=
   fun r ↦ ∑ᶠ z, D.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤) z * (log r - log ‖z‖)

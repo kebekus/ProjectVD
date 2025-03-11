@@ -6,7 +6,7 @@ Authors: Stefan Kebekus
 
 import Mathlib.Analysis.Meromorphic.Order
 import Mathlib.Analysis.Meromorphic.Divisor.Basic
-import VD.ToMathlib.meromorphicOn_levelSetOfOrder
+import VD.meromorphicAt
 import VD.ToBase
 
 open Classical
@@ -20,9 +20,9 @@ basic lemmas about those divisors.
 ## TODO
 
 - Remove the assumption `CompleteSpace E`.
-- Behavior under restriction of divisors/functions
+- Compatibility with restriction of divisors/functions
 - Non-negativity of the divisor for an analytic function
-- Behavior under multiplication and addition of functions
+- Behavior under addition of functions
 - Congruence lemmas for `codiscreteWithin`
 -/
 
@@ -63,41 +63,26 @@ on `U` evaluates to `order.toBase`. -/
 @[simp] lemma eval_of_divisor_outside_domain {f : 𝕜 → E} (hf : MeromorphicOn f U) (hz : z ∈ U) :
     hf.divisor z = (hf z hz).order.toBase := by simp_all [hf.divisor_def, hz]
 
-theorem divisor_congr_codiscreteWithin {f₁ f₂ : 𝕜 → E} (h₁f₁ : MeromorphicOn f₁ U)
-    (h₁f₂ : MeromorphicOn f₂ U) (hf₁₂ : f₁ =ᶠ[Filter.codiscreteWithin U] f₂) :
-    h₁f₁.divisor = h₁f₂.divisor := by
-  ext z
-  sorry
-
-theorem divisor_smul [CompleteSpace 𝕜]
-  {f₁ : 𝕜 → 𝕜}
-  {f₂ : 𝕜 → E}
-  (h₁f₁ : MeromorphicOn f₁ U)
-  (h₁f₂ : MeromorphicOn f₂ U)
-  (h₂f₁ : ∀ z, (hz : z ∈ U) → (h₁f₁ z hz).order ≠ ⊤)
-  (h₂f₂ : ∀ z, (hz : z ∈ U) → (h₁f₂ z hz).order ≠ ⊤) :
-  (h₁f₁.smul h₁f₂).divisor = h₁f₁.divisor + h₁f₂.divisor := by
+theorem divisor_smul [CompleteSpace 𝕜] {f₁ : 𝕜 → 𝕜} {f₂ : 𝕜 → E} (h₁f₁ : MeromorphicOn f₁ U)
+    (h₁f₂ : MeromorphicOn f₂ U) (h₂f₁ : ∀ z, (hz : z ∈ U) → (h₁f₁ z hz).order ≠ ⊤)
+    (h₂f₂ : ∀ z, (hz : z ∈ U) → (h₁f₂ z hz).order ≠ ⊤) :
+    (h₁f₁.smul h₁f₂).divisor = h₁f₁.divisor + h₁f₂.divisor := by
   ext z
   by_cases hz : z ∈ U
   · simp_all [(h₁f₁ z hz).order_smul (h₁f₂ z hz)]
   · simp [hz]
 
-theorem divisor_mul [CompleteSpace 𝕜]
-  {f₁ f₂ : 𝕜 → 𝕜}
-  (h₁f₁ : MeromorphicOn f₁ U)
-  (h₁f₂ : MeromorphicOn f₂ U)
-  (h₂f₁ : ∀ z, (hz : z ∈ U) → (h₁f₁ z hz).order ≠ ⊤)
-  (h₂f₂ : ∀ z, (hz : z ∈ U) → (h₁f₂ z hz).order ≠ ⊤) :
-  (h₁f₁.mul h₁f₂).divisor = h₁f₁.divisor + h₁f₂.divisor := by
+theorem divisor_mul [CompleteSpace 𝕜] {f₁ f₂ : 𝕜 → 𝕜} (h₁f₁ : MeromorphicOn f₁ U)
+    (h₁f₂ : MeromorphicOn f₂ U) (h₂f₁ : ∀ z, (hz : z ∈ U) → (h₁f₁ z hz).order ≠ ⊤)
+    (h₂f₂ : ∀ z, (hz : z ∈ U) → (h₁f₂ z hz).order ≠ ⊤) :
+    (h₁f₁.mul h₁f₂).divisor = h₁f₁.divisor + h₁f₂.divisor := by
   ext z
   by_cases hz : z ∈ U
   · simp_all [(h₁f₁ z hz).order_mul (h₁f₂ z hz)]
   · simp [hz]
 
-theorem divisor_inv [CompleteSpace 𝕜]
-  {f: 𝕜 → 𝕜}
-  (h₁f : MeromorphicOn f U) :
-  h₁f.inv.divisor = -h₁f.divisor := by
+theorem divisor_inv [CompleteSpace 𝕜] {f: 𝕜 → 𝕜} (h₁f : MeromorphicOn f U) :
+    h₁f.inv.divisor = -h₁f.divisor := by
   ext z
   by_cases hz : z ∈ U
   · simp only [hz, eval_of_divisor_outside_domain, DivisorOn.coe_neg, Pi.neg_apply]

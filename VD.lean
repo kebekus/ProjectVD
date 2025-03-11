@@ -6,7 +6,6 @@ import VD.ToMathlib.analyticAt_order
 import VD.ToMathlib.bilinear
 import VD.ToMathlib.codiscreteWithin
 import VD.ToMathlib.divisor
-import VD.ToMathlib.meromorphicOn_levelSetOfOrder
 import VD.cauchyRiemann
 import VD.firstMain
 import VD.harmonicAt

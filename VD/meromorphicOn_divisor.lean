@@ -4,7 +4,6 @@ import Mathlib.Analysis.Meromorphic.Divisor.Basic
 import VD.mathlibAddOn
 import VD.meromorphicOn
 import VD.stronglyMeromorphicOn
-import VD.ToMathlib.meromorphicOn_levelSetOfOrder
 
 open scoped Interval Topology
 open Classical
