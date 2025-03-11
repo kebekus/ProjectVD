@@ -112,7 +112,7 @@ theorem MeromorphicOn.decompose₁
       let A := h₂f.order_eq_zero_iff.not
       simp at A
       rw [← A]
-      unfold MeromorphicOn.divisor at h
+      rw [MeromorphicOn.divisor_def] at h
       simp [hz₀] at h
       exact h.1
   · simp
@@ -263,7 +263,8 @@ theorem MeromorphicOn.decompose₂
             rw [E, D]
             simp
           have : hf.meromorphicOn.divisor u = h₁g₀.divisor u := by
-            unfold MeromorphicOn.divisor
+            rw [MeromorphicOn.divisor_def]
+            rw [MeromorphicOn.divisor_def]
             simp
             rw [this]
           rw [this]
@@ -292,6 +293,7 @@ theorem MeromorphicOn.decompose₃'
     ext x
     unfold d
     simp
+    tauto
   let h₁ := ∏ᶠ u, fun z ↦ (z - u) ^ (d u)
   have h₁h₁ : StronglyMeromorphicOn h₁ U := by
     intro z hz
@@ -312,11 +314,18 @@ theorem MeromorphicOn.decompose₃'
 
   let g' := f * h₁
   have h₁g' : MeromorphicOn g' U := h₁f.meromorphicOn.mul h₁h₁.meromorphicOn
-  have h₂g' : h₁g'.divisor.toFun = 0 := by
+  have h₂g' : h₁g'.divisor = 0 := by
+    ext x
     rw [MeromorphicOn.divisor_mul h₁f.meromorphicOn (fun z hz ↦ h₃f ⟨z, hz⟩) h₁h₁.meromorphicOn h₃h₁]
-    rw [h₂h₁]
+    rw [DivisorOn.coe_add]
+    simp_rw [h₂h₁]
+    simp
     unfold d
     simp
+    ring_nf
+    rw [sub_eq_zero]
+    rfl
+
   have h₃g' : ∀ u : U, (h₁g' u.1 u.2).order = 0 := by
     intro u
     rw [(h₁f u.1 u.2).meromorphicAt.order_mul (h₁h₁ u.1 u.2).meromorphicAt]
@@ -337,7 +346,7 @@ theorem MeromorphicOn.decompose₃'
 
   let g := h₁g'.makeStronglyMeromorphicOn
   have h₁g : StronglyMeromorphicOn g U := stronglyMeromorphicOn_of_makeStronglyMeromorphicOn h₁g'
-  have h₂g : h₁g.meromorphicOn.divisor.toFun = 0 := by
+  have h₂g : h₁g.meromorphicOn.divisor = 0 := by
     rw [← MeromorphicOn.divisor_of_makeStronglyMeromorphicOn]
     rw [h₂g']
   have h₃g : AnalyticOnNhd ℂ g U := by
@@ -384,16 +393,11 @@ theorem MeromorphicOn.decompose₃'
             intro y hy h₂y
             have z₀ : h₁f.meromorphicOn.divisor y = 0 := by
               have F := h₂y.order_eq_zero_iff.2 hy
-              unfold divisor
-              simp
-              intro h
-              left
-              rw [h₂y.meromorphicAt_order]
-              rw [F]
+              rw [MeromorphicOn.divisor_def]
+              simp_rw [h₂y.meromorphicAt_order, F]
               simp
 
             have : (finprod (fun u z => (z - u) ^ d u) y * finprod (fun u z => (z - u) ^ (h₁f.meromorphicOn.divisor u)) y) = 1 := by
-
               have t₀ : (Function.mulSupport fun u z => (z - u) ^ d u).Finite := by
                 rwa [ratlPoly_mulsupport, h₁d]
               rw [finprod_eq_prod _ t₀]
@@ -405,6 +409,7 @@ theorem MeromorphicOn.decompose₃'
                 rw [ratlPoly_mulsupport]
                 unfold d
                 simp
+                rfl
               have : t₀.toFinset = t₁.toFinset := by congr
               rw [this]
               simp
@@ -446,6 +451,7 @@ theorem MeromorphicOn.decompose₃'
             rw [ratlPoly_mulsupport]
             unfold d
             simp
+            rfl
           have : t₀.toFinset = t₁.toFinset := by congr
           rw [this]
           simp
@@ -537,7 +543,7 @@ theorem StronglyMeromorphicOn.decompose_log
     by_contra hCon
     rw [sub_eq_zero] at hCon
     rw [← hCon] at hx
-    unfold MeromorphicOn.divisor at hx
+    rw [MeromorphicOn.divisor_def] at hx
     rw [hCon] at hz
     simp at hz
     let A := (h₁f x h₁x).order_eq_zero_iff
@@ -567,7 +573,7 @@ theorem StronglyMeromorphicOn.decompose_log
     by_contra hCon
     rw [sub_eq_zero] at hCon
     rw [← hCon] at hx
-    unfold MeromorphicOn.divisor at hx
+    rw [MeromorphicOn.divisor_def] at hx
     rw [hCon] at hz
     simp at hz
     let A := (h₁f x h₁x).order_eq_zero_iff

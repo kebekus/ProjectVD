@@ -1,12 +1,13 @@
 import Mathlib.Analysis.Meromorphic.Order
 import Mathlib.Topology.DiscreteSubset
-import VD.ToMathlib.divisor
+import Mathlib.Analysis.Meromorphic.Divisor.Basic
 import VD.mathlibAddOn
 import VD.meromorphicOn
 import VD.stronglyMeromorphicOn
 import VD.ToMathlib.meromorphicOn_levelSetOfOrder
 
 open scoped Interval Topology
+open Classical
 open Real Filter
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
@@ -14,91 +15,18 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 
 -- TODO: Remove the assumption CompleteSpace E.
 
-/-
-lemma ContinuousAt.x {f g : 𝕜 → E} {z₀ : 𝕜} (hf : ContinuousAt f z₀) (hg : ContinuousAt f z₀)
-    (hfg : f =ᶠ[𝓝[≠] z₀] g) :
-    f z₀ = g z₀ := by
-  by_contra h
-  sorry
-
-
-theorem ContinuousAt.y {f g : 𝕜 → E} {z₀ : 𝕜} (hf : ContinuousAt f z₀) (hg : ContinuousAt f z₀) :
-    f =ᶠ[𝓝[≠] z₀] g ↔ f =ᶠ[𝓝 z₀] g := by
-  constructor
-  · intro h
-    apply eventuallyEq_nhdsWithin_of_eventuallyEq_nhds h
-    sorry
-  · intro h
-    apply eventuallyEq_nhdsWithin_iff.mpr
-    filter_upwards [h]
-    tauto
-
-theorem MeromorphicAt.order_eq_zero_iff {f : 𝕜 → E} {z₀ : 𝕜} (hf : MeromorphicAt f z₀) :
-    hf.order = 0 ↔ (∃ g, (ContinuousAt g z₀) ∧ (g z₀ ≠ 0) ∧ f =ᶠ[𝓝[≠] z₀] g ) := by
-  constructor
-  · intro h₂f
-    obtain ⟨g, h₁g, h₂g, h₃g⟩ := (hf.order_eq_int_iff 0).1 h₂f
-    use g, h₁g.continuousAt, h₂g
-    simp only [zpow_zero, one_smul] at h₃g
-    exact h₃g
-  · intro h₂f
-    obtain ⟨g, h₁g, h₂g, h₃g⟩ := h₂f
-    apply (hf.order_eq_int_iff 0).2
-    by_cases h₁ : hf.order = ⊤
-    · rw [hf.order_eq_top_iff] at h₁
-      have : ∀ᶠ (z : 𝕜) in 𝓝[≠] z₀, g z = 0 := by
-        filter_upwards [h₁, h₃g]
-        intro a h₁a h₂a
-        rw [← h₂a, h₁a]
-      have : g z₀ = 0 := by
-
-        sorry
-      tauto
-    sorry
-
-theorem MeromorphicAt.order_eq_zero_iff {f : 𝕜 → E} {z₀ : 𝕜} (hf : MeromorphicAt f z₀) :
-    hf.order ≥ 0 ↔ (∃ g, (ContinuousAt g z₀) ∧ f =ᶠ[𝓝[≠] z₀] g ) := by
-  constructor
-  · intro h₂f
-    let n := hf.order
-    obtain ⟨g, h₁g, h₂g, h₃g⟩ := (hf.order_eq_int_iff n).1 h₂f
-    use g, h₁g.continuousAt, h₂g
-    simp only [zpow_zero, one_smul] at h₃g
-    exact h₃g
-  · intro h₂f
-    obtain ⟨g, h₁g, h₂g, h₃g⟩ := h₂f
-    apply (hf.order_eq_int_iff 0).2
-    by_cases h₁ : hf.order = ⊤
-    · rw [hf.order_eq_top_iff] at h₁
-      have : ∀ᶠ (z : 𝕜) in 𝓝[≠] z₀, g z = 0 := by
-        filter_upwards [h₁, h₃g]
-        intro a h₁a h₂a
-        rw [← h₂a, h₁a]
-      have : g z₀ = 0 := by
-
-        sorry
-      tauto
-    sorry
--/
-
-
 noncomputable def MeromorphicOn.divisor [CompleteSpace E] {f : 𝕜 → E} {U : Set 𝕜} (hf : MeromorphicOn f U) :
-  Divisor U where
+  DivisorOn U where
 
-  toFun := by
-    intro z
-    if hz : z ∈ U then
-      exact ((hf z hz).order.untopD 0 : ℤ)
-    else
-      exact 0
+  toFun := fun z ↦ if hz : z ∈ U then ((hf z hz).order.untopD 0 : ℤ) else 0
 
-  supportWithinDomain := by
+  supportWithinDomain' := by
     intro z hz
     simp at hz
     by_contra h₂z
     simp [h₂z] at hz
 
-  supportDiscreteWithinDomain := by
+  supportDiscreteWithinDomain' := by
     filter_upwards [mem_codiscrete_subtype_iff_mem_codiscreteWithin.1
       hf.codiscrete_setOf_order_eq_zero_or_top]
     intro _ _
@@ -107,6 +35,14 @@ noncomputable def MeromorphicOn.divisor [CompleteSpace E] {f : 𝕜 → E} {U : 
       WithTop.coe_zero]
     tauto
 
+theorem MeromorphicOn.divisor_def [CompleteSpace E]
+  {f : 𝕜 → E}
+  {U : Set 𝕜}
+  {z : 𝕜}
+  (hf : MeromorphicOn f U) :
+  hf.divisor z = if hz : z ∈ U then ((hf z hz).order.untopD 0 : ℤ) else 0 := by
+  rfl
+
 theorem MeromorphicOn.divisor_def₁ [CompleteSpace E]
   {f : 𝕜 → E}
   {U : Set 𝕜}
@@ -114,8 +50,7 @@ theorem MeromorphicOn.divisor_def₁ [CompleteSpace E]
   (hf : MeromorphicOn f U)
   (hz : z ∈ U) :
   hf.divisor z = ((hf z hz).order.untopD 0 : ℤ) := by
-  unfold MeromorphicOn.divisor
-  simp [hz]
+  simp_all [hf.divisor_def]
 
 theorem MeromorphicOn.divisor_def₂ [CompleteSpace E]
   {f : 𝕜 → E}
@@ -125,11 +60,11 @@ theorem MeromorphicOn.divisor_def₂ [CompleteSpace E]
   (hz : z ∈ U)
   (h₂f : (hf z hz).order ≠ ⊤) :
   hf.divisor z = (hf z hz).order.untop h₂f := by
-  unfold MeromorphicOn.divisor
-  simp [hz]
-  rw [WithTop.untopD_eq_iff]
-  left
-  exact Eq.symm (WithTop.coe_untop (hf z hz).order h₂f)
+  simp_all [hf.divisor_def]
+  refine (WithTop.eq_untop_iff h₂f).mpr ?_
+  exact untop'_of_ne_top h₂f
+
+-- Divisor depends on codiscrete
 
 theorem MeromorphicOn.divisor_mul₀  [CompleteSpace 𝕜]
   {f₁ f₂ : 𝕜 → 𝕜}
@@ -140,21 +75,16 @@ theorem MeromorphicOn.divisor_mul₀  [CompleteSpace 𝕜]
   (h₂f₁ : (h₁f₁ z hz).order ≠ ⊤)
   (h₁f₂ : MeromorphicOn f₂ U)
   (h₂f₂ : (h₁f₂ z hz).order ≠ ⊤) :
-  (h₁f₁.mul h₁f₂).divisor.toFun z = h₁f₁.divisor.toFun z + h₁f₂.divisor.toFun z := by
-
-  by_cases h₁z : z ∈ U
-  · rw [MeromorphicOn.divisor_def₂ h₁f₁ hz h₂f₁]
-    rw [MeromorphicOn.divisor_def₂ h₁f₂ hz h₂f₂]
-    have B : ((h₁f₁.mul h₁f₂) z hz).order ≠ ⊤ := by
-      rw [MeromorphicAt.order_mul (h₁f₁ z hz) (h₁f₂ z hz)]
-      simp only [ne_eq, LinearOrderedAddCommGroupWithTop.add_eq_top, not_or]
-      tauto
-    rw [MeromorphicOn.divisor_def₂ (h₁f₁.mul h₁f₂) hz B]
-    simp_rw [MeromorphicAt.order_mul (h₁f₁ z hz) (h₁f₂ z hz)]
-    rw [untop_add]
-  · unfold MeromorphicOn.divisor
-    simp [h₁z]
-
+  (h₁f₁.mul h₁f₂).divisor z = h₁f₁.divisor z + h₁f₂.divisor z := by
+  rw [MeromorphicOn.divisor_def₂ h₁f₁ hz h₂f₁]
+  rw [MeromorphicOn.divisor_def₂ h₁f₂ hz h₂f₂]
+  have B : ((h₁f₁.mul h₁f₂) z hz).order ≠ ⊤ := by
+    rw [MeromorphicAt.order_mul (h₁f₁ z hz) (h₁f₂ z hz)]
+    simp only [ne_eq, LinearOrderedAddCommGroupWithTop.add_eq_top, not_or]
+    tauto
+  rw [MeromorphicOn.divisor_def₂ (h₁f₁.mul h₁f₂) hz B]
+  simp_rw [MeromorphicAt.order_mul (h₁f₁ z hz) (h₁f₂ z hz)]
+  rw [untop_add]
 
 theorem MeromorphicOn.divisor_mul [CompleteSpace 𝕜]
   {f₁ f₂ : 𝕜 → 𝕜}
@@ -163,29 +93,27 @@ theorem MeromorphicOn.divisor_mul [CompleteSpace 𝕜]
   (h₂f₁ : ∀ z, (hz : z ∈ U) → (h₁f₁ z hz).order ≠ ⊤)
   (h₁f₂ : MeromorphicOn f₂ U)
   (h₂f₂ : ∀ z, (hz : z ∈ U) → (h₁f₂ z hz).order ≠ ⊤) :
-  (h₁f₁.mul h₁f₂).divisor.toFun = h₁f₁.divisor.toFun + h₁f₂.divisor.toFun := by
-  funext z
+  (h₁f₁.mul h₁f₂).divisor = h₁f₁.divisor + h₁f₂.divisor := by
+  ext z
   by_cases hz : z ∈ U
-  · rw [MeromorphicOn.divisor_mul₀ hz h₁f₁ (h₂f₁ z hz) h₁f₂ (h₂f₂ z hz)]
-    simp
-  · simp only [Pi.add_apply]
+  · simp only [DivisorOn.coe_add, Pi.add_apply]
+    rw [MeromorphicOn.divisor_mul₀ hz h₁f₁ (h₂f₁ z hz) h₁f₂ (h₂f₂ z hz)]
+  · simp only [DivisorOn.coe_add, Pi.add_apply]
     rw [Function.nmem_support.mp (fun a => hz (h₁f₁.divisor.supportWithinDomain a))]
     rw [Function.nmem_support.mp (fun a => hz (h₁f₂.divisor.supportWithinDomain a))]
     rw [Function.nmem_support.mp (fun a => hz ((h₁f₁.mul h₁f₂).divisor.supportWithinDomain a))]
     simp
 
-
 theorem MeromorphicOn.divisor_inv [CompleteSpace 𝕜]
   {f: 𝕜 → 𝕜}
   {U : Set 𝕜}
   (h₁f : MeromorphicOn f U) :
-  h₁f.inv.divisor.toFun = -h₁f.divisor.toFun := by
-  funext z
-
+  h₁f.inv.divisor = -h₁f.divisor := by
+  ext z
   by_cases hz : z ∈ U
-  · rw [MeromorphicOn.divisor_def₁]
-    simp
-    rw [MeromorphicOn.divisor_def₁]
+  · simp
+    rw [MeromorphicOn.divisor_def₁ h₁f hz]
+    rw [MeromorphicOn.divisor_def₁ h₁f.inv hz]
     rw [MeromorphicAt.order_inv]
     simp
     by_cases h₂f : (h₁f z hz).order = ⊤
@@ -193,10 +121,10 @@ theorem MeromorphicOn.divisor_inv [CompleteSpace 𝕜]
     · let A := untop'_of_ne_top (d := 0) h₂f
       rw [← A]
       exact rfl
-    repeat exact hz
-  · unfold MeromorphicOn.divisor
+  · simp
+    rw [MeromorphicOn.divisor_def]
+    rw [MeromorphicOn.divisor_def]
     simp [hz]
-
 
 theorem MeromorphicOn.divisor_add_const₁  [CompleteSpace 𝕜]
   {f : 𝕜 → 𝕜}
@@ -207,14 +135,15 @@ theorem MeromorphicOn.divisor_add_const₁  [CompleteSpace 𝕜]
   0 ≤ hf.divisor z → 0 ≤ (hf.add (MeromorphicOn.const a)).divisor z := by
   intro h
 
-  unfold MeromorphicOn.divisor
-
   -- Trivial case: z ∉ U
   by_cases hz : z ∉ U
-  · simp [hz]
+  · rw [MeromorphicOn.divisor_def]
+    simp [hz]
 
   -- Non-trivial case: z ∈ U
-  simp at hz; simp [hz]
+  rw [MeromorphicOn.divisor_def]
+  simp at hz
+  simp [hz]
 
   by_cases h₁f : (hf z hz).order = ⊤
   · have : f + (fun z ↦ a) =ᶠ[𝓝[≠] z] (fun z ↦ a) := by
@@ -241,7 +170,7 @@ theorem MeromorphicOn.divisor_add_const₁  [CompleteSpace 𝕜]
     have : 0 ≤ min (hf z hz).order (MeromorphicAt.const a z).order := by
       apply le_min
       --
-      unfold MeromorphicOn.divisor at h
+      rw [MeromorphicOn.divisor_def] at h
       simp [hz] at h
       let V := untop'_of_ne_top (d := 0) h₁f
       rw [← V]
@@ -251,7 +180,6 @@ theorem MeromorphicOn.divisor_add_const₁  [CompleteSpace 𝕜]
       exact analyticAt_const
     exact le_trans this A
     tauto
-
 
 theorem MeromorphicOn.divisor_add_const₂ [CompleteSpace 𝕜]
   {f : 𝕜 → 𝕜}
@@ -264,15 +192,14 @@ theorem MeromorphicOn.divisor_add_const₂ [CompleteSpace 𝕜]
 
   by_cases hz : z ∉ U
   · have : hf.divisor z = 0 := by
-      unfold MeromorphicOn.divisor
-      simp [hz]
+      rw [MeromorphicOn.divisor_def]
+      simp_all
     rw [this] at h
     tauto
 
   simp at hz
-  unfold MeromorphicOn.divisor
+  rw [MeromorphicOn.divisor_def] at *
   simp [hz]
-  unfold MeromorphicOn.divisor at h
   simp [hz] at h
 
   have : (hf z hz).order = (((hf.add (MeromorphicOn.const a))) z hz).order := by
@@ -301,7 +228,6 @@ theorem MeromorphicOn.divisor_add_const₂ [CompleteSpace 𝕜]
         exact analyticAt_const
   rwa [this] at h
 
-
 theorem MeromorphicOn.divisor_add_const₃ [CompleteSpace 𝕜]
   {f : 𝕜 → 𝕜}
   {U : Set 𝕜}
@@ -313,22 +239,22 @@ theorem MeromorphicOn.divisor_add_const₃ [CompleteSpace 𝕜]
 
   by_cases hz : z ∉ U
   · have : hf.divisor z = 0 := by
-      unfold MeromorphicOn.divisor
-      simp [hz]
+      rw [MeromorphicOn.divisor_def]
+      simp_all
     rw [this] at h
     tauto
 
+  rw [MeromorphicOn.divisor_def]
   simp at hz
-  unfold MeromorphicOn.divisor
   simp [hz]
-  unfold MeromorphicOn.divisor at h
-  simp [hz] at h
 
   have : (hf z hz).order = (((hf.add (MeromorphicOn.const a))) z hz).order := by
     have t₀ : (hf z hz).order < (0 : ℤ) := by
         by_contra hCon
         simp only [not_lt] at hCon
         rw [←WithTop.le_untopD_iff (b := 0)] at hCon
+        rw [MeromorphicOn.divisor_def] at h
+        simp [hz] at h
         exact Lean.Omega.Int.le_lt_asymm hCon h
         tauto
     rw [← MeromorphicAt.order_add_of_ne_orders (hf z hz) (MeromorphicAt.const a z)]
@@ -348,8 +274,8 @@ theorem MeromorphicOn.divisor_add_const₃ [CompleteSpace 𝕜]
       _ ≤ (MeromorphicAt.const a z).order := by
         apply AnalyticAt.meromorphicAt_order_nonneg
         exact analyticAt_const
-  rw [this]
-
+  rw [← this]
+  exact Eq.symm (divisor_def₁ hf hz)
 
 theorem MeromorphicOn.divisor_of_makeStronglyMeromorphicOn [CompleteSpace 𝕜]
   {f : 𝕜 → 𝕜}
@@ -381,8 +307,9 @@ theorem StronglyMeromorphicOn.analyticOnNhd [CompleteSpace 𝕜]
   apply StronglyMeromorphicOn.analytic
   intro z hz
   let A := h₂f z hz
-  unfold MeromorphicOn.divisor at A
+  rw [MeromorphicOn.divisor_def] at A
   simp [hz] at A
+
   by_cases h : (h₁f z hz).meromorphicAt.order = ⊤
   · rw [h]
     simp
@@ -403,12 +330,17 @@ theorem StronglyMeromorphicOn.support_divisor [CompleteSpace 𝕜]
   ext u
   constructor
   · intro hu
-    unfold MeromorphicOn.divisor
-    simp [h₁f.order_ne_top hU h₂f ⟨u, hu.1⟩]
-    use hu.1
-    rw [(h₁f u hu.1).order_eq_zero_iff]
-    simp
-    exact hu.2
+    simp_all
+    rw [MeromorphicOn.divisor_def]
+    simp [hu.1]
+    constructor
+    · rw [(h₁f u hu.1).order_eq_zero_iff]
+      tauto
+    · have : ∃ u : U, f u ≠ 0 := by
+        obtain ⟨a, ha⟩ := h₂f
+        use ⟨a, ha.1⟩
+        exact ha.2
+      exact h₁f.order_ne_top hU this ⟨u, hu.1⟩
   · intro hu
     simp at hu
     let A := h₁f.meromorphicOn.divisor.supportWithinDomain hu
@@ -418,6 +350,6 @@ theorem StronglyMeromorphicOn.support_divisor [CompleteSpace 𝕜]
       let B := (h₁f u A).order_eq_zero_iff.not
       simp at B
       rw [← B]
-      unfold MeromorphicOn.divisor at hu
+      rw [MeromorphicOn.divisor_def] at hu
       simp [A] at hu
       exact hu.1

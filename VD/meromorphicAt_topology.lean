@@ -49,7 +49,7 @@ theorem MeromorphicAt.order_nonneg_if_exists_continuous_extension (hf : Meromorp
   apply tendsto_nhdsWithin_of_tendsto_nhds
   exact hh₁.continuousAt.norm
 
-/-- A meromorphic function has non-negative order then there exists an analytic extension. -/
+/-- If a meromorphic function has non-negative order then there exists an analytic extension. -/
 theorem MeromorphicAt.exists_analytic_extension_if_order_nonneg (hf : MeromorphicAt f z₀) (nneg : 0 ≤ hf.order) :
     ∃ (g : 𝕜 → E), AnalyticAt 𝕜 g z₀ ∧ f =ᶠ[𝓝[≠] z₀] g := by
   by_cases h' : hf.order = ⊤
