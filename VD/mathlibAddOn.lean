@@ -1,3 +1,4 @@
+import Mathlib.Analysis.Analytic.IsolatedZeros
 import Mathlib.Analysis.Meromorphic.Basic
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.Analysis.Calculus.FDeriv.Add
@@ -17,23 +18,30 @@ variable {L L₁ L₂ : Filter E}
 
 variable {R : Type*} [Semiring R] [Module R F] [SMulCommClass 𝕜 R F] [ContinuousConstSMul R F]
 
-
-
+variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E : Type*} [NormedAddCommGroup E]
+  [NormedSpace 𝕜 E] {s : E} {p q : FormalMultilinearSeries 𝕜 𝕜 E} {f g : 𝕜 → E} {n : ℕ} {z z₀ : 𝕜}
 
 open Topology Filter
 
-lemma eventuallyEq_nhdsWithin_of_eventuallyEq_nhds
-  {α τ : Type*}
-  {f g : τ → α} [TopologicalSpace τ]
-  {z₀ : τ}
-  (h₁ : f =ᶠ[𝓝[≠] z₀] g)
-  (h₂ : f z₀ = g z₀) :
-  f =ᶠ[𝓝 z₀] g := by
+/-- Two functions agree on a neighborhood of `x` if they agree at `x` and in a punctured
+neighborhood. -/
+theorem eventuallyEq_nhds_of_eventuallyEq_nhdsNE {α β : Type*} [TopologicalSpace α] {f g : α → β}
+    {a : α} (h₁ : f =ᶠ[𝓝[≠] a] g) (h₂ : f a = g a) :
+    f =ᶠ[𝓝 a] g := by
   filter_upwards [eventually_nhdsWithin_iff.1 h₁]
   intro x hx
-  by_cases h₂x : x = z₀
+  by_cases h₂x : x = a
   · simp [h₂x, h₂]
   · tauto
+
+/-- Two analytic functions agree on a punctured neighborhood iff they agree on a neighborhood. -/
+theorem AnalyticAt.eventuallyEq_nhd_iff_eventuallyEq_nhdNE (hf : AnalyticAt 𝕜 f z₀) (hg : AnalyticAt 𝕜 g z₀) :
+  f =ᶠ[𝓝[≠] z₀] g ↔ f =ᶠ[𝓝 z₀] g := by
+  constructor <;> intro hfg
+  · rcases ((hf.sub hg).eventually_eq_zero_or_eventually_ne_zero) with h | h
+    · exact Filter.eventuallyEq_iff_sub.2 h
+    · simpa using (Filter.eventually_and.2 ⟨Filter.eventuallyEq_iff_sub.mp hfg, h⟩).exists
+  · exact hfg.filter_mono nhdsWithin_le_nhds
 
 -- unclear where this should go
 

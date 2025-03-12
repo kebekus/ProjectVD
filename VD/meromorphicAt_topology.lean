@@ -58,11 +58,11 @@ theorem MeromorphicAt.exists_analytic_extension_if_order_nonneg (hf : Meromorphi
     obtain ⟨g, hg, hfg⟩ := (hf.order_eq_int_iff n).mp h₀
     use (fun z ↦ (z - z₀) ^ n • g z)
     constructor
-    · apply AnalyticAt.smul' _ hg
+    · apply AnalyticAt.smul _ hg
       · simp [h₀] at nneg
         obtain ⟨a, ha⟩ := Int.eq_ofNat_of_zero_le nneg
         simp [ha]
-        apply (analyticAt_id.sub' analyticAt_const).pow
+        apply (analyticAt_id.sub analyticAt_const).pow
     · exact hfg.2
 
 /-- A meromorphic function has non-negative order iff there exists a continuous extension. -/

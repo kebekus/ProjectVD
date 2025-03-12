@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Meromorphic.Order
-import VD.meromorphicAt
+import VD.mathlibAddOn
 
 /-!
 # Normal form of meromorphic functions and continuous extension
@@ -40,9 +40,10 @@ variable
 
 /-- A function is 'meromorphic in normal form' at `x` if it vanishes around `x`
 or if can locally be written as `fun z ↦ (z - x) ^ n • g` where `g` is
-analytic and does not vanish at `x`.-/
+analytic and does not vanish at `x`. -/
 def MeromorphicNFAt (f : 𝕜 → E) (x : 𝕜) :=
-  (f =ᶠ[𝓝 x] 0) ∨ (∃ (n : ℤ), ∃ g : 𝕜 → E, (AnalyticAt 𝕜 g x) ∧ (g x ≠ 0) ∧ (f =ᶠ[𝓝 x] (· - x) ^ n • g ))
+  (f =ᶠ[𝓝 x] 0) ∨ (∃ (n : ℤ), ∃ g : 𝕜 → E, (AnalyticAt 𝕜 g x) ∧ (g x ≠ 0) ∧
+    (f =ᶠ[𝓝 x] (· - x) ^ n • g ))
 
 /-- Reformulation of the definition for convenience -/
 theorem meromorphicNFAt_def :
@@ -82,18 +83,16 @@ theorem MeromorphicAt.meromorphicNFAt_iff (hf : MeromorphicAt f x) :
         use g, h₁g, h₂g
         simpa
     · right
-      obtain ⟨g, h₁g, h₂g, h₃g⟩ := (hf.order_eq_int_iff (hf.order.untopD 0)).1
-        (untop'_of_ne_top (LT.lt.ne_top h₁)).symm
-      use (hf.order.untopD 0), g, h₁g, h₂g
+      lift hf.order to ℤ using LT.lt.ne_top h₁ with n hn
+      obtain ⟨g, h₁g, h₂g, h₃g⟩ := (hf.order_eq_int_iff n).1 hn.symm
+      use n, g, h₁g, h₂g
       filter_upwards [eventually_nhdsWithin_iff.1 h₃g]
       intro z hz
       by_cases h₁z : z = x
       · simp only [h₁z, h₂, Pi.smul_apply', Pi.pow_apply, sub_self]
-        apply (smul_eq_zero_of_left (zero_zpow (WithTop.untopD 0 hf.order) _) (g x)).symm
+        apply (smul_eq_zero_of_left (zero_zpow n _) (g x)).symm
         by_contra hCon
-        rw [WithTop.untopD_eq_self_iff, WithTop.coe_zero] at hCon
-        rcases hCon with h | h
-        <;> simp [h] at h₁
+        simp [hCon] at h₁
       · exact hz h₁z
 
 /-- Meromorphicity in normal form is a local property. -/
@@ -124,12 +123,13 @@ theorem meromorphicNFAt_congr {g : 𝕜 → E} (hfg : f =ᶠ[𝓝 x] g) :
 theorem MeromorphicNFAt.meromorphicAt (hf : MeromorphicNFAt f x) :
     MeromorphicAt f x := by
   rcases hf with h | h
-  · exact (meromorphicAt_congr' h).2 analyticAt_const.meromorphicAt
+  · have : f =ᶠ[𝓝[≠] x] 0 := Filter.EventuallyEq.filter_mono h nhdsWithin_le_nhds
+    exact analyticAt_const.meromorphicAt.congr this.symm
   · obtain ⟨n, g, h₁g, _, h₃g⟩ := h
-    rw [meromorphicAt_congr' h₃g]
+    apply MeromorphicAt.congr _ (Filter.EventuallyEq.filter_mono h₃g nhdsWithin_le_nhds).symm
     fun_prop
 
-/- If a function is meromorphic in normal form at `x` and has non-negative
+/-- If a function is meromorphic in normal form at `x` and has non-negative
 order, then it is analytic -/
 theorem MeromorphicNFAt.analyticAt (h₁f : MeromorphicNFAt f x)
     (h₂f : 0 ≤ h₁f.meromorphicAt.order) :
@@ -150,7 +150,7 @@ theorem AnalyticAt.MeromorphicNFAt (hf : AnalyticAt 𝕜 f x) :
 ## Continuous extension and conversion to normal form
 -/
 
-/- Convert a meromorphic function to normal form at `x` by changing its value. -/
+/-- Convert a meromorphic function to normal form at `x` by changing its value at `x`. -/
 noncomputable def MeromorphicAt.toNF (hf : MeromorphicAt f x) :
     𝕜 → E := by
   classical -- do not complain about decidability issues in Function.update
@@ -160,32 +160,33 @@ noncomputable def MeromorphicAt.toNF (hf : MeromorphicAt f x) :
     exact (Classical.choose h₁f) x
   · exact 0
 
-/- Conversion to normal form at `x` by changes the value only at x. -/
+/-- Conversion to normal form at `x` by changes the value only at x. -/
 lemma MeromorphicAt.toNF_id_on_complement (hf : MeromorphicAt f x) :
     Set.EqOn f hf.toNF {x}ᶜ :=
   fun _ _ ↦ by simp_all [MeromorphicAt.toNF]
 
-/- Conversion to normal form at `x` by changes the value only at x. -/
-lemma MeromorphicAt.toNF_id_on_punct_nhd (hf : MeromorphicAt f x) :
+/-- Conversion to normal form at `x` changes the value only at x. -/
+lemma MeromorphicAt.toNF_id_on_nhdNE (hf : MeromorphicAt f x) :
     f =ᶠ[𝓝[≠] x] hf.toNF :=
   eventually_nhdsWithin_of_forall (fun _ hz ↦ hf.toNF_id_on_complement hz)
 
-/- After conversion to normal form at `x`, the function has normal form. -/
+/-- After conversion to normal form at `x`, the function has normal form. -/
 theorem MeromorphicAt.MeromorphicNFAt_of_toNF (hf : MeromorphicAt f x) :
     MeromorphicNFAt hf.toNF x := by
   by_cases h₂f : hf.order = ⊤
   · have : hf.toNF =ᶠ[𝓝 x] 0 := by
-      apply eventuallyEq_nhdsWithin_of_eventuallyEq_nhds
-      · exact hf.toNF_id_on_punct_nhd.symm.trans (hf.order_eq_top_iff.1 h₂f)
+      apply eventuallyEq_nhds_of_eventuallyEq_nhdsNE
+      · exact hf.toNF_id_on_nhdNE.symm.trans (hf.order_eq_top_iff.1 h₂f)
       · simp [h₂f, MeromorphicAt.toNF]
     apply AnalyticAt.MeromorphicNFAt
     rw [analyticAt_congr this]
     exact analyticAt_const
-  · obtain ⟨g, h₁g, h₂g, h₃g⟩ := (hf.order_eq_int_iff (hf.order.untopD 0)).1 (untop'_of_ne_top h₂f).symm
+  · lift hf.order to ℤ using h₂f with n hn
+    obtain ⟨g, h₁g, h₂g, h₃g⟩ := (hf.order_eq_int_iff n).1 hn.symm
     right
-    use WithTop.untopD 0 hf.order, g, h₁g, h₂g
-    apply eventuallyEq_nhdsWithin_of_eventuallyEq_nhds
-    · exact hf.toNF_id_on_punct_nhd.symm.trans h₃g
+    use n, g, h₁g, h₂g
+    apply eventuallyEq_nhds_of_eventuallyEq_nhdsNE
+    · exact hf.toNF_id_on_nhdNE.symm.trans h₃g
     · unfold MeromorphicAt.toNF
       simp only [WithTop.coe_zero, ne_eq, Function.update_self, Pi.smul_apply', Pi.pow_apply,
         sub_self]
@@ -194,19 +195,13 @@ theorem MeromorphicAt.MeromorphicNFAt_of_toNF (hf : MeromorphicAt f x) :
         obtain ⟨h₁G, h₂G, h₃G⟩  := Classical.choose_spec ((hf.order_eq_int_iff 0).1 h₃f)
         simp only [zpow_zero, ne_eq, one_smul] at h₃G
         apply Filter.EventuallyEq.eq_of_nhds
-        apply h₁G.localIdentity h₁g
+        apply (AnalyticAt.eventuallyEq_nhd_iff_eventuallyEq_nhdNE h₁G (by fun_prop)).1
         filter_upwards [h₃g, h₃G]
-        intro a h₁a h₂a
-        simp only [h₃f, WithTop.coe_zero, WithTop.untopD_zero, zpow_zero, one_smul] at h₁a
-        rw [← h₁a, ← h₂a]
-      · have : hf.order ≠ 0 := h₃f
-        rw [zero_zpow (WithTop.untopD 0 hf.order)]
-        simp only [this, ↓reduceDIte, zero_smul]
-        by_contra hCon
-        simp only [WithTop.untopD_eq_self_iff, WithTop.coe_zero] at hCon
-        tauto
+        simp_all
+      · simp_rw [← hn, WithTop.coe_zero, WithTop.coe_eq_zero] at *
+        simp [h₃f, zero_zpow n h₃f]
 
-/- If `f` has normal form at `x`, then `f` equals `f.toNF`. -/
+/-- If `f` has normal form at `x`, then `f` equals `f.toNF`. -/
 theorem MeromorphicNFAt.toNF_eq_id (hf : MeromorphicNFAt f x) :
     f = hf.meromorphicAt.toNF := by
   funext z
@@ -235,7 +230,7 @@ theorem MeromorphicNFAt.toNF_eq_id (hf : MeromorphicNFAt f x) :
         have : g =ᶠ[𝓝 x] (Classical.choose ((h₀f.meromorphicAt.order_eq_int_iff 0).1 h₃f)) := by
           obtain ⟨h₀, h₁, h₂⟩ := Classical.choose_spec
             ((h₀f.meromorphicAt.order_eq_int_iff 0).1 h₃f)
-          apply h₁g.localIdentity h₀
+          apply (h₁g.eventuallyEq_nhd_iff_eventuallyEq_nhdNE h₀).1
           rw [hn] at h₃g
           simp only [zpow_zero, one_smul, ne_eq] at h₃g h₂
           exact (h₃g.filter_mono nhdsWithin_le_nhds).symm.trans h₂

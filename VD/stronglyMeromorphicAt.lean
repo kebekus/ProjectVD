@@ -1,5 +1,6 @@
 import Mathlib.Analysis.Meromorphic.Basic
-import VD.NormalFormAt
+import VD.ToMathlib.NormalFormAt
+import VD.meromorphicAt
 
 open Topology
 
@@ -87,7 +88,7 @@ theorem MeromorphicNFAt.localIdentity
     by_cases cs : hf.meromorphicAt.order = 0
     · rw [cs] at t₀
       exact (hf.analyticAt (le_of_eq cs.symm)).localIdentity (hg.analyticAt (le_of_eq t₀)) h
-    · apply eventuallyEq_nhdsWithin_of_eventuallyEq_nhds h
+    · apply eventuallyEq_nhds_of_eventuallyEq_nhdsNE h
       let h₁f := cs
       rw [hf.order_eq_zero_iff] at h₁f
       let h₁g := cs
@@ -128,7 +129,7 @@ theorem MeromorphicNFAt.eliminate
   have h₁g : MeromorphicNFAt g z₀ := by
     exact MeromorphicAt.MeromorphicNFAt_of_toNF h₁g₁
   have h₂g : h₁g.meromorphicAt.order = 0 := by
-    rw [← h₁g₁.order_congr h₁g₁.toNF_id_on_punct_nhd]
+    rw [← h₁g₁.order_congr h₁g₁.toNF_id_on_nhdNE]
     exact h₂g₁
   constructor
   · apply analyticAt

@@ -80,7 +80,7 @@ theorem MeromorphicOn.decompose₁
         · exact h₁z
   have h₃g : (h₁g z₀ hz₀).order = 0 := by
     unfold g
-    let B := (h₁g₁ z₀ hz₀).toNF_id_on_punct_nhd
+    let B := (h₁g₁ z₀ hz₀).toNF_id_on_nhdNE
     let A := (h₁g₁ z₀ hz₀).order_congr B
     rw [← A]
     rw [h₂g₁]
