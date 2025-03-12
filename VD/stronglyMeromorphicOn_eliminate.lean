@@ -206,7 +206,8 @@ theorem MeromorphicOn.decompose₂
         · rwa [hv]
         · let A := h₂g₀ ⟨v₁, hv⟩
           rw [h₄g] at A
-          rw [mul_comm, ← analyticAt_of_mul_analytic] at A
+          rw [mul_comm] at A
+          rw [← analyticAt_iff_analytic_mul] at A
           simp at A
           exact A
           --
