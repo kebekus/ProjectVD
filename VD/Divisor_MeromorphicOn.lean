@@ -46,7 +46,32 @@ theorem congr_codiscreteWithin_open {f₁ f₂ : 𝕜 → E} (hf₁ : Meromorphi
   simp only [Set.mem_compl_iff, Set.mem_diff, Set.mem_setOf_eq, not_and, Decidable.not_not] at h₂a
   tauto
 
-theorem divisorOn_congr [CompleteSpace E] {f₁ f₂ : 𝕜 → E} (hf₁ : MeromorphicOn f₁ U)
-    (h : f₁ =ᶠ[Filter.codiscreteWithin U] f₂) (h₂ : Set.EqOn f₁ f₂ Uᶜ) :
-    divisor f₁ hf₁ = divisor f₂ (hf₁.congr_codiscreteWithin h h₂) := by
-  sorry
+theorem divisorOn_congr_codiscreteWithin [CompleteSpace E] {f₁ f₂ : 𝕜 → E} (hf₁ : MeromorphicOn f₁ U)
+    (h₁ : f₁ =ᶠ[Filter.codiscreteWithin U] f₂) (h₂ : Set.EqOn f₁ f₂ Uᶜ) :
+    divisor f₁ hf₁ = divisor f₂ (hf₁.congr_codiscreteWithin h₁ h₂) := by
+  ext x
+  by_cases hx : x ∈ U <;> simp [hx]
+  · congr 1
+    apply (hf₁ x hx).order_congr
+    simp_rw [EventuallyEq, Filter.Eventually, mem_codiscreteWithin,
+      disjoint_principal_right] at h₁
+    filter_upwards [h₁ x hx] with a ha
+    simp at ha
+    tauto
+
+theorem divisorOn_congr_codiscreteWithin_open [CompleteSpace E] {f₁ f₂ : 𝕜 → E}
+    (hf₁ : MeromorphicOn f₁ U) (h₁ : f₁ =ᶠ[Filter.codiscreteWithin U] f₂)
+    (h₂ : IsOpen U) :
+    divisor f₁ hf₁ = divisor f₂ (hf₁.congr_codiscreteWithin h₁ h₂) := by
+  ext x
+  by_cases hx : x ∈ U <;> simp [hx]
+  · congr 1
+    apply (hf₁ x hx).order_congr
+    simp_rw [EventuallyEq, Filter.Eventually, mem_codiscreteWithin,
+      disjoint_principal_right] at h₁
+    have : U ∈ 𝓝[≠] x := by
+      apply mem_nhdsWithin.mpr
+      use U, h₂, hx, Set.inter_subset_left
+    filter_upwards [this, h₁ x hx] with a h₁a h₂a
+    simp only [Set.mem_compl_iff, Set.mem_diff, Set.mem_setOf_eq, not_and, Decidable.not_not] at h₂a
+    tauto
