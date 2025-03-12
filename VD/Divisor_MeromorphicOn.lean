@@ -62,7 +62,7 @@ theorem divisorOn_congr_codiscreteWithin [CompleteSpace E] {f₁ f₂ : 𝕜 →
 theorem divisorOn_congr_codiscreteWithin_open [CompleteSpace E] {f₁ f₂ : 𝕜 → E}
     (hf₁ : MeromorphicOn f₁ U) (h₁ : f₁ =ᶠ[Filter.codiscreteWithin U] f₂)
     (h₂ : IsOpen U) :
-    divisor f₁ hf₁ = divisor f₂ (hf₁.congr_codiscreteWithin h₁ h₂) := by
+    divisor f₁ hf₁ = divisor f₂ (hf₁.congr_codiscreteWithin_open h₁ h₂) := by
   ext x
   by_cases hx : x ∈ U <;> simp [hx]
   · congr 1
