@@ -7,32 +7,46 @@ Authors: Stefan Kebekus
 import Mathlib.Topology.DiscreteSubset
 import VD.ToMathlib.Divisor_MeromorphicOn
 
-open Classical
+open Classical Filter Topology
 
 variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {U : Set 𝕜}
   {z : 𝕜}
-  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [CompleteSpace E]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
 
 namespace MeromorphicOn
 
-theorem congr_codiscrete [CompleteSpace 𝕜] {f₁ f₂ : 𝕜 → E} (hf₁ : MeromorphicOn f₁ U)
-    (h : f₁ =ᶠ[Filter.codiscreteWithin U] f₂) :
+-- TODO: Do that also for analytic functions
+
+theorem congr_codiscreteWithin {f₁ f₂ : 𝕜 → E} (hf₁ : MeromorphicOn f₁ U)
+    (h₁ : f₁ =ᶠ[codiscreteWithin U] f₂) (h₂ : Set.EqOn f₁ f₂ Uᶜ) :
     MeromorphicOn f₂ U := by
   intro x hx
   apply (hf₁ x hx).congr
-  let Z := h.
-  --simp_rw [Filter.mem_codiscreteWithin, Filter.disjoint_principal_right] at h
-  rw [Filter.eventuallyEq_iff_exists_mem] at h
-    use {a}ᶜ
-    constructor
-    · simp_rw [mem_codiscreteWithin, Filter.disjoint_principal_right]
+  simp_rw [EventuallyEq, Filter.Eventually, mem_codiscreteWithin,
+    disjoint_principal_right] at h₁
+  filter_upwards [h₁ x hx] with a ha
+  simp at ha
+  tauto
 
-  rw [Filter.EventuallyEq, mem_codiscreteWithin] at h
-  sorry
+-- TODO: Do that also for analytic functions
 
-theorem divisorOn_congr [CompleteSpace 𝕜] {f₁ f₂ : 𝕜 → E} (hf₁ : MeromorphicOn f₁ U)
-    (h : f₁ =ᶠ[Filter.codiscreteWithin U] f₂) :
-    divisor f₁ hf₁ = divisor f₂ (hf₁.congr_codiscrete h) := by
+theorem congr_codiscreteWithin_open {f₁ f₂ : 𝕜 → E} (hf₁ : MeromorphicOn f₁ U)
+    (h₁ : f₁ =ᶠ[codiscreteWithin U] f₂) (h₂ : IsOpen U) :
+    MeromorphicOn f₂ U := by
+  intro x hx
+  apply (hf₁ x hx).congr
+  simp_rw [EventuallyEq, Filter.Eventually, mem_codiscreteWithin,
+    disjoint_principal_right] at h₁
+  have : U ∈ 𝓝[≠] x := by
+    apply mem_nhdsWithin.mpr
+    use U, h₂, hx, Set.inter_subset_left
+  filter_upwards [this, h₁ x hx] with a h₁a h₂a
+  simp only [Set.mem_compl_iff, Set.mem_diff, Set.mem_setOf_eq, not_and, Decidable.not_not] at h₂a
+  tauto
+
+theorem divisorOn_congr [CompleteSpace E] {f₁ f₂ : 𝕜 → E} (hf₁ : MeromorphicOn f₁ U)
+    (h : f₁ =ᶠ[Filter.codiscreteWithin U] f₂) (h₂ : Set.EqOn f₁ f₂ Uᶜ) :
+    divisor f₁ hf₁ = divisor f₂ (hf₁.congr_codiscreteWithin h h₂) := by
   sorry
