@@ -12,13 +12,12 @@ open Classical Filter Topology
 variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {U : Set 𝕜}
-  {z : 𝕜}
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
 
 namespace MeromorphicOn
 
--- TODO: Do that also for analytic functions
-
+/-- If `f₁` is meromorphic on `U`, if `f₂` agrees with `f₁` on a codiscrete
+  subset of `U` and outside of `U`, then `f₂` is also meromorphic on `U`. -/
 theorem congr_codiscreteWithin {f₁ f₂ : 𝕜 → E} (hf₁ : MeromorphicOn f₁ U)
     (h₁ : f₁ =ᶠ[codiscreteWithin U] f₂) (h₂ : Set.EqOn f₁ f₂ Uᶜ) :
     MeromorphicOn f₂ U := by
@@ -30,8 +29,8 @@ theorem congr_codiscreteWithin {f₁ f₂ : 𝕜 → E} (hf₁ : MeromorphicOn f
   simp at ha
   tauto
 
--- TODO: Do that also for analytic functions
-
+/-- If `f₁` is meromorphic on an open set `U`, if `f₂` agrees with `f₁` on a
+  codiscrete subset of `U`, then `f₂` is also meromorphic on `U`. -/
 theorem congr_codiscreteWithin_open {f₁ f₂ : 𝕜 → E} (hf₁ : MeromorphicOn f₁ U)
     (h₁ : f₁ =ᶠ[codiscreteWithin U] f₂) (h₂ : IsOpen U) :
     MeromorphicOn f₂ U := by
@@ -46,7 +45,10 @@ theorem congr_codiscreteWithin_open {f₁ f₂ : 𝕜 → E} (hf₁ : Meromorphi
   simp only [Set.mem_compl_iff, Set.mem_diff, Set.mem_setOf_eq, not_and, Decidable.not_not] at h₂a
   tauto
 
-theorem divisorOn_congr_codiscreteWithin [CompleteSpace E] {f₁ f₂ : 𝕜 → E} (hf₁ : MeromorphicOn f₁ U)
+/-- If `f₁` is meromorphic on `U`, if `f₂` agrees with `f₁` on a codiscrete
+  subset of `U` and outside of `U`, then `f₁` and `f₂` induce the same
+  divisors on `U`. -/
+theorem divisor_congr_codiscreteWithin [CompleteSpace E] {f₁ f₂ : 𝕜 → E} (hf₁ : MeromorphicOn f₁ U)
     (h₁ : f₁ =ᶠ[Filter.codiscreteWithin U] f₂) (h₂ : Set.EqOn f₁ f₂ Uᶜ) :
     divisor f₁ hf₁ = divisor f₂ (hf₁.congr_codiscreteWithin h₁ h₂) := by
   ext x
@@ -59,7 +61,10 @@ theorem divisorOn_congr_codiscreteWithin [CompleteSpace E] {f₁ f₂ : 𝕜 →
     simp at ha
     tauto
 
-theorem divisorOn_congr_codiscreteWithin_open [CompleteSpace E] {f₁ f₂ : 𝕜 → E}
+/-- If `f₁` is meromorphic on an open set `U`, if `f₂` agrees with `f₁` on a
+  codiscrete subset of `U`, then `f₁` and `f₂` induce the same divisors on
+  `U`. -/
+theorem divisor_congr_codiscreteWithin_open [CompleteSpace E] {f₁ f₂ : 𝕜 → E}
     (hf₁ : MeromorphicOn f₁ U) (h₁ : f₁ =ᶠ[Filter.codiscreteWithin U] f₂)
     (h₂ : IsOpen U) :
     divisor f₁ hf₁ = divisor f₂ (hf₁.congr_codiscreteWithin_open h₁ h₂) := by
@@ -75,3 +80,13 @@ theorem divisorOn_congr_codiscreteWithin_open [CompleteSpace E] {f₁ f₂ : �
     filter_upwards [this, h₁ x hx] with a h₁a h₂a
     simp only [Set.mem_compl_iff, Set.mem_diff, Set.mem_setOf_eq, not_and, Decidable.not_not] at h₂a
     tauto
+
+/-- Taking the divisor of a meromorphic function commutes with restriction. -/
+theorem divisor_restrict [CompleteSpace E] {f : 𝕜 → E} {V : Set 𝕜}
+    (hf : MeromorphicOn f U) (hV : V ⊆ U) :
+    (divisor f hf).restrict hV = divisor f (hf.mono_set hV) := by
+  ext x
+  by_cases hx : x ∈ V
+  · rw [DivisorOn.restrict_apply]
+    simp [hx, hV hx]
+  · simp [hx]
