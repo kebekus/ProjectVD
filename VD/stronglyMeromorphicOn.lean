@@ -46,11 +46,7 @@ theorem StronglyMeromorphicOn.analytic
   {U : Set 𝕜}
   (h₁f : StronglyMeromorphicOn f U)
   (h₂f : ∀ x, (hx : x ∈ U) → 0 ≤ (h₁f x hx).meromorphicAt.order) :
-  AnalyticOnNhd 𝕜 f U := by
-  intro z hz
-  apply MeromorphicNFAt.analyticAt
-  exact h₂f z hz
-  exact h₁f z hz
+  AnalyticOnNhd 𝕜 f U := fun z hz ↦ (h₁f z hz).analyticAt (h₂f z hz)
 
 
 /- Analytic functions are strongly meromorphic -/
@@ -58,11 +54,8 @@ theorem AnalyticOn.stronglyMeromorphicOn
   {f : 𝕜 → 𝕜}
   {U : Set 𝕜}
   (h₁f : AnalyticOnNhd 𝕜 f U) :
-  StronglyMeromorphicOn f U := by
-  intro z hz
-  apply AnalyticAt.MeromorphicNFAt
-  exact h₁f z hz
-
+  StronglyMeromorphicOn f U :=
+  fun z hz ↦ (h₁f z hz).MeromorphicNFAt
 
 theorem stronglyMeromorphicOn_of_mul_analytic'
   {f g : 𝕜 → 𝕜}
