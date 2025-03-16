@@ -3,72 +3,67 @@ import VD.stronglyMeromorphicAt
 
 open Topology
 
-
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [CompleteSpace E]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
 
-
-theorem MeromorphicOn.analyticOnCodiscreteWithin [CompleteSpace 𝕜]
-  {f : 𝕜 → 𝕜}
+theorem MeromorphicOn.analyticAt_codiscreteWithin [CompleteSpace E]
+  {f : 𝕜 → E}
   {U : Set 𝕜}
   (hf : MeromorphicOn f U) :
   { x | AnalyticAt 𝕜 f x } ∈ Filter.codiscreteWithin U := by
-
   rw [mem_codiscreteWithin]
   intro x hx
-  simp
-  rw [← Filter.eventually_mem_set]
-  apply Filter.Eventually.mono (hf x hx).eventually_analyticAt
-  simp
+  rw [Filter.disjoint_principal_right, ← Filter.eventually_mem_set]
+  apply (hf x hx).eventually_analyticAt.mono
+  simp only [Set.mem_compl_iff, Set.mem_diff, Set.mem_setOf_eq, not_and, not_not]
   tauto
 
+theorem MeromorphicOn.meromorphicNFAt_codiscreteWithin [CompleteSpace E]
+    {f : 𝕜 → E} {U : Set 𝕜} (hf : MeromorphicOn f U) :
+    { x | MeromorphicNFAt f x } ∈ Filter.codiscreteWithin U := by
+  filter_upwards [hf.analyticAt_codiscreteWithin] with _ ha
+  exact ha.meromorphicNFAt
 
 /- Strongly MeromorphicOn -/
 def StronglyMeromorphicOn
-  (f : 𝕜 → 𝕜)
+  (f : 𝕜 → E)
   (U : Set 𝕜) :=
   ∀ z ∈ U, MeromorphicNFAt f z
 
-
 /- Strongly MeromorphicAt is Meromorphic -/
 theorem StronglyMeromorphicOn.meromorphicOn
-  {f : 𝕜 → 𝕜}
+  {f : 𝕜 → E}
   {U : Set 𝕜}
   (hf : StronglyMeromorphicOn f U) :
-  MeromorphicOn f U := by
-  intro z hz
-  exact MeromorphicNFAt.meromorphicAt (hf z hz)
-
+  MeromorphicOn f U := fun z hz ↦ (hf z hz).meromorphicAt
 
 /- Strongly MeromorphicOn of non-negative order is analytic -/
 theorem StronglyMeromorphicOn.analytic
-  {f : 𝕜 → 𝕜}
+  {f : 𝕜 → E}
   {U : Set 𝕜}
   (h₁f : StronglyMeromorphicOn f U)
   (h₂f : ∀ x, (hx : x ∈ U) → 0 ≤ (h₁f x hx).meromorphicAt.order) :
   AnalyticOnNhd 𝕜 f U := fun z hz ↦ (h₁f z hz).order_nonneg_iff_analyticAt.1 (h₂f z hz)
 
-
 /- Analytic functions are strongly meromorphic -/
 theorem AnalyticOn.stronglyMeromorphicOn
-  {f : 𝕜 → 𝕜}
+  {f : 𝕜 → E}
   {U : Set 𝕜}
   (h₁f : AnalyticOnNhd 𝕜 f U) :
   StronglyMeromorphicOn f U :=
   fun z hz ↦ (h₁f z hz).meromorphicNFAt
 
 theorem stronglyMeromorphicOn_of_mul_analytic'
-  {f g : 𝕜 → 𝕜}
+  {f : 𝕜 → E}
+  {g : 𝕜 → 𝕜}
   {U : Set 𝕜}
   (h₁g : AnalyticOnNhd 𝕜 g U)
   (h₂g : ∀ u : U, g u ≠ 0)
   (h₁f : StronglyMeromorphicOn f U) :
-  StronglyMeromorphicOn (g * f) U := by
+  StronglyMeromorphicOn (g • f) U := by
   intro z hz
-  rw [← smul_eq_mul]
   apply (MeromorphicNFAt_of_mul_analytic (h₁g z hz) ?h₂g).mp (h₁f z hz)
   exact h₂g ⟨z, hz⟩
-
 
 /- Make strongly MeromorphicOn -/
 noncomputable def makeStronglyMeromorphicOn
@@ -122,7 +117,7 @@ theorem makeStronglyMeromorphicOn_changeDiscrete'' [CompleteSpace 𝕜]
   f =ᶠ[Filter.codiscreteWithin U] makeStronglyMeromorphicOn f U := by
 
   rw [Filter.eventuallyEq_iff_exists_mem]
-  use { x | AnalyticAt 𝕜 f x }, hf.analyticOnCodiscreteWithin
+  use { x | AnalyticAt 𝕜 f x }, hf.analyticAt_codiscreteWithin
   intro x hx
   simp at hx
   rw [makeStronglyMeromorphicOn]
