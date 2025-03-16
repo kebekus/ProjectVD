@@ -149,12 +149,10 @@ theorem MeromorphicAt.order_add
 
   -- Handle the trivial cases where one of the orders equals ⊤
   by_cases h₂f₁: hf₁.order = ⊤
-  · rw [h₂f₁]
+  · simp only [h₂f₁, le_top, inf_of_le_right]
+    rw [(hf₁.add hf₂).order_congr]
+    filter_upwards [hf₁.order_eq_top_iff.1 h₂f₁]
     simp
-    have h : f₁ + f₂ =ᶠ[𝓝[≠] z₀] f₂ := by
-      filter_upwards [hf₁.order_eq_top_iff.1 h₂f₁]
-      simp
-    rw [(hf₁.add hf₂).order_congr h]
   by_cases h₂f₂: hf₂.order = ⊤
   · rw [h₂f₂]
     simp

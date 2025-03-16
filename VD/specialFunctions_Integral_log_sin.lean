@@ -189,7 +189,6 @@ lemma intervalIntegrable_log_sin₂ : IntervalIntegrable (log ∘ sin) volume 0 
   simp at this
   exact one_le_pi_div_two
 
-
 theorem intervalIntegrable_log_sin : IntervalIntegrable (log ∘ sin) volume 0 π := by
   apply IntervalIntegrable.trans (b := π / 2)
   exact intervalIntegrable_log_sin₂
@@ -199,7 +198,6 @@ theorem intervalIntegrable_log_sin : IntervalIntegrable (log ∘ sin) volume 0 �
   have : π - π / 2 = π / 2 := by linarith
   rwa [this] at B
 
-
 theorem intervalIntegrable_log_cos : IntervalIntegrable (log ∘ cos) volume 0 (π / 2) := by
   let A := IntervalIntegrable.comp_sub_left intervalIntegrable_log_sin₂ (π / 2)
   simp only [Function.comp_apply, sub_zero, sub_self] at A
@@ -207,7 +205,6 @@ theorem intervalIntegrable_log_cos : IntervalIntegrable (log ∘ cos) volume 0 (
   have : (fun x => log (cos x)) = log ∘ cos := rfl
   apply IntervalIntegrable.symm
   rwa [← this]
-
 
 theorem intervalIntegral.integral_congr_volume
   {E : Type u_3} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -237,7 +234,6 @@ theorem intervalIntegral.integral_congr_volume
   _ ≤ volume {b} := volume.mono this
   _ = 0 := volume_singleton
 
-
 theorem IntervalIntegrable.integral_congr_Ioo
   {E : Type u_3} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {f g : ℝ → E}
@@ -249,8 +245,6 @@ theorem IntervalIntegrable.integral_congr_Ioo
   rw [intervalIntegrable_iff_integrableOn_Ioo_of_le hab]
   rw [MeasureTheory.integrableOn_congr_fun hfg measurableSet_Ioo]
   rw [← intervalIntegrable_iff_integrableOn_Ioo_of_le hab]
-
-
 
 lemma integral_log_sin₀ : ∫ (x : ℝ) in (0)..π, log (sin x) = 2 * ∫ (x : ℝ) in (0)..(π / 2), log (sin x) := by
   rw [← intervalIntegral.integral_add_adjacent_intervals (a := 0) (b := π / 2) (c := π)]
