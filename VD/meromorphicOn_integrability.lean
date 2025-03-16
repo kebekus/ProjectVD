@@ -82,7 +82,7 @@ theorem MeromorphicOn.integrable_log_abs_f₀
 
   · push_neg at h₂f
 
-    let F := h₁f.makeStronglyMeromorphicOn
+    let F := makeStronglyMeromorphicOn f (Metric.closedBall 0 r)
     have : (fun z => log ‖f z‖) =ᶠ[Filter.codiscreteWithin (Metric.closedBall 0 r)] (fun z => log ‖F z‖) := by
       -- WANT: apply Filter.eventuallyEq.congr
       let A := (makeStronglyMeromorphicOn_changeDiscrete'' h₁f)

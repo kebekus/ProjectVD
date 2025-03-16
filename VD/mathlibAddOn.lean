@@ -23,17 +23,6 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E : Type*} [NormedAddCom
 
 open Topology Filter
 
-/-- Two functions agree on a neighborhood of `x` if they agree at `x` and in a punctured
-neighborhood. -/
-theorem eventuallyEq_nhds_of_eventuallyEq_nhdsNE {α β : Type*} [TopologicalSpace α] {f g : α → β}
-    {a : α} (h₁ : f =ᶠ[𝓝[≠] a] g) (h₂ : f a = g a) :
-    f =ᶠ[𝓝 a] g := by
-  filter_upwards [eventually_nhdsWithin_iff.1 h₁]
-  intro x hx
-  by_cases h₂x : x = a
-  · simp [h₂x, h₂]
-  · tauto
-
 /-- Two analytic functions agree on a punctured neighborhood iff they agree on a neighborhood. -/
 theorem AnalyticAt.eventuallyEq_nhd_iff_eventuallyEq_nhdNE (hf : AnalyticAt 𝕜 f z₀) (hg : AnalyticAt 𝕜 g z₀) :
   f =ᶠ[𝓝[≠] z₀] g ↔ f =ᶠ[𝓝 z₀] g := by

@@ -1,5 +1,4 @@
-import Mathlib.Analysis.Meromorphic.Basic
-import VD.ToMathlib.NormalFormAt
+import Mathlib.Analysis.Meromorphic.NormalFormAt
 import VD.meromorphicAt
 
 open Topology
@@ -54,7 +53,7 @@ theorem MeromorphicNFAt.order_eq_zero_iff {f : 𝕜 → E} {x : 𝕜} (hf : Mero
     hf.meromorphicAt.order = 0 ↔ f x ≠ 0 := by
   constructor
   · intro h₁f
-    have h₂f := hf.analyticAt (le_of_eq h₁f.symm)
+    have h₂f := hf.order_nonneg_iff_analyticAt.1 (le_of_eq h₁f.symm)
     apply h₂f.order_eq_zero_iff.1
     apply WithTopCoe
     simp_all only [h₂f.meromorphicAt_order]
@@ -87,15 +86,16 @@ theorem MeromorphicNFAt.localIdentity
     have t₀ := hf.meromorphicAt.order_congr h
     by_cases cs : hf.meromorphicAt.order = 0
     · rw [cs] at t₀
-      exact (hf.analyticAt (le_of_eq cs.symm)).localIdentity (hg.analyticAt (le_of_eq t₀)) h
+      exact (hf.order_nonneg_iff_analyticAt.1 (le_of_eq cs.symm)).localIdentity
+        (hg.order_nonneg_iff_analyticAt.1 (le_of_eq t₀)) h
     · apply eventuallyEq_nhds_of_eventuallyEq_nhdsNE h
       let h₁f := cs
       rw [hf.order_eq_zero_iff] at h₁f
       let h₁g := cs
       rw [t₀, hg.order_eq_zero_iff] at h₁g
-      simp_all
+      simp only [not_not] at *
+      rw [h₁f, h₁g]
   · exact (Filter.EventuallyEq.filter_mono · nhdsWithin_le_nhds)
-
 
 theorem MeromorphicNFAt.eliminate
   {f : 𝕜 → 𝕜}
@@ -124,17 +124,16 @@ theorem MeromorphicNFAt.eliminate
     rw [h₁g₁₁.order_mul h₁f.meromorphicAt, h₂g₁₁]
     simp only [WithTop.coe_untop, g₁₁]
     rw [add_comm, LinearOrderedAddCommGroupWithTop.add_neg_cancel_of_ne_top h₂f]
-  let g := h₁g₁.toNF
+  let g := toMeromorphicNFAt g₁ z₀
   use g
   have h₁g : MeromorphicNFAt g z₀ := by
-    exact MeromorphicAt.MeromorphicNFAt_of_toNF h₁g₁
+    exact meromorphicNFAt_toMeromorphicNFAt
   have h₂g : h₁g.meromorphicAt.order = 0 := by
-    rw [← h₁g₁.order_congr h₁g₁.toNF_id_on_nhdNE]
+    rw [← h₁g₁.order_congr h₁g₁.eq_nhdNE_toMeromorphicNFAt]
     exact h₂g₁
   constructor
-  · apply analyticAt
-    · rw [h₂g]
-    · exact h₁g
+  · apply h₁g.order_nonneg_iff_analyticAt.1
+    rw [h₂g]
   · constructor
     · rwa [← h₁g.order_eq_zero_iff]
     · funext z
@@ -147,10 +146,11 @@ theorem MeromorphicNFAt.eliminate
             have : (fun z => 1) * f = f := by
               funext z
               simp
-            rwa [this]
+            simp [this, h₁f]
+            exact toMeromorphicNFAt_eq_self.mp h₁f
           rw [hz]
           unfold g
-          rw [← toNF_eq_id this]
+          rw [← toMeromorphicNFAt_eq_self.1 this]
           unfold g₁
           rw [hOrd]
           simp
@@ -165,7 +165,7 @@ theorem MeromorphicNFAt.eliminate
           left
           rwa [zpow_eq_zero_iff]
       · simp
-        have : g z = g₁ z := (h₁g₁.toNF_id_on_complement hz).symm
+        have : g z = g₁ z := (h₁g₁.eqOn_compl_singleton_toMermomorphicNFAt hz).symm
         rw [this]
         unfold g₁
         simp [hz]

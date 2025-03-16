@@ -377,18 +377,18 @@ theorem jensen
   (h₂f : f 0 ≠ 0) :
   log ‖f 0‖ = -∑ᶠ s, (MeromorphicOn.divisor f h₁f s) * log (R * ‖s‖⁻¹) + (2 * π)⁻¹ * ∫ (x : ℝ) in (0)..(2 * π), log ‖f (circleMap 0 R x)‖ := by
 
-  let F := h₁f.makeStronglyMeromorphicOn
+  let F := makeStronglyMeromorphicOn f (Metric.closedBall 0 R)
 
   have : F 0 = f 0 := by
     unfold F
     have : 0 ∈ (Metric.closedBall 0 R) := by
       simp [hR.le]
-    unfold MeromorphicOn.makeStronglyMeromorphicOn
+    unfold makeStronglyMeromorphicOn
     simp [this]
     intro h₁R
 
-    let A := MeromorphicNFAt.toNF_eq_id h₁f'
-    simp_rw [A]
+    let A := toMeromorphicNFAt_eq_self.1 h₁f'
+    rw [← A]
   rw [← this]
   rw [← this] at h₂f
   clear this

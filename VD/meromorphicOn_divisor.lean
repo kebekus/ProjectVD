@@ -168,7 +168,7 @@ theorem MeromorphicOn.divisor_of_makeStronglyMeromorphicOn [CompleteSpace 𝕜]
   {f : 𝕜 → 𝕜}
   {U : Set 𝕜}
   (hf : MeromorphicOn f U) :
-  divisor f hf = divisor hf.makeStronglyMeromorphicOn (stronglyMeromorphicOn_of_makeStronglyMeromorphicOn hf).meromorphicOn := by
+  divisor f hf = divisor (makeStronglyMeromorphicOn f U) (stronglyMeromorphicOn_of_makeStronglyMeromorphicOn hf).meromorphicOn := by
   unfold MeromorphicOn.divisor
   simp
   funext z

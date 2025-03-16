@@ -28,7 +28,7 @@ lemma l₂ {x : ℝ} : ‖(circleMap 0 1 x) - a‖ = ‖1 - (circleMap 0 1 (-x))
   _ = ‖(circleMap 0 1 (-x))‖ * ‖(circleMap 0 1 x) - a‖ := by
     rw [l₁]
   _ = ‖(circleMap 0 1 (-x)) * ((circleMap 0 1 x) - a)‖ := by
-    exact Eq.symm (NormedField.norm_mul' (circleMap 0 1 (-x)) (circleMap 0 1 x - a))
+    exact Eq.symm (Complex.norm_mul (circleMap 0 1 (-x)) (circleMap 0 1 x - a))
   _ = ‖(circleMap 0 1 (-x)) * (circleMap 0 1 x) - (circleMap 0 1 (-x)) * a‖ := by
     rw [mul_sub]
   _ = ‖(circleMap 0 1 0) - (circleMap 0 1 (-x)) * a‖ := by
@@ -111,7 +111,7 @@ lemma int₀
     by_contra h
     have : ‖x * a‖ < 1 := by
       calc ‖x * a‖
-      _ = ‖x‖ * ‖a‖ := by exact NormedField.norm_mul' x a
+      _ = ‖x‖ * ‖a‖ := by exact Complex.norm_mul x a
       _ < ρ * ‖a‖ := by
         apply (mul_lt_mul_right _).2
         exact mem_ball_zero_iff.mp hx

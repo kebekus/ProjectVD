@@ -58,9 +58,9 @@ theorem MeromorphicOn.decompose₁
     simp [untop'_of_ne_top h₃f]
     exact LinearOrderedAddCommGroupWithTop.add_neg_cancel_of_ne_top h₃f
 
-  let g := (h₁g₁ z₀ hz₀).toNF
+  let g := toMeromorphicNFAt g₁ z₀
   have h₂g : MeromorphicNFAt g z₀ := by
-    exact MeromorphicAt.MeromorphicNFAt_of_toNF (h₁g₁ z₀ hz₀)
+    exact meromorphicNFAt_toMeromorphicNFAt
   have h₁g : MeromorphicOn g U := by
     intro z hz
     by_cases h₁z : z = z₀
@@ -72,7 +72,7 @@ theorem MeromorphicOn.decompose₁
       use {z₀}ᶜ
       constructor
       · intro y h₁y h₂y
-        let A := (h₁g₁ z₀ hz₀).toNF_id_on_complement h₁y
+        let A := (h₁g₁ z₀ hz₀).eqOn_compl_singleton_toMermomorphicNFAt h₁y
         unfold g
         rw [← A]
       · constructor
@@ -80,12 +80,12 @@ theorem MeromorphicOn.decompose₁
         · exact h₁z
   have h₃g : (h₁g z₀ hz₀).order = 0 := by
     unfold g
-    let B := (h₁g₁ z₀ hz₀).toNF_id_on_nhdNE
+    let B := (h₁g₁ z₀ hz₀).eq_nhdNE_toMeromorphicNFAt
     let A := (h₁g₁ z₀ hz₀).order_congr B
     rw [← A]
     rw [h₂g₁]
   have h₄g : AnalyticAt ℂ g z₀ := by
-    apply h₂g.analyticAt
+    apply h₂g.order_nonneg_iff_analyticAt.1
     rw [h₃g]
 
   use g, h₁g, h₄g, (h₂g.order_eq_zero_iff).mp h₃g
@@ -106,7 +106,7 @@ theorem MeromorphicOn.decompose₁
       have h₄g₁ : MeromorphicNFAt g₁ z₀ := by
         rwa [h₃g₁]
       unfold g
-      rw [← h₄g₁.toNF_eq_id, h₃g₁]
+      rw [← toMeromorphicNFAt_eq_self.1 h₄g₁, h₃g₁]
     · rw [zero_zpow (divisor f h₁f z₀) h]
       simp
       let A := h₂f.order_eq_zero_iff.not
@@ -117,7 +117,7 @@ theorem MeromorphicOn.decompose₁
       exact h.1
   · simp
     unfold g
-    rw [← (h₁g₁ z₀ hz₀).toNF_id_on_complement hz]
+    rw [← (h₁g₁ z₀ hz₀).eqOn_compl_singleton_toMermomorphicNFAt hz]
     unfold g₁ h₁
     simp only [zpow_neg, Pi.mul_apply, h₁, n]
     rw [mul_assoc, inv_mul_cancel₀]
@@ -348,7 +348,7 @@ theorem MeromorphicOn.decompose₃'
     simp
     exact u.2
 
-  let g := h₁g'.makeStronglyMeromorphicOn
+  let g := makeStronglyMeromorphicOn g' U
   have h₁g : StronglyMeromorphicOn g U := stronglyMeromorphicOn_of_makeStronglyMeromorphicOn h₁g'
   have h₂g : divisor g h₁g.meromorphicOn = 0 := by
     rw [← MeromorphicOn.divisor_of_makeStronglyMeromorphicOn]
@@ -364,7 +364,6 @@ theorem MeromorphicOn.decompose₃'
     rw [makeStronglyMeromorphicOn_changeOrder]
     let A := h₃g' u
     exact A
-    exact u.2
 
   use g
   constructor
@@ -435,7 +434,7 @@ theorem MeromorphicOn.decompose₃'
         · simp
           have : g z = g' z := by
             unfold g
-            unfold MeromorphicOn.makeStronglyMeromorphicOn
+            unfold makeStronglyMeromorphicOn
             simp [hz]
           rw [this]
           unfold g'
@@ -603,7 +602,7 @@ theorem MeromorphicOn.decompose_log
     ∧ (∀ u : U, g u ≠ 0)
     ∧ (fun z ↦ log ‖f z‖) =ᶠ[Filter.codiscreteWithin U] fun z ↦ log ‖g z‖ + ∑ᶠ s, (divisor f h₁f s) * log ‖z - s‖ := by
 
-  let F := h₁f.makeStronglyMeromorphicOn
+  let F := makeStronglyMeromorphicOn f U
   have h₁F := stronglyMeromorphicOn_of_makeStronglyMeromorphicOn h₁f
   have h₂F : ∃ u : U, (h₁F.meromorphicOn u u.2).order ≠ ⊤ := by
     obtain ⟨u, hu⟩ := h₂f
