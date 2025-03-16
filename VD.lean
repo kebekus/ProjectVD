@@ -2,7 +2,6 @@ import VD.Divisor_MeromorphicOn
 import VD.Divisor_Singleton
 import VD.ToBase
 import VD.ToMathlib.Divisor_MeromorphicOn
-import VD.ToMathlib.analyticAt
 import VD.ToMathlib.analyticAt_order
 import VD.ToMathlib.bilinear
 import VD.ToMathlib.codiscreteWithin
@@ -17,10 +16,8 @@ import VD.holomorphic_examples
 import VD.holomorphic_primitive
 import VD.intervalIntegrability
 import VD.laplace
-import VD.leftovers.analyticOnNhd_zeroSet
 import VD.leftovers.diffOp
 import VD.leftovers.holomorphic
-import VD.leftovers.holomorphic_zero
 import VD.mathlibAddOn
 import VD.meromorphicAt
 import VD.meromorphicAt_topology

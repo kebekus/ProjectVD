@@ -379,7 +379,7 @@ theorem MeromorphicOn.decompose₃'
         funext z
         by_cases hz : z ∈ U
         · apply Filter.EventuallyEq.eq_of_nhds
-          rw [← MeromorphicNFAt.localIdentity (h₁f z hz) (t₀ z hz)]
+          rw [← MeromorphicNFAt.eventuallyEq_nhdNE_iff_eventuallyEq_nhd (h₁f z hz) (t₀ z hz)]
           have h₅g : g =ᶠ[𝓝[≠] z] g' := makeStronglyMeromorphicOn_changeDiscrete h₁g' hz
           have Y' : (g' * ∏ᶠ (u : ℂ), fun z => (z - u) ^ (divisor f h₁f.meromorphicOn u)) =ᶠ[𝓝[≠] z] g * ∏ᶠ (u : ℂ), fun z => (z - u) ^ (divisor f h₁f.meromorphicOn u) := by
             apply Filter.EventuallyEq.symm

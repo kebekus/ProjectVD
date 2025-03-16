@@ -6,23 +6,6 @@ open Topology
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
 
-theorem MeromorphicOn.analyticAt_codiscreteWithin [CompleteSpace E]
-  {f : 𝕜 → E}
-  {U : Set 𝕜}
-  (hf : MeromorphicOn f U) :
-  { x | AnalyticAt 𝕜 f x } ∈ Filter.codiscreteWithin U := by
-  rw [mem_codiscreteWithin]
-  intro x hx
-  rw [Filter.disjoint_principal_right, ← Filter.eventually_mem_set]
-  apply (hf x hx).eventually_analyticAt.mono
-  simp only [Set.mem_compl_iff, Set.mem_diff, Set.mem_setOf_eq, not_and, not_not]
-  tauto
-
-theorem MeromorphicOn.meromorphicNFAt_codiscreteWithin [CompleteSpace E]
-    {f : 𝕜 → E} {U : Set 𝕜} (hf : MeromorphicOn f U) :
-    { x | MeromorphicNFAt f x } ∈ Filter.codiscreteWithin U := by
-  filter_upwards [hf.analyticAt_codiscreteWithin] with _ ha
-  exact ha.meromorphicNFAt
 
 /- Strongly MeromorphicOn -/
 def StronglyMeromorphicOn

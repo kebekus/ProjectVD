@@ -34,7 +34,7 @@ noncomputable def DivisorOn.singleton (x : 𝕜) (hx : x ∈ U) :
     by_cases hx : x ∈ U <;> simp_all [hx]
 
 theorem finsupp_singleton (D : DivisorOn U) (hD : Set.Finite D.support) :
-    D = ∑ᶠ u : U, (D u.1) • singleton u.1 u.2 := by
+    D = ∑ᶠ u : U, (D u.1) • (DivisorOn.singleton u.1 u.2) := by
   ext x
   rw [finsum_eq_sum]
   sorry

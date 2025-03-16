@@ -24,6 +24,7 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E : Type*} [NormedAddCom
 open Topology Filter
 
 /-- Two analytic functions agree on a punctured neighborhood iff they agree on a neighborhood. -/
+/-
 theorem AnalyticAt.eventuallyEq_nhd_iff_eventuallyEq_nhdNE (hf : AnalyticAt 𝕜 f z₀) (hg : AnalyticAt 𝕜 g z₀) :
   f =ᶠ[𝓝[≠] z₀] g ↔ f =ᶠ[𝓝 z₀] g := by
   constructor <;> intro hfg
@@ -31,23 +32,7 @@ theorem AnalyticAt.eventuallyEq_nhd_iff_eventuallyEq_nhdNE (hf : AnalyticAt 𝕜
     · exact Filter.eventuallyEq_iff_sub.2 h
     · simpa using (Filter.eventually_and.2 ⟨Filter.eventuallyEq_iff_sub.mp hfg, h⟩).exists
   · exact hfg.filter_mono nhdsWithin_le_nhds
-
--- unclear where this should go
-
-lemma WithTopCoe
-  {n : WithTop ℕ} :
-  WithTop.map (Nat.cast : ℕ → ℤ) n = 0 → n = 0 := by
-  rcases n with h|h
-  · intro h
-    contradiction
-  · intro h₁
-    simp only [WithTop.map, Option.map] at h₁
-    have : (h : ℤ) = 0 := by
-      exact WithTop.coe_eq_zero.mp h₁
-    have : h = 0 := by
-      exact Int.ofNat_eq_zero.mp this
-    rw [this]
-    rfl
+-/
 
 lemma rwx
   {a b : WithTop ℤ}

@@ -1,6 +1,5 @@
 import Mathlib.Analysis.Meromorphic.Order
 import Mathlib.MeasureTheory.Integral.IntervalIntegral
-import VD.ToMathlib.analyticAt
 import VD.ToMathlib.divisor
 import VD.mathlibAddOn
 
@@ -90,15 +89,6 @@ theorem MeromorphicAt.order_inv {f : 𝕜 → 𝕜} {z₀ : 𝕜} (hf : Meromorp
   simp only [Pi.inv_apply, h₁a h₂a, smul_eq_mul, mul_inv_rev, zpow_neg]
   ring
 
-
-
-/-
-theorem MeromorphicAt.order_ne_top_iff' {f : ℂ → ℂ} {z₀ : ℂ} (hf : MeromorphicAt f z₀) :
-    hf.order ≠ ⊤ ↔ f * f⁻¹ =ᶠ[𝓝[≠] z₀] 1 := by
-
-  sorry
--/
-
 theorem meromorphicAt_congr
   {𝕜 : Type u_1} [NontriviallyNormedField 𝕜]
   {E : Type u_2} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
@@ -106,14 +96,12 @@ theorem meromorphicAt_congr
   (h : f =ᶠ[𝓝[≠] x] g) : MeromorphicAt f x ↔ MeromorphicAt g x :=
   ⟨fun hf ↦ hf.congr h, fun hg ↦ hg.congr h.symm⟩
 
-
 theorem meromorphicAt_congr'
   {𝕜 : Type u_1} [NontriviallyNormedField 𝕜]
   {E : Type u_2} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   {f : 𝕜 → E} {g : 𝕜 → E} {x : 𝕜}
   (h : f =ᶠ[𝓝 x] g) : MeromorphicAt f x ↔ MeromorphicAt g x :=
   meromorphicAt_congr (Filter.EventuallyEq.filter_mono h nhdsWithin_le_nhds)
-
 
 theorem MeromorphicAt.order_congr
   {f₁ f₂ : 𝕜 → E}
@@ -138,7 +126,6 @@ theorem AnalyticAt.meromorphicAt_order_nonneg
   0 ≤ hf.meromorphicAt.order := by
   rw [hf.meromorphicAt_order, (by rfl : (0 : WithTop ℤ) = WithTop.map Nat.cast (0 : ℕ∞))]
   simp
-
 
 theorem MeromorphicAt.order_add
   {f₁ f₂ : 𝕜 → 𝕜}
