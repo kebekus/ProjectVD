@@ -1,5 +1,5 @@
 import Mathlib.Algebra.BigOperators.Finprod
-import VD.stronglyMeromorphicAt
+import VD.ToMathlib.MeromorphicNFAt
 
 open Topology
 

@@ -1,6 +1,7 @@
 import VD.Divisor_MeromorphicOn
 import VD.Divisor_Singleton
 import VD.ToMathlib.Divisor_MeromorphicOn
+import VD.ToMathlib.MeromorphicNFAt
 import VD.ToMathlib.analyticAt_order
 import VD.ToMathlib.bilinear
 import VD.ToMathlib.codiscreteWithin
@@ -26,7 +27,6 @@ import VD.meromorphicOn_integrability
 import VD.partialDeriv
 import VD.specialFunctions_CircleIntegral_affine
 import VD.specialFunctions_Integral_log_sin
-import VD.stronglyMeromorphicAt
 import VD.stronglyMeromorphicOn
 import VD.stronglyMeromorphicOn_eliminate
 import VD.stronglyMeromorphicOn_ratlPolynomial
