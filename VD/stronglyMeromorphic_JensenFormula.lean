@@ -10,7 +10,7 @@ theorem jensen₀
   -- WARNING: Not needed. MeromorphicOn suffices
   (h₁f : StronglyMeromorphicOn f (Metric.closedBall 0 R))
   (h₂f : f 0 ≠ 0) :
-  log ‖f 0‖ = -∑ᶠ s, (MeromorphicOn.divisor f h₁f.meromorphicOn s) * log (R * ‖s‖⁻¹) + (2 * π)⁻¹ * ∫ (x : ℝ) in (0)..(2 * π), log ‖f (circleMap 0 R x)‖ := by
+  log ‖f 0‖ = -∑ᶠ s, (MeromorphicOn.divisor f (Metric.closedBall 0 R) s) * log (R * ‖s‖⁻¹) + (2 * π)⁻¹ * ∫ (x : ℝ) in (0)..(2 * π), log ‖f (circleMap 0 R x)‖ := by
 
   have h₁U : IsConnected (Metric.closedBall (0 : ℂ) R) := by
     constructor
@@ -30,13 +30,13 @@ theorem jensen₀
   have h''₂f : h'₁f.meromorphicAt.order = 0 := by
     rwa [h'₁f.order_eq_zero_iff]
 
-  have h'''₂f : MeromorphicOn.divisor f h₁f.meromorphicOn 0 = 0 := by
-    rw [MeromorphicOn.divisorOn_def]
+  have h'''₂f : MeromorphicOn.divisor f (Metric.closedBall 0 R) 0 = 0 := by
+    rw [MeromorphicOn.divisor_def]
     simp
     tauto
 
-  have h₃f : Set.Finite (Function.support (MeromorphicOn.divisor f h₁f.meromorphicOn)) := by
-    exact (MeromorphicOn.divisor f (StronglyMeromorphicOn.meromorphicOn h₁f)).finiteSupport h₂U
+  have h₃f : Set.Finite (Function.support (MeromorphicOn.divisor f (Metric.closedBall 0 R))) := by
+    exact (MeromorphicOn.divisor f (Metric.closedBall 0 R)).finiteSupport h₂U
 
   have h'₃f : ∀ s ∈ h₃f.toFinset, s ≠ 0 := by
     by_contra hCon
@@ -46,7 +46,7 @@ theorem jensen₀
     simp at h₁s
     tauto
 
-  have h₄f: Function.support (fun s ↦ (MeromorphicOn.divisor f h₁f.meromorphicOn s) * log (R * ‖s‖⁻¹)) ⊆ h₃f.toFinset := by
+  have h₄f: Function.support (fun s ↦ (MeromorphicOn.divisor f (Metric.closedBall 0 R) s) * log (R * ‖s‖⁻¹)) ⊆ h₃f.toFinset := by
     intro x
     contrapose
     simp
@@ -57,7 +57,7 @@ theorem jensen₀
 
   obtain ⟨F, h₁F, h₂F, h₃F, h₄F⟩ := MeromorphicOn.decompose₃' h₂U h₁U h₁f h'₂f
 
-  have h₁F : Function.mulSupport (fun u ↦ fun z => (z - u) ^ (MeromorphicOn.divisor f h₁f.meromorphicOn u)) ⊆ h₃f.toFinset := by
+  have h₁F : Function.mulSupport (fun u ↦ fun z => (z - u) ^ (MeromorphicOn.divisor f (Metric.closedBall 0 R) u)) ⊆ h₃f.toFinset := by
     intro u
     contrapose
     simp
@@ -67,9 +67,9 @@ theorem jensen₀
     exact rfl
   rw [finprod_eq_prod_of_mulSupport_subset _ h₁F] at h₄F
 
-  let G := fun z ↦ log ‖F z‖ + ∑ᶠ s, (MeromorphicOn.divisor f h₁f.meromorphicOn s) * log ‖z - s‖
+  let G := fun z ↦ log ‖F z‖ + ∑ᶠ s, (MeromorphicOn.divisor f (Metric.closedBall 0 R) s) * log ‖z - s‖
 
-  have h₁G {z : ℂ} : Function.support (fun s ↦ (MeromorphicOn.divisor f h₁f.meromorphicOn s) * log ‖z - s‖) ⊆ h₃f.toFinset := by
+  have h₁G {z : ℂ} : Function.support (fun s ↦ (MeromorphicOn.divisor f (Metric.closedBall 0 R) s) * log ‖z - s‖) ⊆ h₃f.toFinset := by
     intro s
     contrapose
     simp
@@ -95,8 +95,7 @@ theorem jensen₀
       rw [← hCon] at hx
       simp at hx
       rw [← (h₁f z h₁z).order_eq_zero_iff] at h₂z
-      rw [MeromorphicOn.divisorOn_def] at hx
-      simp [h₁z] at hx
+      simp [h₁f.meromorphicOn, h₁z] at hx
       tauto
     apply zpow_ne_zero
     simp
@@ -112,8 +111,7 @@ theorem jensen₀
       rw [← hCon] at hx
       simp at hx
       rw [← (h₁f z h₁z).order_eq_zero_iff] at h₂z
-      rw [MeromorphicOn.divisorOn_def] at hx
-      simp [h₁z] at hx
+      simp [h₁f.meromorphicOn, h₁z] at hx
       tauto
     apply zpow_ne_zero
     simp
@@ -139,8 +137,7 @@ theorem jensen₀
       have t₁ : f (circleMap 0 R a) ≠ 0 := by
         let A := h₁f (circleMap 0 R a) t₀
         rw [← A.order_eq_zero_iff]
-        rw [MeromorphicOn.divisorOn_def] at C
-        simp [t₀] at C
+        simp [h₁f.meromorphicOn, t₀] at C
         rcases C with C₁ | C₂
         · assumption
         · let B := h₁f.meromorphicOn.exists_order_ne_top_iff_forall h₁U
@@ -166,12 +163,12 @@ theorem jensen₀
 
   have decompose_int_G : ∫ (x : ℝ) in (0)..2 * π, G (circleMap 0 R x)
     = (∫ (x : ℝ) in (0)..2 * π, log (norm (F (circleMap 0 R x))))
-        + ∑ᶠ x, (MeromorphicOn.divisor f h₁f.meromorphicOn x) * ∫ (x_1 : ℝ) in (0)..2 * π, log (norm (circleMap 0 R x_1 - ↑x)) := by
+        + ∑ᶠ x, (MeromorphicOn.divisor f (Metric.closedBall 0 R) x) * ∫ (x_1 : ℝ) in (0)..2 * π, log (norm (circleMap 0 R x_1 - ↑x)) := by
     dsimp [G]
 
     rw [intervalIntegral.integral_add]
     congr
-    have t₀ {x : ℝ} : Function.support (fun s ↦ (MeromorphicOn.divisor f h₁f.meromorphicOn s) * log (norm (circleMap 0 R x - s))) ⊆ h₃f.toFinset := by
+    have t₀ {x : ℝ} : Function.support (fun s ↦ (MeromorphicOn.divisor f (Metric.closedBall 0 R) s) * log (norm (circleMap 0 R x - s))) ⊆ h₃f.toFinset := by
       intro s hs
       simp at hs
       simp [hs.1]
@@ -181,8 +178,8 @@ theorem jensen₀
       intro x
       rw [finsum_eq_sum_of_support_subset _ t₀]
     rw [intervalIntegral.integral_finset_sum]
-    let G' := fun x ↦ ((MeromorphicOn.divisor f h₁f.meromorphicOn x) : ℂ) * ∫ (x_1 : ℝ) in (0)..2 * π, log (norm (circleMap 0 R x_1 - x))
-    have t₁ : (Function.support fun x ↦ (MeromorphicOn.divisor f h₁f.meromorphicOn x) * ∫ (x_1 : ℝ) in (0)..2 * π, log (norm (circleMap 0 R x_1 - x))) ⊆ h₃f.toFinset := by
+    let G' := fun x ↦ ((MeromorphicOn.divisor f (Metric.closedBall 0 R) x) : ℂ) * ∫ (x_1 : ℝ) in (0)..2 * π, log (norm (circleMap 0 R x_1 - x))
+    have t₁ : (Function.support fun x ↦ (MeromorphicOn.divisor f (Metric.closedBall 0 R) x) * ∫ (x_1 : ℝ) in (0)..2 * π, log (norm (circleMap 0 R x_1 - x))) ⊆ h₃f.toFinset := by
       simp
       intro s
       contrapose!
@@ -222,7 +219,7 @@ theorem jensen₀
     exact (continuous_circleMap 0 R).continuousAt
     -- IntervalIntegrable (fun x => ∑ᶠ (s : ℂ), ↑(↑⋯.divisor s) * log (Complex.abs (circleMap 0 1 x - s))) MeasureTheory.volume 0 (2 * π)
     --simp? at h₁G
-    have h₁G' {z : ℂ} : (Function.support fun s => (MeromorphicOn.divisor f h₁f.meromorphicOn s) * log (norm (z - s))) ⊆ ↑h₃f.toFinset := by
+    have h₁G' {z : ℂ} : (Function.support fun s => (MeromorphicOn.divisor f (Metric.closedBall 0 R) s) * log (norm (z - s))) ⊆ ↑h₃f.toFinset := by
       exact h₁G
     conv =>
       arg 1
@@ -277,17 +274,17 @@ theorem jensen₀
   rw [t₁] at decompose_int_G
 
 
-  have h₁G' : (Function.support fun s => (MeromorphicOn.divisor f h₁f.meromorphicOn s) * ∫ (x_1 : ℝ) in (0)..(2 * π), log ‖circleMap 0 R x_1 - s‖) ⊆ ↑h₃f.toFinset := by
+  have h₁G' : (Function.support fun s => (MeromorphicOn.divisor f (Metric.closedBall 0 R) s) * ∫ (x_1 : ℝ) in (0)..(2 * π), log ‖circleMap 0 R x_1 - s‖) ⊆ ↑h₃f.toFinset := by
     intro s hs
     simp at hs
     simp [hs.1]
   rw [finsum_eq_sum_of_support_subset _ h₁G'] at decompose_int_G
-  have : ∑ s ∈ h₃f.toFinset, (MeromorphicOn.divisor f h₁f.meromorphicOn s) * ∫ (x_1 : ℝ) in (0)..(2 * π), log ‖circleMap 0 R x_1 - s‖ = ∑ s ∈ h₃f.toFinset, (MeromorphicOn.divisor f h₁f.meromorphicOn s) * (2 * π) * log R := by
+  have : ∑ s ∈ h₃f.toFinset, (MeromorphicOn.divisor f (Metric.closedBall 0 R) s) * ∫ (x_1 : ℝ) in (0)..(2 * π), log ‖circleMap 0 R x_1 - s‖ = ∑ s ∈ h₃f.toFinset, (MeromorphicOn.divisor f (Metric.closedBall 0 R) s) * (2 * π) * log R := by
     apply Finset.sum_congr rfl
     intro s hs
     have : s ∈ Metric.closedBall 0 R := by
-      let A := (MeromorphicOn.divisor f h₁f.meromorphicOn).supportWithinDomain
-      have : s ∈ Function.support (MeromorphicOn.divisor f h₁f.meromorphicOn) := by
+      let A := (MeromorphicOn.divisor f (Metric.closedBall 0 R)).supportWithinDomain
+      have : s ∈ Function.support (MeromorphicOn.divisor f (Metric.closedBall 0 R)) := by
         simp at hs
         exact hs
       exact A this
@@ -375,7 +372,7 @@ theorem jensen
   (h₁f : MeromorphicOn f (Metric.closedBall 0 R))
   (h₁f' : MeromorphicNFAt f 0)
   (h₂f : f 0 ≠ 0) :
-  log ‖f 0‖ = -∑ᶠ s, (MeromorphicOn.divisor f h₁f s) * log (R * ‖s‖⁻¹) + (2 * π)⁻¹ * ∫ (x : ℝ) in (0)..(2 * π), log ‖f (circleMap 0 R x)‖ := by
+  log ‖f 0‖ = -∑ᶠ s, (MeromorphicOn.divisor f (Metric.closedBall 0 R) s) * log (R * ‖s‖⁻¹) + (2 * π)⁻¹ * ∫ (x : ℝ) in (0)..(2 * π), log ‖f (circleMap 0 R x)‖ := by
 
   let F := makeStronglyMeromorphicOn f (Metric.closedBall 0 R)
 
