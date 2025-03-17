@@ -5,13 +5,21 @@ open Filter Topology
 
 variable {𝕜 : Type u_1} [NontriviallyNormedField 𝕜] {E : Type u_2} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
 
-/-- Two analytic functions agree on a punctured neighborhood iff they agree on a neighborhood. -/
-lemma AnalyticAt.eventuallyEq_nhdNE_iff_eventuallyEq_nhd {f g : 𝕜 → E} {z₀ : 𝕜}
-  (hf : AnalyticAt 𝕜 f z₀) (hg : AnalyticAt 𝕜 g z₀) (hfg : f =ᶠ[𝓝[≠] z₀] g) :
-    f =ᶠ[𝓝 z₀] g := by
-  rcases ((hf.sub hg).eventually_eq_zero_or_eventually_ne_zero) with h | h
-  · exact Filter.eventuallyEq_iff_sub.2 h
-  · simpa using (Filter.eventually_and.2 ⟨Filter.eventuallyEq_iff_sub.mp hfg, h⟩).exists
+/-- Local identity theorem: two analytic functions agree on a punctured
+neighborhood iff they agree on a neighborhood.
+
+See `MeromorphicNFAt.eventuallyEq_nhdNE_iff_eventuallyEq_nhd` for the analogous
+statement for meromorphic functions in normal form.
+-/
+theorem AnalyticAt.eventuallyEq_nhdNE_iff_eventuallyEq_nhd {f g : 𝕜 → E} {z₀ : 𝕜}
+    (hf : AnalyticAt 𝕜 f z₀) (hg : AnalyticAt 𝕜 g z₀) :
+    f =ᶠ[𝓝[≠] z₀] g ↔ f =ᶠ[𝓝 z₀] g := by
+  constructor
+  · intro hfg
+    rcases ((hf.sub hg).eventually_eq_zero_or_eventually_ne_zero) with h | h
+    · exact Filter.eventuallyEq_iff_sub.2 h
+    · simpa using (Filter.eventually_and.2 ⟨Filter.eventuallyEq_iff_sub.mp hfg, h⟩).exists
+  · exact (Filter.EventuallyEq.filter_mono · nhdsWithin_le_nhds)
 
 /-- Meromorphic functions that agree in a punctured neighborhood of `z₀` have the same order at
 `z₀`. -/
@@ -48,8 +56,9 @@ theorem MeromorphicOn.meromorphicNFAt_codiscreteWithin [CompleteSpace E] {f : �
   filter_upwards [hf.analyticAt_codiscreteWithin] with _ ha
   exact ha.meromorphicNFAt
 
-/-- If `f` is meromorphic in normal form at `z₀` and `g` is analytic without zero at `z₀`, then
-`g • f` is meromorphic in normal form at `z₀`. -/
+/-- Helper lemma for `meromorphicNFAt_iff_meromorphicNFAt_of_smul_analytic`: if
+`f` is meromorphic in normal form at `z₀` and `g` is analytic without zero at
+`z₀`, then `g • f` is meromorphic in normal form at `z₀`. -/
 lemma MeromorphicNFAt.meromorphicNFAt_of_smul_analytic {f : 𝕜 → E} {g : 𝕜 → 𝕜} {z₀ : 𝕜}
     (hf : MeromorphicNFAt f z₀) (h₁g : AnalyticAt 𝕜 g z₀) (h₂g : g z₀ ≠ 0) :
     MeromorphicNFAt (g • f) z₀ := by
@@ -67,13 +76,13 @@ lemma MeromorphicNFAt.meromorphicNFAt_of_smul_analytic {f : 𝕜 → E} {g : �
 
 /-- If `f` is any function and `g` is analytic without zero at `z₀`, then `f` is meromorphic in
 normal form at `z₀` iff `g • f` is meromorphic in normal form at `z₀`. -/
-theorem MeromorphicNFAt_of_mul_analytic
-  {g : 𝕜 → 𝕜}
-  {f : 𝕜 → E}
-  {z₀ : 𝕜}
-  (h₁g : AnalyticAt 𝕜 g z₀)
-  (h₂g : g z₀ ≠ 0) :
-  MeromorphicNFAt f z₀ ↔ MeromorphicNFAt (g • f) z₀ := by
+theorem meromorphicNFAt_iff_meromorphicNFAt_of_smul_analytic
+    {g : 𝕜 → 𝕜}
+    {f : 𝕜 → E}
+    {z₀ : 𝕜}
+    (h₁g : AnalyticAt 𝕜 g z₀)
+    (h₂g : g z₀ ≠ 0) :
+    MeromorphicNFAt f z₀ ↔ MeromorphicNFAt (g • f) z₀ := by
   constructor
   · exact fun hf ↦ hf.meromorphicNFAt_of_smul_analytic h₁g h₂g
   · intro hprod
@@ -86,6 +95,17 @@ theorem MeromorphicNFAt_of_mul_analytic
     rw [meromorphicNFAt_congr this]
     exact hprod.meromorphicNFAt_of_smul_analytic (h₁g.inv h₂g) (inv_ne_zero h₂g)
 
+/-- If `f` is any function and `g` is analytic without zero at `z₀`, then `f` is meromorphic in
+normal form at `z₀` iff `g * f` is meromorphic in normal form at `z₀`. -/
+theorem meromorphicNFAt_iff_meromorphicNFAt_of_mul_analytic
+    {f g : 𝕜 → 𝕜}
+    {z₀ : 𝕜}
+    (h₁g : AnalyticAt 𝕜 g z₀)
+    (h₂g : g z₀ ≠ 0) :
+    MeromorphicNFAt f z₀ ↔ MeromorphicNFAt (g * f) z₀ := by
+  rw [← smul_eq_mul]
+  exact meromorphicNFAt_iff_meromorphicNFAt_of_smul_analytic h₁g h₂g
+
 /- Private helper lemma. -/
 private lemma WithTop.map_natCast_eq_zero {n : WithTop ℕ}
   (hn : WithTop.map (Nat.cast : ℕ → ℤ) n = 0) :
@@ -96,8 +116,8 @@ private lemma WithTop.map_natCast_eq_zero {n : WithTop ℕ}
     rw [Int.ofNat_eq_zero.mp (WithTop.coe_eq_zero.mp hn)]
     rfl
 
-/-- If `f` is meromorphic in normal form at `z₀`, then `f` has order zero iff it does not vanish
-at `z₀`. -/
+/-- If `f` is meromorphic in normal form at `z₀`, then `f` has order zero iff it
+does not vanish at `z₀`. -/
 theorem MeromorphicNFAt.order_eq_zero_iff {f : 𝕜 → E} {x : 𝕜} (hf : MeromorphicNFAt f x) :
     hf.meromorphicAt.order = 0 ↔ f x ≠ 0 := by
   constructor
@@ -122,19 +142,23 @@ theorem MeromorphicNFAt.order_eq_zero_iff {f : 𝕜 → E} {x : 𝕜} (hf : Mero
       simp only [zpow_zero, smul_eq_mul, one_mul]
       exact h₃g.filter_mono nhdsWithin_le_nhds
 
-/-- Local identity theorem: two meromorphic functions in normal form agree in a neighborhood iff
-they agree in a pointed neighborhood. -/
-theorem MeromorphicNFAt.eventuallyEq_nhdNE_iff_eventuallyEq_nhd {f g : 𝕜 → E} {x : 𝕜}
-    (hf : MeromorphicNFAt f x) (hg : MeromorphicNFAt g x) :
-    f =ᶠ[𝓝[≠] x] g ↔ f =ᶠ[𝓝 x] g := by
+/-- Local identity theorem: two meromorphic functions in normal form agree in a
+neighborhood iff they agree in a pointed neighborhood.
+
+See `AnalytivAt.eventuallyEq_nhdNE_iff_eventuallyEq_nhd` for the analogous
+statement for analytic functions.
+-/
+theorem MeromorphicNFAt.eventuallyEq_nhdNE_iff_eventuallyEq_nhd {f g : 𝕜 → E} {z₀ : 𝕜}
+    (hf : MeromorphicNFAt f z₀) (hg : MeromorphicNFAt g z₀) :
+    f =ᶠ[𝓝[≠] z₀] g ↔ f =ᶠ[𝓝 z₀] g := by
   constructor
   · intro h
     have t₀ := hf.meromorphicAt.order_congr h
     by_cases cs : hf.meromorphicAt.order = 0
     · rw [cs] at t₀
-      exact (hf.order_nonneg_iff_analyticAt.1
-        (le_of_eq cs.symm)).eventuallyEq_nhdNE_iff_eventuallyEq_nhd
-          (hg.order_nonneg_iff_analyticAt.1 (le_of_eq t₀)) h
+      have Z := (hf.order_nonneg_iff_analyticAt.1 (le_of_eq cs.symm))
+      have W := hg.order_nonneg_iff_analyticAt.1 (le_of_eq t₀)
+      exact (AnalyticAt.eventuallyEq_nhdNE_iff_eventuallyEq_nhd Z W).1 h
     · apply eventuallyEq_nhds_of_eventuallyEq_nhdsNE h
       let h₁f := cs
       rw [hf.order_eq_zero_iff] at h₁f

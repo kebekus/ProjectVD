@@ -180,7 +180,7 @@ theorem MeromorphicOn.decompose₂
     simp [hp] at hu
 
   have h₅g₀ : MeromorphicNFAt g₀ u := by
-    rw [MeromorphicNFAt_of_mul_analytic h₀ h₁]
+    rw [meromorphicNFAt_iff_meromorphicNFAt_of_smul_analytic h₀ h₁]
     rw [mul_comm] at h₄g₀
     rw [smul_eq_mul]
     rw [← h₄g₀]

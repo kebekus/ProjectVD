@@ -45,7 +45,7 @@ theorem stronglyMeromorphicOn_of_mul_analytic'
   (h₁f : StronglyMeromorphicOn f U) :
   StronglyMeromorphicOn (g • f) U := by
   intro z hz
-  apply (MeromorphicNFAt_of_mul_analytic (h₁g z hz) ?h₂g).mp (h₁f z hz)
+  apply MeromorphicNFAt.meromorphicNFAt_of_smul_analytic (h₁f z hz) (h₁g z hz)
   exact h₂g ⟨z, hz⟩
 
 /- Make strongly MeromorphicOn -/
@@ -128,3 +128,18 @@ theorem makeStronglyMeromorphicOn_changeOrder [CompleteSpace 𝕜]
   (stronglyMeromorphicOn_of_makeStronglyMeromorphicOn hf z₀ hz₀).meromorphicAt.order = (hf z₀ hz₀).order := by
   apply MeromorphicAt.order_congr
   exact makeStronglyMeromorphicOn_changeDiscrete hf hz₀
+
+theorem StronglyMeromorphicOn.order_ne_top
+  {f : 𝕜 → 𝕜}
+  {U : Set 𝕜}
+  (h₁f : StronglyMeromorphicOn f U)
+  (hU : IsConnected U)
+  (h₂f : ∃ u : U, f u ≠ 0) :
+  ∀ u : U, (h₁f u u.2).meromorphicAt.order ≠ ⊤ := by
+
+  rw [← h₁f.meromorphicOn.exists_order_ne_top_iff_forall hU]
+  obtain ⟨u, hu⟩ := h₂f
+  use u
+  rw [← (h₁f u u.2).order_eq_zero_iff] at hu
+  rw [hu]
+  simp

@@ -10,22 +10,6 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   {f g : 𝕜 → 𝕜} {z₀ : 𝕜}
 
-theorem StronglyMeromorphicOn.order_ne_top
-  {f : 𝕜 → 𝕜}
-  {U : Set 𝕜}
-  (h₁f : StronglyMeromorphicOn f U)
-  (hU : IsConnected U)
-  (h₂f : ∃ u : U, f u ≠ 0) :
-  ∀ u : U, (h₁f u u.2).meromorphicAt.order ≠ ⊤ := by
-
-  rw [← h₁f.meromorphicOn.exists_order_ne_top_iff_forall hU]
-  obtain ⟨u, hu⟩ := h₂f
-  use u
-  rw [← (h₁f u u.2).order_eq_zero_iff] at hu
-  rw [hu]
-  simp
-
-
 theorem MeromorphicOn.nonvanish_of_order_ne_top
   {f : 𝕜 → 𝕜}
   {U : Set 𝕜}
