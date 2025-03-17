@@ -21,7 +21,7 @@ theorem MeromorphicOn.divisor_add_const₁  [CompleteSpace 𝕜]
   (hf : MeromorphicOn f U)
   (a : 𝕜) :
 --  0 ≤ divisor f hf z → 0 ≤ divisor (f + fun _ ↦ a) (hf.add (MeromorphicOn.const a)) z := by
-  0 ≤ divisor f U → 0 ≤ divisor (f + fun _ ↦ a) U z := by
+  0 ≤ divisor f U z → 0 ≤ divisor (f + fun _ ↦ a) U z := by
   intro h
 
   -- Trivial case: z ∉ U
@@ -56,7 +56,7 @@ theorem MeromorphicOn.divisor_add_const₁  [CompleteSpace 𝕜]
     let A := (hf z hz).order_add (MeromorphicAt.const a z)
     have : 0 ≤ min (hf z hz).order (MeromorphicAt.const a z).order := by
       apply le_min
-      have := h z
+      have := h
       simp [hf, hz] at this
       let V := untop'_of_ne_top (d := 0) h₁f
       rw [← V]
