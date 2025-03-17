@@ -32,8 +32,8 @@ theorem MeromorphicOn.integrable_log_abs_f₀
       use 0; simp [hr];
       repeat exact hr.ne.symm
 
-    have h₃f : Set.Finite (Function.support (MeromorphicOn.divisor f h₁f)) := by
-      exact (MeromorphicOn.divisor f h₁f).finiteSupport h₁U
+    have h₃f : Set.Finite (Function.support (MeromorphicOn.divisor f (Metric.closedBall 0 r))) := by
+      exact (MeromorphicOn.divisor f (Metric.closedBall 0 r)).finiteSupport h₁U
 
     obtain ⟨g, h₁g, h₂g, h₃g⟩ := MeromorphicOn.decompose_log h₁U h₂U h₃U h₁f h₂f
     have : (fun z ↦ log ‖f (circleMap 0 r z)‖) = (fun z ↦ log ‖f z‖) ∘ (circleMap 0 r) := by
@@ -68,10 +68,10 @@ theorem MeromorphicOn.integrable_log_abs_f₀
       apply (h₁g (circleMap 0 r x) this).continuousAt
     apply Continuous.continuousAt (continuous_circleMap 0 r)
     --
-    have h {x : ℝ} : (Function.support fun s => (MeromorphicOn.divisor f h₁f s) * log ‖circleMap 0 r x - s‖) ⊆ h₃f.toFinset := by
+    have h {x : ℝ} : (Function.support fun s => (MeromorphicOn.divisor f (Metric.closedBall 0 r) s) * log ‖circleMap 0 r x - s‖) ⊆ h₃f.toFinset := by
       intro x; simp; tauto
     simp_rw [finsum_eq_sum_of_support_subset _ h]
-    have : (fun x => ∑ s ∈ h₃f.toFinset, (MeromorphicOn.divisor f h₁f s) * log ‖circleMap 0 r x - s‖) = (∑ s ∈ h₃f.toFinset, fun x => (MeromorphicOn.divisor f h₁f s) * log ‖circleMap 0 r x - s‖) := by
+    have : (fun x => ∑ s ∈ h₃f.toFinset, (MeromorphicOn.divisor f (Metric.closedBall 0 r) s) * log ‖circleMap 0 r x - s‖) = (∑ s ∈ h₃f.toFinset, fun x => (MeromorphicOn.divisor f (Metric.closedBall 0 r) s) * log ‖circleMap 0 r x - s‖) := by
       ext x; simp
     rw [this]
     apply IntervalIntegrable.sum h₃f.toFinset

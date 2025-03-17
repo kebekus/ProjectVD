@@ -184,10 +184,9 @@ theorem stronglyMeromorphicOn_ratlPolynomial₃order
 theorem stronglyMeromorphicOn_divisor_ratlPolynomial
   (d : ℂ → ℤ)
   (h₁d : Set.Finite d.support) :
-  MeromorphicOn.divisor (∏ᶠ u, fun z ↦ (z - u) ^ d u) (stronglyMeromorphicOn_ratlPolynomial₃ d).meromorphicOn = d := by
+  MeromorphicOn.divisor (∏ᶠ u, fun z ↦ (z - u) ^ d u) ⊤ = d := by
   ext z
-  rw [MeromorphicOn.divisorOn_def]
-  simp
+  rw [MeromorphicOn.divisor_apply (stronglyMeromorphicOn_ratlPolynomial₃ d).meromorphicOn (by simp : z ∈ Set.univ)]
   rw [stronglyMeromorphicOn_divisor_ratlPolynomial₁ d h₁d]
   simp
 
@@ -196,11 +195,10 @@ theorem stronglyMeromorphicOn_divisor_ratlPolynomial_U
   (d : ℂ → ℤ)
   (h₁d : Set.Finite d.support)
   (h₂d : d.support ⊆ U) :
-  MeromorphicOn.divisor (∏ᶠ u, fun z ↦ (z - u) ^ d u) (stronglyMeromorphicOn_ratlPolynomial₃U d U).meromorphicOn = d := by
+  MeromorphicOn.divisor (∏ᶠ u, fun z ↦ (z - u) ^ d u) U = d := by
   ext z
-  rw [MeromorphicOn.divisorOn_def]
   by_cases hz : z ∈ U
-  · simp [hz]
+  · simp [(stronglyMeromorphicOn_ratlPolynomial₃U d U).meromorphicOn, hz]
     rw [stronglyMeromorphicOn_divisor_ratlPolynomial₁ d h₁d]
     simp
   · simp [hz]

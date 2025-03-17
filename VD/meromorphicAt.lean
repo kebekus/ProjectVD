@@ -70,25 +70,6 @@ theorem MeromorphicAt.order_zpow (hf : MeromorphicAt f z₀) {n : ℤ} :
     congr 1
     rw [mul_comm, zpow_mul]
 
-
-theorem MeromorphicAt.order_inv {f : 𝕜 → 𝕜} {z₀ : 𝕜} (hf : MeromorphicAt f z₀) :
-    hf.order = -hf.inv.order := by
-  -- Trivial case: f locally zero
-  by_cases h₂f : hf.order = ⊤
-  · rw [h₂f, ← LinearOrderedAddCommGroupWithTop.neg_top, neg_eq_iff_eq_neg, neg_neg, eq_comm]
-    rw [MeromorphicAt.order_eq_top_iff] at *
-    filter_upwards [h₂f]
-    simp
-  rw [(untop'_of_ne_top h₂f).symm, eq_comm, neg_eq_iff_eq_neg]
-  apply (hf.inv.order_eq_int_iff (-hf.order.untopD 0)).2
-  obtain ⟨g, h₁g, h₂g, h₃g⟩ := (hf.order_eq_int_iff (hf.order.untopD 0)).1 (untop'_of_ne_top h₂f).symm
-  use g⁻¹, h₁g.inv h₂g, inv_eq_zero.not.2 h₂g
-  rw [eventually_nhdsWithin_iff] at *
-  filter_upwards [h₃g]
-  intro _ h₁a h₂a
-  simp only [Pi.inv_apply, h₁a h₂a, smul_eq_mul, mul_inv_rev, zpow_neg]
-  ring
-
 theorem meromorphicAt_congr
   {𝕜 : Type u_1} [NontriviallyNormedField 𝕜]
   {E : Type u_2} [NormedAddCommGroup E] [NormedSpace 𝕜 E]

@@ -5,7 +5,8 @@ Authors: Stefan Kebekus
 -/
 
 import Mathlib.Topology.DiscreteSubset
-import VD.ToMathlib.Divisor_MeromorphicOn
+import Mathlib.Analysis.Meromorphic.Divisor.MeromorphicFunction
+import VD.ToMathlib.MeromorphicNFAt
 
 open Classical Filter Topology
 
@@ -50,9 +51,9 @@ theorem congr_codiscreteWithin_open {f₁ f₂ : 𝕜 → E} (hf₁ : Meromorphi
   divisors on `U`. -/
 theorem divisor_congr_codiscreteWithin [CompleteSpace E] {f₁ f₂ : 𝕜 → E} (hf₁ : MeromorphicOn f₁ U)
     (h₁ : f₁ =ᶠ[Filter.codiscreteWithin U] f₂) (h₂ : Set.EqOn f₁ f₂ Uᶜ) :
-    divisor f₁ hf₁ = divisor f₂ (hf₁.congr_codiscreteWithin h₁ h₂) := by
+    divisor f₁ U = divisor f₂ U := by
   ext x
-  by_cases hx : x ∈ U <;> simp [hx]
+  by_cases hx : x ∈ U <;> simp [hf₁, hf₁.congr_codiscreteWithin h₁ h₂, hx]
   · congr 1
     apply (hf₁ x hx).order_congr
     simp_rw [EventuallyEq, Filter.Eventually, mem_codiscreteWithin,
@@ -67,9 +68,9 @@ theorem divisor_congr_codiscreteWithin [CompleteSpace E] {f₁ f₂ : 𝕜 → E
 theorem divisor_congr_codiscreteWithin_open [CompleteSpace E] {f₁ f₂ : 𝕜 → E}
     (hf₁ : MeromorphicOn f₁ U) (h₁ : f₁ =ᶠ[Filter.codiscreteWithin U] f₂)
     (h₂ : IsOpen U) :
-    divisor f₁ hf₁ = divisor f₂ (hf₁.congr_codiscreteWithin_open h₁ h₂) := by
+    divisor f₁ U = divisor f₂ U := by
   ext x
-  by_cases hx : x ∈ U <;> simp [hx]
+  by_cases hx : x ∈ U <;> simp [hf₁, hf₁.congr_codiscreteWithin_open h₁ h₂, hx]
   · congr 1
     apply (hf₁ x hx).order_congr
     simp_rw [EventuallyEq, Filter.Eventually, mem_codiscreteWithin,
@@ -84,9 +85,9 @@ theorem divisor_congr_codiscreteWithin_open [CompleteSpace E] {f₁ f₂ : 𝕜 
 /-- Taking the divisor of a meromorphic function commutes with restriction. -/
 theorem divisor_restrict [CompleteSpace E] {f : 𝕜 → E} {V : Set 𝕜}
     (hf : MeromorphicOn f U) (hV : V ⊆ U) :
-    (divisor f hf).restrict hV = divisor f (hf.mono_set hV) := by
+    (divisor f U).restrict hV = divisor f V := by
   ext x
   by_cases hx : x ∈ V
   · rw [DivisorOn.restrict_apply]
-    simp [hx, hV hx]
+    simp [hf, hx, hf.mono_set hV, hV hx]
   · simp [hx]

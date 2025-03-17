@@ -15,16 +15,16 @@ theorem MeromorphicOn.decompose₁
   ∃ g : ℂ → ℂ, (MeromorphicOn g U)
     ∧ (AnalyticAt ℂ g z₀)
     ∧ (g z₀ ≠ 0)
-    ∧ (f = g * fun z ↦ (z - z₀) ^ (divisor f h₁f z₀)) := by
+    ∧ (f = g * fun z ↦ (z - z₀) ^ (divisor f U z₀)) := by
 
-  let h₁ := fun z ↦ (z - z₀) ^ (-divisor f h₁f z₀)
+  let h₁ := fun z ↦ (z - z₀) ^ (-divisor f U z₀)
   have h₁h₁ : MeromorphicOn h₁ U := by
     apply MeromorphicOn.zpow
     apply AnalyticOnNhd.meromorphicOn
     apply AnalyticOnNhd.sub
     exact analyticOnNhd_id
     exact analyticOnNhd_const
-  let n : ℤ := (-divisor f h₁f z₀)
+  let n : ℤ := (-divisor f U z₀)
   have h₂h₁ : (h₁h₁ z₀ hz₀).order = n := by
     simp_rw [(h₁h₁ z₀ hz₀).order_eq_int_iff]
     use 1
@@ -43,7 +43,7 @@ theorem MeromorphicOn.decompose₁
     rw [(h₁f z₀ hz₀).order_mul (h₁h₁ z₀ hz₀)]
     rw [h₂h₁]
     unfold n
-    simp [MeromorphicOn.divisorOn_def, h₃f]
+    simp [h₁f, h₃f, hz₀]
     conv =>
       left
       left
@@ -93,7 +93,7 @@ theorem MeromorphicOn.decompose₁
   by_cases hz : z = z₀
   · rw [hz]
     simp only [Pi.mul_apply, sub_self, h₁, n]
-    by_cases h : divisor f h₁f z₀ = 0
+    by_cases h : divisor f U z₀ = 0
     · simp [h]
       have h₂h₁ : h₁ = 1 := by
         funext w
@@ -107,13 +107,12 @@ theorem MeromorphicOn.decompose₁
         rwa [h₃g₁]
       unfold g
       rw [← toMeromorphicNFAt_eq_self.1 h₄g₁, h₃g₁]
-    · rw [zero_zpow (divisor f h₁f z₀) h]
+    · rw [zero_zpow (divisor f U z₀) h]
       simp
       let A := h₂f.order_eq_zero_iff.not
       simp at A
       rw [← A]
-      rw [MeromorphicOn.divisorOn_def] at h
-      simp [hz₀] at h
+      simp [h₁f, hz₀] at h
       exact h.1
   · simp
     unfold g
@@ -135,14 +134,14 @@ theorem MeromorphicOn.decompose₂
     ∃ g : ℂ → ℂ, (MeromorphicOn g U)
     ∧ (∀ p : P, AnalyticAt ℂ g p)
     ∧ (∀ p : P, g p ≠ 0)
-    ∧ (f = g * ∏ p : P, fun z ↦ (z - p.1.1) ^ (divisor f hf.meromorphicOn p.1.1)) := by
+    ∧ (f = g * ∏ p : P, fun z ↦ (z - p.1.1) ^ (divisor f U p.1.1)) := by
 
   apply Finset.induction (p := fun (P : Finset U) ↦
     (∀ p ∈ P, (hf p p.2).meromorphicAt.order ≠ ⊤) →
     ∃ g : ℂ → ℂ, (MeromorphicOn g U)
     ∧ (∀ p : P, AnalyticAt ℂ g p)
     ∧ (∀ p : P, g p ≠ 0)
-    ∧ (f = g * ∏ p : P, fun z ↦ (z - p.1.1) ^ (divisor f hf.meromorphicOn p.1.1)))
+    ∧ (f = g * ∏ p : P, fun z ↦ (z - p.1.1) ^ (divisor f U p.1.1)))
 
   -- case empty
   simp
@@ -153,8 +152,8 @@ theorem MeromorphicOn.decompose₂
   intro hOrder
   obtain ⟨g₀, h₁g₀, h₂g₀, h₃g₀, h₄g₀⟩ := iHyp (fun p hp ↦ hOrder p (Finset.mem_insert_of_mem hp))
 
-  have h₀ : AnalyticAt ℂ (∏ p : P, fun z ↦ (z - p.1.1) ^ (divisor f hf.meromorphicOn p.1.1)) u := by
-    have : (∏ p : P, fun z ↦ (z - p.1.1) ^ (divisor f hf.meromorphicOn p.1.1)) = (fun z => ∏ p : P, (z - p.1.1) ^ (divisor f hf.meromorphicOn p.1.1)) := by
+  have h₀ : AnalyticAt ℂ (∏ p : P, fun z ↦ (z - p.1.1) ^ (divisor f U p.1.1)) u := by
+    have : (∏ p : P, fun z ↦ (z - p.1.1) ^ (divisor f U p.1.1)) = (fun z => ∏ p : P, (z - p.1.1) ^ (divisor f U p.1.1)) := by
       funext w
       simp
     rw [this]
@@ -169,7 +168,7 @@ theorem MeromorphicOn.decompose₂
     rw [← this] at hu
     simp [hp] at hu
 
-  have h₁ : (∏ p : P, fun z ↦ (z - p.1.1) ^ (divisor f hf.meromorphicOn p.1.1)) u ≠ 0 := by
+  have h₁ : (∏ p : P, fun z ↦ (z - p.1.1) ^ (divisor f U p.1.1)) u ≠ 0 := by
     simp only [Finset.prod_apply]
     rw [Finset.prod_ne_zero_iff]
     intro p hp
@@ -252,9 +251,9 @@ theorem MeromorphicOn.decompose₂
           simp
           congr
           have : (hf u u.2).meromorphicAt.order = (h₁g₀ u u.2).order := by
-            have h₅g₀ : f =ᶠ[𝓝 u.1] (g₀ * ∏ p : P, fun z => (z - p.1.1) ^ (divisor f hf.meromorphicOn p.1.1)) := by
+            have h₅g₀ : f =ᶠ[𝓝 u.1] (g₀ * ∏ p : P, fun z => (z - p.1.1) ^ (divisor f U p.1.1)) := by
               exact Eq.eventuallyEq h₄g₀
-            have h₆g₀ : f =ᶠ[𝓝[≠] u.1] (g₀ * ∏ p : P, fun z => (z - p.1.1) ^ (divisor f hf.meromorphicOn p.1.1)) := by
+            have h₆g₀ : f =ᶠ[𝓝[≠] u.1] (g₀ * ∏ p : P, fun z => (z - p.1.1) ^ (divisor f U p.1.1)) := by
               exact eventuallyEq_nhdsWithin_of_eqOn fun ⦃x⦄ a => congrFun h₄g₀ x
             rw [(hf u u.2).meromorphicAt.order_congr h₆g₀]
             let C := (h₁g₀ u u.2).order_mul h₀.meromorphicAt
@@ -263,13 +262,10 @@ theorem MeromorphicOn.decompose₂
             let E := h₀.meromorphicAt_order
             rw [E, D]
             simp
-          have : divisor f hf.meromorphicOn u = divisor g₀ h₁g₀ u := by
-            rw [MeromorphicOn.divisorOn_def]
-            rw [MeromorphicOn.divisorOn_def]
-            simp
+          have : divisor f U u = divisor g₀ U u := by
+            simp [hf.meromorphicOn, h₁g₀]
             rw [this]
-          rw [MeromorphicOn.divisorOn_def] at this
-          simp at this
+          simp [hf.meromorphicOn, h₁g₀] at *
           rw [this]
           --
           simpa
@@ -285,14 +281,14 @@ theorem MeromorphicOn.decompose₃'
   ∃ g : ℂ → ℂ, (MeromorphicOn g U)
     ∧ (AnalyticOnNhd ℂ g U)
     ∧ (∀ u : U, g u ≠ 0)
-    ∧ (f = g * ∏ᶠ u, fun z ↦ (z - u) ^ (divisor f h₁f.meromorphicOn u)) := by
+    ∧ (f = g * ∏ᶠ u, fun z ↦ (z - u) ^ (divisor f U u)) := by
 
   have h₃f : ∀ u : U, (h₁f u u.2).meromorphicAt.order ≠ ⊤ :=
     StronglyMeromorphicOn.order_ne_top h₁f h₂U h₂f
-  have h₄f : Set.Finite (Function.support (divisor f h₁f.meromorphicOn)) := (divisor f h₁f.meromorphicOn).finiteSupport h₁U
+  have h₄f : Set.Finite (Function.support (divisor f U)) := (divisor f U).finiteSupport h₁U
 
-  let d := - (divisor f h₁f.meromorphicOn).toFun
-  have h₁d : d.support = (Function.support (divisor f h₁f.meromorphicOn)) := by
+  let d := - (divisor f U).toFun
+  have h₁d : d.support = (Function.support (divisor f U)) := by
     ext x
     unfold d
     simp
@@ -301,13 +297,13 @@ theorem MeromorphicOn.decompose₃'
   have h₁h₁ : StronglyMeromorphicOn h₁ U := by
     intro z hz
     exact stronglyMeromorphicOn_ratlPolynomial₃ d z trivial
-  have h₂h₁ : (divisor h₁ h₁h₁.meromorphicOn) = d := by
+  have h₂h₁ : (divisor h₁ U) = d := by
     unfold h₁
     apply stronglyMeromorphicOn_divisor_ratlPolynomial_U d
     rwa [h₁d]
     --
     rw [h₁d]
-    exact (divisor f (StronglyMeromorphicOn.meromorphicOn h₁f)).supportWithinDomain
+    exact (divisor f U).supportWithinDomain
   have h₃h₁ : ∀ (z : ℂ) (hz : z ∈ U), (h₁h₁ z hz).meromorphicAt.order ≠ ⊤ := by
     intro z hz
     apply stronglyMeromorphicOn_ratlPolynomial₃order
@@ -318,9 +314,10 @@ theorem MeromorphicOn.decompose₃'
 
   let g' := f * h₁
   have h₁g' : MeromorphicOn g' U := h₁f.meromorphicOn.mul h₁h₁.meromorphicOn
-  have h₂g' : divisor g' h₁g' = 0 := by
+  have h₂g' : divisor g' U = 0 := by
     ext x
-    rw [MeromorphicOn.divisorOn_mul h₁f.meromorphicOn h₁h₁.meromorphicOn (fun z hz ↦ h₃f ⟨z, hz⟩) h₃h₁]
+    unfold g'
+    rw [divisor_mul h₁f.meromorphicOn h₁h₁.meromorphicOn _ h₃h₁]
     rw [DivisorOn.coe_add]
     simp_rw [h₂h₁]
     simp
@@ -329,6 +326,9 @@ theorem MeromorphicOn.decompose₃'
     ring_nf
     rw [sub_eq_zero]
     rfl
+    --
+    intro z hz
+    exact h₃f ⟨z, hz⟩
 
   have h₃g' : ∀ u : U, (h₁g' u.1 u.2).order = 0 := by
     intro u
@@ -342,7 +342,7 @@ theorem MeromorphicOn.decompose₃'
       let A := h₃f u
       exact untop'_of_ne_top A
     rw [this]
-    simp
+    simp [h₁f.meromorphicOn]
     rw [← WithTop.LinearOrderedAddCommGroup.coe_neg]
     rw [← WithTop.coe_add]
     simp
@@ -350,14 +350,13 @@ theorem MeromorphicOn.decompose₃'
 
   let g := makeStronglyMeromorphicOn g' U
   have h₁g : StronglyMeromorphicOn g U := stronglyMeromorphicOn_of_makeStronglyMeromorphicOn h₁g'
-  have h₂g : divisor g h₁g.meromorphicOn = 0 := by
+  have h₂g : divisor g U = 0 := by
     rw [← MeromorphicOn.divisor_of_makeStronglyMeromorphicOn]
-    rw [h₂g']
+    rwa [h₂g']
   have h₃g : AnalyticOnNhd ℂ g U := by
-    apply StronglyMeromorphicOn.analyticOnNhd
+    apply StronglyMeromorphicOn.analyticOnNhd h₁g
     rw [h₂g]
     simp
-    assumption
   have h₄g : ∀ u : U, g u ≠ 0 := by
     intro u
     rw [← (h₁g u.1 u.2).order_eq_zero_iff]
@@ -372,7 +371,7 @@ theorem MeromorphicOn.decompose₃'
     · exact h₃g
     · constructor
       · exact h₄g
-      · have t₀ : StronglyMeromorphicOn (g * ∏ᶠ (u : ℂ), fun z => (z - u) ^ (divisor f h₁f.meromorphicOn u)) U := by
+      · have t₀ : StronglyMeromorphicOn (g * ∏ᶠ (u : ℂ), fun z => (z - u) ^ (divisor f U u)) U := by
           apply stronglyMeromorphicOn_of_mul_analytic' h₃g h₄g
           apply stronglyMeromorphicOn_ratlPolynomial₃U
 
@@ -381,7 +380,7 @@ theorem MeromorphicOn.decompose₃'
         · apply Filter.EventuallyEq.eq_of_nhds
           rw [← MeromorphicNFAt.eventuallyEq_nhdNE_iff_eventuallyEq_nhd (h₁f z hz) (t₀ z hz)]
           have h₅g : g =ᶠ[𝓝[≠] z] g' := makeStronglyMeromorphicOn_changeDiscrete h₁g' hz
-          have Y' : (g' * ∏ᶠ (u : ℂ), fun z => (z - u) ^ (divisor f h₁f.meromorphicOn u)) =ᶠ[𝓝[≠] z] g * ∏ᶠ (u : ℂ), fun z => (z - u) ^ (divisor f h₁f.meromorphicOn u) := by
+          have Y' : (g' * ∏ᶠ (u : ℂ), fun z => (z - u) ^ (divisor f U u)) =ᶠ[𝓝[≠] z] g * ∏ᶠ (u : ℂ), fun z => (z - u) ^ (divisor f U u) := by
             apply Filter.EventuallyEq.symm
             exact Filter.EventuallyEq.mul h₅g (by simp)
           apply Filter.EventuallyEq.trans _ Y'
@@ -394,20 +393,19 @@ theorem MeromorphicOn.decompose₃'
           · let P := (h₁f z hz).meromorphicAt.eventually_analyticAt
             filter_upwards [h, P]
             intro y hy h₂y
-            have z₀ : divisor f h₁f.meromorphicOn y = 0 := by
+            have z₀ : divisor f U y = 0 := by
               have F := h₂y.order_eq_zero_iff.2 hy
-              rw [MeromorphicOn.divisorOn_def]
+              rw [MeromorphicOn.divisor_def]
               simp_rw [h₂y.meromorphicAt_order, F]
               simp
-
-            have : (finprod (fun u z => (z - u) ^ d u) y * finprod (fun u z => (z - u) ^ (divisor f h₁f.meromorphicOn u)) y) = 1 := by
+            have : (finprod (fun u z => (z - u) ^ d u) y * finprod (fun u z => (z - u) ^ (divisor f U u)) y) = 1 := by
               have t₀ : (Function.mulSupport fun u z => (z - u) ^ d u).Finite := by
                 rwa [ratlPoly_mulsupport, h₁d]
               rw [finprod_eq_prod _ t₀]
-              have t₁ : (Function.mulSupport fun u z => (z - u) ^ divisor f h₁f.meromorphicOn u).Finite := by
+              have t₁ : (Function.mulSupport fun u z => (z - u) ^ divisor f U u).Finite := by
                 rwa [ratlPoly_mulsupport]
               rw [finprod_eq_prod _ t₁]
-              have : (Function.mulSupport fun u z => (z - u) ^ d u) = (Function.mulSupport fun u z => (z - u) ^ divisor f h₁f.meromorphicOn u) := by
+              have : (Function.mulSupport fun u z => (z - u) ^ d u) = (Function.mulSupport fun u z => (z - u) ^ divisor f U u) := by
                 rw [ratlPoly_mulsupport]
                 rw [ratlPoly_mulsupport]
                 unfold d
@@ -446,10 +444,10 @@ theorem MeromorphicOn.decompose₃'
           have t₀ : (Function.mulSupport fun u z => (z - u) ^ d u).Finite := by
             rwa [ratlPoly_mulsupport, h₁d]
           rw [finprod_eq_prod _ t₀]
-          have t₁ : (Function.mulSupport fun u z => (z - u) ^ divisor f h₁f.meromorphicOn u).Finite := by
+          have t₁ : (Function.mulSupport fun u z => (z - u) ^ divisor f U u).Finite := by
             rwa [ratlPoly_mulsupport]
           rw [finprod_eq_prod _ t₁]
-          have : (Function.mulSupport fun u z => (z - u) ^ d u) = (Function.mulSupport fun u z => (z - u) ^ divisor f h₁f.meromorphicOn u) := by
+          have : (Function.mulSupport fun u z => (z - u) ^ d u) = (Function.mulSupport fun u z => (z - u) ^ divisor f U u) := by
             rw [ratlPoly_mulsupport]
             rw [ratlPoly_mulsupport]
             unfold d
@@ -466,8 +464,8 @@ theorem MeromorphicOn.decompose₃'
 
           have : z ∉ t₁.toFinset := by
             simp
-            have : divisor f h₁f.meromorphicOn z = 0 := by
-              let A := (divisor f h₁f.meromorphicOn).supportWithinDomain
+            have : divisor f U z = 0 := by
+              let A := (divisor f U).supportWithinDomain
               simp at A
               by_contra H
               let B := A z H
@@ -491,19 +489,19 @@ theorem StronglyMeromorphicOn.decompose_log
   ∃ g : ℂ → ℂ, (MeromorphicOn g U)
     ∧ (AnalyticOnNhd ℂ g U)
     ∧ (∀ u : U, g u ≠ 0)
-    ∧ (fun z ↦ log ‖f z‖) =ᶠ[Filter.codiscreteWithin U] fun z ↦ log ‖g z‖ + ∑ᶠ s, (MeromorphicOn.divisor f h₁f.meromorphicOn s) * log ‖z - s‖ := by
+    ∧ (fun z ↦ log ‖f z‖) =ᶠ[Filter.codiscreteWithin U] fun z ↦ log ‖g z‖ + ∑ᶠ s, (MeromorphicOn.divisor f U s) * log ‖z - s‖ := by
 
-  have h₃f : Set.Finite (Function.support (MeromorphicOn.divisor f h₁f.meromorphicOn)) := by
-    exact (MeromorphicOn.divisor f (StronglyMeromorphicOn.meromorphicOn h₁f)).finiteSupport h₁U
+  have h₃f : Set.Finite (Function.support (MeromorphicOn.divisor f U)) := by
+    exact (MeromorphicOn.divisor f U).finiteSupport h₁U
 
-  have hSupp₁ {z : ℂ} : (fun s ↦ (MeromorphicOn.divisor f h₁f.meromorphicOn s) * log ‖z - s‖).support ⊆ h₃f.toFinset := by
+  have hSupp₁ {z : ℂ} : (fun s ↦ (MeromorphicOn.divisor f U s) * log ‖z - s‖).support ⊆ h₃f.toFinset := by
     intro x
     contrapose
     simp; tauto
   simp_rw [finsum_eq_sum_of_support_subset _ hSupp₁]
 
   obtain ⟨g, h₁g, h₂g, h₃g, h₄g⟩ := MeromorphicOn.decompose₃' h₁U h₂U h₁f h₂f
-  have hSupp₂ {z : ℂ} : ( fun (u : ℂ) ↦ (fun (z : ℂ) ↦ (z - u) ^ (MeromorphicOn.divisor f h₁f.meromorphicOn u)) ).mulSupport ⊆ h₃f.toFinset := by
+  have hSupp₂ {z : ℂ} : ( fun (u : ℂ) ↦ (fun (z : ℂ) ↦ (z - u) ^ (MeromorphicOn.divisor f U u)) ).mulSupport ⊆ h₃f.toFinset := by
     intro x
     contrapose
     simp
@@ -517,8 +515,8 @@ theorem StronglyMeromorphicOn.decompose_log
   rw [Filter.eventuallyEq_iff_exists_mem]
   use {z | f z ≠ 0}
   constructor
-  · have A := (MeromorphicOn.divisor f h₁f.meromorphicOn).supportDiscreteWithinDomain
-    have : {z | f z ≠ 0} ∩ U = (Function.support (MeromorphicOn.divisor f h₁f.meromorphicOn))ᶜ ∩ U := by
+  · have A := (MeromorphicOn.divisor f U).supportDiscreteWithinDomain
+    have : {z | f z ≠ 0} ∩ U = (Function.support (MeromorphicOn.divisor f U))ᶜ ∩ U := by
       rw [← h₁f.support_divisor h₂f h₂U]
       ext u
       simp; tauto
@@ -538,7 +536,7 @@ theorem StronglyMeromorphicOn.decompose_log
     intro x hx
     simp at hx
     have h₁x : x ∈ U := by
-      exact (MeromorphicOn.divisor f h₁f.meromorphicOn).supportWithinDomain hx
+      exact (MeromorphicOn.divisor f U).supportWithinDomain hx
 
     apply zpow_ne_zero
     simp
@@ -546,16 +544,13 @@ theorem StronglyMeromorphicOn.decompose_log
     by_contra hCon
     rw [sub_eq_zero] at hCon
     rw [← hCon] at hx
-    rw [MeromorphicOn.divisorOn_def] at hx
+    simp [h₁f.meromorphicOn, (by exact Set.mem_of_eq_of_mem hCon h₁x : z ∈ U)] at hx
     rw [hCon] at hz
     simp at hz
     let A := (h₁f x h₁x).order_eq_zero_iff
     let B := A.2 hz
-    simp [B] at hx
-    obtain ⟨a, b⟩ := hx
-    let c := b.1
-    simp_rw [hCon] at c
-    tauto
+    simp_rw [← hCon] at B
+    exact hx.1 B
     --
     simp at hz
     by_contra hCon
@@ -568,7 +563,7 @@ theorem StronglyMeromorphicOn.decompose_log
     intro x hx
     simp at hx
     have h₁x : x ∈ U := by
-      exact (MeromorphicOn.divisor f h₁f.meromorphicOn).supportWithinDomain hx
+      exact (MeromorphicOn.divisor f U).supportWithinDomain hx
 
     apply zpow_ne_zero
     simp
@@ -576,16 +571,13 @@ theorem StronglyMeromorphicOn.decompose_log
     by_contra hCon
     rw [sub_eq_zero] at hCon
     rw [← hCon] at hx
-    rw [MeromorphicOn.divisorOn_def] at hx
+    simp [h₁f.meromorphicOn, (by exact Set.mem_of_eq_of_mem hCon h₁x : z ∈ U)] at hx
     rw [hCon] at hz
     simp at hz
     let A := (h₁f x h₁x).order_eq_zero_iff
     let B := A.2 hz
-    simp [B] at hx
-    obtain ⟨a, b⟩ := hx
-    let c := b.1
-    simp_rw [hCon] at c
-    tauto
+    simp_rw [← hCon] at B
+    exact hx.1 B
 
   exact 0
 
@@ -600,7 +592,7 @@ theorem MeromorphicOn.decompose_log
   (h₂f : ∃ u : U, (h₁f u u.2).order ≠ ⊤) :
   ∃ g : ℂ → ℂ, (AnalyticOnNhd ℂ g U)
     ∧ (∀ u : U, g u ≠ 0)
-    ∧ (fun z ↦ log ‖f z‖) =ᶠ[Filter.codiscreteWithin U] fun z ↦ log ‖g z‖ + ∑ᶠ s, (divisor f h₁f s) * log ‖z - s‖ := by
+    ∧ (fun z ↦ log ‖f z‖) =ᶠ[Filter.codiscreteWithin U] fun z ↦ log ‖g z‖ + ∑ᶠ s, (divisor f U s) * log ‖z - s‖ := by
 
   let F := makeStronglyMeromorphicOn f U
   have h₁F := stronglyMeromorphicOn_of_makeStronglyMeromorphicOn h₁f
