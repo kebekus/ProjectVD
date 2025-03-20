@@ -120,40 +120,75 @@ variable (f U) in
 a discrete subset within `U`. Otherwise, returns the 0 function. -/
 noncomputable def toMeromorphicNFOn :
     𝕜 → E := by
-  by_cases hf : MeromorphicOn f U
-  · exact fun z ↦ toMeromorphicNFAt f z z
+  by_cases h₁f : MeromorphicOn f U
+  · intro z
+    by_cases hz : z ∈ U
+    · exact toMeromorphicNFAt f z z
+    · exact f z
   · exact 0
 
-/- ######################################################## -/
-
-theorem toMeromorphicNFOn_changeDiscrete [CompleteSpace E] (hf : MeromorphicOn f U) (hx : x ∈ U) :
-    toMeromorphicNFOn f U =ᶠ[𝓝[≠] x] f := by
-  filter_upwards [(hf x hx).eventually_analyticAt] with a ha
-  simp [toMeromorphicNFOn, hf, ← toMeromorphicNFAt_eq_self.1 ha.meromorphicNFAt]
-
-theorem toMeromorphicNFOn_changeDiscrete' [CompleteSpace E] (hf : MeromorphicOn f U)
-    (hx : x ∈ U) :
-    toMeromorphicNFOn f U =ᶠ[𝓝 x] toMeromorphicNFAt f x := by
-  apply eventuallyEq_nhds_of_eventuallyEq_nhdsNE ((toMeromorphicNFOn_changeDiscrete hf hx).trans
-    (hf x hx).eq_nhdNE_toMeromorphicNFAt)
+/-- If `f` is not meromorphic on `U`, conversion to normal form  maps the function to `0`. -/
+@[simp] lemma toMeromorphicNFOn_of_not_meromorphicOn (hf : ¬MeromorphicOn f U) :
+    toMeromorphicNFOn f U = 0 := by
   simp [toMeromorphicNFOn, hf]
 
-theorem toMeromorphicNFOn_changeDiscrete'' [CompleteSpace E] (hf : MeromorphicOn f U) :
+/-- Conversion to normal form on `U` does not change values outside of `U`. -/
+@[simp] lemma toMeromorphicNFOn_eq_self_on_compl (hf : MeromorphicOn f U) :
+    Set.EqOn f (toMeromorphicNFOn f U) Uᶜ := by
+  intro x hx
+  simp_all [toMeromorphicNFOn]
+
+/-- Conversion to normal form on `U` changes the value only along a discrete subset of `U`. -/
+theorem toMeromorphicNFOn_eqOn_codiscrete [CompleteSpace E] (hf : MeromorphicOn f U) :
     f =ᶠ[Filter.codiscreteWithin U] toMeromorphicNFOn f U := by
   have : U ∈ Filter.codiscreteWithin U := by
     simp [mem_codiscreteWithin.2]
   filter_upwards [hf.analyticAt_codiscreteWithin, this] with a h₁a h₂a
   simp [toMeromorphicNFOn, hf, ← toMeromorphicNFAt_eq_self.1 h₁a.meromorphicNFAt]
 
-theorem MeromorphicNFOn_of_toMeromorphicNFOn [CompleteSpace 𝕜]
-  {f : 𝕜 → 𝕜}
-  {U : Set 𝕜}
-  (hf : MeromorphicOn f U) :
-  MeromorphicNFOn (toMeromorphicNFOn f U) U := by
-  intro z hz
+/-- If `f` is meromorphic on `U` and `x ∈ U`, then `f` and its conversion to
+normal form on `U` agree in a punctured neighborhood of `x`. -/
+theorem toMeromorphicNFOn_eq_self_on_nhdNE [CompleteSpace E] (hf : MeromorphicOn f U)
+    (hx : x ∈ U) :
+    f =ᶠ[𝓝[≠] x] toMeromorphicNFOn f U := by
+  filter_upwards [(hf x hx).eventually_analyticAt] with a ha
+  simp [toMeromorphicNFOn, hf, ← toMeromorphicNFAt_eq_self.1 ha.meromorphicNFAt]
 
-  rw [meromorphicNFAt_congr (toMeromorphicNFOn_changeDiscrete' hf hz)]
-  exact meromorphicNFAt_toMeromorphicNFAt
+/-- If `f` is meromorphic on `U` and `x ∈ U`, then conversion to normal form at
+`x` and conversion to normal form on `U` agree in a neighborhood of `x`. -/
+theorem toMeromorphicNFOn_eq_toMeromorphicNFAt_on_nhdNE [CompleteSpace E] (hf : MeromorphicOn f U)
+    (hx : x ∈ U) :
+    toMeromorphicNFOn f U =ᶠ[𝓝 x] toMeromorphicNFAt f x := by
+  apply eventuallyEq_nhds_of_eventuallyEq_nhdsNE
+  exact (toMeromorphicNFOn_eq_self_on_nhdNE hf hx).symm.trans (hf x hx).eq_nhdNE_toMeromorphicNFAt
+  simp [toMeromorphicNFOn, hf, hx]
+
+variable (f U) in
+/-- After conversion to normal form at `x`, the function has normal form. -/
+theorem meromorphicNFOn_toMeromorphicNFOn [CompleteSpace E] :
+    MeromorphicNFOn (toMeromorphicNFOn f U) U := by
+  by_cases hf : MeromorphicOn f U
+  · intro z hz
+    rw [meromorphicNFAt_congr (toMeromorphicNFOn_eq_toMeromorphicNFAt_on_nhdNE hf hz)]
+    exact meromorphicNFAt_toMeromorphicNFAt
+  · simp [hf]
+    apply AnalyticOnNhd.meromorphicNFOn
+    exact analyticOnNhd_const
+
+/-- If `f` has normal form on `U`, then `f` equals `toMeromorphicNFOn f U`. -/
+@[simp] theorem toMeromorphicNFOn_eq_self [CompleteSpace E] :
+    MeromorphicNFOn f U ↔ f = toMeromorphicNFOn f U := by
+  constructor <;> intro h
+  · ext x
+    by_cases hx : x ∈ U
+    · simp only [toMeromorphicNFOn, h.meromorphicOn, ↓reduceDIte, hx]
+      rw [← toMeromorphicNFAt_eq_self.1 (h x hx)]
+    · simp [toMeromorphicNFOn, h.meromorphicOn, hx]
+  · rw [h]
+    apply meromorphicNFOn_toMeromorphicNFOn
+
+
+/- ######################################################## -/
 
 theorem toMeromorphicNFOn_changeOrder [CompleteSpace 𝕜]
   {f : 𝕜 → 𝕜}
@@ -161,9 +196,10 @@ theorem toMeromorphicNFOn_changeOrder [CompleteSpace 𝕜]
   {z₀ : 𝕜}
   (hf : MeromorphicOn f U)
   (hz₀ : z₀ ∈ U) :
-  (MeromorphicNFOn_of_toMeromorphicNFOn hf z₀ hz₀).meromorphicAt.order = (hf z₀ hz₀).order := by
+  ((meromorphicNFOn_toMeromorphicNFOn f U) z₀ hz₀).meromorphicAt.order = (hf z₀ hz₀).order := by
   apply MeromorphicAt.order_congr
-  exact toMeromorphicNFOn_changeDiscrete hf hz₀
+  exact (toMeromorphicNFOn_eq_self_on_nhdNE hf hz₀).symm
+
 
 theorem MeromorphicOn.divisor_of_toMeromorphicNFOn [CompleteSpace 𝕜]
   {f : 𝕜 → 𝕜}
@@ -172,8 +208,8 @@ theorem MeromorphicOn.divisor_of_toMeromorphicNFOn [CompleteSpace 𝕜]
   divisor f U = divisor (toMeromorphicNFOn f U) U := by
   ext z
   by_cases hz : z ∈ U
-  · simp [hf, (MeromorphicNFOn_of_toMeromorphicNFOn hf).meromorphicOn, hz]
+  · simp [hf, (meromorphicNFOn_toMeromorphicNFOn f U).meromorphicOn, hz]
     congr 1
     apply MeromorphicAt.order_congr
-    exact Filter.EventuallyEq.symm (toMeromorphicNFOn_changeDiscrete hf hz)
+    exact toMeromorphicNFOn_eq_self_on_nhdNE hf hz
   · simp [hz]

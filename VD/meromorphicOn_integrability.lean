@@ -82,10 +82,10 @@ theorem MeromorphicOn.integrable_log_abs_f₀
 
   · push_neg at h₂f
 
-    let F := makeMeromorphicNFOn f (Metric.closedBall 0 r)
+    let F := toMeromorphicNFOn f (Metric.closedBall 0 r)
     have : (fun z => log ‖f z‖) =ᶠ[Filter.codiscreteWithin (Metric.closedBall 0 r)] (fun z => log ‖F z‖) := by
       -- WANT: apply Filter.eventuallyEq.congr
-      let A := (makeMeromorphicNFOn_changeDiscrete'' h₁f)
+      let A := (toMeromorphicNFOn_eqOn_codiscrete h₁f)
       obtain ⟨s, h₁s, h₂s⟩ := eventuallyEq_iff_exists_mem.1 A
       rw [eventuallyEq_iff_exists_mem]
       use s
@@ -105,8 +105,8 @@ theorem MeromorphicOn.integrable_log_abs_f₀
     have : ∀ x ∈ Metric.closedBall 0 r, F x = 0 := by
       intro x hx
       let A := h₂f ⟨x, hx⟩
-      rw [← makeMeromorphicNFOn_changeOrder h₁f hx] at A
-      let B := ((MeromorphicNFOn_of_makeMeromorphicNFOn h₁f) x hx).order_eq_zero_iff.not.1
+      rw [← toMeromorphicNFOn_changeOrder h₁f hx] at A
+      let B := ((meromorphicNFOn_toMeromorphicNFOn f (Metric.closedBall 0 r)) x hx).order_eq_zero_iff.not.1
       simp [A] at B
       assumption
     have : (fun z => log ‖F z‖) ∘ circleMap 0 r = 0 := by

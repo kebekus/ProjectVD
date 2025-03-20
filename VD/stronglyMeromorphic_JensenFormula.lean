@@ -374,14 +374,14 @@ theorem jensen
   (h₂f : f 0 ≠ 0) :
   log ‖f 0‖ = -∑ᶠ s, (MeromorphicOn.divisor f (Metric.closedBall 0 R) s) * log (R * ‖s‖⁻¹) + (2 * π)⁻¹ * ∫ (x : ℝ) in (0)..(2 * π), log ‖f (circleMap 0 R x)‖ := by
 
-  let F := makeMeromorphicNFOn f (Metric.closedBall 0 R)
+  let F := toMeromorphicNFOn f (Metric.closedBall 0 R)
 
   have : F 0 = f 0 := by
     unfold F
     have : 0 ∈ (Metric.closedBall 0 R) := by
       simp [hR.le]
-    unfold makeMeromorphicNFOn
-    simp [this]
+    unfold toMeromorphicNFOn
+    simp [this, h₁f]
     intro h₁R
 
     let A := toMeromorphicNFAt_eq_self.1 h₁f'
@@ -390,11 +390,13 @@ theorem jensen
   rw [← this] at h₂f
   clear this
 
-  have h₁F := MeromorphicNFOn_of_makeMeromorphicNFOn h₁f
+  have h₁F : MeromorphicNFOn F (Metric.closedBall 0 R) := by
+    unfold F
+    exact meromorphicNFOn_toMeromorphicNFOn f (Metric.closedBall 0 R)
 
   rw [jensen₀ hR F h₁F h₂f]
 
-  rw [h₁f.divisor_of_makeMeromorphicNFOn]
+  rw [h₁f.divisor_of_toMeromorphicNFOn]
   congr 2
   have {x : ℝ} : log ‖F (circleMap 0 R x)‖ = (fun z ↦ log ‖F z‖) (circleMap 0 R x) := by
     rfl
@@ -422,7 +424,7 @@ theorem jensen
   clear A
 
   rw [Filter.eventuallyEq_iff_exists_mem]
-  have A := makeMeromorphicNFOn_changeDiscrete'' h₁f
+  have A := toMeromorphicNFOn_eqOn_codiscrete h₁f
   rw [Filter.eventuallyEq_iff_exists_mem] at A
   obtain ⟨s, h₁s, h₂s⟩ := A
   use s

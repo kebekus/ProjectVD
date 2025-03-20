@@ -353,10 +353,12 @@ theorem MeromorphicOn.decompose₃'
     simp
     exact u.2
 
-  let g := makeMeromorphicNFOn g' U
-  have h₁g : MeromorphicNFOn g U := MeromorphicNFOn_of_makeMeromorphicNFOn h₁g'
+  let g := toMeromorphicNFOn g' U
+  have h₁g : MeromorphicNFOn g U := by
+    unfold g
+    exact meromorphicNFOn_toMeromorphicNFOn g' U
   have h₂g : divisor g U = 0 := by
-    rw [← MeromorphicOn.divisor_of_makeMeromorphicNFOn]
+    rw [← MeromorphicOn.divisor_of_toMeromorphicNFOn]
     rwa [h₂g']
   have h₃g : AnalyticOnNhd ℂ g U := by
     rw [← h₁g.nonneg_divisor_iff_analyticOnNhd, h₂g]
@@ -364,7 +366,7 @@ theorem MeromorphicOn.decompose₃'
   have h₄g : ∀ u : U, g u ≠ 0 := by
     intro u
     rw [← (h₁g u.1 u.2).order_eq_zero_iff]
-    rw [makeMeromorphicNFOn_changeOrder]
+    rw [toMeromorphicNFOn_changeOrder]
     let A := h₃g' u
     exact A
 
@@ -382,7 +384,7 @@ theorem MeromorphicOn.decompose₃'
         by_cases hz : z ∈ U
         · apply Filter.EventuallyEq.eq_of_nhds
           rw [← MeromorphicNFAt.eventuallyEq_nhdNE_iff_eventuallyEq_nhd (h₁f z hz) (t₀ z hz)]
-          have h₅g : g =ᶠ[𝓝[≠] z] g' := makeMeromorphicNFOn_changeDiscrete h₁g' hz
+          have h₅g : g =ᶠ[𝓝[≠] z] g' := (toMeromorphicNFOn_eq_self_on_nhdNE h₁g' hz).symm
           have Y' : (g' * ∏ᶠ (u : ℂ), fun z => (z - u) ^ (divisor f U u)) =ᶠ[𝓝[≠] z] g * ∏ᶠ (u : ℂ), fun z => (z - u) ^ (divisor f U u) := by
             apply Filter.EventuallyEq.symm
             exact Filter.EventuallyEq.mul h₅g (by simp)
@@ -435,8 +437,8 @@ theorem MeromorphicOn.decompose₃'
         · simp
           have : g z = g' z := by
             unfold g
-            unfold makeMeromorphicNFOn
-            simp [hz]
+            unfold toMeromorphicNFOn
+            simp [hz, h₁g']
           rw [this]
           unfold g'
           unfold h₁
@@ -604,12 +606,14 @@ theorem MeromorphicOn.decompose_log
     ∧ (∀ u : U, g u ≠ 0)
     ∧ (fun z ↦ log ‖f z‖) =ᶠ[Filter.codiscreteWithin U] fun z ↦ log ‖g z‖ + ∑ᶠ s, (divisor f U s) * log ‖z - s‖ := by
 
-  let F := makeMeromorphicNFOn f U
-  have h₁F := MeromorphicNFOn_of_makeMeromorphicNFOn h₁f
+  let F := toMeromorphicNFOn f U
+  have h₁F : MeromorphicNFOn F U := by
+    unfold F
+    exact meromorphicNFOn_toMeromorphicNFOn f U
   have h₂F : ∃ u : U, (h₁F.meromorphicOn u u.2).order ≠ ⊤ := by
     obtain ⟨u, hu⟩ := h₂f
     use u
-    rw [makeMeromorphicNFOn_changeOrder h₁f u.2]
+    rw [toMeromorphicNFOn_changeOrder h₁f u.2]
     assumption
 
   have t₁ : ∃ u : U, F u ≠ 0 := by
@@ -618,7 +622,7 @@ theorem MeromorphicOn.decompose_log
   have t₃ : (fun z ↦ log ‖f z‖) =ᶠ[Filter.codiscreteWithin U] (fun z ↦ log ‖F z‖) := by
     -- This would be interesting for a tactic
     rw [eventuallyEq_iff_exists_mem]
-    obtain ⟨s, h₁s, h₂s⟩ := eventuallyEq_iff_exists_mem.1 (makeMeromorphicNFOn_changeDiscrete'' h₁f)
+    obtain ⟨s, h₁s, h₂s⟩ := eventuallyEq_iff_exists_mem.1 (toMeromorphicNFOn_eqOn_codiscrete h₁f)
     use s
     tauto
 
@@ -629,5 +633,5 @@ theorem MeromorphicOn.decompose_log
   · constructor
     · exact h₃g
     · apply t₃.trans
-      rw [h₁f.divisor_of_makeMeromorphicNFOn]
+      rw [h₁f.divisor_of_toMeromorphicNFOn]
       exact h₄g
