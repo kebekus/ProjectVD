@@ -21,10 +21,10 @@ theorem analyticAt_ratlPolynomial₁
   exact ne_of_mem_of_not_mem hu hz
 
 
-theorem stronglyMeromorphicOn_ratlPolynomial₂
+theorem MeromorphicNFOn_ratlPolynomial₂
   (d : ℂ → ℤ)
   (P : Finset ℂ) :
-  StronglyMeromorphicOn (∏ u ∈ P, fun z ↦ (z - u) ^ d u) ⊤ := by
+  MeromorphicNFOn (∏ u ∈ P, fun z ↦ (z - u) ^ d u) ⊤ := by
 
   intro z hz
   by_cases h₂z : z ∈ P
@@ -50,23 +50,23 @@ theorem stronglyMeromorphicOn_ratlPolynomial₂
     exact analyticAt_ratlPolynomial₁ d P (z := z) h₂z
 
 
-theorem stronglyMeromorphicOn_ratlPolynomial₃
+theorem MeromorphicNFOn_ratlPolynomial₃
   (d : ℂ → ℤ) :
-  StronglyMeromorphicOn (∏ᶠ u, fun z ↦ (z - u) ^ d u) ⊤ := by
+  MeromorphicNFOn (∏ᶠ u, fun z ↦ (z - u) ^ d u) ⊤ := by
   by_cases hd : (Function.mulSupport fun u z => (z - u) ^ d u).Finite
   · rw [finprod_eq_prod _ hd]
-    apply stronglyMeromorphicOn_ratlPolynomial₂ d hd.toFinset
+    apply MeromorphicNFOn_ratlPolynomial₂ d hd.toFinset
   · rw [finprod_of_infinite_mulSupport hd]
-    apply AnalyticOn.stronglyMeromorphicOn
+    apply AnalyticOn.MeromorphicNFOn
     apply analyticOnNhd_const
 
 
-theorem stronglyMeromorphicOn_ratlPolynomial₃U
+theorem MeromorphicNFOn_ratlPolynomial₃U
   (d : ℂ → ℤ)
   (U : Set ℂ) :
-  StronglyMeromorphicOn (∏ᶠ u, fun z ↦ (z - u) ^ d u) U := by
+  MeromorphicNFOn (∏ᶠ u, fun z ↦ (z - u) ^ d u) U := by
   intro z hz
-  exact stronglyMeromorphicOn_ratlPolynomial₃ d z (trivial)
+  exact MeromorphicNFOn_ratlPolynomial₃ d z (trivial)
 
 
 theorem ratlPoly_mulsupport
@@ -91,11 +91,11 @@ theorem ratlPoly_mulsupport
     tauto
 
 
-theorem stronglyMeromorphicOn_divisor_ratlPolynomial₁
+theorem MeromorphicNFOn_divisor_ratlPolynomial₁
   {z : ℂ}
   (d : ℂ → ℤ)
   (h₁d : Set.Finite d.support) :
-  (((stronglyMeromorphicOn_ratlPolynomial₃ d).meromorphicOn) z trivial).order = d z := by
+  (((MeromorphicNFOn_ratlPolynomial₃ d).meromorphicOn) z trivial).order = d z := by
 
   rw [MeromorphicAt.order_eq_int_iff]
   use ∏ x ∈ h₁d.toFinset.erase z, fun z => (z - x) ^ d x
@@ -144,10 +144,10 @@ theorem stronglyMeromorphicOn_divisor_ratlPolynomial₁
         simp
 
 
-theorem stronglyMeromorphicOn_ratlPolynomial₃order
+theorem MeromorphicNFOn_ratlPolynomial₃order
   {z : ℂ}
   (d : ℂ → ℤ) :
-  ((stronglyMeromorphicOn_ratlPolynomial₃ d) z trivial).meromorphicAt.order ≠ ⊤ := by
+  ((MeromorphicNFOn_ratlPolynomial₃ d) z trivial).meromorphicAt.order ≠ ⊤ := by
 
   have h₂d : (Function.mulSupport fun u z ↦ (z - u) ^ d u) = d.support := by
     ext u
@@ -169,7 +169,7 @@ theorem stronglyMeromorphicOn_ratlPolynomial₃order
       tauto
 
   by_cases hd : Set.Finite (Function.support d)
-  · rw [stronglyMeromorphicOn_divisor_ratlPolynomial₁ d hd]
+  · rw [MeromorphicNFOn_divisor_ratlPolynomial₁ d hd]
     simp
   · rw [← h₂d] at hd
     have : (Function.mulSupport fun u z => (z - u) ^ d u).Infinite := by
@@ -181,16 +181,16 @@ theorem stronglyMeromorphicOn_ratlPolynomial₃order
     simp
 
 
-theorem stronglyMeromorphicOn_divisor_ratlPolynomial
+theorem MeromorphicNFOn_divisor_ratlPolynomial
   (d : ℂ → ℤ)
   (h₁d : Set.Finite d.support) :
   MeromorphicOn.divisor (∏ᶠ u, fun z ↦ (z - u) ^ d u) ⊤ = d := by
   ext z
-  rw [MeromorphicOn.divisor_apply (stronglyMeromorphicOn_ratlPolynomial₃ d).meromorphicOn (by simp : z ∈ Set.univ)]
-  rw [stronglyMeromorphicOn_divisor_ratlPolynomial₁ d h₁d]
+  rw [MeromorphicOn.divisor_apply (MeromorphicNFOn_ratlPolynomial₃ d).meromorphicOn (by simp : z ∈ Set.univ)]
+  rw [MeromorphicNFOn_divisor_ratlPolynomial₁ d h₁d]
   simp
 
-theorem stronglyMeromorphicOn_divisor_ratlPolynomial_U
+theorem MeromorphicNFOn_divisor_ratlPolynomial_U
   {U : Set ℂ}
   (d : ℂ → ℤ)
   (h₁d : Set.Finite d.support)
@@ -198,8 +198,8 @@ theorem stronglyMeromorphicOn_divisor_ratlPolynomial_U
   MeromorphicOn.divisor (∏ᶠ u, fun z ↦ (z - u) ^ d u) U = d := by
   ext z
   by_cases hz : z ∈ U
-  · simp [(stronglyMeromorphicOn_ratlPolynomial₃U d U).meromorphicOn, hz]
-    rw [stronglyMeromorphicOn_divisor_ratlPolynomial₁ d h₁d]
+  · simp [(MeromorphicNFOn_ratlPolynomial₃U d U).meromorphicOn, hz]
+    rw [MeromorphicNFOn_divisor_ratlPolynomial₁ d h₁d]
     simp
   · simp [hz]
     rw [eq_comm, ← Function.nmem_support]

@@ -129,7 +129,7 @@ theorem MeromorphicOn.decompose₂
   {f : ℂ → ℂ}
   {U : Set ℂ}
   {P : Finset U}
-  (hf : StronglyMeromorphicOn f U) :
+  (hf : MeromorphicNFOn f U) :
   (∀ p ∈ P, (hf p p.2).meromorphicAt.order ≠ ⊤) →
     ∃ g : ℂ → ℂ, (MeromorphicOn g U)
     ∧ (∀ p : P, AnalyticAt ℂ g p)
@@ -276,7 +276,7 @@ theorem MeromorphicOn.decompose₃'
   {U : Set ℂ}
   (h₁U : IsCompact U)
   (h₂U : IsConnected U)
-  (h₁f : StronglyMeromorphicOn f U)
+  (h₁f : MeromorphicNFOn f U)
   (h₂f : ∃ u : U, f u ≠ 0) :
   ∃ g : ℂ → ℂ, (MeromorphicOn g U)
     ∧ (AnalyticOnNhd ℂ g U)
@@ -284,7 +284,7 @@ theorem MeromorphicOn.decompose₃'
     ∧ (f = g * ∏ᶠ u, fun z ↦ (z - u) ^ (divisor f U u)) := by
 
   have h₃f : ∀ u : U, (h₁f u u.2).meromorphicAt.order ≠ ⊤ :=
-    StronglyMeromorphicOn.order_ne_top h₁f h₂U h₂f
+    MeromorphicNFOn.order_ne_top h₁f h₂U h₂f
   have h₄f : Set.Finite (Function.support (divisor f U)) := (divisor f U).finiteSupport h₁U
 
   let d := - (divisor f U).toFun
@@ -294,22 +294,22 @@ theorem MeromorphicOn.decompose₃'
     simp
     tauto
   let h₁ := ∏ᶠ u, fun z ↦ (z - u) ^ (d u)
-  have h₁h₁ : StronglyMeromorphicOn h₁ U := by
+  have h₁h₁ : MeromorphicNFOn h₁ U := by
     intro z hz
-    exact stronglyMeromorphicOn_ratlPolynomial₃ d z trivial
+    exact MeromorphicNFOn_ratlPolynomial₃ d z trivial
   have h₂h₁ : (divisor h₁ U) = d := by
     unfold h₁
-    apply stronglyMeromorphicOn_divisor_ratlPolynomial_U d
+    apply MeromorphicNFOn_divisor_ratlPolynomial_U d
     rwa [h₁d]
     --
     rw [h₁d]
     exact (divisor f U).supportWithinDomain
   have h₃h₁ : ∀ (z : ℂ) (hz : z ∈ U), (h₁h₁ z hz).meromorphicAt.order ≠ ⊤ := by
     intro z hz
-    apply stronglyMeromorphicOn_ratlPolynomial₃order
+    apply MeromorphicNFOn_ratlPolynomial₃order
   have h₄h₁ : ∀ (z : ℂ) (hz : z ∈ U), (h₁h₁ z hz).meromorphicAt.order = d z := by
     intro z hz
-    rw [stronglyMeromorphicOn_divisor_ratlPolynomial₁]
+    rw [MeromorphicNFOn_divisor_ratlPolynomial₁]
     rwa [h₁d]
 
   let g' := f * h₁
@@ -348,38 +348,38 @@ theorem MeromorphicOn.decompose₃'
     simp
     exact u.2
 
-  let g := makeStronglyMeromorphicOn g' U
-  have h₁g : StronglyMeromorphicOn g U := stronglyMeromorphicOn_of_makeStronglyMeromorphicOn h₁g'
+  let g := makeMeromorphicNFOn g' U
+  have h₁g : MeromorphicNFOn g U := MeromorphicNFOn_of_makeMeromorphicNFOn h₁g'
   have h₂g : divisor g U = 0 := by
-    rw [← MeromorphicOn.divisor_of_makeStronglyMeromorphicOn]
+    rw [← MeromorphicOn.divisor_of_makeMeromorphicNFOn]
     rwa [h₂g']
   have h₃g : AnalyticOnNhd ℂ g U := by
-    apply StronglyMeromorphicOn.analyticOnNhd h₁g
+    apply MeromorphicNFOn.analyticOnNhd h₁g
     rw [h₂g]
     simp
   have h₄g : ∀ u : U, g u ≠ 0 := by
     intro u
     rw [← (h₁g u.1 u.2).order_eq_zero_iff]
-    rw [makeStronglyMeromorphicOn_changeOrder]
+    rw [makeMeromorphicNFOn_changeOrder]
     let A := h₃g' u
     exact A
 
   use g
   constructor
-  · exact StronglyMeromorphicOn.meromorphicOn h₁g
+  · exact MeromorphicNFOn.meromorphicOn h₁g
   · constructor
     · exact h₃g
     · constructor
       · exact h₄g
-      · have t₀ : StronglyMeromorphicOn (g * ∏ᶠ (u : ℂ), fun z => (z - u) ^ (divisor f U u)) U := by
-          apply stronglyMeromorphicOn_of_mul_analytic' h₃g h₄g
-          apply stronglyMeromorphicOn_ratlPolynomial₃U
+      · have t₀ : MeromorphicNFOn (g * ∏ᶠ (u : ℂ), fun z => (z - u) ^ (divisor f U u)) U := by
+          apply MeromorphicNFOn_of_mul_analytic' h₃g h₄g
+          apply MeromorphicNFOn_ratlPolynomial₃U
 
         funext z
         by_cases hz : z ∈ U
         · apply Filter.EventuallyEq.eq_of_nhds
           rw [← MeromorphicNFAt.eventuallyEq_nhdNE_iff_eventuallyEq_nhd (h₁f z hz) (t₀ z hz)]
-          have h₅g : g =ᶠ[𝓝[≠] z] g' := makeStronglyMeromorphicOn_changeDiscrete h₁g' hz
+          have h₅g : g =ᶠ[𝓝[≠] z] g' := makeMeromorphicNFOn_changeDiscrete h₁g' hz
           have Y' : (g' * ∏ᶠ (u : ℂ), fun z => (z - u) ^ (divisor f U u)) =ᶠ[𝓝[≠] z] g * ∏ᶠ (u : ℂ), fun z => (z - u) ^ (divisor f U u) := by
             apply Filter.EventuallyEq.symm
             exact Filter.EventuallyEq.mul h₅g (by simp)
@@ -432,7 +432,7 @@ theorem MeromorphicOn.decompose₃'
         · simp
           have : g z = g' z := by
             unfold g
-            unfold makeStronglyMeromorphicOn
+            unfold makeMeromorphicNFOn
             simp [hz]
           rw [this]
           unfold g'
@@ -479,12 +479,12 @@ theorem MeromorphicOn.decompose₃'
           tauto
 
 
-theorem StronglyMeromorphicOn.decompose_log
+theorem MeromorphicNFOn.decompose_log
   {f : ℂ → ℂ}
   {U : Set ℂ}
   (h₁U : IsCompact U)
   (h₂U : IsConnected U)
-  (h₁f : StronglyMeromorphicOn f U)
+  (h₁f : MeromorphicNFOn f U)
   (h₂f : ∃ u : U, f u ≠ 0) :
   ∃ g : ℂ → ℂ, (MeromorphicOn g U)
     ∧ (AnalyticOnNhd ℂ g U)
@@ -594,12 +594,12 @@ theorem MeromorphicOn.decompose_log
     ∧ (∀ u : U, g u ≠ 0)
     ∧ (fun z ↦ log ‖f z‖) =ᶠ[Filter.codiscreteWithin U] fun z ↦ log ‖g z‖ + ∑ᶠ s, (divisor f U s) * log ‖z - s‖ := by
 
-  let F := makeStronglyMeromorphicOn f U
-  have h₁F := stronglyMeromorphicOn_of_makeStronglyMeromorphicOn h₁f
+  let F := makeMeromorphicNFOn f U
+  have h₁F := MeromorphicNFOn_of_makeMeromorphicNFOn h₁f
   have h₂F : ∃ u : U, (h₁F.meromorphicOn u u.2).order ≠ ⊤ := by
     obtain ⟨u, hu⟩ := h₂f
     use u
-    rw [makeStronglyMeromorphicOn_changeOrder h₁f u.2]
+    rw [makeMeromorphicNFOn_changeOrder h₁f u.2]
     assumption
 
   have t₁ : ∃ u : U, F u ≠ 0 := by
@@ -608,7 +608,7 @@ theorem MeromorphicOn.decompose_log
   have t₃ : (fun z ↦ log ‖f z‖) =ᶠ[Filter.codiscreteWithin U] (fun z ↦ log ‖F z‖) := by
     -- This would be interesting for a tactic
     rw [eventuallyEq_iff_exists_mem]
-    obtain ⟨s, h₁s, h₂s⟩ := eventuallyEq_iff_exists_mem.1 (makeStronglyMeromorphicOn_changeDiscrete'' h₁f)
+    obtain ⟨s, h₁s, h₂s⟩ := eventuallyEq_iff_exists_mem.1 (makeMeromorphicNFOn_changeDiscrete'' h₁f)
     use s
     tauto
 
@@ -619,5 +619,5 @@ theorem MeromorphicOn.decompose_log
   · constructor
     · exact h₃g
     · apply t₃.trans
-      rw [h₁f.divisor_of_makeStronglyMeromorphicOn]
+      rw [h₁f.divisor_of_makeMeromorphicNFOn]
       exact h₄g

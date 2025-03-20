@@ -157,17 +157,17 @@ theorem MeromorphicOn.divisor_add_const₃ [CompleteSpace 𝕜]
         exact analyticAt_const
   rw [← this]
 
-theorem MeromorphicOn.divisor_of_makeStronglyMeromorphicOn [CompleteSpace 𝕜]
+theorem MeromorphicOn.divisor_of_makeMeromorphicNFOn [CompleteSpace 𝕜]
   {f : 𝕜 → 𝕜}
   {U : Set 𝕜}
   (hf : MeromorphicOn f U) :
-  divisor f U = divisor (makeStronglyMeromorphicOn f U) U := by
+  divisor f U = divisor (makeMeromorphicNFOn f U) U := by
   ext z
   by_cases hz : z ∈ U
-  · simp [hf, (stronglyMeromorphicOn_of_makeStronglyMeromorphicOn hf).meromorphicOn, hz]
+  · simp [hf, (MeromorphicNFOn_of_makeMeromorphicNFOn hf).meromorphicOn, hz]
     congr 1
     apply MeromorphicAt.order_congr
-    exact EventuallyEq.symm (makeStronglyMeromorphicOn_changeDiscrete hf hz)
+    exact EventuallyEq.symm (makeMeromorphicNFOn_changeDiscrete hf hz)
   · simp [hz]
 
 
@@ -175,14 +175,14 @@ theorem MeromorphicOn.divisor_of_makeStronglyMeromorphicOn [CompleteSpace 𝕜]
 -- STRONGLY MEROMORPHIC THINGS
 
 /- Strongly MeromorphicOn of non-negative order is analytic -/
-theorem StronglyMeromorphicOn.analyticOnNhd [CompleteSpace 𝕜]
+theorem MeromorphicNFOn.analyticOnNhd [CompleteSpace 𝕜]
   {f : 𝕜 → 𝕜}
   {U : Set 𝕜}
-  (h₁f : StronglyMeromorphicOn f U)
+  (h₁f : MeromorphicNFOn f U)
   (h₂f : ∀ x, (hx : x ∈ U) → 0 ≤ MeromorphicOn.divisor f U x) :
   AnalyticOnNhd 𝕜 f U := by
 
-  apply StronglyMeromorphicOn.analytic
+  apply MeromorphicNFOn.analytic
   intro z hz
   let A := h₂f z hz
   simp [h₁f.meromorphicOn, hz] at A
@@ -196,10 +196,10 @@ theorem StronglyMeromorphicOn.analyticOnNhd [CompleteSpace 𝕜]
   assumption
 
 
-theorem StronglyMeromorphicOn.support_divisor [CompleteSpace 𝕜]
+theorem MeromorphicNFOn.support_divisor [CompleteSpace 𝕜]
   {f : 𝕜 → 𝕜}
   {U : Set 𝕜}
-  (h₁f : StronglyMeromorphicOn f U)
+  (h₁f : MeromorphicNFOn f U)
   (h₂f : ∃ u : U, f u ≠ 0)
   (hU : IsConnected U) :
   U ∩ f⁻¹' {0} = (Function.support (MeromorphicOn.divisor f U)) := by
