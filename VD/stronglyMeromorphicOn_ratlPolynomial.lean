@@ -57,7 +57,7 @@ theorem MeromorphicNFOn_ratlPolynomial₃
   · rw [finprod_eq_prod _ hd]
     apply MeromorphicNFOn_ratlPolynomial₂ d hd.toFinset
   · rw [finprod_of_infinite_mulSupport hd]
-    apply AnalyticOn.MeromorphicNFOn
+    apply AnalyticOnNhd.meromorphicNFOn
     apply analyticOnNhd_const
 
 

@@ -284,7 +284,7 @@ theorem MeromorphicOn.decompose₃'
     ∧ (f = g * ∏ᶠ u, fun z ↦ (z - u) ^ (divisor f U u)) := by
 
   have h₃f : ∀ u : U, (h₁f u u.2).meromorphicAt.order ≠ ⊤ :=
-    MeromorphicNFOn.order_ne_top h₁f h₂U h₂f
+    MeromorphicNFOn.order_ne_top_if_exists_value_ne_zero h₁f h₂f h₂U
   have h₄f : Set.Finite (Function.support (divisor f U)) := (divisor f U).finiteSupport h₁U
 
   let d := - (divisor f U).toFun
@@ -354,9 +354,8 @@ theorem MeromorphicOn.decompose₃'
     rw [← MeromorphicOn.divisor_of_makeMeromorphicNFOn]
     rwa [h₂g']
   have h₃g : AnalyticOnNhd ℂ g U := by
-    apply MeromorphicNFOn.analyticOnNhd h₁g
-    rw [h₂g]
-    simp
+    rw [← h₁g.nonneg_divisor_iff_analyticOnNhd, h₂g]
+
   have h₄g : ∀ u : U, g u ≠ 0 := by
     intro u
     rw [← (h₁g u.1 u.2).order_eq_zero_iff]
@@ -517,7 +516,7 @@ theorem MeromorphicNFOn.decompose_log
   constructor
   · have A := (MeromorphicOn.divisor f U).supportDiscreteWithinDomain
     have : {z | f z ≠ 0} ∩ U = (Function.support (MeromorphicOn.divisor f U))ᶜ ∩ U := by
-      rw [← h₁f.support_divisor h₂f h₂U]
+      rw [← h₁f.zero_set_eq_divisor_support h₂f h₂U]
       ext u
       simp; tauto
 

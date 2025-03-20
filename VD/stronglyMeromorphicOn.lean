@@ -1,40 +1,100 @@
 import Mathlib.Algebra.BigOperators.Finprod
+import Mathlib.Analysis.Meromorphic.Divisor.MeromorphicFunction
 import VD.ToMathlib.MeromorphicNFAt
+import VD.meromorphicAt
 
 open Topology
 
-variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+variable
+  {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-
-
-/- Strongly MeromorphicOn -/
-def MeromorphicNFOn
-  (f : 𝕜 → E)
-  (U : Set 𝕜) :=
-  ∀ z ∈ U, MeromorphicNFAt f z
-
-/- Strongly MeromorphicAt is Meromorphic -/
-theorem MeromorphicNFOn.meromorphicOn
   {f : 𝕜 → E}
+  {x : 𝕜}
   {U : Set 𝕜}
-  (hf : MeromorphicNFOn f U) :
-  MeromorphicOn f U := fun z hz ↦ (hf z hz).meromorphicAt
 
-/- Strongly MeromorphicOn of non-negative order is analytic -/
-theorem MeromorphicNFOn.analytic
-  {f : 𝕜 → E}
-  {U : Set 𝕜}
-  (h₁f : MeromorphicNFOn f U)
-  (h₂f : ∀ x, (hx : x ∈ U) → 0 ≤ (h₁f x hx).meromorphicAt.order) :
-  AnalyticOnNhd 𝕜 f U := fun z hz ↦ (h₁f z hz).order_nonneg_iff_analyticAt.1 (h₂f z hz)
+/-!
+# Normal form of meromorphic functions on a given set
 
-/- Analytic functions are strongly meromorphic -/
-theorem AnalyticOn.MeromorphicNFOn
-  {f : 𝕜 → E}
-  {U : Set 𝕜}
-  (h₁f : AnalyticOnNhd 𝕜 f U) :
-  MeromorphicNFOn f U :=
-  fun z hz ↦ (h₁f z hz).meromorphicNFAt
+## Definition
+-/
+
+/-- A function is 'meromorphic in normal form' on `U` if has normal form at
+every point of `U`. -/
+def MeromorphicNFOn (f : 𝕜 → E) (U : Set 𝕜) := ∀ z ∈ U, MeromorphicNFAt f z
+
+/-!
+## Relation to other properties of functions
+-/
+
+/-- If a function is meromorphic in normal form on `U`, then it is meromorphic on `U`. -/
+theorem MeromorphicNFOn.meromorphicOn (hf : MeromorphicNFOn f U) :
+    MeromorphicOn f U := fun z hz ↦ (hf z hz).meromorphicAt
+
+/-- If a function is meromorphic in normal form on `U`, then its divisor is
+non-negative iff it is analytic. -/
+theorem MeromorphicNFOn.nonneg_divisor_iff_analyticOnNhd [CompleteSpace E]
+    (h₁f : MeromorphicNFOn f U) :
+    0 ≤ MeromorphicOn.divisor f U ↔ AnalyticOnNhd 𝕜 f U := by
+  constructor <;> intro h
+  · intro x hx
+    rw [← (h₁f x hx).order_nonneg_iff_analyticAt]
+    have := h x
+    simp only [DivisorOn.coe_zero, Pi.zero_apply, h₁f.meromorphicOn, hx,
+      MeromorphicOn.divisor_apply, le_refl, implies_true, WithTop.le_untopD_iff,
+      WithTop.coe_zero] at this
+    assumption
+  · intro x
+    by_cases hx : x ∈ U
+    · simp only [DivisorOn.coe_zero, Pi.zero_apply, h₁f.meromorphicOn, hx,
+        MeromorphicOn.divisor_apply, le_refl, implies_true, WithTop.le_untopD_iff,
+        WithTop.coe_zero]
+      exact (h₁f x hx).order_nonneg_iff_analyticAt.2 (h x hx)
+    · simp [h₁f.meromorphicOn, hx]
+
+/- Analytic functions are meromorphic in normal form. -/
+theorem AnalyticOnNhd.meromorphicNFOn (h₁f : AnalyticOnNhd 𝕜 f U) :
+    MeromorphicNFOn f U := fun z hz ↦ (h₁f z hz).meromorphicNFAt
+
+/-!
+## Level sets of the order function
+-/
+
+/-- Criterion to ensure that the order of a meromorphic function in normal form
+is not infinity. See `MeromorphicOn.exists_order_ne_top_iff_forall` for a related
+criterion for arbitrarymeromorphic functions. -/
+theorem MeromorphicNFOn.order_ne_top_if_exists_value_ne_zero (h₁f : MeromorphicNFOn f U)
+    (h₂f : ∃ u : U, f u ≠ 0) (hU : IsConnected U) :
+    ∀ u : U, (h₁f u u.2).meromorphicAt.order ≠ ⊤ := by
+  rw [← h₁f.meromorphicOn.exists_order_ne_top_iff_forall hU]
+  obtain ⟨u, hu⟩ := h₂f
+  use u
+  rw [← (h₁f u u.2).order_eq_zero_iff] at hu
+  simp [hu]
+
+/-!
+## Divisors of meromorphic functions in normal form.
+-/
+
+theorem MeromorphicNFOn.zero_set_eq_divisor_support [CompleteSpace E] (h₁f : MeromorphicNFOn f U)
+    (h₂f : ∃ u : U, f u ≠ 0) (hU : IsConnected U) :
+    U ∩ f⁻¹' {0} = (Function.support (MeromorphicOn.divisor f U)) := by
+  ext u
+  constructor <;> intro hu
+  · simp_all only [ne_eq, Subtype.exists, exists_prop, Set.mem_inter_iff, Set.mem_preimage,
+      Set.mem_singleton_iff, Function.mem_support, h₁f.meromorphicOn, MeromorphicOn.divisor_apply,
+      WithTop.untopD_eq_self_iff, WithTop.coe_zero, (h₁f u hu.1).order_eq_zero_iff,
+      not_true_eq_false, false_or]
+    apply h₁f.order_ne_top_if_exists_value_ne_zero _ hU ⟨u, hu.1⟩
+    obtain ⟨a, ha⟩ := h₂f
+    use ⟨a, ha.1⟩, ha.2
+  · simp only [Function.mem_support, ne_eq] at hu
+    constructor
+    · exact (MeromorphicOn.divisor f U).supportWithinDomain hu
+    · rw [Set.mem_preimage, Set.mem_singleton_iff]
+      have := (h₁f u ((MeromorphicOn.divisor f U).supportWithinDomain hu)).order_eq_zero_iff.not
+      simp only [h₁f.meromorphicOn, (MeromorphicOn.divisor f U).supportWithinDomain hu,
+        MeromorphicOn.divisor_apply, WithTop.untopD_eq_self_iff, WithTop.coe_zero, not_or] at hu
+      simp_all [this, hu.1]
 
 theorem MeromorphicNFOn_of_mul_analytic'
   {f : 𝕜 → E}
@@ -129,17 +189,15 @@ theorem makeMeromorphicNFOn_changeOrder [CompleteSpace 𝕜]
   apply MeromorphicAt.order_congr
   exact makeMeromorphicNFOn_changeDiscrete hf hz₀
 
-theorem MeromorphicNFOn.order_ne_top
+theorem MeromorphicOn.divisor_of_makeMeromorphicNFOn [CompleteSpace 𝕜]
   {f : 𝕜 → 𝕜}
   {U : Set 𝕜}
-  (h₁f : MeromorphicNFOn f U)
-  (hU : IsConnected U)
-  (h₂f : ∃ u : U, f u ≠ 0) :
-  ∀ u : U, (h₁f u u.2).meromorphicAt.order ≠ ⊤ := by
-
-  rw [← h₁f.meromorphicOn.exists_order_ne_top_iff_forall hU]
-  obtain ⟨u, hu⟩ := h₂f
-  use u
-  rw [← (h₁f u u.2).order_eq_zero_iff] at hu
-  rw [hu]
-  simp
+  (hf : MeromorphicOn f U) :
+  divisor f U = divisor (makeMeromorphicNFOn f U) U := by
+  ext z
+  by_cases hz : z ∈ U
+  · simp [hf, (MeromorphicNFOn_of_makeMeromorphicNFOn hf).meromorphicOn, hz]
+    congr 1
+    apply MeromorphicAt.order_congr
+    exact Filter.EventuallyEq.symm (makeMeromorphicNFOn_changeDiscrete hf hz)
+  · simp [hz]
