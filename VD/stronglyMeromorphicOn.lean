@@ -80,110 +80,100 @@ theorem MeromorphicNFOn.zero_set_eq_divisor_support [CompleteSpace E] (h₁f : M
         MeromorphicOn.divisor_apply, WithTop.untopD_eq_self_iff, WithTop.coe_zero, not_or] at hu
       simp_all [this, hu.1]
 
+/-!
+## Criteria to guarantee normal form
+-/
+
+/-- If `f` is any function and `g` is analytic without zero on `U`, then `f` is meromorphic in
+normal form on `U` iff `g • f` is meromorphic in normal form on `U`. -/
+theorem meromorphicNFOn_smul_iff_right_of_analyticAt {g : 𝕜 → 𝕜} (h₁g : AnalyticOnNhd 𝕜 g U)
+    (h₂g : ∀ u : U, g u ≠ 0) :
+    MeromorphicNFOn (g • f) U ↔ MeromorphicNFOn f U := by
+  constructor <;> intro h z hz
+  · rw [meromorphicNFAt_iff_meromorphicNFAt_of_smul_analytic (h₁g z hz) (h₂g ⟨z, hz⟩)]
+    exact h z hz
+  · apply MeromorphicNFAt.meromorphicNFAt_of_smul_analytic (h z hz) (h₁g z hz)
+    exact h₂g ⟨z, hz⟩
+
+/-- If `f` is any function and `g` is analytic without zero in `U`, then `f` is meromorphic in
+normal form on `U` iff `g * f` is meromorphic in normal form on `U`. -/
+theorem meromorphicNFOn_mul_iff_right {f g : 𝕜 → 𝕜} (h₁g : AnalyticOnNhd 𝕜 g U)
+    (h₂g : ∀ u : U, g u ≠ 0) :
+    MeromorphicNFOn (g * f) U ↔ MeromorphicNFOn f U := by
+  rw [← smul_eq_mul]
+  exact meromorphicNFOn_smul_iff_right_of_analyticAt h₁g h₂g
+
+/-- If `f` is any function and `g` is analytic without zero in `U`, then `f` is meromorphic in
+normal form on `U` iff `f * g` is meromorphic in normal form on `U`. -/
+theorem meromorphicNFAt_mul_iff_left {f g : 𝕜 → 𝕜} (h₁g : AnalyticOnNhd 𝕜 g U)
+    (h₂g : ∀ u : U, g u ≠ 0) :
+    MeromorphicNFOn (f * g) U ↔ MeromorphicNFOn f U := by
+  rw [mul_comm, ← smul_eq_mul]
+  exact meromorphicNFOn_smul_iff_right_of_analyticAt h₁g h₂g
+
+/-!
+## Continuous extension and conversion to normal form
+-/
+
+variable (f U) in
+/-- If `f` is meromorphic on `U`, convert `f` to normal form on `U` by changing its values along
+a discrete subset within `U`. Otherwise, returns the 0 function. -/
+noncomputable def toMeromorphicNFOn :
+    𝕜 → E := by
+  by_cases hf : MeromorphicOn f U
+  · exact fun z ↦ toMeromorphicNFAt f z z
+  · exact 0
+
 /- ######################################################## -/
 
-theorem MeromorphicNFOn_of_mul_analytic'
-  {f : 𝕜 → E}
-  {g : 𝕜 → 𝕜}
-  {U : Set 𝕜}
-  (h₁g : AnalyticOnNhd 𝕜 g U)
-  (h₂g : ∀ u : U, g u ≠ 0)
-  (h₁f : MeromorphicNFOn f U) :
-  MeromorphicNFOn (g • f) U := by
-  intro z hz
-  apply MeromorphicNFAt.meromorphicNFAt_of_smul_analytic (h₁f z hz) (h₁g z hz)
-  exact h₂g ⟨z, hz⟩
+theorem toMeromorphicNFOn_changeDiscrete [CompleteSpace E] (hf : MeromorphicOn f U) (hx : x ∈ U) :
+    toMeromorphicNFOn f U =ᶠ[𝓝[≠] x] f := by
+  filter_upwards [(hf x hx).eventually_analyticAt] with a ha
+  simp [toMeromorphicNFOn, hf, ← toMeromorphicNFAt_eq_self.1 ha.meromorphicNFAt]
 
-/- Make strongly MeromorphicOn -/
-noncomputable def makeMeromorphicNFOn
-  (f : 𝕜 → 𝕜) (U : Set 𝕜) :
-  𝕜 → 𝕜 := by
-  intro z
-  by_cases hz : z ∈ U
-  · exact toMeromorphicNFAt f z z
-  · exact f z
+theorem toMeromorphicNFOn_changeDiscrete' [CompleteSpace E] (hf : MeromorphicOn f U)
+    (hx : x ∈ U) :
+    toMeromorphicNFOn f U =ᶠ[𝓝 x] toMeromorphicNFAt f x := by
+  apply eventuallyEq_nhds_of_eventuallyEq_nhdsNE ((toMeromorphicNFOn_changeDiscrete hf hx).trans
+    (hf x hx).eq_nhdNE_toMeromorphicNFAt)
+  simp [toMeromorphicNFOn, hf]
 
-theorem makeMeromorphicNFOn_changeDiscrete [CompleteSpace 𝕜]
-  {f : 𝕜 → 𝕜}
-  {U : Set 𝕜}
-  {z₀ : 𝕜}
-  (hf : MeromorphicOn f U)
-  (hz₀ : z₀ ∈ U) :
-  makeMeromorphicNFOn f U =ᶠ[𝓝[≠] z₀] f := by
-  apply Filter.eventually_iff_exists_mem.2
-  let A := (hf z₀ hz₀).eventually_analyticAt
-  obtain ⟨V, h₁V, h₂V⟩  := Filter.eventually_iff_exists_mem.1 A
-  use V
-  constructor
-  · assumption
-  · intro v hv
-    unfold makeMeromorphicNFOn
-    by_cases h₂v : v ∈ U
-    · simp [h₂v]
-      let B := (h₂V v hv).meromorphicNFAt
-      let Z := toMeromorphicNFAt_eq_self.1 B
-      rw [eq_comm]
-      rw [← Z]
-    · simp [h₂v]
+theorem toMeromorphicNFOn_changeDiscrete'' [CompleteSpace E] (hf : MeromorphicOn f U) :
+    f =ᶠ[Filter.codiscreteWithin U] toMeromorphicNFOn f U := by
+  have : U ∈ Filter.codiscreteWithin U := by
+    simp [mem_codiscreteWithin.2]
+  filter_upwards [hf.analyticAt_codiscreteWithin, this] with a h₁a h₂a
+  simp [toMeromorphicNFOn, hf, ← toMeromorphicNFAt_eq_self.1 h₁a.meromorphicNFAt]
 
-theorem makeMeromorphicNFOn_changeDiscrete' [CompleteSpace 𝕜]
-  {f : 𝕜 → 𝕜}
-  {U : Set 𝕜}
-  {z₀ : 𝕜}
-  (hf : MeromorphicOn f U)
-  (hz₀ : z₀ ∈ U) :
-  makeMeromorphicNFOn f U =ᶠ[𝓝 z₀] toMeromorphicNFAt f z₀ := by
-  apply eventuallyEq_nhds_of_eventuallyEq_nhdsNE
-  · apply Filter.EventuallyEq.trans (makeMeromorphicNFOn_changeDiscrete hf hz₀)
-    exact MeromorphicAt.eq_nhdNE_toMeromorphicNFAt (hf z₀ hz₀)
-  · rw [makeMeromorphicNFOn]
-    simp [hz₀]
-
-theorem makeMeromorphicNFOn_changeDiscrete'' [CompleteSpace 𝕜]
+theorem MeromorphicNFOn_of_toMeromorphicNFOn [CompleteSpace 𝕜]
   {f : 𝕜 → 𝕜}
   {U : Set 𝕜}
   (hf : MeromorphicOn f U) :
-  f =ᶠ[Filter.codiscreteWithin U] makeMeromorphicNFOn f U := by
-
-  rw [Filter.eventuallyEq_iff_exists_mem]
-  use { x | AnalyticAt 𝕜 f x }, hf.analyticAt_codiscreteWithin
-  intro x hx
-  simp at hx
-  rw [makeMeromorphicNFOn]
-  by_cases h₁x : x ∈ U
-  · simp [h₁x]
-    rw [← toMeromorphicNFAt_eq_self.1 hx.meromorphicNFAt]
-  · simp [h₁x]
-
-theorem MeromorphicNFOn_of_makeMeromorphicNFOn [CompleteSpace 𝕜]
-  {f : 𝕜 → 𝕜}
-  {U : Set 𝕜}
-  (hf : MeromorphicOn f U) :
-  MeromorphicNFOn (makeMeromorphicNFOn f U) U := by
+  MeromorphicNFOn (toMeromorphicNFOn f U) U := by
   intro z hz
-  let A := makeMeromorphicNFOn_changeDiscrete' hf hz
-  rw [meromorphicNFAt_congr A]
+
+  rw [meromorphicNFAt_congr (toMeromorphicNFOn_changeDiscrete' hf hz)]
   exact meromorphicNFAt_toMeromorphicNFAt
 
-theorem makeMeromorphicNFOn_changeOrder [CompleteSpace 𝕜]
+theorem toMeromorphicNFOn_changeOrder [CompleteSpace 𝕜]
   {f : 𝕜 → 𝕜}
   {U : Set 𝕜}
   {z₀ : 𝕜}
   (hf : MeromorphicOn f U)
   (hz₀ : z₀ ∈ U) :
-  (MeromorphicNFOn_of_makeMeromorphicNFOn hf z₀ hz₀).meromorphicAt.order = (hf z₀ hz₀).order := by
+  (MeromorphicNFOn_of_toMeromorphicNFOn hf z₀ hz₀).meromorphicAt.order = (hf z₀ hz₀).order := by
   apply MeromorphicAt.order_congr
-  exact makeMeromorphicNFOn_changeDiscrete hf hz₀
+  exact toMeromorphicNFOn_changeDiscrete hf hz₀
 
-theorem MeromorphicOn.divisor_of_makeMeromorphicNFOn [CompleteSpace 𝕜]
+theorem MeromorphicOn.divisor_of_toMeromorphicNFOn [CompleteSpace 𝕜]
   {f : 𝕜 → 𝕜}
   {U : Set 𝕜}
   (hf : MeromorphicOn f U) :
-  divisor f U = divisor (makeMeromorphicNFOn f U) U := by
+  divisor f U = divisor (toMeromorphicNFOn f U) U := by
   ext z
   by_cases hz : z ∈ U
-  · simp [hf, (MeromorphicNFOn_of_makeMeromorphicNFOn hf).meromorphicOn, hz]
+  · simp [hf, (MeromorphicNFOn_of_toMeromorphicNFOn hf).meromorphicOn, hz]
     congr 1
     apply MeromorphicAt.order_congr
-    exact Filter.EventuallyEq.symm (makeMeromorphicNFOn_changeDiscrete hf hz)
+    exact Filter.EventuallyEq.symm (toMeromorphicNFOn_changeDiscrete hf hz)
   · simp [hz]
