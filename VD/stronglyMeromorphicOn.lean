@@ -51,32 +51,18 @@ theorem MeromorphicNFOn.nonneg_divisor_iff_analyticOnNhd [CompleteSpace E]
       exact (h₁f x hx).order_nonneg_iff_analyticAt.2 (h x hx)
     · simp [h₁f.meromorphicOn, hx]
 
-/- Analytic functions are meromorphic in normal form. -/
+/-- Analytic functions are meromorphic in normal form. -/
 theorem AnalyticOnNhd.meromorphicNFOn (h₁f : AnalyticOnNhd 𝕜 f U) :
     MeromorphicNFOn f U := fun z hz ↦ (h₁f z hz).meromorphicNFAt
 
 /-!
-## Level sets of the order function
+## Divisors and zeros of meromorphic functions in normal form.
 -/
 
-/-- Criterion to ensure that the order of a meromorphic function in normal form
-is not infinity. See `MeromorphicOn.exists_order_ne_top_iff_forall` for a related
-criterion for arbitrarymeromorphic functions. -/
-theorem MeromorphicNFOn.order_ne_top_if_exists_value_ne_zero (h₁f : MeromorphicNFOn f U)
-    (h₂f : ∃ u : U, f u ≠ 0) (hU : IsConnected U) :
-    ∀ u : U, (h₁f u u.2).meromorphicAt.order ≠ ⊤ := by
-  rw [← h₁f.meromorphicOn.exists_order_ne_top_iff_forall hU]
-  obtain ⟨u, hu⟩ := h₂f
-  use u
-  rw [← (h₁f u u.2).order_eq_zero_iff] at hu
-  simp [hu]
-
-/-!
-## Divisors of meromorphic functions in normal form.
--/
-
+/-- If `f` is meromorphic in normal form on `U` and nowhere locally constant zero, then its
+zero set equals the support of the associated divisor. -/
 theorem MeromorphicNFOn.zero_set_eq_divisor_support [CompleteSpace E] (h₁f : MeromorphicNFOn f U)
-    (h₂f : ∃ u : U, f u ≠ 0) (hU : IsConnected U) :
+    (h₂f : ∀ u : U, (h₁f u u.2).meromorphicAt.order ≠ ⊤) :
     U ∩ f⁻¹' {0} = (Function.support (MeromorphicOn.divisor f U)) := by
   ext u
   constructor <;> intro hu
@@ -84,9 +70,7 @@ theorem MeromorphicNFOn.zero_set_eq_divisor_support [CompleteSpace E] (h₁f : M
       Set.mem_singleton_iff, Function.mem_support, h₁f.meromorphicOn, MeromorphicOn.divisor_apply,
       WithTop.untopD_eq_self_iff, WithTop.coe_zero, (h₁f u hu.1).order_eq_zero_iff,
       not_true_eq_false, false_or]
-    apply h₁f.order_ne_top_if_exists_value_ne_zero _ hU ⟨u, hu.1⟩
-    obtain ⟨a, ha⟩ := h₂f
-    use ⟨a, ha.1⟩, ha.2
+    exact h₂f ⟨u, hu.1⟩
   · simp only [Function.mem_support, ne_eq] at hu
     constructor
     · exact (MeromorphicOn.divisor f U).supportWithinDomain hu
@@ -95,6 +79,8 @@ theorem MeromorphicNFOn.zero_set_eq_divisor_support [CompleteSpace E] (h₁f : M
       simp only [h₁f.meromorphicOn, (MeromorphicOn.divisor f U).supportWithinDomain hu,
         MeromorphicOn.divisor_apply, WithTop.untopD_eq_self_iff, WithTop.coe_zero, not_or] at hu
       simp_all [this, hu.1]
+
+/- ######################################################## -/
 
 theorem MeromorphicNFOn_of_mul_analytic'
   {f : 𝕜 → E}

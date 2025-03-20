@@ -516,7 +516,14 @@ theorem MeromorphicNFOn.decompose_log
   constructor
   · have A := (MeromorphicOn.divisor f U).supportDiscreteWithinDomain
     have : {z | f z ≠ 0} ∩ U = (Function.support (MeromorphicOn.divisor f U))ᶜ ∩ U := by
-      rw [← h₁f.zero_set_eq_divisor_support h₂f h₂U]
+      have : ∀ (u : U), (h₁f.meromorphicOn u u.2).order ≠ ⊤ := by
+        rw [← h₁f.meromorphicOn.exists_order_ne_top_iff_forall h₂U]
+        obtain ⟨u, hu⟩ := h₂f
+        use u
+        rw [← (h₁f u u.2).order_eq_zero_iff] at hu
+        rw [hu]
+        tauto
+      rw [← h₁f.zero_set_eq_divisor_support this]
       ext u
       simp; tauto
 
