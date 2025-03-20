@@ -301,7 +301,7 @@ theorem MeromorphicOn.decompose₃'
   let h₁ := ∏ᶠ u, fun z ↦ (z - u) ^ (d u)
   have h₁h₁ : MeromorphicNFOn h₁ U := by
     intro z hz
-    exact MeromorphicNFOn_ratlPolynomial₃ d z trivial
+    exact meromorphicNFOn_LaurentPolynomial d z trivial
   have h₂h₁ : (divisor h₁ U) = d := by
     unfold h₁
     apply MeromorphicNFOn_divisor_ratlPolynomial_U d
@@ -314,7 +314,7 @@ theorem MeromorphicOn.decompose₃'
     apply MeromorphicNFOn_ratlPolynomial₃order
   have h₄h₁ : ∀ (z : ℂ) (hz : z ∈ U), (h₁h₁ z hz).meromorphicAt.order = d z := by
     intro z hz
-    rw [MeromorphicNFOn_divisor_ratlPolynomial₁]
+    rw [order_LaurentPolynomial]
     rwa [h₁d]
 
   let g' := f * h₁
@@ -379,7 +379,7 @@ theorem MeromorphicOn.decompose₃'
       · exact h₄g
       · have t₀ : MeromorphicNFOn (g * ∏ᶠ (u : ℂ), fun z => (z - u) ^ (divisor f U u)) U := by
           rw [meromorphicNFOn_mul_iff_right h₃g h₄g]
-          apply MeromorphicNFOn_ratlPolynomial₃U
+          apply MeromorphicNFOn_set_LaurentPolynomial
         funext z
         by_cases hz : z ∈ U
         · apply Filter.EventuallyEq.eq_of_nhds
@@ -405,14 +405,14 @@ theorem MeromorphicOn.decompose₃'
               simp
             have : (finprod (fun u z => (z - u) ^ d u) y * finprod (fun u z => (z - u) ^ (divisor f U u)) y) = 1 := by
               have t₀ : (Function.mulSupport fun u z => (z - u) ^ d u).Finite := by
-                rwa [ratlPoly_mulsupport, h₁d]
+                rwa [mulsupport_LaurentPolynomial, h₁d]
               rw [finprod_eq_prod _ t₀]
               have t₁ : (Function.mulSupport fun u z => (z - u) ^ divisor f U u).Finite := by
-                rwa [ratlPoly_mulsupport]
+                rwa [mulsupport_LaurentPolynomial]
               rw [finprod_eq_prod _ t₁]
               have : (Function.mulSupport fun u z => (z - u) ^ d u) = (Function.mulSupport fun u z => (z - u) ^ divisor f U u) := by
-                rw [ratlPoly_mulsupport]
-                rw [ratlPoly_mulsupport]
+                rw [mulsupport_LaurentPolynomial]
+                rw [mulsupport_LaurentPolynomial]
                 unfold d
                 simp
                 rfl
@@ -447,14 +447,14 @@ theorem MeromorphicOn.decompose₃'
           nth_rw 1 [← mul_one (f z)]
           congr
           have t₀ : (Function.mulSupport fun u z => (z - u) ^ d u).Finite := by
-            rwa [ratlPoly_mulsupport, h₁d]
+            rwa [mulsupport_LaurentPolynomial, h₁d]
           rw [finprod_eq_prod _ t₀]
           have t₁ : (Function.mulSupport fun u z => (z - u) ^ divisor f U u).Finite := by
-            rwa [ratlPoly_mulsupport]
+            rwa [mulsupport_LaurentPolynomial]
           rw [finprod_eq_prod _ t₁]
           have : (Function.mulSupport fun u z => (z - u) ^ d u) = (Function.mulSupport fun u z => (z - u) ^ divisor f U u) := by
-            rw [ratlPoly_mulsupport]
-            rw [ratlPoly_mulsupport]
+            rw [mulsupport_LaurentPolynomial]
+            rw [mulsupport_LaurentPolynomial]
             unfold d
             simp
             rfl

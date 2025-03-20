@@ -5,13 +5,12 @@ import VD.mathlibAddOn
 
 open scoped Interval Topology
 
+variable
+  {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 
-theorem analyticAt_ratlPolynomial₁
-  {z : ℂ}
-  (d : ℂ → ℤ)
-  (P : Finset ℂ) :
-  z ∉ P → AnalyticAt ℂ (∏ u ∈ P, fun z ↦ (z - u) ^ d u) z := by
-  intro hz
+private lemma analyticAt_finLaurentPolynomial_off_support {z : 𝕜} (d : 𝕜 → ℤ) (P : Finset 𝕜)
+    (hz : z ∉ P) :
+    AnalyticAt 𝕜 (∏ u ∈ P, fun z ↦ (z - u) ^ d u) z := by
   rw [Finset.prod_fn]
   apply Finset.analyticAt_prod
   intro u hu
@@ -20,186 +19,125 @@ theorem analyticAt_ratlPolynomial₁
   rw [sub_ne_zero, ne_comm]
   exact ne_of_mem_of_not_mem hu hz
 
+theorem meromorphicNFOn_top_LaurentPolynomial [DecidableEq 𝕜] (d : 𝕜 → ℤ) :
+    MeromorphicNFOn (∏ᶠ u, fun z ↦ (z - u) ^ d u) ⊤ := by
 
-theorem MeromorphicNFOn_ratlPolynomial₂
-  (d : ℂ → ℤ)
-  (P : Finset ℂ) :
-  MeromorphicNFOn (∏ u ∈ P, fun z ↦ (z - u) ^ d u) ⊤ := by
-
-  intro z hz
-  by_cases h₂z : z ∈ P
-  · rw [← Finset.mul_prod_erase P _ h₂z]
-    right
-    use d z
-    use ∏ x ∈ P.erase z, fun z => (z - x) ^ d x
-    constructor
-    · have : z ∉ P.erase z := Finset.not_mem_erase z P
-      apply analyticAt_ratlPolynomial₁ d (P.erase z) this
-    · constructor
-      · simp only [Finset.prod_apply]
-        rw [Finset.prod_ne_zero_iff]
-        intro u hu
-        apply zpow_ne_zero
-        rw [sub_ne_zero]
-        by_contra hCon
-        rw [hCon] at hu
-        let A := Finset.not_mem_erase u P
-        tauto
-      · exact Filter.Eventually.of_forall (congrFun rfl)
-  · apply AnalyticAt.meromorphicNFAt
-    exact analyticAt_ratlPolynomial₁ d P (z := z) h₂z
-
-
-theorem MeromorphicNFOn_ratlPolynomial₃
-  (d : ℂ → ℤ) :
-  MeromorphicNFOn (∏ᶠ u, fun z ↦ (z - u) ^ d u) ⊤ := by
   by_cases hd : (Function.mulSupport fun u z => (z - u) ^ d u).Finite
   · rw [finprod_eq_prod _ hd]
-    apply MeromorphicNFOn_ratlPolynomial₂ d hd.toFinset
+    intro z hz
+    by_cases h₂z : z ∈ hd.toFinset
+    · rw [← Finset.mul_prod_erase hd.toFinset _ h₂z]
+      right
+      use d z, ∏ x ∈ hd.toFinset.erase z, fun z => (z - x) ^ d x
+      constructor
+      · have : z ∉ hd.toFinset.erase z := Finset.not_mem_erase z hd.toFinset
+        apply analyticAt_finLaurentPolynomial_off_support d (hd.toFinset.erase z) this
+      · constructor
+        · simp only [Finset.prod_apply]
+          rw [Finset.prod_ne_zero_iff]
+          intro u hu
+          apply zpow_ne_zero
+          rw [sub_ne_zero]
+          by_contra hCon
+          rw [hCon] at hu
+          have := Finset.not_mem_erase u hd.toFinset
+          tauto
+        · exact Filter.Eventually.of_forall (congrFun rfl)
+    · exact (analyticAt_finLaurentPolynomial_off_support d hd.toFinset h₂z).meromorphicNFAt
   · rw [finprod_of_infinite_mulSupport hd]
-    apply AnalyticOnNhd.meromorphicNFOn
-    apply analyticOnNhd_const
+    apply analyticOnNhd_const.meromorphicNFOn
 
-
-theorem MeromorphicNFOn_ratlPolynomial₃U
-  (d : ℂ → ℤ)
-  (U : Set ℂ) :
-  MeromorphicNFOn (∏ᶠ u, fun z ↦ (z - u) ^ d u) U := by
+theorem MeromorphicNFOn_set_LaurentPolynomial [DecidableEq 𝕜] (d : 𝕜 → ℤ) (U : Set 𝕜) :
+    MeromorphicNFOn (∏ᶠ u, fun z ↦ (z - u) ^ d u) U := by
   intro z hz
-  exact MeromorphicNFOn_ratlPolynomial₃ d z (trivial)
+  exact meromorphicNFOn_top_LaurentPolynomial d z (trivial)
 
-
-theorem ratlPoly_mulsupport
-  (d : ℂ → ℤ) :
-  (Function.mulSupport fun u z ↦ (z - u) ^ d u) = d.support := by
+private lemma mulsupport_LaurentPolynomial (d : 𝕜 → ℤ) :
+    (Function.mulSupport fun u z ↦ (z - u) ^ d u) = d.support := by
   ext u
   constructor
   · intro h
-    simp at h
-    simp
+    simp_all only [Function.mem_mulSupport, ne_eq, Function.mem_support]
     by_contra hCon
-    rw [hCon] at h
-    simp at h
+    simp only [hCon, zpow_zero] at h
     tauto
   · intro h
-    simp
+    simp only [Function.mem_mulSupport, ne_eq]
     by_contra hCon
-    let A := congrFun hCon u
-    simp at A
-    have t₁ : (0 : ℂ) ^ d u ≠ 0 := ne_zero_of_eq_one A
-    rw [zpow_ne_zero_iff h] at t₁
+    have := congrFun hCon u
+    simp only [sub_self, Pi.one_apply] at this
+    have : (0 : 𝕜) ^ d u ≠ 0 := ne_zero_of_eq_one this
+    rw [zpow_ne_zero_iff h] at this
     tauto
 
-
-theorem MeromorphicNFOn_divisor_ratlPolynomial₁
-  {z : ℂ}
-  (d : ℂ → ℤ)
-  (h₁d : Set.Finite d.support) :
-  (((MeromorphicNFOn_ratlPolynomial₃ d).meromorphicOn) z trivial).order = d z := by
-
+theorem order_LaurentPolynomial [DecidableEq 𝕜] {z : 𝕜} (d : 𝕜 → ℤ) (h₁d : Set.Finite d.support) :
+    (((meromorphicNFOn_top_LaurentPolynomial d).meromorphicOn) z trivial).order = d z := by
   rw [MeromorphicAt.order_eq_int_iff]
-  use ∏ x ∈ h₁d.toFinset.erase z, fun z => (z - x) ^ d x
+  use ∏ x ∈ h₁d.toFinset.erase z, fun z => (z - x) ^ d x,
+    analyticAt_finLaurentPolynomial_off_support d (h₁d.toFinset.erase z)
+      (Finset.not_mem_erase z h₁d.toFinset)
   constructor
-  · have : z ∉ h₁d.toFinset.erase z := Finset.not_mem_erase z h₁d.toFinset
-    apply analyticAt_ratlPolynomial₁ d (h₁d.toFinset.erase z) this
-  · constructor
-    · simp only [Finset.prod_apply]
-      rw [Finset.prod_ne_zero_iff]
-      intro u hu
-      apply zpow_ne_zero
-      rw [sub_ne_zero]
-      by_contra hCon
-      rw [hCon] at hu
-      let A := Finset.not_mem_erase u h₁d.toFinset
-      tauto
-    · apply Filter.Eventually.of_forall
-      intro x
-      have t₀ : (Function.mulSupport fun u z => (z - u) ^ d u).Finite := by
-        rwa [ratlPoly_mulsupport d]
-      rw [finprod_eq_prod _ t₀]
-      have t₁ : h₁d.toFinset = t₀.toFinset := by
-        simp
+  · simp only [Finset.prod_apply]
+    rw [Finset.prod_ne_zero_iff]
+    intro u hu
+    apply zpow_ne_zero
+    rw [sub_ne_zero]
+    by_contra hCon
+    rw [hCon] at hu
+    have := Finset.not_mem_erase u h₁d.toFinset
+    tauto
+  · apply Filter.Eventually.of_forall
+    intro x
+    have t₀ : (Function.mulSupport fun u z => (z - u) ^ d u).Finite := by
+      rwa [mulsupport_LaurentPolynomial d]
+    have t₁ : h₁d.toFinset = t₀.toFinset := by
+      simp [eq_comm, mulsupport_LaurentPolynomial d]
+    rw [finprod_eq_prod _ t₀, t₁, eq_comm]
+    simp only [Finset.prod_apply, smul_eq_mul]
+    have : z ∉ h₁d.toFinset.erase z := Finset.not_mem_erase z h₁d.toFinset
+    by_cases hz : z ∈ h₁d.toFinset
+    · rw [t₁] at hz
+      simp_rw [← Finset.mul_prod_erase t₀.toFinset _ hz]
+    · have : t₀.toFinset = t₀.toFinset.erase z := by
         rw [eq_comm]
-        exact ratlPoly_mulsupport d
-      rw [t₁]
+        apply Finset.erase_eq_of_not_mem
+        rwa [t₁] at hz
+      rw [this]
+      have : (x - z) ^ d z = 1 := by
+        simp only [Set.Finite.mem_toFinset, Function.mem_support, ne_eq, Decidable.not_not] at hz
+        simp [hz]
+      rw [this]
       simp
-      rw [eq_comm]
-      have : z ∉ h₁d.toFinset.erase z := Finset.not_mem_erase z h₁d.toFinset
-      by_cases hz : z ∈ h₁d.toFinset
-      · rw [t₁] at hz
-        conv =>
-          right
-          rw [← Finset.mul_prod_erase t₀.toFinset _ hz]
-      · have : t₀.toFinset = t₀.toFinset.erase z := by
-          rw [eq_comm]
-          apply Finset.erase_eq_of_not_mem
-          rwa [t₁] at hz
-        rw [this]
 
-        have : (x - z) ^ d z = 1 := by
-          simp at hz
-          rw [hz]
-          simp
-        rw [this]
-        simp
-
-
-theorem MeromorphicNFOn_ratlPolynomial₃order
-  {z : ℂ}
-  (d : ℂ → ℤ) :
-  ((MeromorphicNFOn_ratlPolynomial₃ d) z trivial).meromorphicAt.order ≠ ⊤ := by
-
-  have h₂d : (Function.mulSupport fun u z ↦ (z - u) ^ d u) = d.support := by
-    ext u
-    constructor
-    · intro h
-      simp at h
-      simp
-      by_contra hCon
-      rw [hCon] at h
-      simp at h
-      tauto
-    · intro h
-      simp
-      by_contra hCon
-      let A := congrFun hCon u
-      simp at A
-      have t₁ : (0 : ℂ) ^ d u ≠ 0 := ne_zero_of_eq_one A
-      rw [zpow_ne_zero_iff h] at t₁
-      tauto
-
+theorem MeromorphicNFOn_ratlPolynomial₃order [DecidableEq 𝕜] {z : 𝕜} (d : 𝕜 → ℤ) :
+    ((meromorphicNFOn_top_LaurentPolynomial d) z trivial).meromorphicAt.order ≠ ⊤ := by
   by_cases hd : Set.Finite (Function.support d)
-  · rw [MeromorphicNFOn_divisor_ratlPolynomial₁ d hd]
-    simp
-  · rw [← h₂d] at hd
-    have : (Function.mulSupport fun u z => (z - u) ^ d u).Infinite := by
-      exact hd
-    simp_rw [finprod_of_infinite_mulSupport this]
-    have : AnalyticAt ℂ (1 : ℂ → ℂ) z := by exact analyticAt_const
-    rw [AnalyticAt.meromorphicAt_order this]
-    rw [this.order_eq_zero_iff.2 (by simp)]
-    simp
+  · simp [order_LaurentPolynomial d hd]
+  · rw [← mulsupport_LaurentPolynomial] at hd
+    have : AnalyticAt 𝕜 (1 : 𝕜 → 𝕜) z := analyticAt_const
+    simp [finprod_of_infinite_mulSupport hd, this.meromorphicAt_order,
+      this.order_eq_zero_iff.2 (by simp)]
 
 
-theorem MeromorphicNFOn_divisor_ratlPolynomial
-  (d : ℂ → ℤ)
+theorem MeromorphicNFOn_divisor_ratlPolynomial [CompleteSpace 𝕜] [DecidableEq 𝕜]
+  (d : 𝕜 → ℤ)
   (h₁d : Set.Finite d.support) :
   MeromorphicOn.divisor (∏ᶠ u, fun z ↦ (z - u) ^ d u) ⊤ = d := by
   ext z
-  rw [MeromorphicOn.divisor_apply (MeromorphicNFOn_ratlPolynomial₃ d).meromorphicOn (by simp : z ∈ Set.univ)]
-  rw [MeromorphicNFOn_divisor_ratlPolynomial₁ d h₁d]
+  simp_rw [MeromorphicOn.divisor_apply (meromorphicNFOn_top_LaurentPolynomial d).meromorphicOn (by simp : z ∈ Set.univ)]
+  rw [order_LaurentPolynomial d h₁d]
   simp
 
-theorem MeromorphicNFOn_divisor_ratlPolynomial_U
-  {U : Set ℂ}
-  (d : ℂ → ℤ)
+theorem MeromorphicNFOn_divisor_ratlPolynomial_U [CompleteSpace 𝕜] [DecidableEq 𝕜]
+  {U : Set 𝕜}
+  (d : 𝕜 → ℤ)
   (h₁d : Set.Finite d.support)
   (h₂d : d.support ⊆ U) :
   MeromorphicOn.divisor (∏ᶠ u, fun z ↦ (z - u) ^ d u) U = d := by
   ext z
   by_cases hz : z ∈ U
-  · simp [(MeromorphicNFOn_ratlPolynomial₃U d U).meromorphicOn, hz]
-    rw [MeromorphicNFOn_divisor_ratlPolynomial₁ d h₁d]
+  · simp [(MeromorphicNFOn_set_LaurentPolynomial d U).meromorphicOn, hz]
+    rw [order_LaurentPolynomial d h₁d]
     simp
   · simp [hz]
     rw [eq_comm, ← Function.nmem_support]
