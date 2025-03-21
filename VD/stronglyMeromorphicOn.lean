@@ -153,8 +153,8 @@ theorem divisor_toMeromorphicNFOn [CompleteSpace E] (hf : MeromorphicOn f U) :
 
 /-- If `f` is meromorphic on `U` and `x ∈ U`, then `f` and its conversion to
 normal form on `U` agree in a punctured neighborhood of `x`. -/
-theorem toMeromorphicNFOn_eq_self_on_nhdNE [CompleteSpace E] (hf : MeromorphicOn f U)
-    (hx : x ∈ U) :
+theorem MeromorphicOn.toMeromorphicNFOn_eq_self_on_nhdNE [CompleteSpace E]
+    (hf : MeromorphicOn f U) (hx : x ∈ U) :
     f =ᶠ[𝓝[≠] x] toMeromorphicNFOn f U := by
   filter_upwards [(hf x hx).eventually_analyticAt] with a ha
   simp [toMeromorphicNFOn, hf, ← toMeromorphicNFAt_eq_self.1 ha.meromorphicNFAt]
@@ -165,7 +165,7 @@ theorem toMeromorphicNFOn_eq_toMeromorphicNFAt_on_nhdNE [CompleteSpace E] (hf : 
     (hx : x ∈ U) :
     toMeromorphicNFOn f U =ᶠ[𝓝 x] toMeromorphicNFAt f x := by
   apply eventuallyEq_nhds_of_eventuallyEq_nhdsNE
-  exact (toMeromorphicNFOn_eq_self_on_nhdNE hf hx).symm.trans (hf x hx).eq_nhdNE_toMeromorphicNFAt
+  exact (hf.toMeromorphicNFOn_eq_self_on_nhdNE hx).symm.trans (hf x hx).eq_nhdNE_toMeromorphicNFAt
   simp [toMeromorphicNFOn, hf, hx]
 
 variable (f U) in
@@ -203,7 +203,7 @@ theorem toMeromorphicNFOn_changeOrder [CompleteSpace 𝕜]
   (hz₀ : z₀ ∈ U) :
   ((meromorphicNFOn_toMeromorphicNFOn f U) z₀ hz₀).meromorphicAt.order = (hf z₀ hz₀).order := by
   apply MeromorphicAt.order_congr
-  exact (toMeromorphicNFOn_eq_self_on_nhdNE hf hz₀).symm
+  exact (hf.toMeromorphicNFOn_eq_self_on_nhdNE hz₀).symm
 
 
 theorem MeromorphicOn.divisor_of_toMeromorphicNFOn [CompleteSpace 𝕜]
