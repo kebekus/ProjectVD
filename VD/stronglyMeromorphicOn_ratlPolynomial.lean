@@ -160,19 +160,17 @@ theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] [DecidableEq 𝕜
     ∃ g : 𝕜 → 𝕜, AnalyticOnNhd 𝕜 g U ∧ (∀ u : U, g u ≠ 0) ∧
       f =ᶠ[Filter.codiscreteWithin U]
         (∏ᶠ u, fun z ↦ (z - u) ^ ((divisor f U) u)) * g := by
-  let laurent := (∏ᶠ u, fun z ↦ (z - u) ^ ((-divisor f U) u))
-  have h₁laurent : (-divisor f U).support = (divisor f U).support := by
-    ext z
-    simp
-  have h₂laurent : (-divisor f U).support.Finite := by rwa [h₁laurent]
+  let laurent := ∏ᶠ u, fun z ↦ (z - u) ^ (divisor f U u)
   have h₃laurent : MeromorphicOn laurent U := by
-    apply (meromorphicNF_LaurentPolynomial (-divisor f U)).meromorphicOn.mono_set
+    apply (meromorphicNF_LaurentPolynomial (divisor f U)).meromorphicOn.mono_set
     tauto
-  let g' := laurent * f
-  have h₁g' : MeromorphicOn g' U := h₃laurent.mul h₁f
+  --
+  let g' := laurent⁻¹ * f
+  have h₁g' : MeromorphicOn g' U := h₃laurent.inv.mul h₁f
   have h₂g' : ∀ u : U, (h₁g' u u.2).order = 0 := by
     intro u
-    rw [(h₃laurent u u.2).order_mul (h₁f u u.2), order_LaurentPolynomial _ h₂laurent]
+    rw [(h₃laurent u u.2).inv.order_mul (h₁f u u.2), (h₃laurent u u.2).order_inv,
+      order_LaurentPolynomial _ h₃f]
     simp only [DivisorOn.coe_neg, Pi.neg_apply, h₁f, u.2, divisor_apply,
       WithTop.LinearOrderedAddCommGroup.coe_neg]
     lift (h₁f u u.2).order to ℤ using (h₂f u) with n hn
@@ -180,10 +178,12 @@ theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] [DecidableEq 𝕜
       (by rfl : -↑(n : WithTop ℤ) = (↑(-n) : WithTop ℤ)), ← WithTop.coe_add]
     simp
   have h₃g' : MeromorphicOn.divisor g' U = 0 := by
-    rw [h₃laurent.divisor_mul h₁f
-        (fun z hz ↦ order_LaurentPolynomial_ne_top (-MeromorphicOn.divisor f U))
-        (fun z hz ↦ h₂f ⟨z, hz⟩),
-      MeromorphicNFOn_divisor_ratlPolynomial_U _ h₂laurent, neg_add_cancel]
+    rw [MeromorphicOn.divisor_mul h₃laurent.inv h₁f _ (fun z hz ↦ h₂f ⟨z, hz⟩),
+      MeromorphicOn.divisor_inv, MeromorphicNFOn_divisor_ratlPolynomial_U _ h₃f,
+      neg_add_cancel]
+    intro z hz
+    simp [(h₃laurent z hz).order_inv, order_LaurentPolynomial_ne_top (MeromorphicOn.divisor f U)]
+  --
   let g := toMeromorphicNFOn g' U
   have h₁g : MeromorphicNFOn g U := by apply meromorphicNFOn_toMeromorphicNFOn
   have h₂g : MeromorphicOn.divisor g U = 0 := by rw [← divisor_toMeromorphicNFOn h₁g', h₃g']
@@ -194,42 +194,17 @@ theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] [DecidableEq 𝕜
     rw [← (h₁g u hu).order_eq_zero_iff ,
       ← (h₁g' u hu).order_congr (toMeromorphicNFOn_eq_self_on_nhdNE h₁g' hu)]
     exact h₂g' ⟨u, hu⟩
-  · filter_upwards [h₁f.meromorphicNFAt_codiscreteWithin,
+  · have : laurent = ∏ᶠ (u : 𝕜), fun z ↦ (z - u) ^ (divisor f U) u := by rfl
+    rw [← this]
+    filter_upwards [h₁f.meromorphicNFAt_codiscreteWithin,
       (divisor f U).supportDiscreteWithinDomain,
-      (h₃laurent.mul h₁f).meromorphicNFAt_codiscreteWithin] with a h₁a h₂a h₃a
-
-
-    have Z := mulsupport_LaurentPolynomial (divisor f U)
-    have Z' := mulsupport_LaurentPolynomial (-divisor f U)
-    simp_rw [h₁laurent] at Z'
-
-
-    have Z₀ := h₃f
-    simp_rw [← Z] at Z₀
-    simp_rw [finprod_eq_prod _ Z₀]
-
-
+      (h₃laurent.inv.mul h₁f).meromorphicNFAt_codiscreteWithin] with a h₁a h₂a h₃a
     unfold g g'
-    have : (toMeromorphicNFOn (laurent * f) U) a = (laurent * f) a := by
+    have : (toMeromorphicNFOn (laurent⁻¹ * f) U) a = (laurent⁻¹ * f) a := by
       sorry
-    simp
-    rw [this]
-    simp
-    unfold laurent
-
-    have Z'₀ := h₃f
-    simp_rw [← Z'] at Z'₀
-    simp_rw [finprod_eq_prod _ Z'₀]
-
-    have : Z₀.toFinset = Z'₀.toFinset := by
-      ext a
-      simp
-      rw [not_iff_not]
-      sorry
-
-    simp only [DivisorOn.coe_neg, Pi.neg_apply, Finset.prod_apply]
+    simp [this]
     rw [← mul_assoc]
-    rw [Finset.prod_mul_distrib]
+    rw [mul_inv_cancel₀]
     simp
 
 
