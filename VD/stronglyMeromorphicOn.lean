@@ -1,5 +1,6 @@
 import Mathlib.Analysis.Meromorphic.Divisor.MeromorphicFunction
 import VD.ToMathlib.MeromorphicNFAt
+import VD.Divisor_MeromorphicOn
 
 open Topology
 
@@ -143,6 +144,12 @@ theorem toMeromorphicNFOn_eqOn_codiscrete [CompleteSpace E] (hf : MeromorphicOn 
     simp [mem_codiscreteWithin.2]
   filter_upwards [hf.analyticAt_codiscreteWithin, this] with a h₁a h₂a
   simp [toMeromorphicNFOn, hf, ← toMeromorphicNFAt_eq_self.1 h₁a.meromorphicNFAt]
+
+/-- Conversion to normal form on `U` does not affect the divisor. -/
+theorem divisor_toMeromorphicNFOn [CompleteSpace E] (hf : MeromorphicOn f U) :
+    MeromorphicOn.divisor f U = MeromorphicOn.divisor (toMeromorphicNFOn f U) U := by
+  rw [← hf.divisor_congr_codiscreteWithin (toMeromorphicNFOn_eqOn_codiscrete hf)]
+  exact toMeromorphicNFOn_eq_self_on_compl hf
 
 /-- If `f` is meromorphic on `U` and `x ∈ U`, then `f` and its conversion to
 normal form on `U` agree in a punctured neighborhood of `x`. -/

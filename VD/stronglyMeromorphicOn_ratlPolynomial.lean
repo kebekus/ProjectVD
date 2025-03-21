@@ -3,6 +3,7 @@ Copyright (c) 2025 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
+import VD.Divisor_MeromorphicOn
 import VD.stronglyMeromorphicOn
 
 /-!
@@ -153,37 +154,35 @@ theorem MeromorphicNFOn_divisor_ratlPolynomial_U [CompleteSpace 𝕜] [Decidable
 
 -- ##################### --
 
-theorem X [CompleteSpace 𝕜] [DecidableEq 𝕜] {f : 𝕜 → 𝕜} (h₁f : MeromorphicOn f U)
-    (h₂f : ∀ u : U, (h₁f u u.2).order ≠ ⊤) (h₃f : Set.Finite (MeromorphicOn.divisor f U).support) :
-    ∃ g : 𝕜 → 𝕜, AnalyticOnNhd 𝕜 g U ∧ ∀ u : U, g u ≠ 0 ∧
-      f =ᶠ[Filter.codiscreteWithin U] (∏ᶠ u, fun z ↦ (z - u) ^ ((MeromorphicOn.divisor f U) u)) * g := by
-  let g' := (∏ᶠ u, fun z ↦ (z - u) ^ (MeromorphicOn.divisor f U u))⁻¹ * f
-  have h₁g' : MeromorphicOn g' U := by
-    apply MeromorphicOn.mul _ h₁f
-    apply MeromorphicOn.mono_set (U := ⊤)
-    apply MeromorphicOn.inv
-    apply (meromorphicNF_LaurentPolynomial (MeromorphicOn.divisor f U)).meromorphicOn
+theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] [DecidableEq 𝕜] {f : 𝕜 → 𝕜}
+    (h₁f : MeromorphicOn f U) (h₂f : ∀ u : U, (h₁f u u.2).order ≠ ⊤)
+    (h₃f : Set.Finite (MeromorphicOn.divisor f U).support) :
+    ∃ g : 𝕜 → 𝕜, AnalyticOnNhd 𝕜 g U ∧ (∀ u : U, g u ≠ 0) ∧
+      f =ᶠ[Filter.codiscreteWithin U]
+        (∏ᶠ u, fun z ↦ (z - u) ^ ((MeromorphicOn.divisor f U) u)) * g := by
+  let laurent := (∏ᶠ u, fun z ↦ (z - u) ^ ((-MeromorphicOn.divisor f U) u))
+  have hl : MeromorphicOn laurent U := by
+    apply (meromorphicNF_LaurentPolynomial
+      (-MeromorphicOn.divisor f U)).meromorphicOn.mono_set
     tauto
+  let g' := laurent * f
+  have h₁g' : MeromorphicOn g' U := hl.mul h₁f
   have h₂g' : MeromorphicOn.divisor g' U = 0 := by
-    rw [MeromorphicOn.divisor_mul]
-    rw [MeromorphicOn.divisor_inv]
-    rw [MeromorphicNFOn_divisor_ratlPolynomial_U]
-    simp
-    assumption
-    apply MeromorphicOn.mono_set (U := ⊤)
-    apply MeromorphicOn.inv
-    apply (meromorphicNF_LaurentPolynomial (MeromorphicOn.divisor f U)).meromorphicOn
-    tauto
-    assumption
-    intro z hz
+    rw [hl.divisor_mul h₁f
+        (fun z hz ↦ order_LaurentPolynomial_ne_top (-MeromorphicOn.divisor f U))
+        (fun z hz ↦ h₂f ⟨z, hz⟩),
+      MeromorphicNFOn_divisor_ratlPolynomial_U, neg_add_cancel]
+    have : (-MeromorphicOn.divisor f U).support = (MeromorphicOn.divisor f U).support := by
+      ext z
+      simp
+    rwa [this]
+  let g := toMeromorphicNFOn g' U
+  have h₁g : MeromorphicNFOn g U := by apply meromorphicNFOn_toMeromorphicNFOn
+  have h₂g : MeromorphicOn.divisor g U = 0 := by rw [← divisor_toMeromorphicNFOn h₁g', h₂g']
+  have h₃g : AnalyticOnNhd 𝕜 g U := by rw [← h₁g.nonneg_divisor_iff_analyticOnNhd, h₂g]
+  use g, h₃g
+  constructor
+  · intro ⟨u, hu⟩
+    rw [← MeromorphicNFAt.order_eq_zero_iff]
     sorry
-    assumption
-  let g := toMeromorphicNFOn ((∏ᶠ u, fun z ↦ (z - u) ^ (-(MeromorphicOn.divisor f U) u)) * f) U
-  have h₁g : MeromorphicOn g U := by
-
-    sorry
-  have h₂g : AnalyticOnNhd g U := by
-    sorry
-  use g
-
-  sorry
+  · sorry
