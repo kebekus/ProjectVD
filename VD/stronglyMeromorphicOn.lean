@@ -1,7 +1,5 @@
-import Mathlib.Algebra.BigOperators.Finprod
 import Mathlib.Analysis.Meromorphic.Divisor.MeromorphicFunction
 import VD.ToMathlib.MeromorphicNFAt
-import VD.meromorphicAt
 
 open Topology
 
