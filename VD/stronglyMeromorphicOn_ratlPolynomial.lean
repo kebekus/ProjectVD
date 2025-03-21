@@ -201,11 +201,16 @@ theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] [DecidableEq 𝕜
       (h₃laurent.inv.mul h₁f).meromorphicNFAt_codiscreteWithin] with a h₁a h₂a h₃a
     unfold g g'
     have : (toMeromorphicNFOn (laurent⁻¹ * f) U) a = (laurent⁻¹ * f) a := by
+
       sorry
     simp [this]
     rw [← mul_assoc]
     rw [mul_inv_cancel₀]
     simp
-
-
-    sorry
+    rw [← MeromorphicNFAt.order_eq_zero_iff]
+    rw [order_LaurentPolynomial]
+    rw [h₂a]
+    simp
+    exact h₃f
+    have Z := meromorphicNF_LaurentPolynomial (divisor f U)
+    exact Z a trivial
