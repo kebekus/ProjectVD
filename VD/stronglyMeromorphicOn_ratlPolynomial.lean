@@ -197,6 +197,18 @@ theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] [DecidableEq 𝕜
   · filter_upwards [h₁f.meromorphicNFAt_codiscreteWithin,
       (divisor f U).supportDiscreteWithinDomain,
       (h₃laurent.mul h₁f).meromorphicNFAt_codiscreteWithin] with a h₁a h₂a h₃a
+
+
+    have Z := mulsupport_LaurentPolynomial (divisor f U)
+    have Z' := mulsupport_LaurentPolynomial (-divisor f U)
+    simp_rw [h₁laurent] at Z'
+
+
+    have Z₀ := h₃f
+    simp_rw [← Z] at Z₀
+    simp_rw [finprod_eq_prod _ Z₀]
+
+
     unfold g g'
     have : (toMeromorphicNFOn (laurent * f) U) a = (laurent * f) a := by
       sorry
@@ -204,12 +216,20 @@ theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] [DecidableEq 𝕜
     rw [this]
     simp
     unfold laurent
+
+    have Z'₀ := h₃f
+    simp_rw [← Z'] at Z'₀
+    simp_rw [finprod_eq_prod _ Z'₀]
+
+    have : Z₀.toFinset = Z'₀.toFinset := by
+      ext a
+      simp
+      rw [not_iff_not]
+      sorry
+
+    simp only [DivisorOn.coe_neg, Pi.neg_apply, Finset.prod_apply]
     rw [← mul_assoc]
-    have : (∏ᶠ (u : 𝕜), fun z ↦ (z - u) ^ (divisor f U) u) a * (∏ᶠ (u : 𝕜), fun z ↦ (z - u) ^ (-divisor f U) u) a
-      = ((∏ᶠ (u : 𝕜), fun z ↦ (z - u) ^ (divisor f U) u) * (∏ᶠ (u : 𝕜), fun z ↦ (z - u) ^ (-divisor f U) u)) a := by
-      exact rfl
-    rw [this]
-    rw [← finprod_mul_distrib]
+    rw [Finset.prod_mul_distrib]
     simp
 
 
