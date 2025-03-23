@@ -3,6 +3,7 @@ Copyright (c) 2025 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
+import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
 import VD.Divisor_MeromorphicOn
 import VD.stronglyMeromorphicOn
 
@@ -206,3 +207,25 @@ theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] [DecidableEq 𝕜
     rw [← smul_assoc, smul_eq_mul, mul_inv_cancel₀ _, one_smul]
     rwa [← ((meromorphicNF_LaurentPolynomial (divisor f U)) a trivial).order_eq_zero_iff,
       order_LaurentPolynomial, h₂a, Pi.zero_apply, WithTop.coe_zero]
+
+open Real
+
+theorem MeromorphicOn.extract_zeros_poles_log [CompleteSpace 𝕜] [DecidableEq 𝕜] {f : 𝕜 → E}
+    (h₁f : MeromorphicOn f U) (h₂f : ∀ u : U, (h₁f u u.2).order ≠ ⊤)
+    (h₃f : (divisor f U).support.Finite) :
+    ∃ g : 𝕜 → E, AnalyticOnNhd 𝕜 g U ∧ (∀ u : U, g u ≠ 0) ∧
+      (fun z ↦ log ‖f z‖) =ᶠ[Filter.codiscreteWithin U]
+        fun z ↦ ∑ᶠ u, (divisor f U u * log ‖z-u‖) + log ‖g z‖ := by
+  obtain ⟨g, h₁g, h₂g, h₃g⟩ := MeromorphicOn.extract_zeros_poles h₁f h₂f h₃f
+  use g, h₁g, h₂g
+  filter_upwards [h₃g] with z hz
+  rw [hz]
+  simp
+  rw [finprod_eq_prod _]
+  rw [finsum_eq_sum _]
+  rw [norm_smul]
+  simp [Finset.prod_apply]
+  rw [log_mul]
+  rw [log_prod]
+  simp_rw [log_zpow]
+  sorry
