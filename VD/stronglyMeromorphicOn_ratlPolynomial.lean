@@ -156,60 +156,53 @@ theorem MeromorphicNFOn_divisor_ratlPolynomial_U [CompleteSpace 𝕜] [Decidable
 
 -- ##################### --
 
-theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] [DecidableEq 𝕜] {f : 𝕜 → 𝕜}
+theorem Filter.codiscreteWithin_self {X : Type*} [TopologicalSpace X] (U : Set X) :
+    U ∈ Filter.codiscreteWithin U := by simp [mem_codiscreteWithin]
+
+variable
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [CompleteSpace E]
+
+theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] [DecidableEq 𝕜] {f : 𝕜 → E}
     (h₁f : MeromorphicOn f U) (h₂f : ∀ u : U, (h₁f u u.2).order ≠ ⊤)
-    (h₃f : Set.Finite (MeromorphicOn.divisor f U).support) :
-    ∃ g : 𝕜 → 𝕜, AnalyticOnNhd 𝕜 g U ∧ (∀ u : U, g u ≠ 0) ∧
-      f =ᶠ[Filter.codiscreteWithin U]
-        (∏ᶠ u, fun z ↦ (z - u) ^ ((divisor f U) u)) * g := by
-  let laurent := ∏ᶠ u, fun z ↦ (z - u) ^ (divisor f U u)
-  have h₃laurent : MeromorphicOn laurent U := by
-    apply (meromorphicNF_LaurentPolynomial (divisor f U)).meromorphicOn.mono_set
-    tauto
-  --
-  let g' := laurent⁻¹ * f
-  have h₁g' : MeromorphicOn g' U := h₃laurent.inv.mul h₁f
-  have h₂g' : ∀ u : U, (h₁g' u u.2).order = 0 := by
-    intro u
-    rw [(h₃laurent u u.2).inv.order_mul (h₁f u u.2), (h₃laurent u u.2).order_inv,
+    (h₃f : (divisor f U).support.Finite) :
+    ∃ g : 𝕜 → E, AnalyticOnNhd 𝕜 g U ∧ (∀ u : U, g u ≠ 0) ∧
+      f =ᶠ[Filter.codiscreteWithin U] (∏ᶠ u, fun z ↦ (z - u) ^ ((divisor f U) u)) • g := by
+  -- Take `g` as the inverse of the Laurent polynomial defined below, converted
+  -- to a meromorphic function in normal form. Then check all the properties.
+  let φ := ∏ᶠ u, fun z ↦ (z - u) ^ (divisor f U u)
+  have hφ : MeromorphicOn φ U :=
+    (meromorphicNF_LaurentPolynomial (divisor f U)).meromorphicOn.mono_set (by tauto)
+  let g := toMeromorphicNFOn (φ⁻¹ • f) U
+  have hg : MeromorphicNFOn g U := by apply meromorphicNFOn_toMeromorphicNFOn
+  use g
+  constructor
+  · -- AnalyticOnNhd 𝕜 g U
+    rw [← hg.nonneg_divisor_iff_analyticOnNhd, ← divisor_toMeromorphicNFOn (hφ.inv.smul h₁f),
+      divisor_smul hφ.inv h₁f _ (fun z hz ↦ h₂f ⟨z, hz⟩), divisor_inv,
+      MeromorphicNFOn_divisor_ratlPolynomial_U _ h₃f, neg_add_cancel]
+    intro z hz
+    simp [(hφ z hz).order_inv, order_LaurentPolynomial_ne_top (divisor f U)]
+  constructor
+  · -- ∀ (u : ↑U), g ↑u ≠ 0
+    intro ⟨u, hu⟩
+    rw [← (hg u hu).order_eq_zero_iff,
+      ← ((hφ.inv.smul h₁f) u hu).order_congr
+        (toMeromorphicNFOn_eq_self_on_nhdNE (hφ.inv.smul h₁f) hu)]
+    rw [(hφ u hu).inv.order_smul (h₁f u hu), (hφ u hu).order_inv,
       order_LaurentPolynomial _ h₃f]
-    simp only [DivisorOn.coe_neg, Pi.neg_apply, h₁f, u.2, divisor_apply,
+    simp only [DivisorOn.coe_neg, Pi.neg_apply, h₁f, hu, divisor_apply,
       WithTop.LinearOrderedAddCommGroup.coe_neg]
-    lift (h₁f u u.2).order to ℤ using (h₂f u) with n hn
+    lift (h₁f u hu).order to ℤ using (h₂f ⟨u, hu⟩) with n hn
     rw [WithTop.untopD_coe, add_comm,
       (by rfl : -↑(n : WithTop ℤ) = (↑(-n) : WithTop ℤ)), ← WithTop.coe_add]
     simp
-  have h₃g' : MeromorphicOn.divisor g' U = 0 := by
-    rw [divisor_mul h₃laurent.inv h₁f _ (fun z hz ↦ h₂f ⟨z, hz⟩),
-      divisor_inv, MeromorphicNFOn_divisor_ratlPolynomial_U _ h₃f,
-      neg_add_cancel]
-    intro z hz
-    simp [(h₃laurent z hz).order_inv, order_LaurentPolynomial_ne_top (divisor f U)]
-  --
-  let g := toMeromorphicNFOn g' U
-  have h₁g : MeromorphicNFOn g U := by apply meromorphicNFOn_toMeromorphicNFOn
-  have h₂g : MeromorphicOn.divisor g U = 0 := by rw [← divisor_toMeromorphicNFOn h₁g', h₃g']
-  have h₃g : AnalyticOnNhd 𝕜 g U := by rw [← h₁g.nonneg_divisor_iff_analyticOnNhd, h₂g]
-  use g, h₃g
-  constructor
-  · intro ⟨u, hu⟩
-    rw [← (h₁g u hu).order_eq_zero_iff,
-      ← (h₁g' u hu).order_congr (toMeromorphicNFOn_eq_self_on_nhdNE h₁g' hu)]
-    exact h₂g' ⟨u, hu⟩
-  · have : laurent = ∏ᶠ (u : 𝕜), fun z ↦ (z - u) ^ (divisor f U) u := by rfl
-    rw [← this]
-    have fU : U ∈ Filter.codiscreteWithin U := by
-      rw [mem_codiscreteWithin]
-      simp
+  · -- f =ᶠ[Filter.codiscreteWithin U] (∏ᶠ (u : 𝕜), fun z ↦ (z - u) ^ (divisor f U) u) * g
     filter_upwards [(divisor f U).supportDiscreteWithinDomain,
-      (h₃laurent.inv.mul h₁f).meromorphicNFAt_codiscreteWithin,
-      fU] with a h₂a h₃a h₄a
-    unfold g g'
-    have : (toMeromorphicNFOn (laurent⁻¹ * f) U) a = (laurent⁻¹ * f) a := by
-      apply Filter.EventuallyEq.eq_of_nhds
-      apply (toMeromorphicNFOn_eq_toMeromorphicNFAt_on_nhd h₁g' h₄a).trans
-      rw [toMeromorphicNFAt_eq_self.1 h₃a]
-    simp only [Pi.mul_apply, this, Pi.inv_apply]
-    rw [← mul_assoc, mul_inv_cancel₀, one_mul]
+      (hφ.inv.smul h₁f).meromorphicNFAt_codiscreteWithin,
+      Filter.codiscreteWithin_self U] with a h₂a h₃a h₄a
+    unfold g
+    simp only [Pi.smul_apply', toMeromorphicNFOn_eq_toMeromorphicNFAt (hφ.inv.smul h₁f) h₄a,
+      ← toMeromorphicNFAt_eq_self.1 h₃a, Pi.inv_apply]
+    rw [← smul_assoc, smul_eq_mul, mul_inv_cancel₀ _, one_smul]
     rwa [← ((meromorphicNF_LaurentPolynomial (divisor f U)) a trivial).order_eq_zero_iff,
       order_LaurentPolynomial, h₂a, Pi.zero_apply, WithTop.coe_zero]

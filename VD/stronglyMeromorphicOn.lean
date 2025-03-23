@@ -197,6 +197,14 @@ theorem toMeromorphicNFOn_eq_toMeromorphicNFAt_on_nhd [CompleteSpace E] (hf : Me
   exact (hf.toMeromorphicNFOn_eq_self_on_nhdNE hx).symm.trans (hf x hx).eq_nhdNE_toMeromorphicNFAt
   simp [toMeromorphicNFOn, hf, hx]
 
+/-- If `f` is meromorphic on `U` and `x ∈ U`, then conversion to normal form at
+`x` and conversion to normal form on `U` agree at `x`. -/
+theorem toMeromorphicNFOn_eq_toMeromorphicNFAt [CompleteSpace E] (hf : MeromorphicOn f U)
+    (hx : x ∈ U) :
+    toMeromorphicNFOn f U x = toMeromorphicNFAt f x x := by
+  apply Filter.EventuallyEq.eq_of_nhds (g := toMeromorphicNFAt f x)
+  simp [(toMeromorphicNFOn_eq_toMeromorphicNFAt_on_nhd hf hx).trans]
+
 variable (f U) in
 /-- After conversion to normal form at `x`, the function has normal form. -/
 theorem meromorphicNFOn_toMeromorphicNFOn [CompleteSpace E] :
