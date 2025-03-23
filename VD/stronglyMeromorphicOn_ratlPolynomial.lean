@@ -221,8 +221,30 @@ theorem MeromorphicOn.extract_zeros_poles_log [CompleteSpace 𝕜] [DecidableEq 
   filter_upwards [h₃g] with z hz
   rw [hz]
   simp
-  rw [finprod_eq_prod _]
-  rw [finsum_eq_sum _]
+
+  have : (Function.mulSupport fun u z ↦ (z - u) ^ (divisor f U) u) = (divisor f U).support := by
+    ext u
+    constructor
+    · intro h
+      simp_all only [Function.mem_mulSupport, ne_eq, Function.mem_support]
+      by_contra hCon
+      simp only [hCon, zpow_zero] at h
+      tauto
+    · intro h
+      simp only [Function.mem_mulSupport, ne_eq]
+      by_contra hCon
+      have := congrFun hCon u
+      simp only [sub_self, Pi.one_apply] at this
+      have : (0 : 𝕜) ^ (divisor f U u) ≠ 0 := ne_zero_of_eq_one this
+      rw [zpow_ne_zero_iff h] at this
+      tauto
+  rw [finprod_eq_prod]
+
+
+  have : (Function.support fun u ↦ ↑((divisor f U) u) * log ‖z - u‖) = (divisor f U).support := by
+    ext u
+    sorry
+
   rw [norm_smul]
   simp [Finset.prod_apply]
   rw [log_mul]
