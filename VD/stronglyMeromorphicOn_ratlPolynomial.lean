@@ -15,6 +15,8 @@ Laurent polynomials are functions on a non-trivially normed field `𝕜` of the 
 Laurent polynomials are meromorphic in normal form, with divisor equal to `d`.
 -/
 
+open Topology
+
 variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {U : Set 𝕜}
@@ -178,11 +180,11 @@ theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] [DecidableEq 𝕜
       (by rfl : -↑(n : WithTop ℤ) = (↑(-n) : WithTop ℤ)), ← WithTop.coe_add]
     simp
   have h₃g' : MeromorphicOn.divisor g' U = 0 := by
-    rw [MeromorphicOn.divisor_mul h₃laurent.inv h₁f _ (fun z hz ↦ h₂f ⟨z, hz⟩),
-      MeromorphicOn.divisor_inv, MeromorphicNFOn_divisor_ratlPolynomial_U _ h₃f,
+    rw [divisor_mul h₃laurent.inv h₁f _ (fun z hz ↦ h₂f ⟨z, hz⟩),
+      divisor_inv, MeromorphicNFOn_divisor_ratlPolynomial_U _ h₃f,
       neg_add_cancel]
     intro z hz
-    simp [(h₃laurent z hz).order_inv, order_LaurentPolynomial_ne_top (MeromorphicOn.divisor f U)]
+    simp [(h₃laurent z hz).order_inv, order_LaurentPolynomial_ne_top (divisor f U)]
   --
   let g := toMeromorphicNFOn g' U
   have h₁g : MeromorphicNFOn g U := by apply meromorphicNFOn_toMeromorphicNFOn
@@ -191,26 +193,23 @@ theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] [DecidableEq 𝕜
   use g, h₃g
   constructor
   · intro ⟨u, hu⟩
-    rw [← (h₁g u hu).order_eq_zero_iff ,
+    rw [← (h₁g u hu).order_eq_zero_iff,
       ← (h₁g' u hu).order_congr (toMeromorphicNFOn_eq_self_on_nhdNE h₁g' hu)]
     exact h₂g' ⟨u, hu⟩
   · have : laurent = ∏ᶠ (u : 𝕜), fun z ↦ (z - u) ^ (divisor f U) u := by rfl
     rw [← this]
-    filter_upwards [h₁f.meromorphicNFAt_codiscreteWithin,
-      (divisor f U).supportDiscreteWithinDomain,
-      (h₃laurent.inv.mul h₁f).meromorphicNFAt_codiscreteWithin] with a h₁a h₂a h₃a
+    have fU : U ∈ Filter.codiscreteWithin U := by
+      rw [mem_codiscreteWithin]
+      simp
+    filter_upwards [(divisor f U).supportDiscreteWithinDomain,
+      (h₃laurent.inv.mul h₁f).meromorphicNFAt_codiscreteWithin,
+      fU] with a h₂a h₃a h₄a
     unfold g g'
     have : (toMeromorphicNFOn (laurent⁻¹ * f) U) a = (laurent⁻¹ * f) a := by
-
-      sorry
-    simp [this]
-    rw [← mul_assoc]
-    rw [mul_inv_cancel₀]
-    simp
-    rw [← MeromorphicNFAt.order_eq_zero_iff]
-    rw [order_LaurentPolynomial]
-    rw [h₂a]
-    simp
-    exact h₃f
-    have Z := meromorphicNF_LaurentPolynomial (divisor f U)
-    exact Z a trivial
+      apply Filter.EventuallyEq.eq_of_nhds
+      apply (toMeromorphicNFOn_eq_toMeromorphicNFAt_on_nhd h₁g' h₄a).trans
+      rw [toMeromorphicNFAt_eq_self.1 h₃a]
+    simp only [Pi.mul_apply, this, Pi.inv_apply]
+    rw [← mul_assoc, mul_inv_cancel₀, one_mul]
+    rwa [← ((meromorphicNF_LaurentPolynomial (divisor f U)) a trivial).order_eq_zero_iff,
+      order_LaurentPolynomial, h₂a, Pi.zero_apply, WithTop.coe_zero]

@@ -190,7 +190,7 @@ theorem MeromorphicOn.toMeromorphicNFOn_eq_self_on_nhdNE [CompleteSpace E]
 
 /-- If `f` is meromorphic on `U` and `x ∈ U`, then conversion to normal form at
 `x` and conversion to normal form on `U` agree in a neighborhood of `x`. -/
-theorem toMeromorphicNFOn_eq_toMeromorphicNFAt_on_nhdNE [CompleteSpace E] (hf : MeromorphicOn f U)
+theorem toMeromorphicNFOn_eq_toMeromorphicNFAt_on_nhd [CompleteSpace E] (hf : MeromorphicOn f U)
     (hx : x ∈ U) :
     toMeromorphicNFOn f U =ᶠ[𝓝 x] toMeromorphicNFAt f x := by
   apply eventuallyEq_nhds_of_eventuallyEq_nhdsNE
@@ -203,7 +203,7 @@ theorem meromorphicNFOn_toMeromorphicNFOn [CompleteSpace E] :
     MeromorphicNFOn (toMeromorphicNFOn f U) U := by
   by_cases hf : MeromorphicOn f U
   · intro z hz
-    rw [meromorphicNFAt_congr (toMeromorphicNFOn_eq_toMeromorphicNFAt_on_nhdNE hf hz)]
+    rw [meromorphicNFAt_congr (toMeromorphicNFOn_eq_toMeromorphicNFAt_on_nhd hf hz)]
     exact meromorphicNFAt_toMeromorphicNFAt
   · simp [hf]
     apply AnalyticOnNhd.meromorphicNFOn
