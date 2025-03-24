@@ -65,7 +65,7 @@ theorem MeromorphicNFOn_set_LaurentPolynomial [DecidableEq 𝕜] (d : 𝕜 → �
   intro z hz
   exact meromorphicNF_LaurentPolynomial d z (trivial)
 
-private lemma mulsupport_LaurentPolynomial (d : 𝕜 → ℤ) :
+lemma mulsupport_LaurentPolynomial (d : 𝕜 → ℤ) :
     (Function.mulSupport fun u z ↦ (z - u) ^ d u) = d.support := by
   ext u
   constructor
@@ -135,7 +135,7 @@ theorem order_LaurentPolynomial_ne_top [DecidableEq 𝕜] {z : 𝕜} (d : 𝕜 �
 
 /-- The divisor function associated with the divisor of the Laurent polynomial
 `(∏ᶠ u, fun z ↦ (z - u) ^ d u)` equals `d`. -/
-theorem MeromorphicNFOn_divisor_ratlPolynomial [CompleteSpace 𝕜] [DecidableEq 𝕜] (d : 𝕜 → ℤ)
+theorem divisor_LaurentPolynomial [CompleteSpace 𝕜] [DecidableEq 𝕜] (d : 𝕜 → ℤ)
   (h₁d : Set.Finite d.support) :
   MeromorphicOn.divisor (∏ᶠ u, fun z ↦ (z - u) ^ d u) ⊤ = d := by
   ext z
@@ -146,7 +146,7 @@ theorem MeromorphicNFOn_divisor_ratlPolynomial [CompleteSpace 𝕜] [DecidableEq
 
 /-- If `D` is a divisor, then the function associated with the divisor of the Laurent polynomial
 equals `D`. -/
-theorem MeromorphicNFOn_divisor_ratlPolynomial_U [CompleteSpace 𝕜] [DecidableEq 𝕜] {U : Set 𝕜}
+theorem divisor_LaurentPolynomial_within [CompleteSpace 𝕜] [DecidableEq 𝕜] {U : Set 𝕜}
     (D : DivisorOn U) (hD : Set.Finite D.support) :
     MeromorphicOn.divisor (∏ᶠ u, fun z ↦ (z - u) ^ D u) U = D := by
   ext z
@@ -180,7 +180,7 @@ theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] [DecidableEq 𝕜
   · -- AnalyticOnNhd 𝕜 g U
     rw [← hg.nonneg_divisor_iff_analyticOnNhd, ← divisor_toMeromorphicNFOn (hφ.inv.smul h₁f),
       divisor_smul hφ.inv h₁f _ (fun z hz ↦ h₂f ⟨z, hz⟩), divisor_inv,
-      MeromorphicNFOn_divisor_ratlPolynomial_U _ h₃f, neg_add_cancel]
+      divisor_LaurentPolynomial_within _ h₃f, neg_add_cancel]
     intro z hz
     simp [(hφ z hz).order_inv, order_LaurentPolynomial_ne_top (divisor f U)]
   constructor

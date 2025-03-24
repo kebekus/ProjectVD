@@ -1,8 +1,10 @@
 import VD.ToMathlib.codiscreteWithin
-import VD.stronglyMeromorphicOn_ratlPolynomial
+import VD.LaurentPolynomial
+import VD.mathlibAddOn
+import VD.meromorphicOn
 
 open scoped Interval Topology
-open Real Filter MeasureTheory intervalIntegral
+open Real Filter
 
 theorem MeromorphicOn.decompose₁
   {f : ℂ → ℂ}
@@ -301,7 +303,7 @@ theorem MeromorphicOn.decompose₃'
   let h₁ := ∏ᶠ u, fun z ↦ (z - u) ^ (d u)
   have h₁h₁ : MeromorphicNFOn h₁ U := by
     intro z hz
-    exact meromorphicNFOn_LaurentPolynomial d z trivial
+    exact meromorphicNF_LaurentPolynomial d z trivial
   have h₂h₁ : (divisor h₁ U) = d := by
     unfold h₁
     apply MeromorphicNFOn_divisor_ratlPolynomial_U d
@@ -311,7 +313,7 @@ theorem MeromorphicOn.decompose₃'
     exact (divisor f U).supportWithinDomain
   have h₃h₁ : ∀ (z : ℂ) (hz : z ∈ U), (h₁h₁ z hz).meromorphicAt.order ≠ ⊤ := by
     intro z hz
-    apply MeromorphicNFOn_ratlPolynomial₃order
+    apply order_LaurentPolynomial_ne_top
   have h₄h₁ : ∀ (z : ℂ) (hz : z ∈ U), (h₁h₁ z hz).meromorphicAt.order = d z := by
     intro z hz
     rw [order_LaurentPolynomial]
