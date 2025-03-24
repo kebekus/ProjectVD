@@ -218,36 +218,31 @@ theorem MeromorphicOn.extract_zeros_poles_log [CompleteSpace 𝕜] [DecidableEq 
         fun z ↦ ∑ᶠ u, (divisor f U u * log ‖z-u‖) + log ‖g z‖ := by
   obtain ⟨g, h₁g, h₂g, h₃g⟩ := MeromorphicOn.extract_zeros_poles h₁f h₂f h₃f
   use g, h₁g, h₂g
-  filter_upwards [h₃g] with z hz
-  rw [hz]
-  simp
-
-  have : (Function.mulSupport fun u z ↦ (z - u) ^ (divisor f U) u) = (divisor f U).support := by
-    ext u
-    constructor
-    · intro h
-      simp_all only [Function.mem_mulSupport, ne_eq, Function.mem_support]
-      by_contra hCon
-      simp only [hCon, zpow_zero] at h
-      tauto
-    · intro h
-      simp only [Function.mem_mulSupport, ne_eq]
-      by_contra hCon
-      have := congrFun hCon u
-      simp only [sub_self, Pi.one_apply] at this
-      have : (0 : 𝕜) ^ (divisor f U u) ≠ 0 := ne_zero_of_eq_one this
-      rw [zpow_ne_zero_iff h] at this
-      tauto
-  rw [finprod_eq_prod]
-
-
-  have : (Function.support fun u ↦ ↑((divisor f U) u) * log ‖z - u‖) = (divisor f U).support := by
-    ext u
-    sorry
-
-  rw [norm_smul]
-  simp [Finset.prod_apply]
-  rw [log_mul]
-  rw [log_prod]
-  simp_rw [log_zpow]
-  sorry
+  filter_upwards [h₃g, (divisor f U).supportDiscreteWithinDomain,
+    Filter.codiscreteWithin_self U] with z hz h₂z h₃z
+  -- Identify finprod with prod over h₃f.toFinset
+  have : (Function.mulSupport fun u z ↦ (z - u) ^ (divisor f U) u) ⊆ h₃f.toFinset := by
+    intro u hu
+    by_contra hCon
+    simp_all only [ne_eq, Subtype.forall, Pi.smul_apply', divisor_apply, Pi.zero_apply,
+      WithTop.untopD_eq_self_iff, WithTop.coe_zero, or_false, Function.mem_mulSupport,
+      Set.Finite.coe_toFinset, Function.mem_support, Decidable.not_not, zpow_zero]
+    tauto
+  rw [hz, finprod_eq_prod_of_mulSupport_subset _ this]
+  -- Identify finsum with sum over h₃f.toFinset
+  have : (Function.support fun u ↦ ↑((divisor f U) u) * log ‖z - u‖) ⊆ h₃f.toFinset := by
+    intro u hu
+    simp_all
+  rw [finsum_eq_sum_of_support_subset _ this]
+  -- Decompose LHS of the equation
+  have : ∀ x ∈ h₃f.toFinset, ‖z - x‖ ^ (divisor f U) x ≠ 0 := by
+    intro x hx
+    rw [Set.Finite.mem_toFinset, Function.mem_support, ne_eq] at hx
+    rw [ne_eq, zpow_eq_zero_iff hx, norm_eq_zero]
+    by_contra hCon
+    rw [sub_eq_zero] at hCon
+    rw [hCon] at h₂z
+    tauto
+  simp only [Pi.smul_apply', Finset.prod_apply, norm_smul, norm_prod, norm_zpow, hz]
+  rw [log_mul (Finset.prod_ne_zero_iff.2 this) (by simp [h₂g ⟨z, h₃z⟩]), log_prod _ _ this]
+  simp [log_zpow]
