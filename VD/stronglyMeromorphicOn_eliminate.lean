@@ -305,12 +305,16 @@ theorem MeromorphicOn.decompose₃'
     intro z hz
     exact meromorphicNF_LaurentPolynomial d z trivial
   have h₂h₁ : (divisor h₁ U) = d := by
+    have : (-divisor f U).support.Finite := by
+      exact DivisorOn.finiteSupport (-divisor f U) h₁U
+    let A := divisor_LaurentPolynomial_within (-divisor f U) this
+    unfold d
+    have : -(divisor f U).toFun = (-divisor f U).toFun := by
+      exact rfl
+    rw [this, ← A]
     unfold h₁
-    apply MeromorphicNFOn_divisor_ratlPolynomial_U d
-    rwa [h₁d]
-    --
-    rw [h₁d]
-    exact (divisor f U).supportWithinDomain
+    unfold d
+    congr
   have h₃h₁ : ∀ (z : ℂ) (hz : z ∈ U), (h₁h₁ z hz).meromorphicAt.order ≠ ⊤ := by
     intro z hz
     apply order_LaurentPolynomial_ne_top

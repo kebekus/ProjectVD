@@ -43,7 +43,7 @@ theorem MeromorphicAt.order_nonneg_if_exists_continuous_extension (hf : Meromorp
     intro x hx h
     simp [sub_eq_zero] at h
     apply hx h
-  apply h₄.atTop_mul (norm_pos_iff.mpr hh₂)
+  apply h₄.atTop_mul_pos (norm_pos_iff.mpr hh₂)
   apply tendsto_nhdsWithin_of_tendsto_nhds
   exact hh₁.continuousAt.norm
 

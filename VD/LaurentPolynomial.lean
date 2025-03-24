@@ -16,7 +16,7 @@ Laurent polynomials are functions on a non-trivially normed field `𝕜` of the 
 Laurent polynomials are meromorphic in normal form, with divisor equal to `d`.
 -/
 
-open Topology
+open Classical Topology
 
 variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜]
@@ -35,7 +35,7 @@ private lemma analyticAt_finLaurentPolynomial_off_support (d : 𝕜 → ℤ) (P 
   exact ne_of_mem_of_not_mem hu hz
 
 /-- Laurent polynomials are meromorphic in normal form on ⊤. -/
-theorem meromorphicNF_LaurentPolynomial [DecidableEq 𝕜] (d : 𝕜 → ℤ) :
+theorem meromorphicNF_LaurentPolynomial (d : 𝕜 → ℤ) :
     MeromorphicNFOn (∏ᶠ u, fun z ↦ (z - u) ^ d u) ⊤ := by
   by_cases hd : (Function.mulSupport fun u z => (z - u) ^ d u).Finite
   · rw [finprod_eq_prod _ hd]
@@ -60,7 +60,7 @@ theorem meromorphicNF_LaurentPolynomial [DecidableEq 𝕜] (d : 𝕜 → ℤ) :
   · rw [finprod_of_infinite_mulSupport hd]
     apply analyticOnNhd_const.meromorphicNFOn
 
-theorem MeromorphicNFOn_set_LaurentPolynomial [DecidableEq 𝕜] (d : 𝕜 → ℤ) (U : Set 𝕜) :
+theorem MeromorphicNFOn_set_LaurentPolynomial (d : 𝕜 → ℤ) (U : Set 𝕜) :
     MeromorphicNFOn (∏ᶠ u, fun z ↦ (z - u) ^ d u) U := by
   intro z hz
   exact meromorphicNF_LaurentPolynomial d z (trivial)
@@ -84,7 +84,7 @@ lemma mulsupport_LaurentPolynomial (d : 𝕜 → ℤ) :
     tauto
 
 /-- The order of the Laurent polynomial `(∏ᶠ u, fun z ↦ (z - u) ^ d u)` at z equals `d z`. -/
-theorem order_LaurentPolynomial [DecidableEq 𝕜] {z : 𝕜} (d : 𝕜 → ℤ) (h₁d : Set.Finite d.support) :
+theorem order_LaurentPolynomial {z : 𝕜} (d : 𝕜 → ℤ) (h₁d : Set.Finite d.support) :
     (((meromorphicNF_LaurentPolynomial d).meromorphicOn) z trivial).order = d z := by
   rw [MeromorphicAt.order_eq_int_iff]
   use ∏ x ∈ h₁d.toFinset.erase z, fun z => (z - x) ^ d x,
@@ -124,7 +124,7 @@ theorem order_LaurentPolynomial [DecidableEq 𝕜] {z : 𝕜} (d : 𝕜 → ℤ)
       simp
 
 /-- Laurent polynomials are nowhere locally constant zero. -/
-theorem order_LaurentPolynomial_ne_top [DecidableEq 𝕜] {z : 𝕜} (d : 𝕜 → ℤ) :
+theorem order_LaurentPolynomial_ne_top {z : 𝕜} (d : 𝕜 → ℤ) :
     ((meromorphicNF_LaurentPolynomial d) z trivial).meromorphicAt.order ≠ ⊤ := by
   by_cases hd : Set.Finite (Function.support d)
   · simp [order_LaurentPolynomial d hd]
@@ -135,7 +135,7 @@ theorem order_LaurentPolynomial_ne_top [DecidableEq 𝕜] {z : 𝕜} (d : 𝕜 �
 
 /-- The divisor function associated with the divisor of the Laurent polynomial
 `(∏ᶠ u, fun z ↦ (z - u) ^ d u)` equals `d`. -/
-theorem divisor_LaurentPolynomial [CompleteSpace 𝕜] [DecidableEq 𝕜] (d : 𝕜 → ℤ)
+theorem divisor_LaurentPolynomial [CompleteSpace 𝕜] (d : 𝕜 → ℤ)
   (h₁d : Set.Finite d.support) :
   MeromorphicOn.divisor (∏ᶠ u, fun z ↦ (z - u) ^ d u) ⊤ = d := by
   ext z
@@ -146,7 +146,7 @@ theorem divisor_LaurentPolynomial [CompleteSpace 𝕜] [DecidableEq 𝕜] (d : �
 
 /-- If `D` is a divisor, then the function associated with the divisor of the Laurent polynomial
 equals `D`. -/
-theorem divisor_LaurentPolynomial_within [CompleteSpace 𝕜] [DecidableEq 𝕜] {U : Set 𝕜}
+theorem divisor_LaurentPolynomial_within [CompleteSpace 𝕜] {U : Set 𝕜}
     (D : DivisorOn U) (hD : Set.Finite D.support) :
     MeromorphicOn.divisor (∏ᶠ u, fun z ↦ (z - u) ^ D u) U = D := by
   ext z
@@ -163,7 +163,7 @@ theorem Filter.codiscreteWithin_self {X : Type*} [TopologicalSpace X] (U : Set X
 variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [CompleteSpace E]
 
-theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] [DecidableEq 𝕜] {f : 𝕜 → E}
+theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] {f : 𝕜 → E}
     (h₁f : MeromorphicOn f U) (h₂f : ∀ u : U, (h₁f u u.2).order ≠ ⊤)
     (h₃f : (divisor f U).support.Finite) :
     ∃ g : 𝕜 → E, AnalyticOnNhd 𝕜 g U ∧ (∀ u : U, g u ≠ 0) ∧
@@ -210,7 +210,7 @@ theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] [DecidableEq 𝕜
 
 open Real
 
-theorem MeromorphicOn.extract_zeros_poles_log [CompleteSpace 𝕜] [DecidableEq 𝕜] {f : 𝕜 → E}
+theorem MeromorphicOn.extract_zeros_poles_log [CompleteSpace 𝕜] {f : 𝕜 → E}
     (h₁f : MeromorphicOn f U) (h₂f : ∀ u : U, (h₁f u u.2).order ≠ ⊤)
     (h₃f : (divisor f U).support.Finite) :
     ∃ g : 𝕜 → E, AnalyticOnNhd 𝕜 g U ∧ (∀ u : U, g u ≠ 0) ∧
