@@ -73,32 +73,21 @@ theorem MermomorphicAt.order_add (hf₁ : MeromorphicAt f₁ z₀) (hf₂ : Mero
     exact Int.min_le_right n₁ n₂
   have : f₁ + f₂ =ᶠ[𝓝[≠] z₀] (· - z₀) ^ m • G := by
     dsimp [G]
-    filter_upwards [h₃g₁, h₃g₂]
-    intro a h₁a h₂a
+    filter_upwards [h₃g₁, h₃g₂, (self_mem_nhdsWithin : {z₀}ᶜ ∈ 𝓝[≠] z₀)] with a h₁a h₂a h₃a
     simp only [Pi.add_apply, h₁a, h₂a, Pi.smul_apply', Pi.pow_apply, smul_add, G]
     congr 1
-    simp [← smul_assoc, smul_eq_mul, ← zpow_add, m]
-    sorry
-
+    <;>
+    · simp only [← smul_assoc, smul_eq_mul, m, G]
+      congr 1
+      rw [← zpow_add', add_sub_cancel]
+      left
+      simpa [h₃a, sub_eq_zero]
   rw [(hf₁.add hf₂).order_congr this, MeromorphicAt.order_smul _ hG.meromorphicAt,
     meromorphicAt_order_centeredMonomial]
-  simp only [m, G, ← WithTop.coe_min]
-  by_cases h₁G : hG.order = ⊤
-  · simp [hG.meromorphicAt_order, h₁G]
-  · have : hG.meromorphicAt.order ≠ ⊤ := by
-      sorry
-    lift hG.meromorphicAt.order to ℤ using this with n hn
-    rw [← WithTop.coe_add]
-    rw [WithTop.le_coe_iff]
-    simp
-    rw [hG.meromorphicAt_order, ← hn]
-
-    sorry
-
-  exact le_self_add
+  simp [← WithTop.coe_min, le_add_of_nonneg_right hG.meromorphicAt_order_nonneg]
 
 /-- Helper lemma for AnalyticAt.order_add_of_unequal_order -/
-lemma AnalyticAt.order_add_of_order_lt_order (hf₁ : AnalyticAt 𝕜 f₁ z₀) (hf₂ : AnalyticAt 𝕜 f₂ z₀)
+lemma MeromorphicAt.order_add_of_order_lt_order (hf₁ : MeromorphicAt f₁ z₀) (hf₂ : MeromorphicAt f₂ z₀)
     (h : hf₁.order < hf₂.order) :
     (hf₁.add hf₂).order = hf₁.order := by
   -- Trivial case: f₂ vanishes identically around z₀
