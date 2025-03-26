@@ -1,6 +1,5 @@
 import VD.Divisor_MeromorphicOn
 import VD.LaurentPolynomial
-import VD.ToMathlib.MeromorphicNFAt
 import VD.ToMathlib.analyticAt_order
 import VD.ToMathlib.bilinear
 import VD.ToMathlib.codiscreteWithin
@@ -19,6 +18,7 @@ import VD.leftovers.diffOp
 import VD.leftovers.holomorphic
 import VD.mathlibAddOn
 import VD.meromorphicAt
+import VD.meromorphicAt_order
 import VD.meromorphicAt_topology
 import VD.meromorphicOn
 import VD.meromorphicOn_divisor

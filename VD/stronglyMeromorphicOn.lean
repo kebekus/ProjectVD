@@ -1,7 +1,7 @@
 --import Mathlib.Analysis.Meromorphic.Divisor.MeromorphicFunction
 import Mathlib.Analysis.Meromorphic.NormalFormAt
 import Mathlib.Analysis.Meromorphic.Divisor.MeromorphicFunction
---import VD.Divisor_MeromorphicOn
+import VD.Divisor_MeromorphicOn
 
 open Topology
 
