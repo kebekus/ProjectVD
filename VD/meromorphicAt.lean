@@ -1,6 +1,5 @@
-import Mathlib.Analysis.Meromorphic.Order
+import Mathlib.Analysis.Meromorphic.Divisor
 import Mathlib.MeasureTheory.Integral.IntervalIntegral
-import VD.ToMathlib.divisor
 import VD.mathlibAddOn
 
 open scoped Interval Topology
@@ -83,22 +82,6 @@ theorem meromorphicAt_congr'
   {f : 𝕜 → E} {g : 𝕜 → E} {x : 𝕜}
   (h : f =ᶠ[𝓝 x] g) : MeromorphicAt f x ↔ MeromorphicAt g x :=
   meromorphicAt_congr (Filter.EventuallyEq.filter_mono h nhdsWithin_le_nhds)
-
-theorem MeromorphicAt.order_congr
-  {f₁ f₂ : 𝕜 → E}
-  {z₀ : 𝕜}
-  (hf₁ : MeromorphicAt f₁ z₀)
-  (h : f₁ =ᶠ[𝓝[≠] z₀] f₂):
-  hf₁.order = (hf₁.congr h).order := by
-  by_cases hord : hf₁.order = ⊤
-  · rw [hord, eq_comm, (hf₁.congr h).order_eq_top_iff]
-    rw [hf₁.order_eq_top_iff] at hord
-    exact EventuallyEq.rw hord (fun x => Eq (f₂ x)) h.symm
-  · obtain ⟨n, hn : hf₁.order = n⟩ := Option.ne_none_iff_exists'.mp hord
-    obtain ⟨g, h₁g, h₂g, h₃g⟩ := (hf₁.order_eq_int_iff n).1 hn
-    rw [hn, eq_comm, (hf₁.congr h).order_eq_int_iff]
-    use g, h₁g, h₂g
-    exact EventuallyEq.rw h₃g (fun x => Eq (f₂ x)) h.symm
 
 theorem AnalyticAt.meromorphicAt_order_nonneg
   {f : 𝕜 → E}
