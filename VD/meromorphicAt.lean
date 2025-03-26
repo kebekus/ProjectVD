@@ -111,8 +111,7 @@ theorem MeromorphicAt.order_add
   obtain ⟨g₁, h₁g₁, h₂g₁, h₃g₁⟩ := hf₁.order_ne_top_iff.1 h₂f₁
   obtain ⟨g₂, h₁g₂, h₂g₂, h₃g₂⟩ := hf₂.order_ne_top_iff.1 h₂f₂
   lift hf₁.order to ℤ using h₂f₁ with n₁ hn₁
-  --let n₁ := WithTop.untopD 0 hf₁.order
-  let n₂ := WithTop.untopD 0 hf₂.order
+  lift hf₂.order to ℤ using h₂f₂ with n₂ hn₂
   let n := min n₁ n₂
   have h₁n₁ : 0 ≤ n₁ - n := by
     rw [sub_nonneg]
@@ -139,7 +138,7 @@ theorem MeromorphicAt.order_add
     simp
     rw [mul_add]
     repeat rw [←mul_assoc, ← zpow_add' (by left; exact (sub_ne_zero_of_ne h₂y))]
-    simp [hn₁, n₂]
+    simp [hn₁, hn₂]
 
   rw [(hf₁.add hf₂).order_congr this]
 
@@ -150,11 +149,7 @@ theorem MeromorphicAt.order_add
     use 1, analyticAt_const
     simp
   rw [t₁]
-  unfold n n₂
-  have : hf₁.order ⊓ hf₂.order = (WithTop.untopD 0 hf₁.order ⊓ WithTop.untopD 0 hf₂.order) := by
-    rw [←untop'_of_ne_top (d := 0) h₂f₁, ←untop'_of_ne_top (d := 0) h₂f₂]
-    simp
-  rw [this]
+  unfold n
   exact le_add_of_nonneg_right h₂g
 
 

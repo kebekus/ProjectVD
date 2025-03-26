@@ -1,10 +1,9 @@
 import Mathlib.Analysis.Meromorphic.Order
 import Mathlib.Topology.DiscreteSubset
-import Mathlib.Analysis.Meromorphic.Divisor.Basic
+import Mathlib.Analysis.Meromorphic.Divisor
 import VD.mathlibAddOn
 import VD.meromorphicOn
 import VD.stronglyMeromorphicOn
-import Mathlib.Analysis.Meromorphic.Divisor.MeromorphicFunction
 
 open scoped Interval Topology
 open Classical
