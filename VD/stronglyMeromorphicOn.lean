@@ -233,8 +233,8 @@ theorem meromorphicNFOn_toMeromorphicNFOn [CompleteSpace E] :
 
 /- ######################################################## -/
 
-theorem toMeromorphicNFOn_changeOrder [CompleteSpace 𝕜]
-  {f : 𝕜 → 𝕜}
+theorem toMeromorphicNFOn_changeOrder [CompleteSpace E]
+  {f : 𝕜 → E}
   {U : Set 𝕜}
   {z₀ : 𝕜}
   (hf : MeromorphicOn f U)
@@ -244,8 +244,8 @@ theorem toMeromorphicNFOn_changeOrder [CompleteSpace 𝕜]
   exact (hf.toMeromorphicNFOn_eq_self_on_nhdNE hz₀).symm
 
 
-theorem MeromorphicOn.divisor_of_toMeromorphicNFOn [CompleteSpace 𝕜]
-  {f : 𝕜 → 𝕜}
+theorem MeromorphicOn.divisor_of_toMeromorphicNFOn [CompleteSpace E]
+  {f : 𝕜 → E}
   {U : Set 𝕜}
   (hf : MeromorphicOn f U) :
   divisor f U = divisor (toMeromorphicNFOn f U) U := by
