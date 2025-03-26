@@ -5,7 +5,7 @@ Authors: Stefan Kebekus
 -/
 
 import Mathlib.Topology.DiscreteSubset
-import Mathlib.Analysis.Meromorphic.Divisor.MeromorphicFunction
+import Mathlib.Analysis.Meromorphic.Divisor
 import Mathlib.Analysis.Meromorphic.NormalFormAt
 
 open Classical Filter Topology
