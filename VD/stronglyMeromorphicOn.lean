@@ -61,15 +61,13 @@ theorem MeromorphicNFOn.nonneg_divisor_iff_analyticOnNhd [CompleteSpace E]
   · intro x hx
     rw [← (h₁f x hx).order_nonneg_iff_analyticAt]
     have := h x
-    simp only [DivisorOn.coe_zero, Pi.zero_apply, h₁f.meromorphicOn, hx,
-      MeromorphicOn.divisor_apply, le_refl, implies_true, WithTop.le_untopD_iff,
-      WithTop.coe_zero] at this
+    simp only [Function.locallyFinsuppWithin.coe_zero, Pi.zero_apply, h₁f.meromorphicOn, hx,
+      MeromorphicOn.divisor_apply] at this
     assumption
   · intro x
     by_cases hx : x ∈ U
-    · simp only [DivisorOn.coe_zero, Pi.zero_apply, h₁f.meromorphicOn, hx,
-        MeromorphicOn.divisor_apply, le_refl, implies_true, WithTop.le_untopD_iff,
-        WithTop.coe_zero]
+    · simp only [Function.locallyFinsuppWithin.coe_zero, Pi.zero_apply, h₁f.meromorphicOn, hx,
+      MeromorphicOn.divisor_apply]
       exact (h₁f x hx).order_nonneg_iff_analyticAt.2 (h x hx)
     · simp [h₁f.meromorphicOn, hx]
 
@@ -250,9 +248,7 @@ theorem MeromorphicOn.divisor_of_toMeromorphicNFOn [CompleteSpace E]
   (hf : MeromorphicOn f U) :
   divisor f U = divisor (toMeromorphicNFOn f U) U := by
   ext z
-  by_cases hz : z ∈ U
-  · simp [hf, (meromorphicNFOn_toMeromorphicNFOn f U).meromorphicOn, hz]
-    congr 1
+  by_cases hz : z ∈ U <;> simp [hf, (meromorphicNFOn_toMeromorphicNFOn f U).meromorphicOn, hz]
+  · congr 1
     apply MeromorphicAt.order_congr
     exact toMeromorphicNFOn_eq_self_on_nhdNE hf hz
-  · simp [hz]

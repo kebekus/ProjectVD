@@ -89,6 +89,6 @@ theorem divisor_restrict [CompleteSpace E] {f : 𝕜 → E} {V : Set 𝕜}
     (divisor f U).restrict hV = divisor f V := by
   ext x
   by_cases hx : x ∈ V
-  · rw [DivisorOn.restrict_apply]
+  · rw [Function.locallyFinsuppWithin.restrict_apply]
     simp [hf, hx, hf.mono_set hV, hV hx]
   · simp [hx]
