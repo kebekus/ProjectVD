@@ -67,8 +67,7 @@ If `f₁` is meromorphic on an open set `U`, if `f₂` agrees with `f₁` on a
 codiscrete subset of `U`, then `f₁` and `f₂` induce the same divisors on`U`.
 -/
 theorem divisor_congr_codiscreteWithin_open [CompleteSpace E] {f₁ f₂ : 𝕜 → E}
-    (hf₁ : MeromorphicOn f₁ U) (h₁ : f₁ =ᶠ[Filter.codiscreteWithin U] f₂)
-    (h₂ : IsOpen U) :
+    (hf₁ : MeromorphicOn f₁ U) (h₁ : f₁ =ᶠ[Filter.codiscreteWithin U] f₂) (h₂ : IsOpen U) :
     divisor f₁ U = divisor f₂ U := by
   ext x
   by_cases hx : x ∈ U <;> simp [hf₁, hf₁.congr_codiscreteWithin_open h₁ h₂, hx]
@@ -84,8 +83,7 @@ theorem divisor_congr_codiscreteWithin_open [CompleteSpace E] {f₁ f₂ : 𝕜 
     tauto
 
 /-- Taking the divisor of a meromorphic function commutes with restriction. -/
-theorem divisor_restrict [CompleteSpace E] {f : 𝕜 → E} {V : Set 𝕜}
-    (hf : MeromorphicOn f U) (hV : V ⊆ U) :
+theorem divisor_restrict [CompleteSpace E] {f : 𝕜 → E} {V : Set 𝕜} (hf : MeromorphicOn f U) (hV : V ⊆ U) :
     (divisor f U).restrict hV = divisor f V := by
   ext x
   by_cases hx : x ∈ V
