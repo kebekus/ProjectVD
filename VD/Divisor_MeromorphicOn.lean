@@ -6,7 +6,7 @@ Authors: Stefan Kebekus
 
 import Mathlib.Topology.DiscreteSubset
 import Mathlib.Analysis.Meromorphic.Divisor.MeromorphicFunction
-import VD.ToMathlib.MeromorphicNFAt
+import Mathlib.Analysis.Meromorphic.NormalFormAt
 
 open Classical Filter Topology
 
@@ -62,9 +62,10 @@ theorem divisor_congr_codiscreteWithin [CompleteSpace E] {f₁ f₂ : 𝕜 → E
     simp at ha
     tauto
 
-/-- If `f₁` is meromorphic on an open set `U`, if `f₂` agrees with `f₁` on a
-  codiscrete subset of `U`, then `f₁` and `f₂` induce the same divisors on
-  `U`. -/
+/--
+If `f₁` is meromorphic on an open set `U`, if `f₂` agrees with `f₁` on a
+codiscrete subset of `U`, then `f₁` and `f₂` induce the same divisors on`U`.
+-/
 theorem divisor_congr_codiscreteWithin_open [CompleteSpace E] {f₁ f₂ : 𝕜 → E}
     (hf₁ : MeromorphicOn f₁ U) (h₁ : f₁ =ᶠ[Filter.codiscreteWithin U] f₂)
     (h₂ : IsOpen U) :

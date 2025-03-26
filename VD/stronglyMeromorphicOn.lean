@@ -1,6 +1,7 @@
+--import Mathlib.Analysis.Meromorphic.Divisor.MeromorphicFunction
+import Mathlib.Analysis.Meromorphic.NormalFormAt
 import Mathlib.Analysis.Meromorphic.Divisor.MeromorphicFunction
-import VD.ToMathlib.MeromorphicNFAt
-import VD.Divisor_MeromorphicOn
+--import VD.Divisor_MeromorphicOn
 
 open Topology
 
@@ -107,30 +108,30 @@ theorem MeromorphicNFOn.zero_set_eq_divisor_support [CompleteSpace E] (h₁f : M
 
 /-- If `f` is any function and `g` is analytic without zero on `U`, then `f` is meromorphic in
 normal form on `U` iff `g • f` is meromorphic in normal form on `U`. -/
-theorem meromorphicNFOn_smul_iff_right_of_analyticAt {g : 𝕜 → 𝕜} (h₁g : AnalyticOnNhd 𝕜 g U)
+theorem meromorphicNFOn_smul_iff_right_of_analyticOnNhd {g : 𝕜 → 𝕜} (h₁g : AnalyticOnNhd 𝕜 g U)
     (h₂g : ∀ u : U, g u ≠ 0) :
     MeromorphicNFOn (g • f) U ↔ MeromorphicNFOn f U := by
   constructor <;> intro h z hz
-  · rw [meromorphicNFAt_iff_meromorphicNFAt_of_smul_analytic (h₁g z hz) (h₂g ⟨z, hz⟩)]
+  · rw [← meromorphicNFAt_smul_iff_right_of_analyticAt (h₁g z hz) (h₂g ⟨z, hz⟩)]
     exact h z hz
-  · apply MeromorphicNFAt.meromorphicNFAt_of_smul_analytic (h z hz) (h₁g z hz)
+  · apply (h z hz).smul_analytic (h₁g z hz)
     exact h₂g ⟨z, hz⟩
 
 /-- If `f` is any function and `g` is analytic without zero in `U`, then `f` is meromorphic in
 normal form on `U` iff `g * f` is meromorphic in normal form on `U`. -/
-theorem meromorphicNFOn_mul_iff_right {f g : 𝕜 → 𝕜} (h₁g : AnalyticOnNhd 𝕜 g U)
+theorem meromorphicNFOn_mul_iff_right_of_analyticOnNhd {f g : 𝕜 → 𝕜} (h₁g : AnalyticOnNhd 𝕜 g U)
     (h₂g : ∀ u : U, g u ≠ 0) :
     MeromorphicNFOn (g * f) U ↔ MeromorphicNFOn f U := by
   rw [← smul_eq_mul]
-  exact meromorphicNFOn_smul_iff_right_of_analyticAt h₁g h₂g
+  exact meromorphicNFOn_smul_iff_right_of_analyticOnNhd h₁g h₂g
 
 /-- If `f` is any function and `g` is analytic without zero in `U`, then `f` is meromorphic in
 normal form on `U` iff `f * g` is meromorphic in normal form on `U`. -/
-theorem meromorphicNFAt_mul_iff_left {f g : 𝕜 → 𝕜} (h₁g : AnalyticOnNhd 𝕜 g U)
+theorem meromorphicNFOn_mul_iff_left_of_analyticOnNhd {f g : 𝕜 → 𝕜} (h₁g : AnalyticOnNhd 𝕜 g U)
     (h₂g : ∀ u : U, g u ≠ 0) :
     MeromorphicNFOn (f * g) U ↔ MeromorphicNFOn f U := by
   rw [mul_comm, ← smul_eq_mul]
-  exact meromorphicNFOn_smul_iff_right_of_analyticAt h₁g h₂g
+  exact meromorphicNFOn_mul_iff_right_of_analyticOnNhd h₁g h₂g
 
 /-- A function to 𝕜 is meromorphic in normal form on `U` iff its inverse is. -/
 theorem meromorphicNFOn_iff_meromorphicNFOn_inv {f : 𝕜 → 𝕜} :
@@ -171,7 +172,7 @@ theorem toMeromorphicNFOn_eqOn_codiscrete [CompleteSpace E] (hf : MeromorphicOn 
     f =ᶠ[Filter.codiscreteWithin U] toMeromorphicNFOn f U := by
   have : U ∈ Filter.codiscreteWithin U := by
     simp [mem_codiscreteWithin.2]
-  filter_upwards [hf.analyticAt_codiscreteWithin, this] with a h₁a h₂a
+  filter_upwards [hf.analyticAt_mem_codiscreteWithin, this] with a h₁a h₂a
   simp [toMeromorphicNFOn, hf, ← toMeromorphicNFAt_eq_self.1 h₁a.meromorphicNFAt]
 
 /-- Conversion to normal form on `U` does not affect the divisor. -/
