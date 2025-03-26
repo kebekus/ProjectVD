@@ -108,10 +108,10 @@ theorem MeromorphicAt.order_add
     rw [(hf₁.add hf₂).order_congr]
     filter_upwards [hf₂.order_eq_top_iff.1 h₂f₂]
     simp
-  obtain ⟨g₁, h₁g₁, h₂g₁, h₃g₁⟩ := hf₁.order_ne_top_iff.1 h₂f₁
-  obtain ⟨g₂, h₁g₂, h₂g₂, h₃g₂⟩ := hf₂.order_ne_top_iff.1 h₂f₂
   lift hf₁.order to ℤ using h₂f₁ with n₁ hn₁
   lift hf₂.order to ℤ using h₂f₂ with n₂ hn₂
+  obtain ⟨g₁, h₁g₁, h₂g₁, h₃g₁⟩ := (hf₁.order_eq_int_iff n₁).1 hn₁.symm
+  obtain ⟨g₂, h₁g₂, h₂g₂, h₃g₂⟩ := (hf₂.order_eq_int_iff n₂).1 hn₂.symm
   let n := min n₁ n₂
   have h₁n₁ : 0 ≤ n₁ - n := by
     rw [sub_nonneg]
@@ -128,17 +128,12 @@ theorem MeromorphicAt.order_add
   have h₂g : 0 ≤ h₁g.meromorphicAt.order := h₁g.meromorphicAt_order_nonneg
 
   have : f₁ + f₂ =ᶠ[𝓝[≠] z₀] (fun z ↦ (z - z₀) ^ n) * g := by
-    rw [eventuallyEq_nhdsWithin_iff, eventually_nhds_iff]
-    obtain ⟨t, ht⟩ := eventually_nhds_iff.1 (eventually_nhdsWithin_iff.1 (h₃g₁.and h₃g₂))
-    use t
-    simp [ht]
-    intro y h₁y h₂y
-    rw [(ht.1 y h₁y h₂y).1, (ht.1 y h₁y h₂y).2]
+    filter_upwards [h₃g₁, h₃g₂] with y h₁y h₂y
+    have : y - z₀ ≠ 0 := by
+      sorry
+    rw [Pi.add_apply, Pi.mul_apply, h₁y, h₂y]
     unfold g
-    simp
-    rw [mul_add]
-    repeat rw [←mul_assoc, ← zpow_add' (by left; exact (sub_ne_zero_of_ne h₂y))]
-    simp [hn₁, hn₂]
+    simp [mul_add, ← mul_assoc, ← zpow_add', this]
 
   rw [(hf₁.add hf₂).order_congr this]
 
@@ -149,7 +144,6 @@ theorem MeromorphicAt.order_add
     use 1, analyticAt_const
     simp
   rw [t₁]
-  unfold n
   exact le_add_of_nonneg_right h₂g
 
 
