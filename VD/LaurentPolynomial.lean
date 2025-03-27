@@ -4,8 +4,27 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
-import VD.Divisor_MeromorphicOn
 import VD.stronglyMeromorphicOn
+
+-- -----------------
+
+theorem Filter.codiscreteWithin_self {X : Type*} [TopologicalSpace X] (U : Set X) :
+    U ∈ Filter.codiscreteWithin U := by simp [mem_codiscreteWithin]
+
+theorem Function.locallyFinsuppWithin.supportDiscreteWithinDomain
+    {X : Type*} [TopologicalSpace X] [T1Space X] (U : Set X)
+    {Y : Type*} [Zero Y]
+    (f : Function.locallyFinsuppWithin U Y) :
+    f =ᶠ[Filter.codiscreteWithin U] 0 := by
+  apply codiscreteWithin_iff_locallyFiniteComplementWithin.2
+  have : f.support = (U \ {x | f x = (0 : X → Y) x}) := by
+    ext x
+    simp only [mem_support, ne_eq, Pi.zero_apply, Set.mem_diff, Set.mem_setOf_eq, iff_and_self]
+    exact (support_subset_iff.1 f.supportWithinDomain) x
+  rw [← this]
+  exact f.supportLocallyFiniteWithinDomain
+
+-- -----------------
 
 /-!
 # Laurent polynomials
@@ -20,6 +39,7 @@ open Classical Topology
 
 variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [CompleteSpace E]
   {U : Set 𝕜}
   {z : 𝕜}
 
@@ -123,7 +143,9 @@ theorem order_LaurentPolynomial {z : 𝕜} (d : 𝕜 → ℤ) (h₁d : Set.Finit
       rw [this]
       simp
 
-/-- Laurent polynomials are nowhere locally constant zero. -/
+/--
+Laurent polynomials are nowhere locally constant zero.
+-/
 theorem order_LaurentPolynomial_ne_top {z : 𝕜} (d : 𝕜 → ℤ) :
     ((meromorphicNF_LaurentPolynomial d) z trivial).meromorphicAt.order ≠ ⊤ := by
   by_cases hd : Set.Finite (Function.support d)
@@ -133,8 +155,10 @@ theorem order_LaurentPolynomial_ne_top {z : 𝕜} (d : 𝕜 → ℤ) :
     simp [finprod_of_infinite_mulSupport hd, this.meromorphicAt_order,
       this.order_eq_zero_iff.2 (by simp)]
 
-/-- The divisor function associated with the divisor of the Laurent polynomial
-`(∏ᶠ u, fun z ↦ (z - u) ^ d u)` equals `d`. -/
+/--
+The divisor function associated with the divisor of the Laurent polynomial
+`(∏ᶠ u, fun z ↦ (z - u) ^ d u)` equals `d`.
+-/
 theorem divisor_LaurentPolynomial [CompleteSpace 𝕜] (d : 𝕜 → ℤ)
   (h₁d : Set.Finite d.support) :
   MeromorphicOn.divisor (∏ᶠ u, fun z ↦ (z - u) ^ d u) ⊤ = d := by
@@ -144,10 +168,12 @@ theorem divisor_LaurentPolynomial [CompleteSpace 𝕜] (d : 𝕜 → ℤ)
   rw [order_LaurentPolynomial d h₁d]
   simp
 
-/-- If `D` is a divisor, then the function associated with the divisor of the Laurent polynomial
-equals `D`. -/
+/--
+If `D` is a divisor, then the function associated with the divisor of the
+Laurent polynomial equals `D`.
+-/
 theorem divisor_LaurentPolynomial_within [CompleteSpace 𝕜] {U : Set 𝕜}
-    (D : DivisorOn U) (hD : Set.Finite D.support) :
+    (D : Function.locallyFinsuppWithin U ℤ) (hD : Set.Finite D.support) :
     MeromorphicOn.divisor (∏ᶠ u, fun z ↦ (z - u) ^ D u) U = D := by
   ext z
   by_cases hz : z ∈ U
@@ -155,14 +181,11 @@ theorem divisor_LaurentPolynomial_within [CompleteSpace 𝕜] {U : Set 𝕜}
       MeromorphicOn.divisor_apply, order_LaurentPolynomial D hD]
   · simp [hz]
 
--- ##################### --
-
-theorem Filter.codiscreteWithin_self {X : Type*} [TopologicalSpace X] (U : Set X) :
-    U ∈ Filter.codiscreteWithin U := by simp [mem_codiscreteWithin]
-
-variable
-  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [CompleteSpace E]
-
+/--
+If `f` is meromorphic on an open set `U`, if `f` is nowhere locally constant zero, and if the
+support of the divisor of `f` is finite, then there exists a meromorphic function `g` on `U` such
+that `f` is the product of the Laurent polynomial associated with the divisor of `f` and `g`.
+-/
 theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] {f : 𝕜 → E}
     (h₁f : MeromorphicOn f U) (h₂f : ∀ u : U, (h₁f u u.2).order ≠ ⊤)
     (h₃f : (divisor f U).support.Finite) :
@@ -186,20 +209,16 @@ theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] {f : 𝕜 → E}
   constructor
   · -- ∀ (u : ↑U), g ↑u ≠ 0
     intro ⟨u, hu⟩
-    rw [← (hg u hu).order_eq_zero_iff,
-      ← ((hφ.inv.smul h₁f) u hu).order_congr
-        (toMeromorphicNFOn_eq_self_on_nhdNE (hφ.inv.smul h₁f) hu)]
-    rw [(hφ u hu).inv.order_smul (h₁f u hu), (hφ u hu).order_inv,
-      order_LaurentPolynomial _ h₃f]
-    simp only [DivisorOn.coe_neg, Pi.neg_apply, h₁f, hu, divisor_apply,
-      WithTop.LinearOrderedAddCommGroup.coe_neg]
+    rw [← (hg u hu).order_eq_zero_iff, ← ((hφ.inv.smul h₁f) u hu).order_congr
+      (toMeromorphicNFOn_eq_self_on_nhdNE (hφ.inv.smul h₁f) hu).symm]
+    rw [(hφ u hu).inv.order_smul (h₁f u hu), (hφ u hu).order_inv, order_LaurentPolynomial _ h₃f]
+    simp only [Pi.neg_apply, h₁f, hu, divisor_apply, WithTop.LinearOrderedAddCommGroup.coe_neg]
     lift (h₁f u hu).order to ℤ using (h₂f ⟨u, hu⟩) with n hn
-    rw [WithTop.untopD_coe, add_comm,
-      (by rfl : -↑(n : WithTop ℤ) = (↑(-n) : WithTop ℤ)), ← WithTop.coe_add]
+    rw [WithTop.untop₀_coe, (by rfl : -↑(n : WithTop ℤ) = (↑(-n) : WithTop ℤ)), ← WithTop.coe_add]
     simp
   · -- f =ᶠ[Filter.codiscreteWithin U] (∏ᶠ (u : 𝕜), fun z ↦ (z - u) ^ (divisor f U) u) * g
     filter_upwards [(divisor f U).supportDiscreteWithinDomain,
-      (hφ.inv.smul h₁f).meromorphicNFAt_codiscreteWithin,
+      (hφ.inv.smul h₁f).meromorphicNFAt_mem_codiscreteWithin,
       Filter.codiscreteWithin_self U] with a h₂a h₃a h₄a
     unfold g
     simp only [Pi.smul_apply', toMeromorphicNFOn_eq_toMeromorphicNFAt (hφ.inv.smul h₁f) h₄a,
@@ -207,6 +226,8 @@ theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] {f : 𝕜 → E}
     rw [← smul_assoc, smul_eq_mul, mul_inv_cancel₀ _, one_smul]
     rwa [← ((meromorphicNF_LaurentPolynomial (divisor f U)) a trivial).order_eq_zero_iff,
       order_LaurentPolynomial, h₂a, Pi.zero_apply, WithTop.coe_zero]
+
+-- ##################### --
 
 open Real
 
