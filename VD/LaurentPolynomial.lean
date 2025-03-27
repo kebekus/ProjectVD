@@ -25,9 +25,18 @@ theorem divisor_toMeromorphicNFOn [CompleteSpace E] {f : 𝕜 → E} (hf : Merom
 
 -- -----------------
 
+/--
+Any set is codiscrete within itself.
+-/
 theorem Filter.codiscreteWithin_self {X : Type*} [TopologicalSpace X] (U : Set X) :
     U ∈ Filter.codiscreteWithin U := by simp [mem_codiscreteWithin]
 
+-- -----------------
+
+/--
+If `X` is a `T1Space`, then functions with locally finite support within `U`
+have discrete support within `U`.
+-/
 theorem Function.locallyFinsuppWithin.supportDiscreteWithinDomain
     {X : Type*} [TopologicalSpace X] [T1Space X] (U : Set X)
     {Y : Type*} [Zero Y]
@@ -46,10 +55,11 @@ theorem Function.locallyFinsuppWithin.supportDiscreteWithinDomain
 /-!
 # Laurent polynomials
 
-This file discusses Laurent polynomials as examples of meromorphic functions.
-Laurent polynomials are functions on a non-trivially normed field `𝕜` of the form
-`(∏ᶠ u, fun z ↦ (z - u) ^ d u)`, where `d : 𝕜 → ℤ` has finite support. We show that
-Laurent polynomials are meromorphic in normal form, with divisor equal to `d`.
+This file discusses Laurent polynomials as examples of meromorphic functions in
+normal form. Laurent polynomials are functions on a non-trivially normed field
+`𝕜` of the form `(∏ᶠ u, fun z ↦ (z - u) ^ d u)`, where `d : 𝕜 → ℤ` has finite
+support. We show that Laurent polynomials are meromorphic in normal form, with
+divisor equal to `d`.
 -/
 
 open Classical Real Topology
