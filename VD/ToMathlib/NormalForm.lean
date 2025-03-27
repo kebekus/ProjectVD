@@ -1,6 +1,5 @@
 import Mathlib.Analysis.Meromorphic.NormalFormAt
 import Mathlib.Analysis.Meromorphic.Divisor
-import VD.Divisor_MeromorphicOn
 
 open Topology
 

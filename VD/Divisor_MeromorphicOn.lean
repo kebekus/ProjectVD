@@ -1,12 +1,5 @@
-/-
-Copyright (c) 2025 Stefan Kebekus. All rights reserved.
-Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Stefan Kebekus
--/
-
-import Mathlib.Topology.DiscreteSubset
 import Mathlib.Analysis.Meromorphic.Divisor
-import Mathlib.Analysis.Meromorphic.NormalFormAt
+import VD.ToMathlib.NormalForm
 
 open Classical Filter Topology
 
@@ -90,3 +83,13 @@ theorem divisor_restrict [CompleteSpace E] {f : 𝕜 → E} {V : Set 𝕜} (hf :
   · rw [Function.locallyFinsuppWithin.restrict_apply]
     simp [hf, hx, hf.mono_set hV, hV hx]
   · simp [hx]
+
+-- ----------------
+
+/--
+Conversion to normal form on `U` does not affect the divisor.
+-/
+theorem divisor_toMeromorphicNFOn [CompleteSpace E] {f : 𝕜 → E} (hf : MeromorphicOn f U) :
+    MeromorphicOn.divisor f U = MeromorphicOn.divisor (toMeromorphicNFOn f U) U := by
+  rw [← hf.divisor_congr_codiscreteWithin (toMeromorphicNFOn_eqOn_codiscrete hf)]
+  exact toMeromorphicNFOn_eq_self_on_compl hf
