@@ -1,5 +1,4 @@
 import Mathlib.Analysis.Meromorphic.Divisor
-import VD.ToMathlib.NormalForm
 
 open Classical Filter Topology
 
