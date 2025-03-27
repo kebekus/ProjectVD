@@ -6,7 +6,22 @@ Authors: Stefan Kebekus
 import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
 import Mathlib.Analysis.Meromorphic.Divisor
 import VD.ToMathlib.NormalForm
-import VD.Congruence_Divisor
+import VD.ToMathlib.Congruence_Divisor
+
+
+-- -----------------
+variable
+  {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+  {U : Set 𝕜}
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+
+/--
+Conversion to normal form on `U` does not affect the divisor.
+-/
+theorem divisor_toMeromorphicNFOn [CompleteSpace E] {f : 𝕜 → E} (hf : MeromorphicOn f U) :
+    MeromorphicOn.divisor f U = MeromorphicOn.divisor (toMeromorphicNFOn f U) U := by
+  rw [← hf.divisor_congr_codiscreteWithin (toMeromorphicNFOn_eqOn_codiscrete hf)]
+  exact toMeromorphicNFOn_eq_self_on_compl hf
 
 -- -----------------
 
