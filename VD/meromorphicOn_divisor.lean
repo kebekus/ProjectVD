@@ -46,25 +46,18 @@ theorem MeromorphicOn.divisor_add_const₁  [CompleteSpace 𝕜]
 
     by_cases ha: (MeromorphicAt.const a z).order = ⊤
     · simp [ha]
-    · rw [WithTop.le_untopD_iff]
-      apply AnalyticAt.meromorphicAt_order_nonneg
+    · apply AnalyticAt.meromorphicAt_order_nonneg
       exact analyticAt_const
-      tauto
 
-  · rw [WithTop.le_untopD_iff]
-    let A := (hf z hz).order_add (MeromorphicAt.const a z)
+  · let A := (hf z hz).order_add (MeromorphicAt.const a z)
     have : 0 ≤ min (hf z hz).order (MeromorphicAt.const a z).order := by
       apply le_min
       have := h
       simp [hf, hz] at this
-      let V := untop'_of_ne_top (d := 0) h₁f
-      rw [← V]
-      simpa [h]
-      --
+      exact this
       apply AnalyticAt.meromorphicAt_order_nonneg
       exact analyticAt_const
     exact le_trans this A
-    tauto
 
 theorem MeromorphicOn.divisor_add_const₂ [CompleteSpace 𝕜]
   {f : 𝕜 → 𝕜}
