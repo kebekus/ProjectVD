@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
+import Mathlib.Analysis.Meromorphic.Divisor
+import VD.ToMathlib.NormalForm
 import VD.stronglyMeromorphicOn
 
 -- -----------------
