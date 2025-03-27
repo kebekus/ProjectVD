@@ -8,7 +8,7 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 
 
 /--
-If two functions agree in a punctured neighborhood, then one if meromorphic iff
+If two functions agree in a punctured neighborhood, then one is meromorphic iff
 the other is meromorphic.
 -/
 theorem meromorphicAt_congr
