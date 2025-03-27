@@ -215,15 +215,13 @@ theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] {f : 𝕜 → E}
     (meromorphicNF_LaurentPolynomial (divisor f U)).meromorphicOn.mono_set (by tauto)
   let g := toMeromorphicNFOn (φ⁻¹ • f) U
   have hg : MeromorphicNFOn g U := by apply meromorphicNFOn_toMeromorphicNFOn
-  use g
-  constructor
+  refine ⟨g, ?_, ?_, ?_⟩
   · -- AnalyticOnNhd 𝕜 g U
     rw [← hg.nonneg_divisor_iff_analyticOnNhd, ← divisor_toMeromorphicNFOn (hφ.inv.smul h₁f),
       divisor_smul hφ.inv h₁f _ (fun z hz ↦ h₂f ⟨z, hz⟩), divisor_inv,
       divisor_LaurentPolynomial_within _ h₃f, neg_add_cancel]
     intro z hz
     simp [(hφ z hz).order_inv, order_LaurentPolynomial_ne_top (divisor f U)]
-  constructor
   · -- ∀ (u : ↑U), g ↑u ≠ 0
     intro ⟨u, hu⟩
     rw [← (hg u hu).order_eq_zero_iff, ← ((hφ.inv.smul h₁f) u hu).order_congr
