@@ -1,4 +1,4 @@
-import VD.Divisor_MeromorphicOn
+import VD.Congruence_Divisor
 import VD.LaurentPolynomial
 import VD.ToMathlib.NormalForm
 import VD.ToMathlib.analyticAt_order
@@ -27,6 +27,5 @@ import VD.meromorphicOn_integrability
 import VD.partialDeriv
 import VD.specialFunctions_CircleIntegral_affine
 import VD.specialFunctions_Integral_log_sin
-import VD.stronglyMeromorphicOn
 import VD.stronglyMeromorphicOn_eliminate
 import VD.stronglyMeromorphic_JensenFormula

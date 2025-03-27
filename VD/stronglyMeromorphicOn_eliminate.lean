@@ -1,10 +1,16 @@
-import VD.ToMathlib.codiscreteWithin
 import VD.LaurentPolynomial
 import VD.mathlibAddOn
 import VD.meromorphicOn
+import VD.ToMathlib.codiscreteWithin
+import VD.ToMathlib.NormalForm
 
 open scoped Interval Topology
 open Real Filter
+
+@[simp]
+lemma WithTop.eq_untop₀_iff {α : Type*} [Zero α] {a : WithTop α} :
+    (a : WithTop α).untop₀ = a ↔ a ≠ ⊤ := by
+  induction a <;> simp
 
 theorem MeromorphicOn.decompose₁
   {f : ℂ → ℂ}
@@ -57,7 +63,7 @@ theorem MeromorphicOn.decompose₁
       rw [← h]
       simp
     simp [hz₀, h₃f]
-    simp [untop'_of_ne_top h₃f]
+    rw [WithTop.eq_untop₀_iff.2 h₃f]
     exact LinearOrderedAddCommGroupWithTop.add_neg_cancel_of_ne_top h₃f
 
   let g := toMeromorphicNFAt g₁ z₀
@@ -181,10 +187,10 @@ theorem MeromorphicOn.decompose₂
     simp [hp] at hu
 
   have h₅g₀ : MeromorphicNFAt g₀ u := by
-    rw [meromorphicNFAt_iff_meromorphicNFAt_of_smul_analytic h₀ h₁]
+    --rw [meromorphicNFAt_smul_iff_right_of_analyticAt h₀ h₁]
     rw [mul_comm] at h₄g₀
-    rw [smul_eq_mul]
-    rw [← h₄g₀]
+    --rw [smul_eq_mul]
+    rw [h₄g₀]
     exact hf u u.2
 
   have h₆g₀ : (h₁g₀ u u.2).order ≠ ⊤ := by

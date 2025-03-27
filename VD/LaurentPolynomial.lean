@@ -6,7 +6,7 @@ Authors: Stefan Kebekus
 import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
 import Mathlib.Analysis.Meromorphic.Divisor
 import VD.ToMathlib.NormalForm
-import VD.stronglyMeromorphicOn
+import VD.Congruence_Divisor
 
 -- -----------------
 

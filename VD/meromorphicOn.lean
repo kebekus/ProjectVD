@@ -1,6 +1,5 @@
 import Mathlib.Analysis.Meromorphic.Divisor
 import VD.meromorphicAt
-import VD.stronglyMeromorphicOn
 import VD.mathlibAddOn
 
 open scoped Interval Topology
