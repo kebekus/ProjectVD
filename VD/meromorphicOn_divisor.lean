@@ -2,8 +2,8 @@ import Mathlib.Analysis.Meromorphic.Order
 import Mathlib.Topology.DiscreteSubset
 import Mathlib.Analysis.Meromorphic.Divisor
 import VD.mathlibAddOn
-import VD.meromorphicOn
-import VD.stronglyMeromorphicOn
+import VD.ToMathlib.meromorphicAt_order
+import VD.ToMathlib.NormalForm
 
 open scoped Interval Topology
 open Classical
@@ -11,7 +11,6 @@ open Real Filter
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-
 
 theorem MeromorphicOn.divisor_add_const₁  [CompleteSpace 𝕜]
   {f : 𝕜 → 𝕜}
@@ -46,7 +45,9 @@ theorem MeromorphicOn.divisor_add_const₁  [CompleteSpace 𝕜]
 
     by_cases ha: (MeromorphicAt.const a z).order = ⊤
     · simp [ha]
-    · apply AnalyticAt.meromorphicAt_order_nonneg
+    ·
+      simp [ha]
+      apply AnalyticAt.meromorphicAt_order_nonneg
       exact analyticAt_const
 
   · let A := (hf z hz).order_add (MeromorphicAt.const a z)
@@ -84,7 +85,7 @@ theorem MeromorphicOn.divisor_add_const₂ [CompleteSpace 𝕜]
         rw [←WithTop.le_untopD_iff (b := 0)] at hCon
         exact Lean.Omega.Int.le_lt_asymm hCon h
         tauto
-    rw [← MeromorphicAt.order_add_of_ne_orders (hf z hz) (MeromorphicAt.const a z)]
+    rw [MeromorphicAt.order_add_of_unequal_order (hf z hz) (MeromorphicAt.const a z)]
     simp
 
     by_cases ha: (MeromorphicAt.const a z).order = ⊤
@@ -130,7 +131,7 @@ theorem MeromorphicOn.divisor_add_const₃ [CompleteSpace 𝕜]
         simp [hf, hz] at h
         exact Lean.Omega.Int.le_lt_asymm hCon h
         tauto
-    rw [← MeromorphicAt.order_add_of_ne_orders (hf z hz) (MeromorphicAt.const a z)]
+    rw [MeromorphicAt.order_add_of_unequal_order (hf z hz) (MeromorphicAt.const a z)]
     simp
 
     by_cases ha: (MeromorphicAt.const a z).order = ⊤

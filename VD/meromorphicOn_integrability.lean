@@ -105,7 +105,7 @@ theorem MeromorphicOn.integrable_log_abs_f₀
     have : ∀ x ∈ Metric.closedBall 0 r, F x = 0 := by
       intro x hx
       let A := h₂f ⟨x, hx⟩
-      rw [← toMeromorphicNFOn_changeOrder h₁f hx] at A
+      rw [← toMeromorphicNFOn_order h₁f hx] at A
       let B := ((meromorphicNFOn_toMeromorphicNFOn f (Metric.closedBall 0 r)) x hx).order_eq_zero_iff.not.1
       simp [A] at B
       assumption

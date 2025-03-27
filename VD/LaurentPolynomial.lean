@@ -52,7 +52,7 @@ Laurent polynomials are functions on a non-trivially normed field `𝕜` of the 
 Laurent polynomials are meromorphic in normal form, with divisor equal to `d`.
 -/
 
-open Classical Topology
+open Classical Real Topology
 
 variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜]
@@ -198,10 +198,15 @@ theorem divisor_LaurentPolynomial_within [CompleteSpace 𝕜] {U : Set 𝕜}
       MeromorphicOn.divisor_apply, order_LaurentPolynomial D hD]
   · simp [hz]
 
+/-!
+## Extration of Zeros and Poles
+-/
+
 /--
-If `f` is meromorphic on an open set `U`, if `f` is nowhere locally constant zero, and if the
-support of the divisor of `f` is finite, then there exists a meromorphic function `g` on `U` such
-that `f` is the product of the Laurent polynomial associated with the divisor of `f` and `g`.
+If `f` is meromorphic on an open set `U`, if `f` is nowhere locally constant
+zero, and if the support of the divisor of `f` is finite, then there exists an
+analytic function `g` on `U` without zeros such that `f` is the product of the
+Laurent polynomial associated with the divisor of `f` and `g`.
 -/
 theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] {f : 𝕜 → E}
     (h₁f : MeromorphicOn f U) (h₂f : ∀ u : U, (h₁f u u.2).order ≠ ⊤)
@@ -242,10 +247,13 @@ theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] {f : 𝕜 → E}
     rwa [← ((meromorphicNF_LaurentPolynomial (divisor f U)) a trivial).order_eq_zero_iff,
       order_LaurentPolynomial, h₂a, Pi.zero_apply, WithTop.coe_zero]
 
--- ##################### --
-
-open Real
-
+/--
+If `f` is meromorphic on an open set `U`, if `f` is nowhere locally constant
+zero, and if the support of the divisor of `f` is finite, then there exists an
+analytic function `g` on `U` without zeros such that `log ‖f‖` is equivalent,
+modulo equality on codiscrete subsets of `U` to
+`∑ᶠ u, (divisor f U u * log ‖z-u‖) + log ‖g z‖`.
+-/
 theorem MeromorphicOn.extract_zeros_poles_log [CompleteSpace 𝕜] {f : 𝕜 → E}
     (h₁f : MeromorphicOn f U) (h₂f : ∀ u : U, (h₁f u u.2).order ≠ ⊤)
     (h₃f : (divisor f U).support.Finite) :

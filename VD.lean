@@ -1,5 +1,5 @@
-import VD.Congruence_Divisor
 import VD.LaurentPolynomial
+import VD.ToMathlib.Congruence_Divisor
 import VD.ToMathlib.NormalForm
 import VD.ToMathlib.analyticAt_order
 import VD.ToMathlib.bilinear

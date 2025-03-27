@@ -3,7 +3,7 @@ import Mathlib.MeasureTheory.Integral.CircleIntegral
 import VD.ToMathlib.divisor
 import VD.meromorphicOn_divisor
 import VD.meromorphicOn_integrability
-import VD.stronglyMeromorphicOn
+import VD.ToMathlib.NormalForm
 import VD.stronglyMeromorphic_JensenFormula
 
 open Real
