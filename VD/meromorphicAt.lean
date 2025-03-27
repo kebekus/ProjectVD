@@ -1,7 +1,6 @@
 import Mathlib.Analysis.Meromorphic.Divisor
 import Mathlib.MeasureTheory.Integral.IntervalIntegral
 import VD.mathlibAddOn
-import VD.ToMathlib.meromorphicAt_order
 
 open scoped Interval Topology
 open Real Filter MeasureTheory intervalIntegral
@@ -14,8 +13,8 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 
 theorem MeromorphicAt.order_ne_top_iff {f : 𝕜 → E} {z₀ : 𝕜} (hf : MeromorphicAt f z₀) :
     hf.order ≠ ⊤ ↔ ∃ (g : 𝕜 → E), AnalyticAt 𝕜 g z₀ ∧ g z₀ ≠ 0 ∧ f =ᶠ[𝓝[≠] z₀] fun z ↦ (z - z₀) ^ (hf.order.untopD 0) • g z :=
-  ⟨fun h ↦ (hf.order_eq_int_iff (hf.order.untopD 0)).1 (untop'_of_ne_top h).symm,
-    fun h ↦ Option.ne_none_iff_exists'.2 ⟨hf.order.untopD 0, (hf.order_eq_int_iff (hf.order.untopD 0)).2 h⟩⟩
+  ⟨fun h ↦ hf.order_eq_int_iff.1 (untop'_of_ne_top h).symm,
+    fun h ↦ Option.ne_none_iff_exists'.2 ⟨hf.order.untopD 0, hf.order_eq_int_iff.2 h⟩⟩
 
 theorem MeromorphicAt.order_pow (hf : MeromorphicAt f z₀) {n : ℕ} :
     (hf.pow n).order = n * hf.order := by
@@ -75,7 +74,7 @@ theorem meromorphicAt_congr'
   {E : Type u_2} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   {f : 𝕜 → E} {g : 𝕜 → E} {x : 𝕜}
   (h : f =ᶠ[𝓝 x] g) : MeromorphicAt f x ↔ MeromorphicAt g x :=
-  meromorphicAt_congr (Filter.EventuallyEq.filter_mono h nhdsWithin_le_nhds)
+  MeromorphicAt.meromorphicAt_congr (Filter.EventuallyEq.filter_mono h nhdsWithin_le_nhds)
 
 -- Might want to think about adding an analytic function instead of a constant
 theorem MeromorphicAt.order_add_const

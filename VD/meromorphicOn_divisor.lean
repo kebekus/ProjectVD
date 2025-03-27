@@ -2,7 +2,6 @@ import Mathlib.Analysis.Meromorphic.Order
 import Mathlib.Topology.DiscreteSubset
 import Mathlib.Analysis.Meromorphic.Divisor
 import VD.mathlibAddOn
-import VD.ToMathlib.meromorphicAt_order
 import VD.ToMathlib.NormalForm
 
 open scoped Interval Topology

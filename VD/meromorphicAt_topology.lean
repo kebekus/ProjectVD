@@ -23,7 +23,7 @@ theorem MeromorphicAt.order_nonneg_if_exists_continuous_extension (hf : Meromorp
   have nneg : 0 < -n := by linarith
   obtain ⟨a, ha⟩ := Int.eq_succ_of_zero_lt nneg
   obtain ⟨g, hg, hfg⟩ := h
-  obtain ⟨h, hh₁, hh₂, hfh⟩ := (hf.order_eq_int_iff n).mp h₁
+  obtain ⟨h, hh₁, hh₂, hfh⟩ := hf.order_eq_int_iff.mp h₁
   have h₂ : Tendsto (fun z ↦ ‖(z - z₀) ^ n • h z‖) (𝓝[≠] z₀) (𝓝 ‖g z₀‖) := by
     apply tendsto_norm.comp
     exact (tendsto_nhdsWithin_of_tendsto_nhds hg).congr' (hfg.symm.trans hfh)
@@ -55,7 +55,7 @@ theorem MeromorphicAt.exists_analytic_extension_if_order_nonneg (hf : Meromorphi
     exact ⟨analyticAt_const, hf.order_eq_top_iff.mp h'⟩
   · let n := (hf.order).untop (LT.lt.ne_top (WithTop.lt_top_iff_ne_top.mpr h'))
     have h₀ : hf.order = n := by simp [n]
-    obtain ⟨g, hg, hfg⟩ := (hf.order_eq_int_iff n).mp h₀
+    obtain ⟨g, hg, hfg⟩ := hf.order_eq_int_iff.mp h₀
     use (fun z ↦ (z - z₀) ^ n • g z)
     constructor
     · apply AnalyticAt.smul _ hg
