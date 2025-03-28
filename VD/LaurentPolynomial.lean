@@ -81,7 +81,7 @@ private lemma analyticAt_finLaurentPolynomial_off_support (d : 𝕜 → ℤ) (P 
   rw [sub_ne_zero, ne_comm]
   exact ne_of_mem_of_not_mem hu hz
 
-/-- Laurent polynomials are meromorphic in normal form on ⊤. -/
+/-- Laurent polynomials are meromorphic in normal form on `⊤`. -/
 theorem meromorphicNF_LaurentPolynomial (d : 𝕜 → ℤ) :
     MeromorphicNFOn (∏ᶠ u, fun z ↦ (z - u) ^ d u) ⊤ := by
   by_cases hd : (Function.mulSupport fun u z => (z - u) ^ d u).Finite
@@ -107,11 +107,16 @@ theorem meromorphicNF_LaurentPolynomial (d : 𝕜 → ℤ) :
   · rw [finprod_of_infinite_mulSupport hd]
     apply analyticOnNhd_const.meromorphicNFOn
 
-theorem MeromorphicNFOn_set_LaurentPolynomial (d : 𝕜 → ℤ) (U : Set 𝕜) :
+/-- Laurent polynomials are meromorphic in normal form on arbitrary subsets of `𝕜`. -/
+theorem MeromorphicNFOn_LaurentPolynomial (d : 𝕜 → ℤ) (U : Set 𝕜) :
     MeromorphicNFOn (∏ᶠ u, fun z ↦ (z - u) ^ d u) U := by
   intro z hz
   exact meromorphicNF_LaurentPolynomial d z (trivial)
 
+/--
+Helper Lemma: Identifying the support of `d` as the mulsupport of the product
+defining the Laurent polynomial.
+-/
 lemma mulsupport_LaurentPolynomial (d : 𝕜 → ℤ) :
     (Function.mulSupport fun u z ↦ (z - u) ^ d u) = d.support := by
   ext u
@@ -204,7 +209,7 @@ theorem divisor_LaurentPolynomial_within [CompleteSpace 𝕜] {U : Set 𝕜}
     MeromorphicOn.divisor (∏ᶠ u, fun z ↦ (z - u) ^ D u) U = D := by
   ext z
   by_cases hz : z ∈ U
-  · simp [(MeromorphicNFOn_set_LaurentPolynomial D U).meromorphicOn, hz,
+  · simp [(MeromorphicNFOn_LaurentPolynomial D U).meromorphicOn, hz,
       MeromorphicOn.divisor_apply, order_LaurentPolynomial D hD]
   · simp [hz]
 

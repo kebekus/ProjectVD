@@ -386,7 +386,7 @@ theorem MeromorphicOn.decompose₃'
       · exact h₄g
       · have t₀ : MeromorphicNFOn (g * ∏ᶠ (u : ℂ), fun z => (z - u) ^ (divisor f U u)) U := by
           rw [meromorphicNFOn_mul_iff_right_of_analyticOnNhd h₃g h₄g]
-          apply MeromorphicNFOn_set_LaurentPolynomial
+          apply MeromorphicNFOn_LaurentPolynomial
         funext z
         by_cases hz : z ∈ U
         · apply Filter.EventuallyEq.eq_of_nhds
