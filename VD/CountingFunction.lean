@@ -78,4 +78,9 @@ theorem logCounting_inv [CompleteSpace 𝕜] {f : 𝕜 → 𝕜} :
     simp
   rw [this]
 
+theorem logCounting_add_analytic {f g : 𝕜 → E} (hf : MeromorphicOn f ⊤)
+    (hg : AnalyticOn 𝕜 g ⊤) :
+    logCounting (f + g) ⊤ = logCounting f ⊤ := by
+  sorry
+
 end MeromorphicOn
