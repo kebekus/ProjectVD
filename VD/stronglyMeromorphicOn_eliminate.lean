@@ -2,10 +2,9 @@ import VD.LaurentPolynomial
 import VD.mathlibAddOn
 import VD.meromorphicOn
 import VD.ToMathlib.codiscreteWithin
-import VD.ToMathlib.NormalForm
 
 open scoped Interval Topology
-open Real Filter
+open Classical Real Filter
 
 @[simp]
 lemma WithTop.eq_untop₀_iff {α : Type*} [Zero α] {a : WithTop α} :
@@ -114,7 +113,7 @@ theorem MeromorphicOn.decompose₁
       have h₄g₁ : MeromorphicNFAt g₁ z₀ := by
         rwa [h₃g₁]
       unfold g
-      rw [← toMeromorphicNFAt_eq_self.1 h₄g₁, h₃g₁]
+      rw [toMeromorphicNFAt_eq_self.2 h₄g₁, h₃g₁]
     · rw [zero_zpow (divisor f U z₀) h]
       simp
       let A := h₂f.order_eq_zero_iff.not
@@ -138,14 +137,14 @@ theorem MeromorphicOn.decompose₂
   {U : Set ℂ}
   {P : Finset U}
   (hf : MeromorphicNFOn f U) :
-  (∀ p ∈ P, (hf p p.2).meromorphicAt.order ≠ ⊤) →
+  (∀ p ∈ P, (hf p.2).meromorphicAt.order ≠ ⊤) →
     ∃ g : ℂ → ℂ, (MeromorphicOn g U)
     ∧ (∀ p : P, AnalyticAt ℂ g p)
     ∧ (∀ p : P, g p ≠ 0)
     ∧ (f = g * ∏ p : P, fun z ↦ (z - p.1.1) ^ (divisor f U p.1.1)) := by
 
   apply Finset.induction (p := fun (P : Finset U) ↦
-    (∀ p ∈ P, (hf p p.2).meromorphicAt.order ≠ ⊤) →
+    (∀ p ∈ P, (hf p.2).meromorphicAt.order ≠ ⊤) →
     ∃ g : ℂ → ℂ, (MeromorphicOn g U)
     ∧ (∀ p : P, AnalyticAt ℂ g p)
     ∧ (∀ p : P, g p ≠ 0)
@@ -188,7 +187,7 @@ theorem MeromorphicOn.decompose₂
 
   have h₅g₀ : MeromorphicNFAt g₀ u := by
     rw [← meromorphicNFAt_mul_iff_left h₀ h₁ (f := g₀), ← h₄g₀]
-    exact hf u u.2
+    exact hf u.2
 
   have h₆g₀ : (h₁g₀ u u.2).order ≠ ⊤ := by
     by_contra hCon
@@ -255,12 +254,12 @@ theorem MeromorphicOn.decompose₂
           rw [Finset.prod_insert]
           simp
           congr
-          have : (hf u u.2).meromorphicAt.order = (h₁g₀ u u.2).order := by
+          have : (hf u.2).meromorphicAt.order = (h₁g₀ u u.2).order := by
             have h₅g₀ : f =ᶠ[𝓝 u.1] (g₀ * ∏ p : P, fun z => (z - p.1.1) ^ (divisor f U p.1.1)) := by
               exact Eq.eventuallyEq h₄g₀
             have h₆g₀ : f =ᶠ[𝓝[≠] u.1] (g₀ * ∏ p : P, fun z => (z - p.1.1) ^ (divisor f U p.1.1)) := by
               exact eventuallyEq_nhdsWithin_of_eqOn fun ⦃x⦄ a => congrFun h₄g₀ x
-            rw [(hf u u.2).meromorphicAt.order_congr h₆g₀]
+            rw [(hf u.2).meromorphicAt.order_congr h₆g₀]
             let C := (h₁g₀ u u.2).order_mul h₀.meromorphicAt
             rw [C]
             let D := h₀.order_eq_zero_iff.2 h₁
@@ -288,11 +287,11 @@ theorem MeromorphicOn.decompose₃'
     ∧ (∀ u : U, g u ≠ 0)
     ∧ (f = g * ∏ᶠ u, fun z ↦ (z - u) ^ (divisor f U u)) := by
 
-  have h₃f : ∀ u : U, (h₁f u u.2).meromorphicAt.order ≠ ⊤ := by
+  have h₃f : ∀ u : U, (h₁f u.2).meromorphicAt.order ≠ ⊤ := by
     rw [← h₁f.meromorphicOn.exists_order_ne_top_iff_forall h₂U]
     obtain ⟨u, hu⟩ := h₂f
     use u
-    rw [← (h₁f u u.2).order_eq_zero_iff] at hu
+    rw [← (h₁f u.2).order_eq_zero_iff] at hu
     rw [hu]
     tauto
   have h₄f : Set.Finite (Function.support (divisor f U)) := (divisor f U).finiteSupport h₁U
@@ -306,7 +305,7 @@ theorem MeromorphicOn.decompose₃'
   let h₁ := ∏ᶠ u, fun z ↦ (z - u) ^ (d u)
   have h₁h₁ : MeromorphicNFOn h₁ U := by
     intro z hz
-    exact meromorphicNF_LaurentPolynomial d z trivial
+    exact meromorphicNF_LaurentPolynomial d (trivial : z ∈ ⊤)
   have h₂h₁ : (divisor h₁ U) = d := by
     have : (-divisor f U).support.Finite := by
       exact (-divisor f U).finiteSupport h₁U
@@ -318,10 +317,10 @@ theorem MeromorphicOn.decompose₃'
     unfold h₁
     unfold d
     congr
-  have h₃h₁ : ∀ (z : ℂ) (hz : z ∈ U), (h₁h₁ z hz).meromorphicAt.order ≠ ⊤ := by
+  have h₃h₁ : ∀ (z : ℂ) (hz : z ∈ U), (h₁h₁ hz).meromorphicAt.order ≠ ⊤ := by
     intro z hz
     apply order_LaurentPolynomial_ne_top
-  have h₄h₁ : ∀ (z : ℂ) (hz : z ∈ U), (h₁h₁ z hz).meromorphicAt.order = d z := by
+  have h₄h₁ : ∀ (z : ℂ) (hz : z ∈ U), (h₁h₁ hz).meromorphicAt.order = d z := by
     intro z hz
     rw [order_LaurentPolynomial]
     rwa [h₁d]
@@ -345,12 +344,12 @@ theorem MeromorphicOn.decompose₃'
 
   have h₃g' : ∀ u : U, (h₁g' u.1 u.2).order = 0 := by
     intro u
-    rw [(h₁f u.1 u.2).meromorphicAt.order_mul (h₁h₁ u.1 u.2).meromorphicAt]
+    rw [(h₁f u.2).meromorphicAt.order_mul (h₁h₁ u.2).meromorphicAt]
     rw [h₄h₁]
     unfold d
     unfold MeromorphicOn.divisor
     simp
-    have : (h₁f u.1 u.2).meromorphicAt.order = (h₁f u.1 u.2).meromorphicAt.order.untop₀ := by
+    have : (h₁f u.2).meromorphicAt.order = (h₁f u.2).meromorphicAt.order.untop₀ := by
       rw [eq_comm]
       simp [h₃f u]
     rw [this]
@@ -368,13 +367,13 @@ theorem MeromorphicOn.decompose₃'
     rw [MeromorphicOn.divisor_of_toMeromorphicNFOn]
     rwa [h₂g']
   have h₃g : AnalyticOnNhd ℂ g U := by
-    rw [← h₁g.nonneg_divisor_iff_analyticOnNhd, h₂g]
+    rw [← h₁g.divisor_nonneg_iff_analyticOnNhd, h₂g]
 
-  have h₄g : ∀ u : U, g u ≠ 0 := by
-    intro u
-    rw [← (h₁g u.1 u.2).order_eq_zero_iff]
-    rw [toMeromorphicNFOn_order]
-    let A := h₃g' u
+  have h₄g : ∀ u ∈ U, g u ≠ 0 := by
+    intro u hu
+    rw [← (h₁g hu).order_eq_zero_iff]
+    rw [order_toMeromorphicNFOn]
+    let A := h₃g' ⟨u, hu⟩
     exact A
 
   use g
@@ -383,14 +382,14 @@ theorem MeromorphicOn.decompose₃'
   · constructor
     · exact h₃g
     · constructor
-      · exact h₄g
+      · exact fun u ↦ h₄g u u.2
       · have t₀ : MeromorphicNFOn (g * ∏ᶠ (u : ℂ), fun z => (z - u) ^ (divisor f U u)) U := by
           rw [meromorphicNFOn_mul_iff_right_of_analyticOnNhd h₃g h₄g]
           apply MeromorphicNFOn_LaurentPolynomial
         funext z
         by_cases hz : z ∈ U
         · apply Filter.EventuallyEq.eq_of_nhds
-          rw [← MeromorphicNFAt.eventuallyEq_nhdNE_iff_eventuallyEq_nhd (h₁f z hz) (t₀ z hz)]
+          rw [← MeromorphicNFAt.eventuallyEq_nhdNE_iff_eventuallyEq_nhd (h₁f hz) (t₀ hz)]
           have h₅g : g =ᶠ[𝓝[≠] z] g' := (toMeromorphicNFOn_eq_self_on_nhdNE h₁g' hz)
           have Y' : (g' * ∏ᶠ (u : ℂ), fun z => (z - u) ^ (divisor f U u)) =ᶠ[𝓝[≠] z] g * ∏ᶠ (u : ℂ), fun z => (z - u) ^ (divisor f U u) := by
             apply Filter.EventuallyEq.symm
@@ -398,11 +397,11 @@ theorem MeromorphicOn.decompose₃'
           apply Filter.EventuallyEq.trans _ Y'
           unfold g'
           unfold h₁
-          rcases (h₁f z hz).meromorphicAt.eventually_eq_zero_or_eventually_ne_zero with h | h
+          rcases (h₁f hz).meromorphicAt.eventually_eq_zero_or_eventually_ne_zero with h | h
           · filter_upwards [h]
             intro a ha
             simp [ha]
-          · let P := (h₁f z hz).meromorphicAt.eventually_analyticAt
+          · let P := (h₁f hz).meromorphicAt.eventually_analyticAt
             filter_upwards [h, P]
             intro y hy h₂y
             have z₀ : divisor f U y = 0 := by
@@ -479,6 +478,7 @@ theorem MeromorphicOn.decompose₃'
             have : divisor f U z = 0 := by
               let A := (divisor f U).supportWithinDomain
               simp at A
+              classical
               by_contra H
               let B := A z H
               tauto
@@ -533,7 +533,7 @@ theorem MeromorphicNFOn.decompose_log
         rw [← h₁f.meromorphicOn.exists_order_ne_top_iff_forall h₂U]
         obtain ⟨u, hu⟩ := h₂f
         use u
-        rw [← (h₁f u u.2).order_eq_zero_iff] at hu
+        rw [← (h₁f u.2).order_eq_zero_iff] at hu
         rw [hu]
         tauto
       rw [← h₁f.zero_set_eq_divisor_support this]
@@ -566,7 +566,7 @@ theorem MeromorphicNFOn.decompose_log
     simp [h₁f.meromorphicOn, (by exact Set.mem_of_eq_of_mem hCon h₁x : z ∈ U)] at hx
     rw [hCon] at hz
     simp at hz
-    let A := (h₁f x h₁x).order_eq_zero_iff
+    let A := (h₁f h₁x).order_eq_zero_iff
     let B := A.2 hz
     simp_rw [← hCon] at B
     exact hx.1 B
@@ -593,7 +593,7 @@ theorem MeromorphicNFOn.decompose_log
     simp [h₁f.meromorphicOn, (by exact Set.mem_of_eq_of_mem hCon h₁x : z ∈ U)] at hx
     rw [hCon] at hz
     simp at hz
-    let A := (h₁f x h₁x).order_eq_zero_iff
+    let A := (h₁f h₁x).order_eq_zero_iff
     let B := A.2 hz
     simp_rw [← hCon] at B
     exact hx.1 B
@@ -620,7 +620,7 @@ theorem MeromorphicOn.decompose_log
   have h₂F : ∃ u : U, (h₁F.meromorphicOn u u.2).order ≠ ⊤ := by
     obtain ⟨u, hu⟩ := h₂f
     use u
-    rw [toMeromorphicNFOn_order h₁f u.2]
+    rw [order_toMeromorphicNFOn h₁f u.2]
     assumption
 
   have t₁ : ∃ u : U, F u ≠ 0 := by

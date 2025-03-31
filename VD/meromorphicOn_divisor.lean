@@ -1,8 +1,8 @@
 import Mathlib.Analysis.Meromorphic.Order
+import Mathlib.Analysis.Meromorphic.NormalFormAt
 import Mathlib.Topology.DiscreteSubset
 import Mathlib.Analysis.Meromorphic.Divisor
 import VD.mathlibAddOn
-import VD.ToMathlib.NormalForm
 
 open scoped Interval Topology
 open Classical

@@ -3,7 +3,7 @@ import Mathlib.MeasureTheory.Integral.CircleIntegral
 import VD.ToMathlib.divisor
 import VD.meromorphicOn_divisor
 import VD.meromorphicOn_integrability
-import VD.ToMathlib.NormalForm
+import Mathlib.Analysis.Meromorphic.NormalFormAt
 import VD.stronglyMeromorphic_JensenFormula
 
 open Real
@@ -63,16 +63,18 @@ theorem Nevanlinna_counting₁₁
       apply Int.le_neg_of_le_neg
       simp
       exact h.le
-    simp [h']
-    clear h'
+    let Z := max_eq_right_iff.2 h'
+    rw [Z]
 
     have A := (hf.restrict |r|).divisor_add_const₂ a h
     have A' : 0 ≤ -(MeromorphicOn.divisor (f + fun _ ↦ a) (Metric.closedBall 0 |r|) x) := by
       apply Int.le_neg_of_le_neg
       simp
       exact A.le
+    let Z := max_eq_right_iff.2 A'
+    rw [Z]
+
     simp [A']
-    clear A A'
 
     exact (hf.restrict |r|).divisor_add_const₃ a h
   --
@@ -165,7 +167,7 @@ theorem Nevanlinna_counting
       exact h.le
     simp at h
     simp [h']
-    linarith
+    simp_all
   --
   repeat
     intro x

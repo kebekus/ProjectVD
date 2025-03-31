@@ -5,7 +5,7 @@ Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
 import Mathlib.Analysis.Meromorphic.Divisor
-import VD.ToMathlib.NormalForm
+import Mathlib.Analysis.Meromorphic.NormalFormAt
 import VD.ToMathlib.Congruence_Divisor
 
 
@@ -21,7 +21,7 @@ Conversion to normal form on `U` does not affect the divisor.
 theorem divisor_toMeromorphicNFOn [CompleteSpace E] {f : 𝕜 → E} (hf : MeromorphicOn f U) :
     MeromorphicOn.divisor f U = MeromorphicOn.divisor (toMeromorphicNFOn f U) U := by
   rw [← hf.divisor_congr_codiscreteWithin (toMeromorphicNFOn_eqOn_codiscrete hf)]
-  exact toMeromorphicNFOn_eq_self_on_compl hf
+  exact (toMeromorphicNFOn_eq_self_on_compl hf).symm
 
 -- -----------------
 
@@ -111,7 +111,7 @@ theorem meromorphicNF_LaurentPolynomial (d : 𝕜 → ℤ) :
 theorem MeromorphicNFOn_LaurentPolynomial (d : 𝕜 → ℤ) (U : Set 𝕜) :
     MeromorphicNFOn (∏ᶠ u, fun z ↦ (z - u) ^ d u) U := by
   intro z hz
-  exact meromorphicNF_LaurentPolynomial d z (trivial)
+  exact meromorphicNF_LaurentPolynomial d (trivial)
 
 /--
 Helper Lemma: Identifying the support of `d` as the mulsupport of the product
@@ -179,7 +179,7 @@ theorem order_LaurentPolynomial {z : 𝕜} (d : 𝕜 → ℤ) (h₁d : Set.Finit
 Laurent polynomials are nowhere locally constant zero.
 -/
 theorem order_LaurentPolynomial_ne_top {z : 𝕜} (d : 𝕜 → ℤ) :
-    ((meromorphicNF_LaurentPolynomial d) z trivial).meromorphicAt.order ≠ ⊤ := by
+    (meromorphicNF_LaurentPolynomial d (trivial : z ∈ ⊤)).meromorphicAt.order ≠ ⊤ := by
   by_cases hd : Set.Finite (Function.support d)
   · simp [order_LaurentPolynomial d hd]
   · rw [← mulsupport_LaurentPolynomial] at hd
@@ -237,14 +237,14 @@ theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] {f : 𝕜 → E}
   have hg : MeromorphicNFOn g U := by apply meromorphicNFOn_toMeromorphicNFOn
   refine ⟨g, ?_, ?_, ?_⟩
   · -- AnalyticOnNhd 𝕜 g U
-    rw [← hg.nonneg_divisor_iff_analyticOnNhd, ← divisor_toMeromorphicNFOn (hφ.inv.smul h₁f),
+    rw [← hg.divisor_nonneg_iff_analyticOnNhd, ← divisor_toMeromorphicNFOn (hφ.inv.smul h₁f),
       divisor_smul hφ.inv h₁f _ (fun z hz ↦ h₂f ⟨z, hz⟩), divisor_inv,
       divisor_LaurentPolynomial_within _ h₃f, neg_add_cancel]
     intro z hz
     simp [(hφ z hz).order_inv, order_LaurentPolynomial_ne_top (divisor f U)]
   · -- ∀ (u : ↑U), g ↑u ≠ 0
     intro ⟨u, hu⟩
-    rw [← (hg u hu).order_eq_zero_iff, ← ((hφ.inv.smul h₁f) u hu).order_congr
+    rw [← (hg hu).order_eq_zero_iff, ← ((hφ.inv.smul h₁f) u hu).order_congr
       (toMeromorphicNFOn_eq_self_on_nhdNE (hφ.inv.smul h₁f) hu).symm]
     rw [(hφ u hu).inv.order_smul (h₁f u hu), (hφ u hu).order_inv, order_LaurentPolynomial _ h₃f]
     simp only [Pi.neg_apply, h₁f, hu, divisor_apply, WithTop.LinearOrderedAddCommGroup.coe_neg]
@@ -257,9 +257,9 @@ theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] {f : 𝕜 → E}
       Filter.codiscreteWithin_self U] with a h₂a h₃a h₄a
     unfold g
     simp only [Pi.smul_apply', toMeromorphicNFOn_eq_toMeromorphicNFAt (hφ.inv.smul h₁f) h₄a,
-      ← toMeromorphicNFAt_eq_self.1 h₃a, Pi.inv_apply]
+      toMeromorphicNFAt_eq_self.2 h₃a, Pi.inv_apply]
     rw [← smul_assoc, smul_eq_mul, mul_inv_cancel₀ _, one_smul]
-    rwa [← ((meromorphicNF_LaurentPolynomial (divisor f U)) a trivial).order_eq_zero_iff,
+    rwa [← ((meromorphicNF_LaurentPolynomial (divisor f U)) trivial).order_eq_zero_iff,
       order_LaurentPolynomial, h₂a, Pi.zero_apply, WithTop.coe_zero]
 
 /--

@@ -94,7 +94,7 @@ theorem jensen₀
       by_contra hCon
       rw [← hCon] at hx
       simp at hx
-      rw [← (h₁f z h₁z).order_eq_zero_iff] at h₂z
+      rw [← (h₁f h₁z).order_eq_zero_iff] at h₂z
       simp [h₁f.meromorphicOn, h₁z] at hx
       tauto
     apply zpow_ne_zero
@@ -110,7 +110,7 @@ theorem jensen₀
       by_contra hCon
       rw [← hCon] at hx
       simp at hx
-      rw [← (h₁f z h₁z).order_eq_zero_iff] at h₂z
+      rw [← (h₁f h₁z).order_eq_zero_iff] at h₂z
       simp [h₁f.meromorphicOn, h₁z] at hx
       tauto
     apply zpow_ne_zero
@@ -135,7 +135,7 @@ theorem jensen₀
         apply circleMap_mem_closedBall
         exact hR.le
       have t₁ : f (circleMap 0 R a) ≠ 0 := by
-        let A := h₁f (circleMap 0 R a) t₀
+        let A := h₁f t₀
         rw [← A.order_eq_zero_iff]
         simp [h₁f.meromorphicOn, t₀] at C
         rcases C with C₁ | C₂
@@ -143,9 +143,9 @@ theorem jensen₀
         · let B := h₁f.meromorphicOn.exists_order_ne_top_iff_forall h₁U
           let C := fun q ↦ B.1 q ⟨(circleMap 0 R a), t₀⟩
           rw [C₂] at C
-          have : ∃ u : (Metric.closedBall (0 : ℂ) R), (h₁f u u.2).meromorphicAt.order ≠ ⊤ := by
+          have : ∃ u : (Metric.closedBall (0 : ℂ) R), (h₁f u.2).meromorphicAt.order ≠ ⊤ := by
             use ⟨(0 : ℂ), (by simp; exact hR.le)⟩
-            let H := h₁f 0 (by simp; exact hR.le)
+            let H := h₁f ((by simp; exact hR.le) : (0 : ℂ) ∈ Metric.closedBall 0 R)
             let K := H.order_eq_zero_iff.2 h₂f
             rw [K]
             simp
@@ -384,8 +384,8 @@ theorem jensen
     simp [this, h₁f]
     intro h₁R
 
-    let A := toMeromorphicNFAt_eq_self.1 h₁f'
-    rw [← A]
+    let A := toMeromorphicNFAt_eq_self.2 h₁f'
+    rw [A]
   rw [← this]
   rw [← this] at h₂f
   clear this
