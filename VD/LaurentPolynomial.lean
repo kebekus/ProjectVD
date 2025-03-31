@@ -2,22 +2,6 @@ import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
 import VD.ToMathlib.LaurentPolynomial
 import VD.ToMathlib.Congruence_Divisor
 
--- -----------------
-variable
-  {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-  {U : Set 𝕜}
-  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-
-/--
-Conversion to normal form on `U` does not affect the divisor.
--/
-theorem divisor_toMeromorphicNFOn [CompleteSpace E] {f : 𝕜 → E} (hf : MeromorphicOn f U) :
-    MeromorphicOn.divisor f U = MeromorphicOn.divisor (toMeromorphicNFOn f U) U := by
-  rw [← hf.divisor_congr_codiscreteWithin (toMeromorphicNFOn_eqOn_codiscrete hf)]
-  exact (toMeromorphicNFOn_eq_self_on_compl hf).symm
--- -----------------
-
-
 variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {U : Set 𝕜}
@@ -49,7 +33,7 @@ theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] {f : 𝕜 → E}
   have hg : MeromorphicNFOn g U := by apply meromorphicNFOn_toMeromorphicNFOn
   refine ⟨g, ?_, ?_, ?_⟩
   · -- AnalyticOnNhd 𝕜 g U
-    rw [← hg.divisor_nonneg_iff_analyticOnNhd, ← divisor_toMeromorphicNFOn (hφ.inv.smul h₁f),
+    rw [← hg.divisor_nonneg_iff_analyticOnNhd, divisor_of_toMeromorphicNFOn (hφ.inv.smul h₁f),
       divisor_smul hφ.inv h₁f _ (fun z hz ↦ h₂f ⟨z, hz⟩), divisor_inv,
       divisor_LaurentPolynomial_within _ h₃f, neg_add_cancel]
     intro z hz
