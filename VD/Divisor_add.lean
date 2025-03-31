@@ -1,7 +1,7 @@
 import Mathlib.Analysis.Meromorphic.Divisor
+import Mathlib.Analysis.Meromorphic.NormalFormAt
 import Mathlib.MeasureTheory.Integral.IntervalIntegral
 import VD.mathlibAddOn
-import VD.ToMathlib.NormalForm
 
 open scoped Interval Topology
 open Real Filter MeasureTheory intervalIntegral
