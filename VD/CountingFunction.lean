@@ -31,7 +31,10 @@ noncomputable def Function.locallyFinsuppWithin.restr_to_ball
     Function.locallyFinsuppWithin (closedBall (0 : 𝕜) |r|) ℤ :=
   D.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤)
 
-/-- The logarithmic counting function of a function with locally finite support `⊤`. -/
+/--
+The logarithmic counting function of a function with locally finite support
+within `⊤`.
+-/
 noncomputable def Function.locallyFinsuppWithin.logCounting
     (D : Function.locallyFinsuppWithin (⊤ : Set 𝕜) ℤ) :
     ℝ → ℝ :=
