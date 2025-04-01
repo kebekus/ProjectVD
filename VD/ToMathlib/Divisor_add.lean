@@ -5,16 +5,12 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   {f g : 𝕜 → E} {z₀ : 𝕜} {U : Set 𝕜}
 
-/-- A function that is analytic in a neighborhood of `U` is meromorphic on `U`. -/
-theorem AnalyticOnNhd.MeromorphicOn (hf : AnalyticOnNhd 𝕜 f U) :
-    MeromorphicOn f U := fun x hx ↦ (hf x hx).meromorphicAt
-
 /-- Analytic functions have non-negative divisors. -/
 theorem AnalyticOnNhd.divisor_nonneg [CompleteSpace E] (hf : AnalyticOnNhd 𝕜 f U) :
     0 ≤ MeromorphicOn.divisor f U := by
   intro x
   by_cases hx : x ∈ U
-  · simp [hf.MeromorphicOn, hx, (hf x hx).meromorphicAt_order_nonneg]
+  · simp [hf.meromorphicOn, hx, (hf x hx).meromorphicAt_order_nonneg]
   simp [hx]
 
 /-- Adding an analytic function to a meromorphic one does not change the pole divisor. -/

@@ -73,6 +73,7 @@ lemma Function.locallyFinsuppWithin.logCounting_support {r : ℝ}
   sorry
   sorry
 
+-- TODO: Integral representation
 
 namespace MeromorphicOn
 
