@@ -5,7 +5,7 @@ Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Meromorphic.Divisor
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
-import VD.Divisor_add
+import VD.ToMathlib.Divisor_add
 
 open Metric Real
 

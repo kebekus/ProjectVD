@@ -1,12 +1,11 @@
 import VD.CountingFunction
-import VD.Divisor_add
 import VD.LaurentPolynomial
 import VD.ToMathlib.Congruence_Divisor
+import VD.ToMathlib.Divisor_add
 import VD.ToMathlib.LaurentPolynomial
 import VD.ToMathlib.analyticAt_order
 import VD.ToMathlib.bilinear
 import VD.ToMathlib.codiscreteWithin
-import VD.ToMathlib.divisor
 import VD.cauchyRiemann
 import VD.firstMain
 import VD.harmonicAt
