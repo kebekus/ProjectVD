@@ -5,6 +5,7 @@ Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Meromorphic.Divisor
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
+import VD.Divisor_add
 
 open Metric Real
 
@@ -40,6 +41,38 @@ noncomputable def Function.locallyFinsuppWithin.logCounting
   by_cases hx : x = 0
   <;> simp [hx]
 
+lemma Function.locallyFinsuppWithin.logCounting_support {r : ℝ}
+    (D : Function.locallyFinsuppWithin (⊤ : Set 𝕜) ℤ) :
+    Function.support (fun z ↦ D.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤) z * (log r - log ‖z‖))
+      ⊆ Function.support (D.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤)) := by
+  intro x hx
+  simp_all
+
+@[simp] lemma Function.locallyFinsuppWithin.logCounting_sub
+    (D₁ : Function.locallyFinsuppWithin (⊤ : Set 𝕜) ℤ) (D₂ : Function.locallyFinsuppWithin (⊤ : Set 𝕜) ℤ) :
+    logCounting D₁ - logCounting D₂ = logCounting (D₁ - D₂) := by
+  ext r
+  simp [logCounting]
+  have t₁ : Function.support (fun z ↦ D₁.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤) z * (log r - log ‖z‖))
+    ⊆ Function.support (D₁.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤))
+      ∪ Function.support (D₂.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤)) := by
+    intro x hx
+    simp_all
+  have t₂ : Function.support (fun z ↦ D₂.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤) z * (log r - log ‖z‖))
+    ⊆ Function.support (D₁.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤))
+      ∪ Function.support (D₂.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤)) := by
+    intro x hx
+    simp_all
+  have t₁₂ : Function.support (fun z ↦ (D₁ - D₂).restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤) z * (log r - log ‖z‖))
+    ⊆ Function.support (D₁.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤))
+      ∪ Function.support (D₂.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤)) := by
+    intro x hx
+    simp_all
+    sorry
+  rw [finsum_eq_sum]
+  sorry
+  sorry
+
 
 namespace MeromorphicOn
 
@@ -66,21 +99,26 @@ lemma logCounting_eval_zero {f : 𝕜 → E} {a : WithTop E}:
     logCounting f a 0 = 0 := by
   by_cases h : a = ⊤ <;> simp [h, logCounting]
 
+theorem log_counting_zero_sub_logCounting_top {f : 𝕜 → E} :
+    logCounting f 0 - logCounting f ⊤ = (divisor f ⊤).logCounting := by
+  simp [logCounting_def_zero, logCounting_def_top]
+
 /-!
 ## Elementary Properties of the Counting Function
 -/
 
 theorem logCounting_inv [CompleteSpace 𝕜] {f : 𝕜 → 𝕜} :
     logCounting f 0 = logCounting f⁻¹ ⊤ := by
-  rw [logCounting_def_zero, logCounting_def_top]
-  have : (divisor f ⊤)⁺ = (divisor f⁻¹ ⊤)⁻ := by
-    ext x
-    simp
-  rw [this]
+  simp [logCounting_def_zero, logCounting_def_top]
 
 theorem logCounting_add_analytic {f g : 𝕜 → E} (hf : MeromorphicOn f ⊤)
     (hg : AnalyticOn 𝕜 g ⊤) :
     logCounting (f + g) ⊤ = logCounting f ⊤ := by
-  sorry
+  simp only [logCounting, ↓reduceDIte,
+    hf.divisor_add_analytic ((IsOpen.analyticOn_iff_analyticOnNhd TopologicalSpace.isOpen_univ).1 hg)]
+
+theorem logCounting_add_const {f : 𝕜 → E} {a : E} (hf : MeromorphicOn f ⊤) :
+    logCounting (f + fun _ ↦ a) ⊤ = logCounting f ⊤ := by
+  apply hf.logCounting_add_analytic analyticOn_const
 
 end MeromorphicOn
