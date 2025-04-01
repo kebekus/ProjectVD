@@ -26,11 +26,16 @@ Distribution Theory.
 ## Definition of the Counting Function
 -/
 
+noncomputable def Function.locallyFinsuppWithin.restr_to_ball
+    (D : Function.locallyFinsuppWithin (⊤ : Set 𝕜) ℤ) (r : ℝ) :
+    Function.locallyFinsuppWithin (closedBall (0 : 𝕜) |r|) ℤ :=
+  D.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤)
+
 /-- The logarithmic counting function of a function with locally finite support `⊤`. -/
 noncomputable def Function.locallyFinsuppWithin.logCounting
     (D : Function.locallyFinsuppWithin (⊤ : Set 𝕜) ℤ) :
     ℝ → ℝ :=
-  fun r ↦ ∑ᶠ z, D.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤) z * (log r - log ‖z‖)
+  fun r ↦ ∑ᶠ z, D.restr_to_ball r z * (log r - log ‖z‖)
 
 /-- The value of the counting function at zero is zero. -/
 @[simp] lemma Function.locallyFinsuppWithin.logCounting_eval_zero
@@ -43,31 +48,27 @@ noncomputable def Function.locallyFinsuppWithin.logCounting
 
 lemma Function.locallyFinsuppWithin.logCounting_support {r : ℝ}
     (D : Function.locallyFinsuppWithin (⊤ : Set 𝕜) ℤ) :
-    Function.support (fun z ↦ D.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤) z * (log r - log ‖z‖))
-      ⊆ Function.support (D.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤)) := by
+    Function.support (fun z ↦ D.restr_to_ball r z * (log r - log ‖z‖))
+      ⊆ Function.support (D.restr_to_ball r) := by
   intro x hx
   simp_all
 
 @[simp] lemma Function.locallyFinsuppWithin.logCounting_sub
-    (D₁ : Function.locallyFinsuppWithin (⊤ : Set 𝕜) ℤ) (D₂ : Function.locallyFinsuppWithin (⊤ : Set 𝕜) ℤ) :
+    (D₁ D₂ : Function.locallyFinsuppWithin (⊤ : Set 𝕜) ℤ) :
     logCounting D₁ - logCounting D₂ = logCounting (D₁ - D₂) := by
   ext r
   simp [logCounting]
-  have t₁ : Function.support (fun z ↦ D₁.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤) z * (log r - log ‖z‖))
-    ⊆ Function.support (D₁.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤))
-      ∪ Function.support (D₂.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤)) := by
+  let s := (D₁.restr_to_ball r).support ∪ (D₂.restr_to_ball r).support
+  have t₁ : (fun z ↦ D₁.restr_to_ball r z * (log r - log ‖z‖)).support ⊆ s := by
     intro x hx
-    simp_all
-  have t₂ : Function.support (fun z ↦ D₂.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤) z * (log r - log ‖z‖))
-    ⊆ Function.support (D₁.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤))
-      ∪ Function.support (D₂.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤)) := by
+    simp_all [s]
+  have t₂ : (fun z ↦ D₂.restr_to_ball r z * (log r - log ‖z‖)).support ⊆ s := by
     intro x hx
-    simp_all
-  have t₁₂ : Function.support (fun z ↦ (D₁ - D₂).restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤) z * (log r - log ‖z‖))
-    ⊆ Function.support (D₁.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤))
-      ∪ Function.support (D₂.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤)) := by
+    simp_all [s]
+  have t₁₂ : (fun z ↦ (D₁ - D₂).restr_to_ball r z * (log r - log ‖z‖)).support ⊆ s := by
     intro x hx
-    simp_all
+    simp_all [s]
+
     sorry
   rw [finsum_eq_sum]
   sorry
