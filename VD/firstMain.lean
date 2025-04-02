@@ -4,6 +4,7 @@ import VD.meromorphicOn_divisor
 import VD.meromorphicOn_integrability
 import Mathlib.Analysis.Meromorphic.NormalFormAt
 import VD.stronglyMeromorphic_JensenFormula
+import VD.CountingFunction
 
 open Real
 
@@ -25,156 +26,6 @@ theorem MeromorphicOn.restrict_inv
   funext x
   simp
 
-noncomputable def MeromorphicOn.N_zero
-  (f : ℂ → ℂ) :
-  ℝ → ℝ :=
-  fun r ↦ ∑ᶠ z, (max 0 ((MeromorphicOn.divisor f (Metric.closedBall 0 |r|)) z)) * log (r * ‖z‖⁻¹)
-  --hf.divisor⁺.logCounting
-
-noncomputable def MeromorphicOn.N_infty
-  (f : ℂ → ℂ) :
-  ℝ → ℝ :=
-  fun r ↦ ∑ᶠ z, (max 0 (-((MeromorphicOn.divisor f (Metric.closedBall 0 |r|)) z))) * log (r * ‖z‖⁻¹)
-
-
-theorem Nevanlinna_counting₁₁
-  {f : ℂ → ℂ}
-  (hf : MeromorphicOn f ⊤)
-  (a : ℂ) :
-  MeromorphicOn.N_infty (f + fun _ ↦ a) = MeromorphicOn.N_infty f := by
-
-  funext r
-  unfold MeromorphicOn.N_infty
-  let A := (MeromorphicOn.divisor f (Metric.closedBall 0 |r|)).finiteSupport (isCompact_closedBall 0 |r|)
-  repeat
-    rw [finsum_eq_sum_of_support_subset (s := A.toFinset)]
-  apply Finset.sum_congr rfl
-  intro x hx; simp at hx
-  congr 2
-
-  by_cases h : 0 ≤ (MeromorphicOn.divisor f (Metric.closedBall 0 |r|)) x
-  · simp [h]
-    let A := (hf.restrict |r|).divisor_add_const₁ a h
-    exact A
-
-  · simp at h
-    have h' : 0 ≤ -((MeromorphicOn.divisor f (Metric.closedBall 0 |r|)) x) := by
-      apply Int.le_neg_of_le_neg
-      simp
-      exact h.le
-    let Z := max_eq_right_iff.2 h'
-    rw [Z]
-
-    have A := (hf.restrict |r|).divisor_add_const₂ a h
-    have A' : 0 ≤ -(MeromorphicOn.divisor (f + fun _ ↦ a) (Metric.closedBall 0 |r|) x) := by
-      apply Int.le_neg_of_le_neg
-      simp
-      exact A.le
-    let Z := max_eq_right_iff.2 A'
-    rw [Z]
-
-    simp [A']
-
-    exact (hf.restrict |r|).divisor_add_const₃ a h
-  --
-  intro x
-  contrapose
-  simp
-  intro hx
-  rw [hx]
-  tauto
-  --
-  intro x
-  contrapose
-  simp
-  intro hx
-  have : 0 ≤ MeromorphicOn.divisor f (Metric.closedBall 0 |r|) x := by
-    rw [hx]
-  have G := (hf.restrict |r|).divisor_add_const₁ a this
-  clear this
-  simp [G]
-
-theorem Nevanlinna_counting'₁₁
-  {f : ℂ → ℂ}
-  (hf : MeromorphicOn f ⊤)
-  (a : ℂ) :
-  MeromorphicOn.N_infty (f - fun _ ↦ a) = MeromorphicOn.N_infty f := by
-  have : (f - fun x => a) = (f + fun x => -a) := by
-    funext x
-    simp; ring
-  have : MeromorphicOn.N_infty (f - fun _ ↦ a) = MeromorphicOn.N_infty (f + fun _ ↦ -a) := by
-    congr 1
-
-  rw [this]
-  exact Nevanlinna_counting₁₁ hf (-a)
-
-theorem Nevanlinna_counting₀
-  {f : ℂ → ℂ}
-  (hf : MeromorphicOn f ⊤) :
-  MeromorphicOn.N_infty f⁻¹ = MeromorphicOn.N_zero f := by
-
-  funext r
-  unfold MeromorphicOn.N_zero MeromorphicOn.N_infty
-  let A := (MeromorphicOn.divisor f (Metric.closedBall 0 |r|)).finiteSupport (isCompact_closedBall 0 |r|)
-  repeat
-    rw [finsum_eq_sum_of_support_subset (s := A.toFinset)]
-  apply Finset.sum_congr rfl
-  intro x hx
-  congr
-  let B := hf.restrict_inv |r|
-  rw [MeromorphicOn.divisor_inv]
-  simp
-  --
-  --exact fun x a => hf x trivial
-  --
-  intro x
-  contrapose
-  simp
-  intro hx
-  rw [hx]
-  tauto
-  --
-  intro x
-  contrapose
-  simp
-  intro hx
-  rw [hx]
-  tauto
-
-theorem Nevanlinna_counting
-  (f : ℂ → ℂ) :
-  MeromorphicOn.N_zero f - MeromorphicOn.N_infty f = fun r ↦ ∑ᶠ z, (MeromorphicOn.divisor f (Metric.closedBall 0 |r|) z) * log (r * ‖z‖⁻¹) := by
-
-  funext r
-  simp only [Pi.sub_apply]
-  unfold  MeromorphicOn.N_zero MeromorphicOn.N_infty
-
-  let A := (MeromorphicOn.divisor f (Metric.closedBall 0 |r|)).finiteSupport (isCompact_closedBall 0 |r|)
-  repeat
-    rw [finsum_eq_sum_of_support_subset (s := A.toFinset)]
-  rw [← Finset.sum_sub_distrib]
-  simp_rw [← sub_mul]
-  congr
-  funext x
-  congr
-  by_cases h : 0 ≤ MeromorphicOn.divisor f (Metric.closedBall 0 |r|) x
-  · simp [h]
-  · have h' : 0 ≤ -(MeromorphicOn.divisor f (Metric.closedBall 0 |r|) x) := by
-      simp at h
-      apply Int.le_neg_of_le_neg
-      simp
-      exact h.le
-    simp at h
-    simp [h']
-    simp_all
-  --
-  repeat
-    intro x
-    contrapose
-    simp
-    intro hx
-    rw [hx]
-    tauto
 
 
 --
@@ -211,7 +62,7 @@ noncomputable def MeromorphicOn.T_infty
   {f : ℂ → ℂ}
   (hf : MeromorphicOn f ⊤) :
   ℝ → ℝ :=
-  hf.m_infty + N_infty f
+  hf.m_infty + VD.logCounting f ⊤
 
 
 theorem Nevanlinna_firstMain₁
@@ -229,8 +80,23 @@ theorem Nevanlinna_firstMain₁
   rw [this]
   clear this
 
-  rw [Nevanlinna_counting₀ h₁f]
-  rw [Nevanlinna_counting f]
+  rw [← VD.logCounting_inv]
+  rw [← VD.log_counting_zero_sub_logCounting_top]
+  unfold Function.locallyFinsuppWithin.logCounting
+  have XX {r : ℝ} : (MeromorphicOn.divisor f ⊤).toBall r  = MeromorphicOn.divisor f (Metric.closedBall 0 |r|) := by
+    unfold Function.locallyFinsuppWithin.toBall
+    exact MeromorphicOn.divisor_restrict h₁f fun ⦃a⦄ a ↦ trivial
+  simp_rw [XX]
+  clear XX
+  have ZZ : (MeromorphicOn.divisor f ⊤) 0 = 0 := by
+    rw [MeromorphicOn.divisor_apply]
+    rw [← h₂f.order_eq_zero_iff] at h₃f
+    simp_rw [h₃f]
+    exact rfl
+    assumption
+    trivial
+  rw [ZZ]
+  simp
   funext r
   simp
   rw [← Nevanlinna_proximity h₁f]
@@ -296,7 +162,7 @@ theorem Nevanlinna_firstMain₂
 
   have : (h₁f.T_infty r) - ((h₁f.sub (MeromorphicOn.const a)).T_infty r) = (h₁f.m_infty r) - ((h₁f.sub (MeromorphicOn.const a)).m_infty r) := by
     unfold MeromorphicOn.T_infty
-    rw [Nevanlinna_counting'₁₁ h₁f a]
+    rw [VD.logCounting_sub_const h₁f]
     simp
   rw [this]
   clear this

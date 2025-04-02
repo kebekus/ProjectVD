@@ -7,7 +7,7 @@ import Mathlib.Analysis.Meromorphic.Divisor
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import VD.ToMathlib.Divisor_add
 
-open Metric Real
+open MeromorphicOn Metric Real
 
 variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜] {U : Set 𝕜}
@@ -23,74 +23,87 @@ Distribution Theory.
 -/
 
 /-!
-## Definition of the Counting Function
+## Supporting Notation
 -/
 
-noncomputable def Function.locallyFinsuppWithin.to_ball
+namespace Function.locallyFinsuppWithin
+
+/--
+Shorthand notation for the restriction of a function with locally finite support
+within ⊤ to the closed unit ball of radius `r`.
+-/
+noncomputable def toBall
     (D : Function.locallyFinsuppWithin (⊤ : Set 𝕜) ℤ) (r : ℝ) :
     Function.locallyFinsuppWithin (closedBall (0 : 𝕜) |r|) ℤ :=
   D.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤)
 
-lemma Function.locallyFinsuppWithin.restr_to_ball_sub
+/--
+Restriction commutes with subtraction.
+-/
+lemma toBall_sub
     {D₁ D₂ : Function.locallyFinsuppWithin (⊤ : Set 𝕜) ℤ} {r : ℝ} :
-    (D₁ - D₂).to_ball r = D₁.to_ball r - D₂.to_ball r := by
-  unfold Function.locallyFinsuppWithin.to_ball
+    (D₁ - D₂).toBall r = D₁.toBall r - D₂.toBall r := by
   ext x
-  by_cases h₁ : ‖x‖ ≤ |r| <;> simp [restrict_apply, h₁]
+  by_cases h₁ : ‖x‖ ≤ |r| <;> simp [toBall, restrict_apply, h₁]
+
+end Function.locallyFinsuppWithin
+
+/-!
+## The Logarithmic Counting Function of a Function with Locally Finite Support
+-/
 
 /--
-The logarithmic counting function of a function with locally finite support
-within `⊤`.
+Definition of the logarithmic counting function for a function with locally
+finite support within `⊤`.
 -/
 noncomputable def Function.locallyFinsuppWithin.logCounting
     (D : Function.locallyFinsuppWithin (⊤ : Set 𝕜) ℤ) :
     ℝ → ℝ :=
-  fun r ↦ ∑ᶠ z, D.to_ball r z * (log r - log ‖z‖)
+  fun r ↦ ∑ᶠ z, D.toBall r z * log (r * ‖z‖⁻¹) + (D 0) * log r
 
 /-- The value of the counting function at zero is zero. -/
 @[simp] lemma Function.locallyFinsuppWithin.logCounting_eval_zero
     (D : Function.locallyFinsuppWithin (⊤ : Set 𝕜) ℤ) :
     logCounting D 0 = 0 := by
-  rw [logCounting, finsum_eq_zero_of_forall_eq_zero]
-  intro x
-  by_cases hx : x = 0
-  <;> simp [hx]
+  rw [logCounting]
+  simp
 
-lemma Function.locallyFinsuppWithin.logCounting_support {r : ℝ}
-    (D : Function.locallyFinsuppWithin (⊤ : Set 𝕜) ℤ) :
-    Function.support (fun z ↦ D.to_ball r z * (log r - log ‖z‖))
-      ⊆ Function.support (D.to_ball r) := by
-  intro x hx
-  simp_all
-
+/--
+The logarithmic counting function commutes with subtraction.
+-/
 @[simp] lemma Function.locallyFinsuppWithin.logCounting_sub [ProperSpace 𝕜]
     (D₁ D₂ : Function.locallyFinsuppWithin (⊤ : Set 𝕜) ℤ) :
-    logCounting D₁ - logCounting D₂ = logCounting (D₁ - D₂) := by
+    logCounting (D₁ - D₂) = logCounting D₁ - logCounting D₂ := by
   ext r
   simp [logCounting]
-  let s := (D₁.to_ball r).support ∪ (D₂.to_ball r).support
-  have h₁s : s.Finite := by
+  have h₁s : ((D₁.toBall r).support ∪ (D₂.toBall r).support).Finite := by
     apply Set.finite_union.2
     constructor
     <;> apply Function.locallyFinsuppWithin.finiteSupport _ (isCompact_closedBall 0 |r|)
-  have t₁ : (fun z ↦ D₁.to_ball r z * (log r - log ‖z‖)).support ⊆ h₁s.toFinset := by
+  have t₁ : (fun z ↦ D₁.toBall r z * log (r * ‖z‖⁻¹)).support ⊆ h₁s.toFinset := by
     intro x hx
-    simp_all [s]
-  rw [finsum_eq_sum_of_support_subset _ t₁]
-  have t₂ : (fun z ↦ D₂.to_ball r z * (log r - log ‖z‖)).support ⊆ h₁s.toFinset := by
-    intro x hx
-    simp_all [s]
-  rw [finsum_eq_sum_of_support_subset _ t₂]
-  have t₁₂ : (fun z ↦ (D₁ - D₂).to_ball r z * (log r - log ‖z‖)).support ⊆ h₁s.toFinset := by
-    intro x hx
-    unfold s
-    by_contra hCon
-    rw [Function.locallyFinsuppWithin.restr_to_ball_sub] at hx
     simp_all
-  simp_rw [finsum_eq_sum_of_support_subset _ t₁₂, ← Finset.sum_sub_distrib, ← sub_mul, Function.locallyFinsuppWithin.restr_to_ball_sub]
+  rw [finsum_eq_sum_of_support_subset _ t₁]
+  have t₂ : (fun z ↦ D₂.toBall r z * log (r * ‖z‖⁻¹)).support ⊆ h₁s.toFinset := by
+    intro x hx
+    simp_all
+  rw [finsum_eq_sum_of_support_subset _ t₂]
+  have t₁₂ : (fun z ↦ (D₁ - D₂).toBall r z * log (r * ‖z‖⁻¹)).support ⊆ h₁s.toFinset := by
+    intro x hx
+    by_contra hCon
+    rw [Function.locallyFinsuppWithin.toBall_sub] at hx
+    simp_all
+  simp_rw [finsum_eq_sum_of_support_subset _ t₁₂]
+  have {A B C D : ℝ} : A + B - (C + D) = A - C + (B - D) := by
+    ring
+  simp_rw [this, ← Finset.sum_sub_distrib, ← sub_mul, Function.locallyFinsuppWithin.toBall_sub]
   simp
 
-namespace MeromorphicOn
+/-!
+## The Logarithmic Counting Function of a Meromorphic Function
+-/
+
+namespace VD
 
 /-- The logarithmic counting function of a meromorphic function. -/
 noncomputable def logCounting (f : 𝕜 → E) (a : WithTop E) :
@@ -120,8 +133,8 @@ lemma logCounting_eval_zero {f : 𝕜 → E} {a : WithTop E}:
   by_cases h : a = ⊤ <;> simp [h, logCounting]
 
 theorem log_counting_zero_sub_logCounting_top [ProperSpace 𝕜] {f : 𝕜 → E} :
-    logCounting f 0 - logCounting f ⊤ = (divisor f ⊤).logCounting := by
-  simp [logCounting_zero, logCounting_top]
+    (divisor f ⊤).logCounting = logCounting f 0 - logCounting f ⊤ := by
+  simp [logCounting_zero, logCounting_top, ← Function.locallyFinsuppWithin.logCounting_sub]
 
 /-!
 ## Elementary Properties of the Counting Function
@@ -135,10 +148,18 @@ theorem logCounting_add_analytic {f g : 𝕜 → E} (hf : MeromorphicOn f ⊤)
     (hg : AnalyticOn 𝕜 g ⊤) :
     logCounting (f + g) ⊤ = logCounting f ⊤ := by
   simp only [logCounting, ↓reduceDIte,
-    hf.divisor_add_analytic ((IsOpen.analyticOn_iff_analyticOnNhd TopologicalSpace.isOpen_univ).1 hg)]
+    hf.divisor_add_analytic (isOpen_univ.analyticOn_iff_analyticOnNhd.1 hg)]
 
 theorem logCounting_add_const {f : 𝕜 → E} {a : E} (hf : MeromorphicOn f ⊤) :
     logCounting (f + fun _ ↦ a) ⊤ = logCounting f ⊤ := by
-  apply hf.logCounting_add_analytic analyticOn_const
+  apply logCounting_add_analytic hf analyticOn_const
 
-end MeromorphicOn
+theorem logCounting_sub_const {f : 𝕜 → E} {a : E} (hf : MeromorphicOn f ⊤) :
+    logCounting (f - fun _ ↦ a) ⊤ = logCounting f ⊤ := by
+  have : f - (fun x ↦ a) = f + fun x ↦ -a := by
+    funext x
+    simp [sub_eq_add_neg]
+  rw [this]
+  apply logCounting_add_analytic hf analyticOn_const
+
+end VD
