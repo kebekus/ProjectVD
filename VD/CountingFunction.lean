@@ -26,15 +26,15 @@ Distribution Theory.
 ## Definition of the Counting Function
 -/
 
-noncomputable def Function.locallyFinsuppWithin.restr_to_ball
+noncomputable def Function.locallyFinsuppWithin.to_ball
     (D : Function.locallyFinsuppWithin (⊤ : Set 𝕜) ℤ) (r : ℝ) :
     Function.locallyFinsuppWithin (closedBall (0 : 𝕜) |r|) ℤ :=
   D.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤)
 
 lemma Function.locallyFinsuppWithin.restr_to_ball_sub
     {D₁ D₂ : Function.locallyFinsuppWithin (⊤ : Set 𝕜) ℤ} {r : ℝ} :
-    (D₁ - D₂).restr_to_ball r = D₁.restr_to_ball r - D₂.restr_to_ball r := by
-  unfold Function.locallyFinsuppWithin.restr_to_ball
+    (D₁ - D₂).to_ball r = D₁.to_ball r - D₂.to_ball r := by
+  unfold Function.locallyFinsuppWithin.to_ball
   ext x
   by_cases h₁ : ‖x‖ ≤ |r| <;> simp [restrict_apply, h₁]
 
@@ -45,7 +45,7 @@ within `⊤`.
 noncomputable def Function.locallyFinsuppWithin.logCounting
     (D : Function.locallyFinsuppWithin (⊤ : Set 𝕜) ℤ) :
     ℝ → ℝ :=
-  fun r ↦ ∑ᶠ z, D.restr_to_ball r z * (log r - log ‖z‖)
+  fun r ↦ ∑ᶠ z, D.to_ball r z * (log r - log ‖z‖)
 
 /-- The value of the counting function at zero is zero. -/
 @[simp] lemma Function.locallyFinsuppWithin.logCounting_eval_zero
@@ -58,8 +58,8 @@ noncomputable def Function.locallyFinsuppWithin.logCounting
 
 lemma Function.locallyFinsuppWithin.logCounting_support {r : ℝ}
     (D : Function.locallyFinsuppWithin (⊤ : Set 𝕜) ℤ) :
-    Function.support (fun z ↦ D.restr_to_ball r z * (log r - log ‖z‖))
-      ⊆ Function.support (D.restr_to_ball r) := by
+    Function.support (fun z ↦ D.to_ball r z * (log r - log ‖z‖))
+      ⊆ Function.support (D.to_ball r) := by
   intro x hx
   simp_all
 
@@ -68,20 +68,20 @@ lemma Function.locallyFinsuppWithin.logCounting_support {r : ℝ}
     logCounting D₁ - logCounting D₂ = logCounting (D₁ - D₂) := by
   ext r
   simp [logCounting]
-  let s := (D₁.restr_to_ball r).support ∪ (D₂.restr_to_ball r).support
+  let s := (D₁.to_ball r).support ∪ (D₂.to_ball r).support
   have h₁s : s.Finite := by
     apply Set.finite_union.2
     constructor
     <;> apply Function.locallyFinsuppWithin.finiteSupport _ (isCompact_closedBall 0 |r|)
-  have t₁ : (fun z ↦ D₁.restr_to_ball r z * (log r - log ‖z‖)).support ⊆ h₁s.toFinset := by
+  have t₁ : (fun z ↦ D₁.to_ball r z * (log r - log ‖z‖)).support ⊆ h₁s.toFinset := by
     intro x hx
     simp_all [s]
   rw [finsum_eq_sum_of_support_subset _ t₁]
-  have t₂ : (fun z ↦ D₂.restr_to_ball r z * (log r - log ‖z‖)).support ⊆ h₁s.toFinset := by
+  have t₂ : (fun z ↦ D₂.to_ball r z * (log r - log ‖z‖)).support ⊆ h₁s.toFinset := by
     intro x hx
     simp_all [s]
   rw [finsum_eq_sum_of_support_subset _ t₂]
-  have t₁₂ : (fun z ↦ (D₁ - D₂).restr_to_ball r z * (log r - log ‖z‖)).support ⊆ h₁s.toFinset := by
+  have t₁₂ : (fun z ↦ (D₁ - D₂).to_ball r z * (log r - log ‖z‖)).support ⊆ h₁s.toFinset := by
     intro x hx
     unfold s
     by_contra hCon
@@ -99,15 +99,19 @@ noncomputable def logCounting (f : 𝕜 → E) (a : WithTop E) :
   · exact (divisor f ⊤)⁻.logCounting
   · exact (divisor (fun z ↦ f z - a.untop₀) ⊤)⁺.logCounting
 
-lemma logCounting_def {f : 𝕜 → E} {a : E} :
+lemma logCounting_finite {f : 𝕜 → E} {a : E} :
     logCounting f a = (divisor (fun z ↦ f z - a) ⊤)⁺.logCounting := by
   simp [logCounting]
 
-lemma logCounting_def_zero {f : 𝕜 → E} :
+lemma logCounting_finite_eq_logCounting_zero_of_shifted {f : 𝕜 → E} {a : E} :
+    logCounting f a = logCounting (f - fun _ ↦ a) 0 := by
+  simp [logCounting]
+
+lemma logCounting_zero {f : 𝕜 → E} :
     logCounting f 0 = (divisor f ⊤)⁺.logCounting := by
   simp [logCounting]
 
-lemma logCounting_def_top {f : 𝕜 → E} :
+lemma logCounting_top {f : 𝕜 → E} :
     logCounting f ⊤ = (divisor f ⊤)⁻.logCounting := by
   simp [logCounting]
 
@@ -117,7 +121,7 @@ lemma logCounting_eval_zero {f : 𝕜 → E} {a : WithTop E}:
 
 theorem log_counting_zero_sub_logCounting_top [ProperSpace 𝕜] {f : 𝕜 → E} :
     logCounting f 0 - logCounting f ⊤ = (divisor f ⊤).logCounting := by
-  simp [logCounting_def_zero, logCounting_def_top]
+  simp [logCounting_zero, logCounting_top]
 
 /-!
 ## Elementary Properties of the Counting Function
@@ -125,7 +129,7 @@ theorem log_counting_zero_sub_logCounting_top [ProperSpace 𝕜] {f : 𝕜 → E
 
 theorem logCounting_inv [CompleteSpace 𝕜] {f : 𝕜 → 𝕜} :
     logCounting f 0 = logCounting f⁻¹ ⊤ := by
-  simp [logCounting_def_zero, logCounting_def_top]
+  simp [logCounting_zero, logCounting_top]
 
 theorem logCounting_add_analytic {f g : 𝕜 → E} (hf : MeromorphicOn f ⊤)
     (hg : AnalyticOn 𝕜 g ⊤) :
