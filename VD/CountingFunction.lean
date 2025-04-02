@@ -31,6 +31,13 @@ noncomputable def Function.locallyFinsuppWithin.restr_to_ball
     Function.locallyFinsuppWithin (closedBall (0 : 𝕜) |r|) ℤ :=
   D.restrict (by tauto : closedBall (0 : 𝕜) |r| ⊆ ⊤)
 
+lemma Function.locallyFinsuppWithin.restr_to_ball_sub
+    {D₁ D₂ : Function.locallyFinsuppWithin (⊤ : Set 𝕜) ℤ} {r : ℝ} :
+    (D₁ - D₂).restr_to_ball r = D₁.restr_to_ball r - D₂.restr_to_ball r := by
+  unfold Function.locallyFinsuppWithin.restr_to_ball
+  ext x
+  by_cases h₁ : ‖x‖ ≤ |r| <;> simp [restrict_apply, h₁]
+
 /--
 The logarithmic counting function of a function with locally finite support
 within `⊤`.
@@ -56,28 +63,32 @@ lemma Function.locallyFinsuppWithin.logCounting_support {r : ℝ}
   intro x hx
   simp_all
 
-@[simp] lemma Function.locallyFinsuppWithin.logCounting_sub
+@[simp] lemma Function.locallyFinsuppWithin.logCounting_sub [ProperSpace 𝕜]
     (D₁ D₂ : Function.locallyFinsuppWithin (⊤ : Set 𝕜) ℤ) :
     logCounting D₁ - logCounting D₂ = logCounting (D₁ - D₂) := by
   ext r
   simp [logCounting]
   let s := (D₁.restr_to_ball r).support ∪ (D₂.restr_to_ball r).support
-  have t₁ : (fun z ↦ D₁.restr_to_ball r z * (log r - log ‖z‖)).support ⊆ s := by
+  have h₁s : s.Finite := by
+    apply Set.finite_union.2
+    constructor
+    <;> apply Function.locallyFinsuppWithin.finiteSupport _ (isCompact_closedBall 0 |r|)
+  have t₁ : (fun z ↦ D₁.restr_to_ball r z * (log r - log ‖z‖)).support ⊆ h₁s.toFinset := by
     intro x hx
     simp_all [s]
-  have t₂ : (fun z ↦ D₂.restr_to_ball r z * (log r - log ‖z‖)).support ⊆ s := by
+  rw [finsum_eq_sum_of_support_subset _ t₁]
+  have t₂ : (fun z ↦ D₂.restr_to_ball r z * (log r - log ‖z‖)).support ⊆ h₁s.toFinset := by
     intro x hx
     simp_all [s]
-  have t₁₂ : (fun z ↦ (D₁ - D₂).restr_to_ball r z * (log r - log ‖z‖)).support ⊆ s := by
+  rw [finsum_eq_sum_of_support_subset _ t₂]
+  have t₁₂ : (fun z ↦ (D₁ - D₂).restr_to_ball r z * (log r - log ‖z‖)).support ⊆ h₁s.toFinset := by
     intro x hx
-    simp_all [s]
-
-    sorry
-  rw [finsum_eq_sum]
-  sorry
-  sorry
-
--- TODO: Integral representation
+    unfold s
+    by_contra hCon
+    rw [Function.locallyFinsuppWithin.restr_to_ball_sub] at hx
+    simp_all
+  simp_rw [finsum_eq_sum_of_support_subset _ t₁₂, ← Finset.sum_sub_distrib, ← sub_mul, Function.locallyFinsuppWithin.restr_to_ball_sub]
+  simp
 
 namespace MeromorphicOn
 
@@ -104,7 +115,7 @@ lemma logCounting_eval_zero {f : 𝕜 → E} {a : WithTop E}:
     logCounting f a 0 = 0 := by
   by_cases h : a = ⊤ <;> simp [h, logCounting]
 
-theorem log_counting_zero_sub_logCounting_top {f : 𝕜 → E} :
+theorem log_counting_zero_sub_logCounting_top [ProperSpace 𝕜] {f : 𝕜 → E} :
     logCounting f 0 - logCounting f ⊤ = (divisor f ⊤).logCounting := by
   simp [logCounting_def_zero, logCounting_def_top]
 
