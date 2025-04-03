@@ -33,8 +33,7 @@ noncomputable def MeromorphicOn.m_infty
   {f : ℂ → ℂ}
   (_ : MeromorphicOn f ⊤) :
   ℝ → ℝ :=
-  fun r ↦ (2 * π)⁻¹ * ∫ x in (0)..(2 * π), posLog ‖f (circleMap 0 r x)‖
-
+  fun r ↦ (2 * π)⁻¹ * ∫ x in (0)..(2 * π), log⁺ ‖f (circleMap 0 r x)‖
 
 theorem Nevanlinna_proximity
   {f : ℂ → ℂ}
@@ -56,7 +55,6 @@ theorem Nevanlinna_proximity
   apply MeromorphicOn.integrable_poslog_abs_f
   exact MeromorphicOn.inv_iff.mpr fun x a => h₁f x trivial
 
-
 noncomputable def MeromorphicOn.T_infty
   {f : ℂ → ℂ}
   (hf : MeromorphicOn f ⊤) :
@@ -70,6 +68,7 @@ theorem Nevanlinna_firstMain₁
   (h₂f : MeromorphicNFAt f 0)
   (h₃f : f 0 ≠ 0) :
   (fun _ ↦ log ‖f 0‖) + h₁f.inv.T_infty = h₁f.T_infty := by
+  classical
 
   rw [add_eq_of_eq_sub]
   unfold MeromorphicOn.T_infty
@@ -86,11 +85,10 @@ theorem Nevanlinna_firstMain₁
     unfold Function.locallyFinsuppWithin.toBall
     exact MeromorphicOn.divisor_restrict h₁f fun ⦃a⦄ a ↦ trivial
   simp_all
-  simp_rw [XX]
   clear XX
-  have ZZ : (MeromorphicOn.divisor f ⊤) 0 = 0 := by
+  have ZZ : (MeromorphicOn.divisor f Set.univ) 0 = 0 := by
     rw [MeromorphicOn.divisor_apply]
-    rw [← h₂f.order_eq_zero_iff] at h₃f
+    simp_rw [← h₂f.order_eq_zero_iff] at h₃f
     simp_rw [h₃f]
     exact rfl
     assumption

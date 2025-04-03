@@ -66,7 +66,6 @@ noncomputable def Laplace
         intro m f
         exact Eq.symm (Finset.mul_sum Finset.univ (fun i ↦ f ![v i, v i]) m)
       cont := by
-        simp
         apply continuous_finset_sum
         intro i _
         exact ContinuousEvalConst.continuous_eval_const ![v i, v i]
