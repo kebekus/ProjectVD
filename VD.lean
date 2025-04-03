@@ -1,7 +1,6 @@
 import VD.CountingFunction
 import VD.LaurentPolynomial
 import VD.ToMathlib.Congruence_Divisor
-import VD.ToMathlib.Divisor_add
 import VD.ToMathlib.LaurentPolynomial
 import VD.ToMathlib.analyticAt_order
 import VD.ToMathlib.bilinear
@@ -22,7 +21,6 @@ import VD.mathlibAddOn
 import VD.meromorphicAt
 import VD.meromorphicAt_topology
 import VD.meromorphicOn
-import VD.meromorphicOn_divisor
 import VD.meromorphicOn_integrability
 import VD.partialDeriv
 import VD.specialFunctions_CircleIntegral_affine

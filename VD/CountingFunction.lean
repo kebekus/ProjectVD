@@ -5,7 +5,6 @@ Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Meromorphic.Divisor
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
-import VD.ToMathlib.Divisor_add
 
 open MeromorphicOn Metric Real
 
@@ -100,7 +99,7 @@ noncomputable def logCounting [ProperSpace 𝕜] :
 
 /-- The value of the counting function at zero is zero. -/
 @[simp] lemma logCounting_eval_zero [ProperSpace 𝕜]
-    (D : locallyFinsuppWithin (⊤ : Set 𝕜) ℤ) :
+    (D : locallyFinsuppWithin (Set.univ : Set 𝕜) ℤ) :
     logCounting D 0 = 0 := by
   rw [logCounting]
   simp
@@ -140,7 +139,11 @@ lemma logCounting_top {f : 𝕜 → E} :
 
 lemma logCounting_eval_zero {f : 𝕜 → E} {a : WithTop E}:
     logCounting f a 0 = 0 := by
-  by_cases h : a = ⊤ <;> simp [h, logCounting]
+  by_cases h : a = ⊤
+  · simp [logCounting, h]
+    erw [Function.locallyFinsuppWithin.logCounting_eval_zero (divisor f Set.univ)⁻]
+  · simp [h, logCounting]
+    erw [Function.locallyFinsuppWithin.logCounting_eval_zero]
 
 theorem log_counting_zero_sub_logCounting_top {f : 𝕜 → E} :
     (divisor f ⊤).logCounting = logCounting f 0 - logCounting f ⊤ := by
@@ -148,10 +151,8 @@ theorem log_counting_zero_sub_logCounting_top {f : 𝕜 → E} :
   nth_rw 1 [← posPart_sub_negPart (divisor f Set.univ)]
   conv =>
     left
-    rw [Function.locallyFinsuppWithin.logCounting.map_sub (divisor f Set.univ)⁺ (divisor f Set.univ)⁻]
-
+    erw [Function.locallyFinsuppWithin.logCounting.map_sub (divisor f Set.univ)⁺ (divisor f Set.univ)⁻]
   simp
-  simp_rw [← Function.locallyFinsuppWithin.logCounting.map_sub]
 
 /-!
 ## Elementary Properties of the Counting Function
@@ -164,8 +165,8 @@ theorem logCounting_inv [CompleteSpace 𝕜] {f : 𝕜 → 𝕜} :
 theorem logCounting_add_analytic {f g : 𝕜 → E} (hf : MeromorphicOn f ⊤)
     (hg : AnalyticOn 𝕜 g ⊤) :
     logCounting (f + g) ⊤ = logCounting f ⊤ := by
-  simp only [logCounting, ↓reduceDIte,
-    hf.divisor_add_analytic (isOpen_univ.analyticOn_iff_analyticOnNhd.1 hg)]
+  simp only [logCounting, ↓reduceDIte]
+  erw [hf.negPart_divisor_add_of_analyticNhdOn_right (isOpen_univ.analyticOn_iff_analyticOnNhd.1 hg)]
 
 theorem logCounting_add_const {f : 𝕜 → E} {a : E} (hf : MeromorphicOn f ⊤) :
     logCounting (f + fun _ ↦ a) ⊤ = logCounting f ⊤ := by

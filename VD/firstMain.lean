@@ -1,8 +1,7 @@
 import Mathlib.Analysis.SpecialFunctions.Log.PosLog
 import Mathlib.MeasureTheory.Integral.CircleIntegral
-import VD.meromorphicOn_divisor
 import VD.meromorphicOn_integrability
-import Mathlib.Analysis.Meromorphic.NormalFormAt
+import Mathlib.Analysis.Meromorphic.NormalForm
 import VD.stronglyMeromorphic_JensenFormula
 import VD.CountingFunction
 
@@ -86,6 +85,7 @@ theorem Nevanlinna_firstMain₁
   have XX {r : ℝ} : (MeromorphicOn.divisor f ⊤).toBall r  = MeromorphicOn.divisor f (Metric.closedBall 0 |r|) := by
     unfold Function.locallyFinsuppWithin.toBall
     exact MeromorphicOn.divisor_restrict h₁f fun ⦃a⦄ a ↦ trivial
+  simp_all
   simp_rw [XX]
   clear XX
   have ZZ : (MeromorphicOn.divisor f ⊤) 0 = 0 := by
