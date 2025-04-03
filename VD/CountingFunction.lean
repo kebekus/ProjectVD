@@ -93,16 +93,10 @@ noncomputable def logCounting [ProperSpace 𝕜] :
       repeat
         rw [finsum_eq_sum_of_support_subset (s := h₁s.toFinset)]
       simp_rw [← Finset.sum_add_distrib, ← add_mul]
-      --
-      intro x hx
-      simp_all
-      --
-      intro x hx
-      simp_all
-      --
-      intro x hx
-      by_contra hCon
-      simp_all
+      repeat
+        intro x hx
+        by_contra
+        simp_all
     · ring
 
 /-- Evaluation of the logarithmic counting function at zero yields zero. -/
