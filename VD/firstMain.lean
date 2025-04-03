@@ -1,9 +1,8 @@
-import Mathlib.Analysis.SpecialFunctions.Log.PosLog
+import Mathlib.Analysis.Meromorphic.NormalForm
 import Mathlib.MeasureTheory.Integral.CircleIntegral
 import VD.meromorphicOn_integrability
-import Mathlib.Analysis.Meromorphic.NormalForm
 import VD.stronglyMeromorphic_JensenFormula
-import VD.CountingFunction
+import VD.ToMathlib.CountingFunction
 
 open Real
 
@@ -160,7 +159,7 @@ theorem Nevanlinna_firstMain₂
 
   have : (h₁f.T_infty r) - ((h₁f.sub (MeromorphicOn.const a)).T_infty r) = (h₁f.m_infty r) - ((h₁f.sub (MeromorphicOn.const a)).m_infty r) := by
     unfold MeromorphicOn.T_infty
-    rw [VD.logCounting_sub_const h₁f]
+    rw [VD.logCounting_sub_const_right h₁f]
     simp
   rw [this]
   clear this
