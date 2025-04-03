@@ -1,6 +1,6 @@
-import VD.CountingFunction
 import VD.LaurentPolynomial
 import VD.ToMathlib.Congruence_Divisor
+import VD.ToMathlib.CountingFunction
 import VD.ToMathlib.LaurentPolynomial
 import VD.ToMathlib.analyticAt_order
 import VD.ToMathlib.bilinear
