@@ -143,8 +143,7 @@ theorem MeromorphicOn.decompose₂
     ∧ (∀ p : P, g p ≠ 0)
     ∧ (f = g * ∏ p : P, fun z ↦ (z - p.1.1) ^ (divisor f U p.1.1)) := by
 
-  apply Finset.induction (p := fun (P : Finset U) ↦
-    (∀ p ∈ P, (hf p.2).meromorphicAt.order ≠ ⊤) →
+  apply Finset.induction (motive := fun (P : Finset U) ↦ (∀ p ∈ P, (hf p.2).meromorphicAt.order ≠ ⊤) →
     ∃ g : ℂ → ℂ, (MeromorphicOn g U)
     ∧ (∀ p : P, AnalyticAt ℂ g p)
     ∧ (∀ p : P, g p ≠ 0)

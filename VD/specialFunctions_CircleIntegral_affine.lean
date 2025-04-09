@@ -1,4 +1,4 @@
-import Mathlib.MeasureTheory.Integral.Periodic
+import Mathlib.MeasureTheory.Integral.IntervalIntegral.Periodic
 import Mathlib.MeasureTheory.Integral.CircleIntegral
 import VD.specialFunctions_Integral_log_sin
 import VD.harmonicAt_examples

@@ -1,5 +1,5 @@
 import Mathlib.Analysis.Meromorphic.Divisor
-import Mathlib.MeasureTheory.Integral.IntervalIntegral
+import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import VD.mathlibAddOn
 
 open scoped Interval Topology
