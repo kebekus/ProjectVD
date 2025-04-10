@@ -62,6 +62,58 @@ theorem MeromorphicOn.intervalIntegrable_posLog_norm {f : ℝ → ℂ} {a b : �
   apply hf.intervalIntegrable_log_norm.const_mul
   apply (IntervalIntegrable.abs hf.intervalIntegrable_log_norm).const_mul
 
+/-- Circle integrability is invariant when functions change along discrete sets. -/
+theorem CircleIntegrable.congr_codiscreteWithin' {c : ℂ} {R : ℝ} {f₁ f₂ : ℂ → ℝ}
+    (hf : f₁ =ᶠ[codiscreteWithin (Metric.sphere c |R|)] f₂) (hf₁ : CircleIntegrable f₁ c R) :
+    CircleIntegrable f₂ c R := by
+  by_cases hR : R = 0
+  · simp [hR]
+  apply (intervalIntegrable_congr_codiscreteWithin _).1 hf₁
+  rw [eventuallyEq_iff_exists_mem]
+  exact ⟨(circleMap c R)⁻¹' {z | f₁ z = f₂ z},
+    codiscreteWithin.mono (by simp only [Set.subset_univ]) (circleMap_preimage_codiscrete hR hf),
+    by tauto⟩
+
+theorem CircleIntegrable.finsum {ι : Type u_1}
+    {E : Type u_3} [NormedAddCommGroup E] {c : ℂ} {R : ℝ}
+    {f : ι → ℂ → ℂ}
+    (h : ∀ i, CircleIntegrable (f i) c R) :
+    CircleIntegrable (∑ᶠ i, f i) c R := by
+  unfold CircleIntegrable
+  apply IntervalIntegrable.finsum
+  sorry
+
+
+theorem MeromorphicOn.circleIntegrable_log_norm {f : ℂ → ℂ} {r : ℝ}
+    (hf : MeromorphicOn f (Metric.sphere 0 |r|)) :
+    CircleIntegrable (log ‖f ·‖) 0 r := by
+  by_cases t₀ : ∀ u : (Metric.sphere (0 : ℂ) |r|), (hf u u.2).order ≠ ⊤
+  · obtain ⟨g, h₁g, h₂g, h₃g⟩ := hf.extract_zeros_poles_log t₀
+      ((divisor f (Metric.sphere (0 : ℂ) |r|)).finiteSupport (isCompact_sphere 0 |r|))
+
+    apply CircleIntegrable.congr_codiscreteWithin' h₃g.symm
+    apply CircleIntegrable.add
+    · unfold CircleIntegrable
+
+      sorry
+    · apply ContinuousOn.intervalIntegrable
+      simp
+      apply ContinuousOn.log
+      apply ContinuousOn.norm
+      apply ContinuousOn.comp (t := Metric.sphere 0 |r|)
+      apply h₁g.continuousOn
+      apply Continuous.continuousOn
+      apply continuous_circleMap
+      --
+      intro x hx
+      simp
+      --
+      intro x hx
+      simp
+      apply h₂g ⟨circleMap 0 r x, circleMap_mem_sphere' 0 r x⟩
+  · sorry
+
+
 
 theorem MeromorphicOn.integrable_log_abs_f₀ {f : ℂ → ℂ} {r : ℝ}
   -- WARNING: Not optimal. It suffices to be meromorphic on the Sphere
