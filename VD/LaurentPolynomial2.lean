@@ -9,17 +9,16 @@ import Mathlib.Analysis.Meromorphic.NormalForm
 /-!
 # Factorized Rational Functions
 
-This file discusses functions `𝕜 → 𝕜` of the form
-`(∏ᶠ u, fun z ↦ (z - u) ^ d u)`, where `d : 𝕜 → ℤ` has finite support.
-We show that these factorized
-rational functions are meromorphic in normal form, with divisor equal to `d`.
+This file discusses functions `𝕜 → 𝕜` of the form `∏ᶠ u, (· - u) ^ d u`,
+where `d : 𝕜 → ℤ`. We show that these "factorized rational functions" are
+meromorphic in normal form, with divisor equal to `d`.
 
 TODO: Show that every meromorphic functions on a compact set is equivalent,
 modulo equality on codiscrete sets, the the product of a factorized rational
 function and an analytic function without zeros.
 -/
 
-open Function
+open Classical Function
 
 variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜]
@@ -77,7 +76,47 @@ lemma Function.FactorizedRational.analyticAt {d : 𝕜 → ℤ} {x : 𝕜} (h : 
     rw [finprod_of_infinite_mulSupport h₁]
     apply analyticAt_const
 
-private lemma analyticAt_finLaurentPolynomial_off_support (d : 𝕜 → ℤ) (P : Finset 𝕜)
+lemma Function.FactorizedRational.zeroAt {d : 𝕜 → ℤ} {x : 𝕜} (h : d x = 0) :
+    (∏ᶠ u, (· - u) ^ d u) x ≠ 0 := by
+  by_cases h₁ : Set.Finite d.support
+  · rw [← Function.mulSupport_factorizedRational d] at h₁
+    rw [finprod_eq_prod _ h₁]
+    rw [Finset.prod_apply]
+    rw [Finset.prod_ne_zero_iff]
+    intro z hz
+    simp only [Pi.pow_apply, ne_eq]
+    by_cases h₂ : z = x
+    · simp_all
+    · apply zpow_ne_zero
+      rw [sub_ne_zero]
+      tauto
+  · rw [← Function.mulSupport_factorizedRational d] at h₁
+    rw [finprod_of_infinite_mulSupport h₁]
+    simp
+
+lemma Function.FactorizedRational.analyticAt' {d : 𝕜 → ℤ} (u₀ : 𝕜) (hd : d.support.Finite) :
+    (∏ᶠ u, (· - u) ^ d u) = ((· - u₀) ^ d u₀) * (∏ᶠ u, (· - u) ^ (update d u₀ 0 u)) := by
+  by_cases h₁d : d u₀ = 0
+  · rw [← eq_update_self_iff.2 h₁d]
+    simp [h₁d]
+  have t₀ : (mulSupport fun u ↦ (fun x ↦ x - u) ^ d u) ⊆ hd.toFinset := by
+    simp [Function.mulSupport_factorizedRational]
+  rw [finprod_eq_prod_of_mulSupport_subset _ t₀]
+  have t₁ : u₀ ∈ hd.toFinset := by
+    simp_all
+  rw [← Finset.mul_prod_erase hd.toFinset _ t₁]
+  congr 1
+  have t₂ : (mulSupport fun u ↦ (fun x ↦ x - u) ^ (update d u₀ 0 u)) ⊆ hd.toFinset.erase u₀ := by
+    rw [Function.mulSupport_factorizedRational]
+    intro x hx
+    by_cases h₁x : x = u₀ <;> simp_all
+  rw [finprod_eq_prod_of_mulSupport_subset _ t₂]
+  apply Finset.prod_congr rfl
+  intro x hx
+  rw [eq_comm]
+  simp_all
+
+private lemma analyticAt_finLaurentPolynomial_off_supportx (d : 𝕜 → ℤ) (P : Finset 𝕜)
     (hz : z ∉ P) :
     AnalyticAt 𝕜 (∏ u ∈ P, fun z ↦ (z - u) ^ d u) z := by
   rw [Finset.prod_fn]
@@ -89,30 +128,24 @@ private lemma analyticAt_finLaurentPolynomial_off_support (d : 𝕜 → ℤ) (P 
 
 /-- Laurent polynomials are meromorphic in normal form on `⊤`. -/
 theorem meromorphicNFOn_laurentPolynomial_top (d : 𝕜 → ℤ) :
-    MeromorphicNFOn (Function.FactorizedRational d) ⊤ := by
+    MeromorphicNFOn (∏ᶠ u, (· - u) ^ d u) ⊤ := by
   classical
-  by_cases hd : (Function.mulSupport fun u => (· - u) ^ d u).Finite
-  · rw [Function.FactorizedRational, finprod_eq_prod _ hd]
-    intro z hz
-    by_cases h₂z : z ∈ hd.toFinset
-    · rw [← Finset.mul_prod_erase hd.toFinset _ h₂z]
-      right
-      use d z, ∏ x ∈ hd.toFinset.erase z, fun z => (z - x) ^ d x,
-        analyticAt_finLaurentPolynomial_off_support d (hd.toFinset.erase z)
-          (Finset.not_mem_erase z hd.toFinset)
-      constructor
-      · rw [Finset.prod_apply, Finset.prod_ne_zero_iff]
-        intro u hu
-        apply zpow_ne_zero
-        rw [sub_ne_zero]
-        by_contra hCon
-        rw [hCon] at hu
-        have := Finset.not_mem_erase u hd.toFinset
-        tauto
-      · exact Filter.Eventually.of_forall (congrFun rfl)
-    · exact (analyticAt_finLaurentPolynomial_off_support d hd.toFinset h₂z).meromorphicNFAt
-  · rw [Function.FactorizedRational, finprod_of_infinite_mulSupport hd]
-    apply analyticOnNhd_const.meromorphicNFOn
+  by_cases hd : d.support.Finite
+  · intro z hz
+    rw [Function.FactorizedRational.analyticAt' z hd]
+    right
+    use d z, (∏ᶠ u, (· - u) ^ update d z 0 u)
+    constructor
+    · simp [Function.FactorizedRational.analyticAt]
+    · constructor
+      · apply FactorizedRational.zeroAt
+        simp
+      · simp
+  · rw [← Function.mulSupport_factorizedRational d] at hd
+    rw [finprod_of_infinite_mulSupport hd]
+    apply AnalyticOnNhd.meromorphicNFOn
+    apply analyticOnNhd_const
+
 
 /-- Laurent polynomials are meromorphic in normal form on arbitrary subsets of `𝕜`. -/
 theorem meromorphicNFOn_laurentPolynomial (d : 𝕜 → ℤ) (U : Set 𝕜) :
@@ -125,40 +158,15 @@ theorem order_laurentPolynomial {z : 𝕜} (d : 𝕜 → ℤ) (h₁d : Set.Finit
     (((meromorphicNFOn_laurentPolynomial_top d).meromorphicOn) z trivial).order = d z := by
   classical
   rw [MeromorphicAt.order_eq_int_iff]
-  use ∏ x ∈ h₁d.toFinset.erase z, fun z => (z - x) ^ d x,
-    analyticAt_finLaurentPolynomial_off_support d (h₁d.toFinset.erase z)
-      (Finset.not_mem_erase z h₁d.toFinset)
+  use (∏ᶠ u, (· - u) ^ update d z 0 u)
   constructor
-  · simp only [Finset.prod_apply]
-    rw [Finset.prod_ne_zero_iff]
-    intro u hu
-    apply zpow_ne_zero
-    rw [sub_ne_zero]
-    by_contra hCon
-    rw [hCon] at hu
-    have := Finset.not_mem_erase u h₁d.toFinset
-    tauto
-  · apply Filter.Eventually.of_forall
-    intro x
-    have t₀ : (Function.mulSupport fun u => (· - u) ^ d u).Finite := by
-      rwa [Function.mulSupport_factorizedRational d]
-    have t₁ : h₁d.toFinset = t₀.toFinset := by
-      simp [eq_comm, Function.mulSupport_factorizedRational d]
-    rw [Function.FactorizedRational, finprod_eq_prod _ t₀, t₁, eq_comm]
-    simp only [Finset.prod_apply, smul_eq_mul]
-    by_cases hz : z ∈ h₁d.toFinset
-    · rw [t₁] at hz
-      simp_rw [← Finset.mul_prod_erase t₀.toFinset _ hz]
+  · simp [Function.FactorizedRational.analyticAt]
+  · constructor
+    · apply FactorizedRational.zeroAt
       simp
-    · have : t₀.toFinset = t₀.toFinset.erase z := by
-        rw [eq_comm]
-        apply Finset.erase_eq_of_not_mem
-        rwa [t₁] at hz
-      rw [this]
-      have : (x - z) ^ d z = 1 := by
-        simp only [Set.Finite.mem_toFinset, Function.mem_support, ne_eq, Decidable.not_not] at hz
-        simp [hz]
-      rw [this]
+    · filter_upwards
+      rw [Function.FactorizedRational.analyticAt' z h₁d]
+      intro a
       simp
 
 /--
