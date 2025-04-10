@@ -87,7 +87,6 @@ theorem ne_zero {d : 𝕜 → ℤ} {x : 𝕜} (h : d x = 0) :
     by_cases h₂ : x = z <;> simp_all [zpow_ne_zero, sub_ne_zero]
   · simp [finprod_of_infinite_mulSupport h₁]
 
-
 open Classical in
 /--
 Helper Lemma for Computations: Extract one factor out of a factorized rational
