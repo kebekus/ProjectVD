@@ -1,7 +1,7 @@
-import VD.LaurentPolynomial
+import VD.Eliminate
 import VD.ToMathlib.Congruence_Divisor
 import VD.ToMathlib.CountingFunction
-import VD.ToMathlib.LaurentPolynomial
+import VD.ToMathlib.FactorizedRational
 import VD.ToMathlib.analyticAt_order
 import VD.ToMathlib.bilinear
 import VD.ToMathlib.codiscreteWithin
@@ -15,8 +15,10 @@ import VD.holomorphic_examples
 import VD.holomorphic_primitive
 import VD.intervalIntegrability
 import VD.laplace
+import VD.leftovers.LaurentPolynomial
 import VD.leftovers.diffOp
 import VD.leftovers.holomorphic
+import VD.leftovers.«LaurentPolynomial-eliminate»
 import VD.mathlibAddOn
 import VD.meromorphicAt
 import VD.meromorphicAt_topology

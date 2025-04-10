@@ -1,4 +1,4 @@
-import VD.LaurentPolynomial
+import VD.leftovers.LaurentPolynomial
 import VD.mathlibAddOn
 import VD.meromorphicOn
 import VD.ToMathlib.codiscreteWithin

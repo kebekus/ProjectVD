@@ -89,15 +89,15 @@ theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] {f : 𝕜 → E}
 If `f` is meromorphic on a set `U`, if `f` is nowhere locally constant zero, and
 if the support of the divisor of `f` is finite, then there exists an analytic
 function `g` on `U` without zeros such that `log ‖f‖` is equivalent, modulo
-equality on codiscrete subsets of `U` to `∑ᶠ u, (divisor f U u * log ‖z-u‖) +
-log ‖g z‖`.
+equality on codiscrete subsets of `U` to `∑ᶠ u, (divisor f U u * log ‖· - u‖) +
+log ‖g ·‖`.
 -/
 theorem MeromorphicOn.extract_zeros_poles_log [CompleteSpace 𝕜] {f : 𝕜 → E}
     (h₁f : MeromorphicOn f U) (h₂f : ∀ u : U, (h₁f u u.2).order ≠ ⊤)
     (h₃f : (divisor f U).support.Finite) :
     ∃ g : 𝕜 → E, AnalyticOnNhd 𝕜 g U ∧ (∀ u : U, g u ≠ 0) ∧
-      (fun z ↦ log ‖f z‖) =ᶠ[Filter.codiscreteWithin U]
-        fun z ↦ ∑ᶠ u, (divisor f U u * log ‖z-u‖) + log ‖g z‖ := by
+      (log ‖f ·‖) =ᶠ[Filter.codiscreteWithin U]
+        ∑ᶠ u, (divisor f U u * log ‖· - u‖) + (log ‖g ·‖) := by
   obtain ⟨g, h₁g, h₂g, h₃g⟩ := MeromorphicOn.extract_zeros_poles h₁f h₂f h₃f
   use g, h₁g, h₂g
   filter_upwards [h₃g, (divisor f U).supportDiscreteWithinDomain,
@@ -112,9 +112,14 @@ theorem MeromorphicOn.extract_zeros_poles_log [CompleteSpace 𝕜] {f : 𝕜 →
     tauto
   rw [hz, finprod_eq_prod_of_mulSupport_subset _ this]
   -- Identify finsum with sum over h₃f.toFinset
-  have : (Function.support fun u ↦ ↑((divisor f U) u) * log ‖z - u‖) ⊆ h₃f.toFinset := by
+  have : (Function.support fun u ↦ (divisor f U u * log ‖· - u‖)) ⊆ h₃f.toFinset := by
     intro u hu
-    simp_all
+    simp_all only [ne_eq, Subtype.forall, Pi.smul_apply', divisor_apply, Pi.zero_apply,
+      WithTop.untop₀_eq_zero, or_false, Set.Finite.coe_toFinset, Function.mulSupport_subset_iff,
+      Function.mem_support]
+    by_contra hCon
+    simp_all only [Int.cast_zero, zero_mul]
+    tauto
   rw [finsum_eq_sum_of_support_subset _ this]
   -- Decompose LHS of the equation
   have : ∀ x ∈ h₃f.toFinset, ‖z - x‖ ^ (divisor f U) x ≠ 0 := by

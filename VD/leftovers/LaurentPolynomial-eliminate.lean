@@ -1,5 +1,5 @@
 import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
-import VD.ToMathlib.LaurentPolynomial
+import VD.leftovers.LaurentPolynomial
 import VD.ToMathlib.Congruence_Divisor
 
 variable

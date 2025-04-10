@@ -1,21 +1,75 @@
+import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.Analysis.SpecialFunctions.Log.PosLog
 import Mathlib.MeasureTheory.Integral.CircleIntegral
 import VD.specialFunctions_CircleIntegral_affine
+import VD.Eliminate
 import VD.stronglyMeromorphicOn_eliminate
 
 open scoped Interval Topology
 open Real Filter MeasureTheory intervalIntegral
 
+theorem IntervalIntegrable.finsum {ι : Type u_1} {E : Type u_3} [NormedAddCommGroup E] {a b : ℝ}
+    {μ : MeasureTheory.Measure ℝ} [IsLocallyFiniteMeasure μ] {f : ι → ℝ → E}
+    (h : ∀ i, IntervalIntegrable (f i) μ a b) :
+    IntervalIntegrable (∑ᶠ i, f i) μ a b := by
+  by_cases h₁ : f.support.Finite
+  · rw [finsum_eq_sum _ h₁]
+    apply IntervalIntegrable.sum
+    intro i hi
+    exact h i
+  · rw [finsum_of_infinite_support h₁]
+    apply _root_.intervalIntegrable_const_iff.2
+    tauto
 
-theorem MeromorphicOn.integrable_log_abs_f₀
-  {f : ℂ → ℂ}
-  {r : ℝ}
+theorem MeromorphicOn.intervalIntegrable_log_norm {f : ℝ → ℂ} {a b : ℝ}
+    (hf : MeromorphicOn f [[a, b]]) :
+    IntervalIntegrable (log ‖f ·‖) MeasureTheory.volume a b := by
+  by_cases t₀ : ∀ u : [[a, b]], (hf u u.2).order ≠ ⊤
+  · obtain ⟨g, h₁g, h₂g, h₃g⟩ := hf.extract_zeros_poles_log t₀
+      ((divisor f [[a, b]]).finiteSupport isCompact_uIcc)
+    rw [intervalIntegrable_congr_codiscreteWithin
+      (h₃g.filter_mono (Filter.codiscreteWithin.mono Set.uIoc_subset_uIcc))]
+    apply IntervalIntegrable.add
+    · apply IntervalIntegrable.finsum
+      intro i
+      apply IntervalIntegrable.const_mul
+      rw [(by ring : a = ((a - i) + i)), (by ring : b = ((b - i) + i))]
+      apply IntervalIntegrable.comp_sub_right (f := fun x ↦ log ‖x‖) _ i
+      simp_rw [norm_eq_abs, log_abs]
+      exact intervalIntegrable_log'
+    · apply ContinuousOn.intervalIntegrable
+      apply h₁g.continuousOn.norm.log
+      simp_all
+  · rw [← hf.exists_order_ne_top_iff_forall (isConnected_Icc inf_le_sup)] at t₀
+    push_neg at t₀
+    have : (fun x ↦ log ‖f x‖) =ᶠ[codiscreteWithin (Ι a b)] 0 := by
+      apply Filter.EventuallyEq.filter_mono _ (Filter.codiscreteWithin.mono Set.uIoc_subset_uIcc)
+      filter_upwards [hf.meromorphicNFAt_mem_codiscreteWithin,
+        Filter.codiscreteWithin_self [[a, b]]] with x h₁x h₂x
+      simp only [Pi.zero_apply, log_eq_zero, norm_eq_zero]
+      left
+      by_contra hCon
+      simp_all [← h₁x.order_eq_zero_iff, t₀ ⟨x, h₂x⟩]
+    rw [intervalIntegrable_congr_codiscreteWithin this]
+    apply _root_.intervalIntegrable_const_iff.2
+    tauto
+
+theorem MeromorphicOn.intervalIntegrable_posLog_norm {f : ℝ → ℂ} {a b : ℝ}
+    (hf : MeromorphicOn f [[a, b]]) :
+    IntervalIntegrable (log⁺ ‖f ·‖) MeasureTheory.volume a b := by
+  simp_rw [← half_mul_log_add_log_abs, mul_add]
+  apply IntervalIntegrable.add
+  apply hf.intervalIntegrable_log_norm.const_mul
+  apply (IntervalIntegrable.abs hf.intervalIntegrable_log_norm).const_mul
+
+
+theorem MeromorphicOn.integrable_log_abs_f₀ {f : ℂ → ℂ} {r : ℝ}
   -- WARNING: Not optimal. It suffices to be meromorphic on the Sphere
-  (h₁f : MeromorphicOn f (Metric.closedBall (0 : ℂ) r))
+    (h₁f : MeromorphicOn f (Metric.closedBall (0 : ℂ) r))
   -- WARNING: Not optimal. This needs to go
-  (hr : 0 < r)
-   :
-  IntervalIntegrable (fun z ↦ log ‖f (circleMap 0 r z)‖) MeasureTheory.volume 0 (2 * π) := by
+    (hr : 0 < r) :
+    IntervalIntegrable (fun z ↦ log ‖f (circleMap 0 r z)‖) MeasureTheory.volume 0 (2 * π) := by
+
 
   by_cases h₂f : ∃ u : (Metric.closedBall (0 : ℂ) r), (h₁f u u.2).order ≠ ⊤
   · have h₁U : IsCompact (Metric.closedBall (0 : ℂ) r) := isCompact_closedBall 0 r
@@ -35,14 +89,18 @@ theorem MeromorphicOn.integrable_log_abs_f₀
     have h₃f : Set.Finite (Function.support (MeromorphicOn.divisor f (Metric.closedBall 0 r))) := by
       exact (MeromorphicOn.divisor f (Metric.closedBall 0 r)).finiteSupport h₁U
 
-    obtain ⟨g, h₁g, h₂g, h₃g⟩ := MeromorphicOn.decompose_log h₁U h₂U h₃U h₁f h₂f
+    have h₄f : ∀ u : (Metric.closedBall (0 : ℂ) r), (h₁f u u.2).order ≠ ⊤ := by
+      sorry
+
+    obtain ⟨g, h₁g, h₂g, h₃g⟩ := MeromorphicOn.extract_zeros_poles_log h₁f h₄f h₃f
+
     have : (fun z ↦ log ‖f (circleMap 0 r z)‖) = (fun z ↦ log ‖f z‖) ∘ (circleMap 0 r) := by
       rfl
     rw [this]
     have : Metric.sphere (0 : ℂ) |r| ⊆ Metric.closedBall (0 : ℂ) r := by
       rw [abs_of_pos hr]
       apply Metric.sphere_subset_closedBall
-
+    simp_rw [add_comm] at h₃g
     rw [integrability_congr_changeDiscrete this (ne_of_lt hr).symm h₃g]
 
     apply IntervalIntegrable.add
