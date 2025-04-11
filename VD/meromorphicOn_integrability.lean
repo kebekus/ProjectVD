@@ -1,3 +1,6 @@
+import Mathlib.Data.Complex.FiniteDimensional
+import Mathlib.Data.Complex.Module
+import Mathlib.Analysis.NormedSpace.Connected
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.Analysis.SpecialFunctions.Log.PosLog
 import Mathlib.MeasureTheory.Integral.CircleIntegral
@@ -74,30 +77,44 @@ theorem CircleIntegrable.congr_codiscreteWithin' {c : ℂ} {R : ℝ} {f₁ f₂ 
     codiscreteWithin.mono (by simp only [Set.subset_univ]) (circleMap_preimage_codiscrete hR hf),
     by tauto⟩
 
-theorem CircleIntegrable.finsum {ι : Type u_1}
-    {E : Type u_3} [NormedAddCommGroup E] {c : ℂ} {R : ℝ}
-    {f : ι → ℂ → ℂ}
-    (h : ∀ i, CircleIntegrable (f i) c R) :
+theorem CircleIntegrable.sum
+    {ι : Type*}
+    {E : Type u_3} [NormedAddCommGroup E]
+    {c : ℂ} {R : ℝ} (s : Finset ι) {f : ι → ℂ → E} (h : ∀ i ∈ s, CircleIntegrable (f i) c R) :
+    CircleIntegrable (∑ i ∈ s, f i) c R := by
+  rw [CircleIntegrable,
+    (by aesop : (fun θ ↦ (∑ i ∈ s, f i) (circleMap c R θ)) = ∑ i ∈ s, fun θ ↦ f i (circleMap c R θ))] at *
+  exact IntervalIntegrable.sum s h
+
+theorem CircleIntegrable.finsum
+    {ι : Type*}
+    {E : Type u_3} [NormedAddCommGroup E]
+    {c : ℂ} {R : ℝ} {f : ι → ℂ → E} (h : ∀ i, CircleIntegrable (f i) c R) :
     CircleIntegrable (∑ᶠ i, f i) c R := by
-  unfold CircleIntegrable
-  apply IntervalIntegrable.finsum
-  sorry
+  by_cases h₁ : (Function.support f).Finite
+  · rw [finsum_eq_sum f h₁]
+    exact CircleIntegrable.sum h₁.toFinset (fun i _ ↦ h i)
+  · rw [finsum_of_infinite_support h₁]
+    apply circleIntegrable_const
 
-
-theorem MeromorphicOn.circleIntegrable_log_norm {f : ℂ → ℂ} {r : ℝ}
-    (hf : MeromorphicOn f (Metric.sphere 0 |r|)) :
+theorem MeromorphicOn.circleIntegrable_log_norm {f : ℂ → ℂ} {r : ℝ} (hf : MeromorphicOn f (Metric.sphere 0 |r|)) :
     CircleIntegrable (log ‖f ·‖) 0 r := by
   by_cases t₀ : ∀ u : (Metric.sphere (0 : ℂ) |r|), (hf u u.2).order ≠ ⊤
   · obtain ⟨g, h₁g, h₂g, h₃g⟩ := hf.extract_zeros_poles_log t₀
       ((divisor f (Metric.sphere (0 : ℂ) |r|)).finiteSupport (isCompact_sphere 0 |r|))
-
     apply CircleIntegrable.congr_codiscreteWithin' h₃g.symm
     apply CircleIntegrable.add
-    · unfold CircleIntegrable
-
-      sorry
-    · apply ContinuousOn.intervalIntegrable
+    · apply CircleIntegrable.finsum
+      intro i
+      unfold CircleIntegrable
       simp
+      apply IntervalIntegrable.const_mul
+      apply MeromorphicOn.intervalIntegrable_log_norm
+      apply AnalyticOnNhd.meromorphicOn
+      apply AnalyticOnNhd.sub
+      apply AnalyticOnNhd.mono (analyticOnNhd_circleMap (0 : ℂ) r) (by tauto)
+      apply analyticOnNhd_const
+    · apply ContinuousOn.intervalIntegrable
       apply ContinuousOn.log
       apply ContinuousOn.norm
       apply ContinuousOn.comp (t := Metric.sphere 0 |r|)
@@ -111,7 +128,22 @@ theorem MeromorphicOn.circleIntegrable_log_norm {f : ℂ → ℂ} {r : ℝ}
       intro x hx
       simp
       apply h₂g ⟨circleMap 0 r x, circleMap_mem_sphere' 0 r x⟩
-  · sorry
+  · rw [← hf.exists_order_ne_top_iff_forall] at t₀
+    push_neg at t₀
+    have : (fun x ↦ log ‖f x‖) =ᶠ[codiscreteWithin (Metric.sphere (0 : ℂ) |r|)] 0 := by
+      --apply Filter.EventuallyEq.filter_mono _ (Filter.codiscreteWithin.mono (Metric.sphere (0 : ℂ) |r|))
+      filter_upwards [hf.meromorphicNFAt_mem_codiscreteWithin,
+        Filter.codiscreteWithin_self (Metric.sphere (0 : ℂ) |r|)] with x h₁x h₂x
+      simp only [Pi.zero_apply, log_eq_zero, norm_eq_zero]
+      left
+      by_contra hCon
+      simp_all [← h₁x.order_eq_zero_iff, t₀ ⟨x, h₂x⟩]
+    apply CircleIntegrable.congr_codiscreteWithin' this.symm
+    apply circleIntegrable_const
+    --
+    apply isConnected_sphere
+    simp
+    exact abs_nonneg r
 
 
 
