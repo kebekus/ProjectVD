@@ -145,8 +145,18 @@ theorem MeromorphicOn.circleIntegrable_log_norm {f : ℂ → ℂ} {r : ℝ} (hf 
     simp
     exact abs_nonneg r
 
+theorem MeromorphicOn.circleIntegrable_posLog_norm {f : ℂ → ℂ} {r : ℝ} (hf : MeromorphicOn f (Metric.sphere 0 |r|)) :
+    CircleIntegrable (log⁺ ‖f ·‖) 0 r := by
+  simp_rw [← half_mul_log_add_log_abs, mul_add]
+  apply CircleIntegrable.add
+  --
+  apply hf.circleIntegrable_log_norm.const_mul
+  --
+  apply IntervalIntegrable.const_mul
+  apply IntervalIntegrable.abs
+  apply hf.circleIntegrable_log_norm
 
-
+/-
 theorem MeromorphicOn.integrable_log_abs_f₀ {f : ℂ → ℂ} {r : ℝ}
   -- WARNING: Not optimal. It suffices to be meromorphic on the Sphere
     (h₁f : MeromorphicOn f (Metric.closedBall (0 : ℂ) r))
@@ -287,3 +297,4 @@ theorem MeromorphicOn.integrable_poslog_abs_f
   apply IntervalIntegrable.add
   apply h₁f.integrable_log_abs_f.const_mul
   apply (IntervalIntegrable.abs h₁f.integrable_log_abs_f).const_mul
+-/

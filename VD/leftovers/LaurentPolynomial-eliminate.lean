@@ -19,7 +19,7 @@ zero, and if the support of the divisor of `f` is finite, then there exists an
 analytic function `g` on `U` without zeros such that `f` is the product of the
 Laurent polynomial associated with the divisor of `f` and `g`.
 -/
-theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] {f : 𝕜 → E}
+theorem MeromorphicOn.extract_zeros_poles' [CompleteSpace 𝕜] {f : 𝕜 → E}
     (h₁f : MeromorphicOn f U) (h₂f : ∀ u : U, (h₁f u u.2).order ≠ ⊤)
     (h₃f : (divisor f U).support.Finite) :
     ∃ g : 𝕜 → E, AnalyticOnNhd 𝕜 g U ∧ (∀ u : U, g u ≠ 0) ∧
@@ -65,13 +65,13 @@ analytic function `g` on `U` without zeros such that `log ‖f‖` is equivalent
 modulo equality on codiscrete subsets of `U` to
 `∑ᶠ u, (divisor f U u * log ‖z-u‖) + log ‖g z‖`.
 -/
-theorem MeromorphicOn.extract_zeros_poles_log [CompleteSpace 𝕜] {f : 𝕜 → E}
+theorem MeromorphicOn.extract_zeros_poles_log_ [CompleteSpace 𝕜] {f : 𝕜 → E}
     (h₁f : MeromorphicOn f U) (h₂f : ∀ u : U, (h₁f u u.2).order ≠ ⊤)
     (h₃f : (divisor f U).support.Finite) :
     ∃ g : 𝕜 → E, AnalyticOnNhd 𝕜 g U ∧ (∀ u : U, g u ≠ 0) ∧
       (fun z ↦ log ‖f z‖) =ᶠ[Filter.codiscreteWithin U]
         fun z ↦ ∑ᶠ u, (divisor f U u * log ‖z-u‖) + log ‖g z‖ := by
-  obtain ⟨g, h₁g, h₂g, h₃g⟩ := MeromorphicOn.extract_zeros_poles h₁f h₂f h₃f
+  obtain ⟨g, h₁g, h₂g, h₃g⟩ := MeromorphicOn.extract_zeros_poles' h₁f h₂f h₃f
   use g, h₁g, h₂g
   filter_upwards [h₃g, (divisor f U).supportDiscreteWithinDomain,
     Filter.codiscreteWithin_self U] with z hz h₂z h₃z

@@ -47,11 +47,11 @@ theorem Nevanlinna_proximity
   simp_rw [← posLog_sub_posLog_inv]; congr
   exact Eq.symm (IsAbsoluteValue.abv_inv Norm.norm (f (circleMap 0 r x)))
   --
-  apply MeromorphicOn.integrable_poslog_abs_f
+  apply MeromorphicOn.circleIntegrable_posLog_norm
   intro z hx
   exact h₁f z trivial
   --
-  apply MeromorphicOn.integrable_poslog_abs_f
+  apply MeromorphicOn.circleIntegrable_posLog_norm
   exact MeromorphicOn.inv_iff.mpr fun x a => h₁f x trivial
 
 noncomputable def MeromorphicOn.T_infty
@@ -262,12 +262,11 @@ theorem Nevanlinna_firstMain₂
     simp
   rw [this] at s₁
   assumption
-
   --
-  apply MeromorphicOn.integrable_poslog_abs_f
+  apply MeromorphicOn.circleIntegrable_posLog_norm
   exact fun x a => h₁f x trivial
   --
-  apply MeromorphicOn.integrable_poslog_abs_f
+  apply MeromorphicOn.circleIntegrable_posLog_norm
   apply MeromorphicOn.sub
   exact fun x a => h₁f x trivial
   apply MeromorphicOn.const a
