@@ -62,6 +62,12 @@ theorem MeromorphicOn.intervalIntegrable_posLog_norm [NormedSpace ℝ E] [Comple
   · apply hf.intervalIntegrable_log_norm.const_mul
   · apply (IntervalIntegrable.abs hf.intervalIntegrable_log_norm).const_mul
 
+theorem MeromorphicOn.intervalIntegrable_log {f : ℝ → ℝ}
+    (hf : MeromorphicOn f [[a, b]]) :
+    IntervalIntegrable (log ∘ f) volume a b := by
+  rw [(by aesop : log ∘ f = (log ‖f ·‖))]
+  exact hf.intervalIntegrable_log_norm
+
 /-- Circle integrability is invariant when functions change along discrete sets. -/
 theorem CircleIntegrable.congr_codiscreteWithin' {f₁ f₂ : ℂ → E} (hf₁ : CircleIntegrable f₁ c R)
     (hf : f₁ =ᶠ[codiscreteWithin (sphere c |R|)] f₂) :
