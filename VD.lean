@@ -22,7 +22,6 @@ import VD.leftovers.«LaurentPolynomial-eliminate»
 import VD.mathlibAddOn
 import VD.meromorphicAt
 import VD.meromorphicAt_topology
-import VD.meromorphicOn
 import VD.meromorphicOn_integrability
 import VD.partialDeriv
 import VD.specialFunctions_CircleIntegral_affine
