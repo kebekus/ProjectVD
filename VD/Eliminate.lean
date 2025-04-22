@@ -44,8 +44,9 @@ open Real
 /--
 If `f` is meromorphic on an open set `U`, if `f` is nowhere locally constant
 zero, and if the support of the divisor of `f` is finite, then there exists an
-analytic function `g` on `U` without zeros such that `f` is the product of the
-Laurent polynomial associated with the divisor of `f` and `g`.
+analytic function `g` on `U` without zeros such that `f` is equivalent, modulo
+equality on a codiscrete set, to the product of `g` and the factorized rational
+function associated with the divisor of `f.
 -/
 theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] {f : 𝕜 → E}
     (h₁f : MeromorphicOn f U) (h₂f : ∀ u : U, (h₁f u u.2).order ≠ ⊤)
