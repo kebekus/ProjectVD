@@ -1,6 +1,5 @@
 import VD.leftovers.LaurentPolynomial
 import VD.mathlibAddOn
-import VD.meromorphicOn
 import VD.ToMathlib.codiscreteWithin
 
 open scoped Interval Topology

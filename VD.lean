@@ -3,7 +3,6 @@ import VD.ToMathlib.Congruence_Divisor
 import VD.ToMathlib.CountingFunction
 import VD.ToMathlib.FactorizedRational
 import VD.ToMathlib.analyticAt_order
-import VD.ToMathlib.bilinear
 import VD.ToMathlib.codiscreteWithin
 import VD.cauchyRiemann
 import VD.firstMain
@@ -22,7 +21,6 @@ import VD.leftovers.«LaurentPolynomial-eliminate»
 import VD.mathlibAddOn
 import VD.meromorphicAt
 import VD.meromorphicAt_topology
-import VD.meromorphicOn
 import VD.meromorphicOn_integrability
 import VD.partialDeriv
 import VD.specialFunctions_CircleIntegral_affine
