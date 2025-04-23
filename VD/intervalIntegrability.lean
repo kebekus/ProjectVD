@@ -39,8 +39,8 @@ theorem integral_congr_changeDiscrete
   tauto
 
 lemma circleMap_neg
-  {r x : ℝ} :
-  circleMap 0 (-r) x = circleMap 0 r (x + π) := by
+  {r x : ℝ} {c : ℂ} :
+  circleMap c (-r) x = circleMap c r (x + π) := by
   unfold circleMap
   simp [add_mul, Complex.exp_add]
 
@@ -70,16 +70,16 @@ theorem integrability_congr_negRadius
 
 theorem integrabl_congr_negRadius
   {f : ℂ → ℝ}
-  {r : ℝ} :
-  ∫ (x : ℝ) in (0)..(2 * π), f (circleMap 0 r x) = ∫ (x : ℝ) in (0)..(2 * π), f (circleMap 0 (-r) x) := by
+  {r : ℝ} {c : ℂ} :
+  ∫ (x : ℝ) in (0)..(2 * π), f (circleMap c r x) = ∫ (x : ℝ) in (0)..(2 * π), f (circleMap c (-r) x) := by
 
   simp_rw [circleMap_neg]
-  have t₀ : Function.Periodic (fun (θ : ℝ) ↦ f (circleMap 0   r  θ)) (2 * π) := by
+  have t₀ : Function.Periodic (fun (θ : ℝ) ↦ f (circleMap c r θ)) (2 * π) := by
     intro x
     simp
     congr 1
-    exact periodic_circleMap 0 r x
-  have B := intervalIntegral.integral_comp_add_right (a := 0) (b := 2 * π) (fun θ => f (circleMap 0 r θ)) π
+    exact periodic_circleMap c r x
+  have B := intervalIntegral.integral_comp_add_right (a := 0) (b := 2 * π) (fun θ => f (circleMap c r θ)) π
   rw [B]
   let X := t₀.intervalIntegral_add_eq 0 (0 + π)
   simp at X

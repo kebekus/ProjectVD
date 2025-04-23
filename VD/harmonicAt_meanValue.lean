@@ -2,6 +2,7 @@ import Mathlib.Analysis.NormedSpace.Pointwise
 import Mathlib.Topology.MetricSpace.Thickening
 import Mathlib.Analysis.Complex.CauchyIntegral
 import VD.holomorphic_examples
+import VD.intervalIntegrability
 
 theorem harmonic_meanValue
   {f : ℂ → ℝ}
@@ -126,3 +127,48 @@ theorem harmonic_meanValue₁
   exact fun x a => h₂e a
   assumption
   linarith
+
+theorem harmonic_meanValue₂
+  {f : ℂ → ℝ}
+  {z : ℂ}
+  {R : ℝ}
+  (hf : ∀ x ∈ Metric.closedBall z |R| , HarmonicAt f x) :
+  (⨍ (x : ℝ) in (0)..2 * Real.pi, f (circleMap z R x)) = f z := by
+  rw [interval_average_eq]
+  apply ltByCases 0 R
+  · intro hR
+    rw [abs_of_pos hR] at hf
+    rw [harmonic_meanValue₁ R hR hf]
+    rw [sub_zero]
+    rw [smul_eq_mul]
+    rw [← mul_assoc]
+    rw [inv_mul_cancel₀]
+    simp
+    apply mul_ne_zero
+    exact Ne.symm (NeZero.ne' 2)
+    exact Real.pi_ne_zero
+  · intro hR
+    simp_rw [← hR]
+    simp only [circleMap_zero_radius, Function.const_apply,
+      intervalIntegral.integral_const]
+    rw [sub_zero]
+    rw [smul_eq_mul, smul_eq_mul]
+    rw [← mul_assoc]
+    rw [inv_mul_cancel₀]
+    simp
+    apply mul_ne_zero
+    exact Ne.symm (NeZero.ne' 2)
+    exact Real.pi_ne_zero
+  · intro hR
+    rw [integrabl_congr_negRadius]
+    rw [abs_of_neg hR] at hf
+    rw [harmonic_meanValue₁ (-R) _ hf]
+    rw [sub_zero]
+    rw [smul_eq_mul]
+    rw [← mul_assoc]
+    rw [inv_mul_cancel₀]
+    simp
+    apply mul_ne_zero
+    exact Ne.symm (NeZero.ne' 2)
+    exact Real.pi_ne_zero
+    simp_all

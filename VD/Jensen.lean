@@ -25,7 +25,7 @@ theorem jensenNT
     (f : ℂ → ℂ)
     (h₁f : MeromorphicNFOn f (closedBall 0 |R|))
     (h₂f : ∀ u : (closedBall (0 : ℂ) |R|), (h₁f u.2).meromorphicAt.order ≠ ⊤) :
-    ∫ (x : ℝ) in (0)..(2 * π), log ‖f (circleMap 0 R x)‖ = 0 := by
+    ⨍ (x : ℝ) in (0)..(2 * π), log ‖f (circleMap 0 R x)‖ = 1 := by
   -- Decompose f modulo equality on codiscrete sets, extracting zeros and poles
   have h₃f := (divisor f (closedBall 0 |R|)).finiteSupport (isCompact_closedBall 0 |R|)
   obtain ⟨g, h₁g, h₂g, h₃g⟩ := h₁f.meromorphicOn.extract_zeros_poles_log h₂f h₃f
@@ -37,6 +37,7 @@ theorem jensenNT
   rw [finsum_eq_sum_of_support_subset _ this] at h₃g
   clear this
   -- Apply the decomposition of f under the integral
+  rw [interval_average_eq]
   rw [circleAverage_congr_codiscreteWithin (codiscreteWithin.mono sphere_subset_closedBall h₃g) hR]
   -- Decompose the integral
   simp_rw [Pi.add_apply]
@@ -58,7 +59,7 @@ theorem jensenNT
     apply (analyticOnNhd_id.sub analyticOnNhd_const).meromorphicOn
   rw [intervalIntegral.integral_finset_sum this]
   clear this
-  simp
+  simp only [intervalIntegral.integral_const_mul, smul_eq_mul, mul_add]
   -- Identify integrals
   have : ∑ x ∈ h₃f.toFinset, ((divisor f (closedBall 0 |R|)) x) * ∫ (x_1 : ℝ) in (0)..(2 * π), log ‖circleMap 0 R x_1 - x‖
     = ∑ x ∈ h₃f.toFinset, ↑((divisor f (closedBall 0 |R|)) x) * (2 * π) * log R := by
@@ -73,16 +74,16 @@ theorem jensenNT
   rw [this]
   clear this
   -- Identify integral
-  have : (∫ (x : ℝ) in (0)..2 * Real.pi, log ‖g (circleMap 0 R x)‖) = 2 * Real.pi * log ‖g 0‖ := by
-    have t₀ : ∀ z ∈ Metric.closedBall 0 R, HarmonicAt (fun w ↦ Real.log ‖g w‖) z := by
+  have : (⨍ (x : ℝ) in (0)..2 * Real.pi, log ‖g (circleMap 0 R x)‖) = log ‖g 0‖ := by
+    have t₀ : ∀ z ∈ Metric.closedBall 0 |R|, HarmonicAt (fun w ↦ Real.log ‖g w‖) z := by
       intro z hz
       apply logabs_of_holomorphicAt_is_harmonic
       exact AnalyticAt.holomorphicAt (h₁g z hz)
       exact h₂g ⟨z, hz⟩
-    have hR' : 0 < R := by
-      sorry
-    apply harmonic_meanValue₁ R hR' t₀
+    exact harmonic_meanValue₂ t₀
+  rw [← interval_average_eq]
   rw [this]
+  clear this
 
 
   sorry
