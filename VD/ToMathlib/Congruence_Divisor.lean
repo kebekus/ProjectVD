@@ -78,14 +78,3 @@ theorem divisor_congr_codiscreteWithin_open [CompleteSpace E] {f₁ f₂ : 𝕜 
     filter_upwards [this, h₁ x hx] with a h₁a h₂a
     simp only [Set.mem_compl_iff, Set.mem_diff, Set.mem_setOf_eq, not_and, Decidable.not_not] at h₂a
     tauto
-
-/--
-Taking the divisor of a meromorphic function commutes with restriction.
--/
-theorem divisor_restrict [CompleteSpace E] {f : 𝕜 → E} {V : Set 𝕜} (hf : MeromorphicOn f U) (hV : V ⊆ U) :
-    (divisor f U).restrict hV = divisor f V := by
-  ext x
-  by_cases hx : x ∈ V
-  · rw [Function.locallyFinsuppWithin.restrict_apply]
-    simp [hf, hx, hf.mono_set hV, hV hx]
-  · simp [hx]
