@@ -473,6 +473,24 @@ lemma int₄
   · exact int'₂ h₂a
   · exact int'₀ h₂a
 
+-- integral
+lemma int₅
+  {a : ℂ}
+  {R : ℝ}
+  (hR : R ≠ 0)
+  (ha : a ∈ Metric.closedBall 0 |R|) :
+  ∫ x in (0)..(2 * π), log ‖circleMap 0 R x - a‖ = (2 * π) * log R := by
+  apply ltByCases 0 R
+  · intro h
+    apply int₄ h
+    rwa [← abs_of_pos h]
+  · tauto
+  · intro h
+    rw [integrabl_congr_negRadius (f := fun z ↦ log ‖z - a‖)]
+    rw [← log_neg_eq_log]
+    apply int₄
+    exact Left.neg_pos_iff.mpr h
+    rwa [← abs_of_neg h]
 
 lemma intervalIntegrable_logAbs_circleMap_sub_const
   {a : ℂ}

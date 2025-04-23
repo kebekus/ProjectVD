@@ -26,7 +26,7 @@ theorem jensenNT
     (h₁f : MeromorphicNFOn f (closedBall 0 |R|))
     (h₂f : ∀ u : (closedBall (0 : ℂ) |R|), (h₁f u.2).meromorphicAt.order ≠ ⊤) :
     ∫ (x : ℝ) in (0)..(2 * π), log ‖f (circleMap 0 R x)‖ = 0 := by
-  -- Decompose f, extracting zeros and poles
+  -- Decompose f modulo equality on codiscrete sets, extracting zeros and poles
   have h₃f := (divisor f (closedBall 0 |R|)).finiteSupport (isCompact_closedBall 0 |R|)
   obtain ⟨g, h₁g, h₂g, h₃g⟩ := h₁f.meromorphicOn.extract_zeros_poles_log h₂f h₃f
   have : (fun u x ↦ (divisor f (closedBall 0 |R|) u) * log ‖x - u‖).support ⊆ h₃f.toFinset := by
@@ -36,10 +36,7 @@ theorem jensenNT
     aesop
   rw [finsum_eq_sum_of_support_subset _ this] at h₃g
   clear this
-  -- Insert the decomposition of f into the integral
-  conv =>
-    left; arg 1; intro x
-    rw [(by rfl : log ‖f (circleMap 0 R x)‖ = (fun z ↦ log ‖f z‖) (circleMap 0 R x))]
+  -- Apply the decomposition of f under the integral
   rw [circleAverage_congr_codiscreteWithin (codiscreteWithin.mono sphere_subset_closedBall h₃g) hR]
   -- Decompose the integral
   simp_rw [Pi.add_apply]
@@ -57,16 +54,36 @@ theorem jensenNT
   have : ∀ i ∈ h₃f.toFinset, IntervalIntegrable (fun x ↦ ↑((divisor f (closedBall 0 |R|)) i) * log ‖circleMap 0 R x - i‖) MeasureTheory.volume 0 (2 * π) := by
     intro u hu
     apply IntervalIntegrable.const_mul
-    have {x : ℝ} : log ‖circleMap 0 R x - u‖ = (fun z ↦ log ‖z - u‖) (circleMap 0 R x) := by
-      sorry
-    conv =>
-      arg 1; intro x
-      rw [this]
-    --apply MeromorphicOn.circleIntegrable_log_norm
-
-    sorry
+    apply MeromorphicOn.circleIntegrable_log_norm (f := (· - u))
+    apply (analyticOnNhd_id.sub analyticOnNhd_const).meromorphicOn
   rw [intervalIntegral.integral_finset_sum this]
+  clear this
   simp
+  -- Identify integrals
+  have : ∑ x ∈ h₃f.toFinset, ((divisor f (closedBall 0 |R|)) x) * ∫ (x_1 : ℝ) in (0)..(2 * π), log ‖circleMap 0 R x_1 - x‖
+    = ∑ x ∈ h₃f.toFinset, ↑((divisor f (closedBall 0 |R|)) x) * (2 * π) * log R := by
+    apply Finset.sum_congr rfl
+    intro u hu
+    rw [int₅ hR]
+    ring
+    let A := (divisor f (closedBall 0 |R|)).supportWithinDomain
+    have : u ∈ (divisor f (closedBall 0 |R|)).support := by
+      simp_all
+    exact A this
+  rw [this]
+  clear this
+  -- Identify integral
+  have : (∫ (x : ℝ) in (0)..2 * Real.pi, log ‖g (circleMap 0 R x)‖) = 2 * Real.pi * log ‖g 0‖ := by
+    have t₀ : ∀ z ∈ Metric.closedBall 0 R, HarmonicAt (fun w ↦ Real.log ‖g w‖) z := by
+      intro z hz
+      apply logabs_of_holomorphicAt_is_harmonic
+      exact AnalyticAt.holomorphicAt (h₁g z hz)
+      exact h₂g ⟨z, hz⟩
+    have hR' : 0 < R := by
+      sorry
+    apply harmonic_meanValue₁ R hR' t₀
+  rw [this]
+
 
   sorry
 
