@@ -26,14 +26,16 @@ theorem jensenNT {R : ℝ}
     (h₁f : MeromorphicNFOn f (closedBall 0 |R|))
     (h₂f : ∀ u : (closedBall (0 : ℂ) |R|), (h₁f u.2).meromorphicAt.order ≠ ⊤) :
     ∃ g : ℂ → ℂ, AnalyticOnNhd ℂ g (closedBall 0 |R|)
-      ∧ (∀ u : (closedBall 0 |R|), g u ≠ 0)
+      ∧ (∀ u : (closedBall (0 : ℂ) |R|), g u ≠ 0)
       ∧ (log ‖f ·‖) =ᶠ[Filter.codiscreteWithin (closedBall 0 |R|)]
-        ∑ᶠ u, (divisor f (closedBall 0 |R|) u * log ‖· - u‖) + (log ‖g ·‖)
+        ∑ᶠ u, (divisor f (closedBall (0 : ℂ) |R|) u * log ‖· - u‖) + (log ‖g ·‖)
       ∧ ⨍ (x : ℝ) in (0)..(2 * π), log ‖f (circleMap 0 R x)‖
         = ∑ᶠ (i : ℂ), ↑((divisor f (closedBall 0 |R|)) i) * log R + log ‖g 0‖ := by
   -- Decompose f modulo equality on codiscrete sets, extracting zeros and poles
   have h₃f := (divisor f (closedBall 0 |R|)).finiteSupport (isCompact_closedBall 0 |R|)
   obtain ⟨g, h₁g, h₂g, h₃g⟩ := h₁f.meromorphicOn.extract_zeros_poles_log h₂f h₃f
+  use g, h₁g, h₂g, h₃g
+
   have : (fun u x ↦ (divisor f (closedBall 0 |R|) u) * log ‖x - u‖).support ⊆ h₃f.toFinset := by
     intro u
     contrapose
@@ -96,7 +98,8 @@ theorem jensenNT {R : ℝ}
   rw [← Finset.mul_sum (a := (2 * π))]
   rw [← mul_assoc]
   have : (2 * π - 0)⁻¹ * (2 * π) = 1 := by
-    sorry
+    rw [sub_zero, inv_mul_cancel₀]
+    apply mul_ne_zero two_ne_zero pi_ne_zero
   rw [this]
   simp
   have : ∑ i ∈ h₃f.toFinset, ↑((divisor f (closedBall 0 |R|)) i) * log R
@@ -108,4 +111,3 @@ theorem jensenNT {R : ℝ}
       aesop
     rw [finsum_eq_sum_of_support_subset _ this]
   rw [this]
-  sorry

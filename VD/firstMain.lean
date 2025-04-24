@@ -140,7 +140,7 @@ theorem Nevanlinna_firstMain₁
 
   congr 1
   congr 1
-  let A := integrabl_congr_negRadius (f := (fun z ↦ log (norm (f z)))) (r := r)
+  let A := integrabl_congr_negRadius (f := (fun z ↦ log (norm (f z)))) (r := r) (c := 0)
   rw [A]
   have : |r| = -r := by
     rw [← abs_of_pos h₂r]
