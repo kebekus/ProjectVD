@@ -145,7 +145,7 @@ theorem primitive_fderivAtBasepointZero
     linarith
   · intro y hy
 
-    have {A B C D :E} : (A + B) - (C + D) = (A - C) + (B - D) := by
+    have {A B C D : E} : (A + B) - (C + D) = (A - C) + (B - D) := by
       abel
     rw [this]
     rw [← smul_sub]
