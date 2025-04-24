@@ -7,7 +7,6 @@ import VD.ToMathlib.codiscreteWithin
 open scoped Interval Topology
 open Real Filter MeasureTheory intervalIntegral
 
-
 /- Integral and Integrability up to changes on codiscrete sets -/
 theorem integrability_congr_changeDiscrete
     {f₁ f₂ : ℂ → ℝ} {U : Set ℂ} {r : ℝ}
@@ -42,12 +41,10 @@ lemma circleMap_neg {r x : ℝ} {c : ℂ} :
     circleMap c (-r) x = circleMap c r (x + π) := by
   simp [circleMap, add_mul, Complex.exp_add]
 
-theorem integrability_congr_negRadius
-  {f : ℂ → ℝ}
-  {r : ℝ} :
-  IntervalIntegrable (fun (θ : ℝ) ↦ f (circleMap 0   r  θ)) MeasureTheory.volume 0 (2 * π) →
-  IntervalIntegrable (fun (θ : ℝ) ↦ f (circleMap 0 (-r) θ)) MeasureTheory.volume 0 (2 * π) := by
-
+-- unused
+theorem circleIntegrable_congr_negRadius {f : ℂ → ℝ} {r : ℝ} :
+  CircleIntegrable f 0 r → CircleIntegrable f 0 (-r) := by
+  unfold CircleIntegrable
   intro h
   simp_rw [circleMap_neg]
   have t₀ : (fun θ ↦ f (circleMap 0 r θ)).Periodic (2 * π) := by
@@ -56,7 +53,6 @@ theorem integrability_congr_negRadius
   rw [← zero_add (2 * π)] at h
   have := (t₀.intervalIntegrable two_pi_pos h π (3 * π)).comp_add_right π
   simp_all [← (by ring : 3 * π - π = 2 * π)]
-
 
 theorem integrabl_congr_negRadius
   {f : ℂ → ℝ}
