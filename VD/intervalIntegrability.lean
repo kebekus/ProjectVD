@@ -38,12 +38,9 @@ theorem integral_congr_changeDiscrete
     (circleMap_preimage_codiscrete hr (Filter.codiscreteWithin.mono hU hf))]
   tauto
 
-lemma circleMap_neg
-  {r x : ℝ} {c : ℂ} :
-  circleMap c (-r) x = circleMap c r (x + π) := by
-  unfold circleMap
-  simp [add_mul, Complex.exp_add]
-
+lemma circleMap_neg {r x : ℝ} {c : ℂ} :
+    circleMap c (-r) x = circleMap c r (x + π) := by
+  simp [circleMap, add_mul, Complex.exp_add]
 
 theorem integrability_congr_negRadius
   {f : ℂ → ℝ}
@@ -53,19 +50,12 @@ theorem integrability_congr_negRadius
 
   intro h
   simp_rw [circleMap_neg]
-  have t₀ : Function.Periodic (fun (θ : ℝ) ↦ f (circleMap 0 r θ)) (2 * π) := by
+  have t₀ : (fun θ ↦ f (circleMap 0 r θ)).Periodic (2 * π) := by
     intro x
-    simp
-    congr 1
-    exact periodic_circleMap 0 r x
+    simp [periodic_circleMap 0 r x]
   rw [← zero_add (2 * π)] at h
-  have B := t₀.intervalIntegrable two_pi_pos h (π) (3 * π)
-  let A := IntervalIntegrable.comp_add_right B π
-  simp at A
-  have : 3 * π - π = 2 * π := by
-    ring
-  rw [this] at A
-  exact A
+  have := (t₀.intervalIntegrable two_pi_pos h π (3 * π)).comp_add_right π
+  simp_all [← (by ring : 3 * π - π = 2 * π)]
 
 
 theorem integrabl_congr_negRadius

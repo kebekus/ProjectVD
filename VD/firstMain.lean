@@ -24,8 +24,6 @@ theorem MeromorphicOn.restrict_inv
   funext x
   simp
 
-
-
 --
 
 noncomputable def MeromorphicOn.m_infty

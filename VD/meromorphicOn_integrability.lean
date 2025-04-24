@@ -19,7 +19,7 @@ theorem IntervalIntegrable.finsum {f : ι → ℝ → E} (h : ∀ i, IntervalInt
   by_cases h₁ : f.support.Finite
   · simp [finsum_eq_sum _ h₁, IntervalIntegrable.sum h₁.toFinset (fun i _ ↦ h i)]
   · rw [finsum_of_infinite_support h₁]
-    apply _root_.intervalIntegrable_const_iff.2
+    apply intervalIntegrable_const_iff.2
     tauto
 
 theorem MeromorphicOn.intervalIntegrable_log_norm [NormedSpace ℝ E] [CompleteSpace E] {f : ℝ → E}
@@ -35,14 +35,14 @@ theorem MeromorphicOn.intervalIntegrable_log_norm [NormedSpace ℝ E] [CompleteS
       intro i
       apply IntervalIntegrable.const_mul
       rw [(by ring : a = ((a - i) + i)), (by ring : b = ((b - i) + i))]
-      apply IntervalIntegrable.comp_sub_right (f := fun x ↦ log ‖x‖) _ i
+      apply IntervalIntegrable.comp_sub_right (f := (log ‖·‖)) _ i
       simp [norm_eq_abs, log_abs]
     · apply ContinuousOn.intervalIntegrable
       apply h₁g.continuousOn.norm.log
       simp_all
   · rw [← hf.exists_order_ne_top_iff_forall (isConnected_Icc inf_le_sup)] at t₀
     push_neg at t₀
-    have : (fun x ↦ log ‖f x‖) =ᶠ[codiscreteWithin (Ι a b)] 0 := by
+    have : (log ‖f ·‖) =ᶠ[codiscreteWithin (Ι a b)] 0 := by
       apply EventuallyEq.filter_mono _ (codiscreteWithin.mono Set.uIoc_subset_uIcc)
       filter_upwards [hf.meromorphicNFAt_mem_codiscreteWithin,
         codiscreteWithin_self [[a, b]]] with x h₁x h₂x
@@ -60,7 +60,7 @@ theorem MeromorphicOn.intervalIntegrable_posLog_norm [NormedSpace ℝ E] [Comple
   simp_rw [← half_mul_log_add_log_abs, mul_add]
   apply IntervalIntegrable.add
   · apply hf.intervalIntegrable_log_norm.const_mul
-  · apply (IntervalIntegrable.abs hf.intervalIntegrable_log_norm).const_mul
+  · apply hf.intervalIntegrable_log_norm.abs.const_mul
 
 theorem MeromorphicOn.intervalIntegrable_log {f : ℝ → ℝ}
     (hf : MeromorphicOn f [[a, b]]) :
@@ -108,9 +108,8 @@ theorem MeromorphicOn.circleIntegrable_log_norm [NormedSpace ℂ E] [CompleteSpa
       apply IntervalIntegrable.const_mul
       apply MeromorphicOn.intervalIntegrable_log_norm
       apply AnalyticOnNhd.meromorphicOn
-      apply AnalyticOnNhd.sub
-      · apply AnalyticOnNhd.mono (analyticOnNhd_circleMap c R) (by tauto)
-      · apply analyticOnNhd_const
+      apply AnalyticOnNhd.sub _ analyticOnNhd_const
+      apply (analyticOnNhd_circleMap c R).mono (by tauto)
     · apply ContinuousOn.intervalIntegrable
       apply ContinuousOn.log
       · apply ContinuousOn.norm
@@ -122,7 +121,7 @@ theorem MeromorphicOn.circleIntegrable_log_norm [NormedSpace ℂ E] [CompleteSpa
         apply h₂g ⟨circleMap c R x, circleMap_mem_sphere' c R x⟩
   · rw [← hf.exists_order_ne_top_iff_forall (isConnected_sphere (by simp) c (abs_nonneg R))] at t₀
     push_neg at t₀
-    have : (fun x ↦ log ‖f x‖) =ᶠ[codiscreteWithin (sphere c |R|)] 0 := by
+    have : (log ‖f ·‖) =ᶠ[codiscreteWithin (sphere c |R|)] 0 := by
       filter_upwards [hf.meromorphicNFAt_mem_codiscreteWithin,
         codiscreteWithin_self (sphere c |R|)] with x h₁x h₂x
       simp only [Pi.zero_apply, log_eq_zero, norm_eq_zero]
@@ -138,5 +137,4 @@ theorem MeromorphicOn.circleIntegrable_posLog_norm [NormedSpace ℂ E] [Complete
   apply CircleIntegrable.add
   · apply hf.circleIntegrable_log_norm.const_mul
   · apply IntervalIntegrable.const_mul
-    apply IntervalIntegrable.abs
-    apply hf.circleIntegrable_log_norm
+    apply hf.circleIntegrable_log_norm.abs
