@@ -35,17 +35,24 @@ theorem jensenNT {R : ℝ}
   have h₃f := (divisor f (closedBall 0 |R|)).finiteSupport (isCompact_closedBall 0 |R|)
   obtain ⟨g, h₁g, h₂g, h₃g⟩ := h₁f.meromorphicOn.extract_zeros_poles_log h₂f h₃f
   use g, h₁g, h₂g, h₃g
-
-  have : (fun u x ↦ (divisor f (closedBall 0 |R|) u) * log ‖x - u‖).support ⊆ h₃f.toFinset := by
-    intro u
-    contrapose
-    rw [Set.Finite.coe_toFinset, Function.mem_support, ne_eq, not_not]
-    aesop
-  rw [finsum_eq_sum_of_support_subset _ this] at h₃g
-  clear this
   -- Apply the decomposition of f under the integral
   rw [interval_average_eq]
   rw [circleAverage_congr_codiscreteWithin (codiscreteWithin.mono sphere_subset_closedBall h₃g) hR]
+  rw [← interval_average_eq]
+  -- Turn all finsums into sums
+  rw [interval_average_eq]
+  have : (fun u x ↦ (divisor f (closedBall 0 |R|) u) * log ‖x - u‖).support ⊆ h₃f.toFinset := by
+    intro u
+    contrapose
+    aesop
+  rw [finsum_eq_sum_of_support_subset _ this]
+  clear this
+  have : (fun u ↦ (divisor f (closedBall 0 |R|) u) * log R).support ⊆ h₃f.toFinset := by
+    intro u
+    contrapose
+    aesop
+  rw [finsum_eq_sum_of_support_subset _ this]
+  clear this
   -- Decompose the integral
   simp_rw [Pi.add_apply]
   have : IntervalIntegrable (fun x ↦ (∑ i ∈ h₃f.toFinset, fun x ↦ ↑((divisor f (closedBall 0 |R|)) i) * log ‖x - i‖) (circleMap 0 R x))
@@ -80,14 +87,12 @@ theorem jensenNT {R : ℝ}
     exact A this
   rw [this]
   clear this
+
   -- Identify integral
   have : (⨍ (x : ℝ) in (0)..2 * Real.pi, log ‖g (circleMap 0 R x)‖) = log ‖g 0‖ := by
-    have t₀ : ∀ z ∈ Metric.closedBall 0 |R|, HarmonicAt (fun w ↦ Real.log ‖g w‖) z := by
-      intro z hz
-      apply logabs_of_holomorphicAt_is_harmonic
-      exact AnalyticAt.holomorphicAt (h₁g z hz)
-      exact h₂g ⟨z, hz⟩
-    exact harmonic_meanValue₂ t₀
+    apply harmonic_meanValue₂ (f := (log ‖g ·‖))
+    exact fun z hz ↦ logabs_of_holomorphicAt_is_harmonic (h₁g z hz).holomorphicAt (h₂g ⟨z, hz⟩)
+
   nth_rw 4 [← smul_eq_mul]
   rw [← interval_average_eq]
   rw [this]
@@ -102,12 +107,3 @@ theorem jensenNT {R : ℝ}
     apply mul_ne_zero two_ne_zero pi_ne_zero
   rw [this]
   simp
-  have : ∑ i ∈ h₃f.toFinset, ↑((divisor f (closedBall 0 |R|)) i) * log R
-    = ∑ᶠ i, ↑((divisor f (closedBall 0 |R|)) i) * log R := by
-    have : (fun u ↦ (divisor f (closedBall 0 |R|) u) * log R).support ⊆ h₃f.toFinset := by
-      intro u
-      contrapose
-      rw [Set.Finite.coe_toFinset, Function.mem_support, ne_eq, not_not]
-      aesop
-    rw [finsum_eq_sum_of_support_subset _ this]
-  rw [this]
