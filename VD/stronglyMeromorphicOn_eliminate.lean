@@ -1,6 +1,7 @@
 import VD.leftovers.LaurentPolynomial
-import VD.mathlibAddOn
 import VD.ToMathlib.codiscreteWithin
+import Mathlib.Analysis.Meromorphic.NormalForm
+import Mathlib.Analysis.Complex.Basic
 
 open scoped Interval Topology
 open Classical Real Filter

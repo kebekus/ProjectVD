@@ -1,8 +1,6 @@
 import VD.harmonicAt
 import VD.holomorphicAt
 import VD.holomorphic_primitive
-import VD.mathlibAddOn
-
 
 theorem CauchyRiemann₆
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
