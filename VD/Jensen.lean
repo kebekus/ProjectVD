@@ -20,12 +20,17 @@ theorem CircleIntegrable.const_mul_fun {c : ℂ} {a R : ℝ} {f : ℂ → ℝ} (
     CircleIntegrable (fun z ↦ a * f z) c R := by
   apply CircleIntegrable.const_mul h
 
-theorem jensenNT
-    {R : ℝ} (hR : R ≠ 0)
+theorem jensenNT {R : ℝ}
+    (hR : R ≠ 0)
     (f : ℂ → ℂ)
     (h₁f : MeromorphicNFOn f (closedBall 0 |R|))
     (h₂f : ∀ u : (closedBall (0 : ℂ) |R|), (h₁f u.2).meromorphicAt.order ≠ ⊤) :
-    ⨍ (x : ℝ) in (0)..(2 * π), log ‖f (circleMap 0 R x)‖ = 1 := by
+    ∃ g : ℂ → ℂ, AnalyticOnNhd ℂ g (closedBall 0 |R|)
+      ∧ (∀ u : (closedBall 0 |R|), g u ≠ 0)
+      ∧ (log ‖f ·‖) =ᶠ[Filter.codiscreteWithin (closedBall 0 |R|)]
+        ∑ᶠ u, (divisor f (closedBall 0 |R|) u * log ‖· - u‖) + (log ‖g ·‖)
+      ∧ ⨍ (x : ℝ) in (0)..(2 * π), log ‖f (circleMap 0 R x)‖
+        = ∑ᶠ (i : ℂ), ↑((divisor f (closedBall 0 |R|)) i) * log R + log ‖g 0‖ := by
   -- Decompose f modulo equality on codiscrete sets, extracting zeros and poles
   have h₃f := (divisor f (closedBall 0 |R|)).finiteSupport (isCompact_closedBall 0 |R|)
   obtain ⟨g, h₁g, h₂g, h₃g⟩ := h₁f.meromorphicOn.extract_zeros_poles_log h₂f h₃f
@@ -81,17 +86,26 @@ theorem jensenNT
       exact AnalyticAt.holomorphicAt (h₁g z hz)
       exact h₂g ⟨z, hz⟩
     exact harmonic_meanValue₂ t₀
+  nth_rw 4 [← smul_eq_mul]
   rw [← interval_average_eq]
   rw [this]
   clear this
-
-
-  sorry
-
-
-
-
-
-
-
+  -- Simplify
+  have {a b₁ b₂ c : ℝ} : a * (b₁ * b₂) * c = (b₁ * b₂) * (a * c) := by ring
+  simp_rw [this]
+  rw [← Finset.mul_sum (a := (2 * π))]
+  rw [← mul_assoc]
+  have : (2 * π - 0)⁻¹ * (2 * π) = 1 := by
+    sorry
+  rw [this]
+  simp
+  have : ∑ i ∈ h₃f.toFinset, ↑((divisor f (closedBall 0 |R|)) i) * log R
+    = ∑ᶠ i, ↑((divisor f (closedBall 0 |R|)) i) * log R := by
+    have : (fun u ↦ (divisor f (closedBall 0 |R|) u) * log R).support ⊆ h₃f.toFinset := by
+      intro u
+      contrapose
+      rw [Set.Finite.coe_toFinset, Function.mem_support, ne_eq, not_not]
+      aesop
+    rw [finsum_eq_sum_of_support_subset _ this]
+  rw [this]
   sorry
