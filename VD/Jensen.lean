@@ -4,13 +4,22 @@ import VD.Eliminate
 
 open Filter MeromorphicOn Metric Real
 
+/-!
+# Circle Averages
+-/
 
 theorem circleAverage_congr_codiscreteWithin {c : ℂ} {R : ℝ} {f₁ f₂ : ℂ → ℝ}
     (hf : f₁ =ᶠ[codiscreteWithin (sphere c |R|)] f₂) (hR : R ≠ 0) :
-    (∫ x in (0)..(2 * π), f₁ (circleMap c R x)) = (∫ x in (0)..(2 * π), f₂ (circleMap c R x)) := by
+    (⨍ x in (0)..(2 * π), f₁ (circleMap c R x)) = (⨍ x in (0)..(2 * π), f₂ (circleMap c R x)) := by
+  rw [interval_average_eq, interval_average_eq]
+  congr 1
   apply intervalIntegral.integral_congr_ae_restrict
   apply ae_restrict_le_codiscreteWithin measurableSet_uIoc
   apply codiscreteWithin.mono (by tauto) (circleMap_preimage_codiscrete hR hf)
+
+/-!
+# Circle Integrability
+-/
 
 theorem CircleIntegrable.const_mul {c : ℂ} {a R : ℝ} {f : ℂ → ℝ} (h : CircleIntegrable f c R) :
     CircleIntegrable (a • f) c R := by
@@ -20,8 +29,28 @@ theorem CircleIntegrable.const_mul_fun {c : ℂ} {a R : ℝ} {f : ℂ → ℝ} (
     CircleIntegrable (fun z ↦ a * f z) c R := by
   apply CircleIntegrable.const_mul h
 
-theorem jensenNT {R : ℝ}
+
+/-!
+# Decomposition
+-/
+
+theorem Jensen₀
+    {R : ℝ}
     (hR : R ≠ 0)
+    (D : Function.locallyFinsuppWithin (closedBall (0 : ℂ) |R|) ℤ) :
+    ⨍ (x : ℝ) in (0)..(2 * π), ∑ᶠ u, (D u) * log ‖circleMap 0 R x - u‖ = 0 := by
+  have h := D.finiteSupport (isCompact_closedBall 0 |R|)
+  rw [interval_average_eq]
+  have {x : ℂ} : (fun u ↦ (D u) * log ‖x - u‖).support ⊆ h.toFinset := by
+    intro u
+    contrapose
+    aesop
+  simp_rw [finsum_eq_sum_of_support_subset _ this]
+
+  sorry
+
+
+theorem jensenNT {R : ℝ} (hR : R ≠ 0)
     (f : ℂ → ℂ)
     (h₁f : MeromorphicNFOn f (closedBall 0 |R|))
     (h₂f : ∀ u : (closedBall (0 : ℂ) |R|), (h₁f u.2).meromorphicAt.order ≠ ⊤) :
@@ -36,9 +65,8 @@ theorem jensenNT {R : ℝ}
   obtain ⟨g, h₁g, h₂g, h₃g⟩ := h₁f.meromorphicOn.extract_zeros_poles_log h₂f h₃f
   use g, h₁g, h₂g, h₃g
   -- Apply the decomposition of f under the integral
-  rw [interval_average_eq]
   rw [circleAverage_congr_codiscreteWithin (codiscreteWithin.mono sphere_subset_closedBall h₃g) hR]
-  rw [← interval_average_eq]
+  simp_rw [Pi.add_apply]
   -- Turn all finsums into sums
   rw [interval_average_eq]
   have : (fun u x ↦ (divisor f (closedBall 0 |R|) u) * log ‖x - u‖).support ⊆ h₃f.toFinset := by
@@ -54,9 +82,13 @@ theorem jensenNT {R : ℝ}
   rw [finsum_eq_sum_of_support_subset _ this]
   clear this
   -- Decompose the integral
-  simp_rw [Pi.add_apply]
+  have : CircleIntegrable (∑ᶠ i, fun x ↦ (divisor f (closedBall 0 |R|) i) * log ‖x - i‖) 0 R := by
+    apply CircleIntegrable.finsum
+    intro u
+    apply CircleIntegrable.const_mul
+    apply (analyticOnNhd_id.sub analyticOnNhd_const).meromorphicOn.circleIntegrable_log_norm
   have : IntervalIntegrable (fun x ↦ (∑ i ∈ h₃f.toFinset, fun x ↦ ↑((divisor f (closedBall 0 |R|)) i) * log ‖x - i‖) (circleMap 0 R x))
-    MeasureTheory.volume 0 (2 * π) := by
+      MeasureTheory.volume 0 (2 * π) := by
     apply CircleIntegrable.sum
     intro u hu
     apply CircleIntegrable.const_mul
