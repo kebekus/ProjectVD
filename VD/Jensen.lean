@@ -18,8 +18,8 @@ noncomputable def circleAverage (f : ℂ → E) (c : ℂ) (R : ℝ) : E :=
 
 theorem circleAverage_congr_codiscreteWithin {c : ℂ} {R : ℝ} {f₁ f₂ : ℂ → ℝ}
     (hf : f₁ =ᶠ[codiscreteWithin (sphere c |R|)] f₂) (hR : R ≠ 0) :
-    (⨍ x in (0)..(2 * π), f₁ (circleMap c R x)) = (⨍ x in (0)..(2 * π), f₂ (circleMap c R x)) := by
-  rw [interval_average_eq, interval_average_eq]
+    circleAverage f₁ c R = circleAverage f₂ c R := by
+  unfold circleAverage
   congr 1
   apply intervalIntegral.integral_congr_ae_restrict
   apply ae_restrict_le_codiscreteWithin measurableSet_uIoc
@@ -41,6 +41,11 @@ theorem CircleAverage.const_smul {c : ℂ} {a R : ℝ} {f : ℂ → E} :
 theorem CircleAverage.const_smul_fun {c : ℂ} {a R : ℝ} {f : ℂ → E} :
     circleAverage (fun z ↦ a • f z) c R = a • circleAverage f c R := by
   apply CircleAverage.const_smul
+
+theorem circleAverage.average_add {f g : ℂ → E} {c : ℂ} {R : ℝ}
+    (hf : CircleIntegrable f c R) (hg : CircleIntegrable g c R) :
+    circleAverage (f + g) c R = circleAverage f c R + circleAverage g c R := by
+  sorry
 
 
 /-!
@@ -70,7 +75,7 @@ theorem Jensen₀
   rw [int₅ hR hu, smul_eq_mul, ← mul_assoc, inv_mul_cancel₀ (mul_ne_zero two_ne_zero pi_ne_zero)]
   ring
 
-theorem Jensen₁
+@[simp] theorem Jensen₁
     {R : ℝ}
     (D : Function.locallyFinsuppWithin (closedBall (0 : ℂ) |R|) ℤ) :
     circleAverage (∑ᶠ u, fun z ↦ (D u) * log ‖z - u‖) 0 R = ∑ᶠ u, (D u) * log R := by
@@ -103,6 +108,26 @@ theorem Jensen₁
   apply D.supportWithinDomain
   simp_all
 
+@[simp] theorem Jensen₂
+    {R : ℝ}
+    {g : ℂ → ℂ}
+    (h₁g : AnalyticOnNhd ℂ g (closedBall 0 |R|))
+    (h₂g : ∀ u : (closedBall (0 : ℂ) |R|), g u ≠ 0) :
+    circleAverage (fun x ↦ log ‖g x‖) 0 |R| = log ‖g 0‖ := by
+  unfold circleAverage
+  by_cases hR : R = 0
+  · simp only [hR, abs_zero, circleMap_zero_radius, Function.const_apply,
+      intervalIntegral.integral_const, sub_zero, smul_eq_mul]
+    rw [← mul_assoc, inv_mul_cancel₀ (mul_ne_zero two_ne_zero pi_ne_zero)]
+    simp
+
+  rw [harmonic_meanValue₁ |R| (abs_pos.mpr hR)
+    (fun x hx ↦ logabs_of_holomorphicAt_is_harmonic (h₁g x hx).holomorphicAt (h₂g ⟨x, hx⟩))]
+  rw [smul_eq_mul, ← mul_assoc, inv_mul_cancel₀ (mul_ne_zero two_ne_zero pi_ne_zero)]
+  simp
+
+
+
 theorem jensenNT {R : ℝ} (hR : R ≠ 0)
     (f : ℂ → ℂ)
     (h₁f : MeromorphicNFOn f (closedBall 0 |R|))
@@ -111,7 +136,7 @@ theorem jensenNT {R : ℝ} (hR : R ≠ 0)
       ∧ (∀ u : (closedBall (0 : ℂ) |R|), g u ≠ 0)
       ∧ (log ‖f ·‖) =ᶠ[Filter.codiscreteWithin (closedBall 0 |R|)]
         ∑ᶠ u, (divisor f (closedBall (0 : ℂ) |R|) u * log ‖· - u‖) + (log ‖g ·‖)
-      ∧ ⨍ (x : ℝ) in (0)..(2 * π), log ‖f (circleMap 0 R x)‖
+      ∧ circleAverage (log ‖f ·‖) 0 R
         = ∑ᶠ (i : ℂ), ↑((divisor f (closedBall 0 |R|)) i) * log R + log ‖g 0‖ := by
   -- Decompose f modulo equality on codiscrete sets, extracting zeros and poles
   have h₃f := (divisor f (closedBall 0 |R|)).finiteSupport (isCompact_closedBall 0 |R|)
@@ -119,64 +144,26 @@ theorem jensenNT {R : ℝ} (hR : R ≠ 0)
   use g, h₁g, h₂g, h₃g
   -- Apply the decomposition of f under the integral
   rw [circleAverage_congr_codiscreteWithin (codiscreteWithin.mono sphere_subset_closedBall h₃g) hR]
-  simp_rw [Pi.add_apply]
-  -- Turn all finsums into sums
-  rw [interval_average_eq]
-  have : (fun u x ↦ (divisor f (closedBall 0 |R|) u) * log ‖x - u‖).support ⊆ h₃f.toFinset := by
-    intro u
-    contrapose
-    aesop
-  rw [finsum_eq_sum_of_support_subset _ this]
-  clear this
-  have : (fun u ↦ (divisor f (closedBall 0 |R|) u) * log R).support ⊆ h₃f.toFinset := by
-    intro u
-    contrapose
-    aesop
-  rw [finsum_eq_sum_of_support_subset _ this]
-  clear this
   -- Decompose the integral
   have : CircleIntegrable (∑ᶠ i, fun x ↦ (divisor f (closedBall 0 |R|) i) * log ‖x - i‖) 0 R := by
     apply CircleIntegrable.finsum
     intro u
     apply CircleIntegrable.const_mul
     apply (analyticOnNhd_id.sub analyticOnNhd_const).meromorphicOn.circleIntegrable_log_norm
-  have : IntervalIntegrable (fun x ↦ (∑ i ∈ h₃f.toFinset, fun x ↦ ↑((divisor f (closedBall 0 |R|)) i) * log ‖x - i‖) (circleMap 0 R x))
-      MeasureTheory.volume 0 (2 * π) := by
-    apply CircleIntegrable.sum
-    intro u hu
-    apply CircleIntegrable.const_mul
-    apply MeromorphicOn.circleIntegrable_log_norm
-    apply (analyticOnNhd_id.sub analyticOnNhd_const).meromorphicOn
-  rw [intervalIntegral.integral_add this (h₁g.mono sphere_subset_closedBall).meromorphicOn.circleIntegrable_log_norm]
-  clear this
-  -- Further decompose the integral
-  simp only [Finset.sum_apply]
-  have : ∀ i ∈ h₃f.toFinset, IntervalIntegrable (fun x ↦ ↑((divisor f (closedBall 0 |R|)) i) * log ‖circleMap 0 R x - i‖) MeasureTheory.volume 0 (2 * π) := by
-    intro u hu
-    apply IntervalIntegrable.const_mul
-    apply MeromorphicOn.circleIntegrable_log_norm (f := (· - u))
-    apply (analyticOnNhd_id.sub analyticOnNhd_const).meromorphicOn
-  rw [intervalIntegral.integral_finset_sum this]
-  clear this
-  simp only [intervalIntegral.integral_const_mul, smul_eq_mul, mul_add]
-  -- Identify integrals
-  have : ∑ x ∈ h₃f.toFinset, ((divisor f (closedBall 0 |R|)) x) * ∫ (x_1 : ℝ) in (0)..(2 * π), log ‖circleMap 0 R x_1 - x‖
-    = ∑ x ∈ h₃f.toFinset, ↑((divisor f (closedBall 0 |R|)) x) * (2 * π) * log R := by
-    apply Finset.sum_congr rfl
-    intro u hu
-    rw [int₅ hR]
-    ring
-    let A := (divisor f (closedBall 0 |R|)).supportWithinDomain
-    have : u ∈ (divisor f (closedBall 0 |R|)).support := by
-      simp_all
-    exact A this
-  rw [this]
-  clear this
+  rw [circleAverage.average_add this
+    (h₁g.mono sphere_subset_closedBall).meromorphicOn.circleIntegrable_log_norm]
+  -- Identify pieces
+  simp [h₁g, h₂g]
 
-  -- Identify integral
-  have : (⨍ (x : ℝ) in (0)..2 * Real.pi, log ‖g (circleMap 0 R x)‖) = log ‖g 0‖ := by
-    apply harmonic_meanValue₂ (f := (log ‖g ·‖))
-    exact fun z hz ↦ logabs_of_holomorphicAt_is_harmonic (h₁g z hz).holomorphicAt (h₂g ⟨z, hz⟩)
+  apply Jensen₂ h₁g
+
+
+  apply Jensen₂ h₁g h₂g
+  unfold circleAverage
+  simp
+  rw [harmonic_meanValue₁ (f := (log ‖g ·‖))]
+
+  exact fun z hz ↦ logabs_of_holomorphicAt_is_harmonic (h₁g z hz).holomorphicAt (h₂g ⟨z, hz⟩)
 
   nth_rw 4 [← smul_eq_mul]
   rw [← interval_average_eq]
