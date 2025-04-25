@@ -2,6 +2,7 @@ import Mathlib.Analysis.Complex.Basic
 import VD.specialFunctions_CircleIntegral_affine
 import VD.stronglyMeromorphicOn_eliminate
 import VD.Eliminate
+import VD.intervalIntegrability
 
 open Filter MeromorphicOn Metric Real
 
@@ -15,6 +16,20 @@ variable
 
 noncomputable def circleAverage (f : ℂ → E) (c : ℂ) (R : ℝ) : E :=
   (2 * π)⁻¹ • ∫ θ : ℝ in (0)..2 * π, f (circleMap c R θ)
+
+theorem circleAverage_congr_negRadius {c : ℂ} {R : ℝ} {f : ℂ → ℝ} :
+    circleAverage f c R = circleAverage f c (-R) := by
+  unfold circleAverage
+  congr 1
+  apply integrabl_congr_negRadius
+
+theorem circleAverage_congr_absRadius {c : ℂ} {R : ℝ} {f : ℂ → ℝ} :
+    circleAverage f c R = circleAverage f c |R| := by
+  by_cases hR : 0 ≤ R
+  · rw [abs_of_nonneg hR]
+  · simp at hR
+    rw [abs_of_neg hR]
+    exact circleAverage_congr_negRadius
 
 theorem circleAverage_congr_codiscreteWithin {c : ℂ} {R : ℝ} {f₁ f₂ : ℂ → ℝ}
     (hf : f₁ =ᶠ[codiscreteWithin (sphere c |R|)] f₂) (hR : R ≠ 0) :
@@ -45,7 +60,9 @@ theorem CircleAverage.const_smul_fun {c : ℂ} {a R : ℝ} {f : ℂ → E} :
 theorem circleAverage.average_add {f g : ℂ → E} {c : ℂ} {R : ℝ}
     (hf : CircleIntegrable f c R) (hg : CircleIntegrable g c R) :
     circleAverage (f + g) c R = circleAverage f c R + circleAverage g c R := by
-  sorry
+  rw [circleAverage, circleAverage, circleAverage, ← smul_add]
+  congr
+  apply intervalIntegral.integral_add hf hg
 
 
 /-!
@@ -126,8 +143,6 @@ theorem Jensen₀
   rw [smul_eq_mul, ← mul_assoc, inv_mul_cancel₀ (mul_ne_zero two_ne_zero pi_ne_zero)]
   simp
 
-
-
 theorem jensenNT {R : ℝ} (hR : R ≠ 0)
     (f : ℂ → ℂ)
     (h₁f : MeromorphicNFOn f (closedBall 0 |R|))
@@ -154,28 +169,6 @@ theorem jensenNT {R : ℝ} (hR : R ≠ 0)
     (h₁g.mono sphere_subset_closedBall).meromorphicOn.circleIntegrable_log_norm]
   -- Identify pieces
   simp [h₁g, h₂g]
-
-  apply Jensen₂ h₁g
-
-
-  apply Jensen₂ h₁g h₂g
-  unfold circleAverage
-  simp
-  rw [harmonic_meanValue₁ (f := (log ‖g ·‖))]
-
-  exact fun z hz ↦ logabs_of_holomorphicAt_is_harmonic (h₁g z hz).holomorphicAt (h₂g ⟨z, hz⟩)
-
-  nth_rw 4 [← smul_eq_mul]
-  rw [← interval_average_eq]
-  rw [this]
-  clear this
-  -- Simplify
-  have {a b₁ b₂ c : ℝ} : a * (b₁ * b₂) * c = (b₁ * b₂) * (a * c) := by ring
-  simp_rw [this]
-  rw [← Finset.mul_sum (a := (2 * π))]
-  rw [← mul_assoc]
-  have : (2 * π - 0)⁻¹ * (2 * π) = 1 := by
-    rw [sub_zero, inv_mul_cancel₀]
-    apply mul_ne_zero two_ne_zero pi_ne_zero
-  rw [this]
-  simp
+  rw [← Jensen₂ h₁g]
+  apply circleAverage_congr_absRadius
+  simp_all
