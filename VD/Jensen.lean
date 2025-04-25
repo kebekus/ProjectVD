@@ -27,8 +27,7 @@ theorem circleAverage_congr_absRadius {c : ℂ} {R : ℝ} {f : ℂ → ℝ} :
     circleAverage f c R = circleAverage f c |R| := by
   by_cases hR : 0 ≤ R
   · rw [abs_of_nonneg hR]
-  · simp at hR
-    rw [abs_of_neg hR]
+  · rw [abs_of_neg (not_le.1 hR)]
     exact circleAverage_congr_negRadius
 
 theorem circleAverage_congr_codiscreteWithin {c : ℂ} {R : ℝ} {f₁ f₂ : ℂ → ℝ}
