@@ -62,6 +62,17 @@ lemma circleAverage_eq_intervalAverage :
     ← smul_assoc, smul_eq_mul, inv_mul_cancel₀ (mul_ne_zero two_ne_zero pi_ne_zero),
     one_smul]
 
+/--
+Expression of `circleAverage´ in terms of `circleAverage` with center zero.
+-/
+lemma circleAverage_shiftCenter :
+    circleAverage f c R = circleAverage (fun z ↦ f (z + c)) 0 R := by
+  unfold circleAverage circleMap
+  congr
+  ext θ
+  congr 1
+  ring
+
 /-!
 ## Congruence Lemmata
 -/
