@@ -7,8 +7,6 @@ import Mathlib.MeasureTheory.Integral.CircleIntegral
 import Mathlib.MeasureTheory.Integral.IntervalAverage
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Periodic
 
---import VD.intervalIntegrability
-
 /-!
 # Circle Averages
 
@@ -16,7 +14,7 @@ For a function `f` on the complex plane, this file introduces the notation
 `circleAverage f c R` as a shorthand for the average of `f` on the circle with
 center `c` and radius `R`. Averages of this form are typically used in analysis
 of one complex variable. Like `IntervalAverage`, this notion exists as a
-convenience, avoiding the hassle to manually elemininate `2 * π` every time an
+convenience. It avoids the hassle to manually elemininate `2 * π` every time an
 average is computed.
 
 Note: The relevant integrability property is `CircleIntegrable`, as defined in

@@ -3,6 +3,7 @@ import Mathlib.Topology.MetricSpace.Thickening
 import Mathlib.Analysis.Complex.CauchyIntegral
 import VD.holomorphic_examples
 import VD.intervalIntegrability
+import VD.CircleAverage
 
 theorem harmonic_meanValue
   {f : ℂ → ℝ}
@@ -128,18 +129,17 @@ theorem harmonic_meanValue₁
   assumption
   linarith
 
-theorem harmonic_meanValue₂
+@[simp] theorem harmonic_meanValue₂
   {f : ℂ → ℝ}
   {z : ℂ}
   {R : ℝ}
   (hf : ∀ x ∈ Metric.closedBall z |R| , HarmonicAt f x) :
-  (⨍ (x : ℝ) in (0)..2 * Real.pi, f (circleMap z R x)) = f z := by
-  rw [interval_average_eq]
+  circleAverage f z R = f z := by
+  rw [circleAverage]
   apply ltByCases 0 R
   · intro hR
     rw [abs_of_pos hR] at hf
     rw [harmonic_meanValue₁ R hR hf]
-    rw [sub_zero]
     rw [smul_eq_mul]
     rw [← mul_assoc]
     rw [inv_mul_cancel₀]
@@ -163,7 +163,6 @@ theorem harmonic_meanValue₂
     rw [integrabl_congr_negRadius]
     rw [abs_of_neg hR] at hf
     rw [harmonic_meanValue₁ (-R) _ hf]
-    rw [sub_zero]
     rw [smul_eq_mul]
     rw [← mul_assoc]
     rw [inv_mul_cancel₀]

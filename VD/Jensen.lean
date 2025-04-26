@@ -1,4 +1,5 @@
 import Mathlib.Analysis.Complex.Basic
+import VD.CircleAverage
 import VD.specialFunctions_CircleIntegral_affine
 import VD.stronglyMeromorphicOn_eliminate
 import VD.Eliminate
@@ -10,58 +11,6 @@ variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 
-/-!
-# Circle Averages
--/
-
-noncomputable def circleAverage (f : ℂ → E) (c : ℂ) (R : ℝ) : E :=
-  (2 * π)⁻¹ • ∫ θ : ℝ in (0)..2 * π, f (circleMap c R θ)
-
-theorem circleAverage_congr_negRadius {c : ℂ} {R : ℝ} {f : ℂ → ℝ} :
-    circleAverage f c R = circleAverage f c (-R) := by
-  unfold circleAverage
-  congr 1
-  apply integrabl_congr_negRadius
-
-theorem circleAverage_congr_absRadius {c : ℂ} {R : ℝ} {f : ℂ → ℝ} :
-    circleAverage f c R = circleAverage f c |R| := by
-  by_cases hR : 0 ≤ R
-  · rw [abs_of_nonneg hR]
-  · rw [abs_of_neg (not_le.1 hR)]
-    exact circleAverage_congr_negRadius
-
-theorem circleAverage_congr_codiscreteWithin {c : ℂ} {R : ℝ} {f₁ f₂ : ℂ → ℝ}
-    (hf : f₁ =ᶠ[codiscreteWithin (sphere c |R|)] f₂) (hR : R ≠ 0) :
-    circleAverage f₁ c R = circleAverage f₂ c R := by
-  unfold circleAverage
-  congr 1
-  apply intervalIntegral.integral_congr_ae_restrict
-  apply ae_restrict_le_codiscreteWithin measurableSet_uIoc
-  apply codiscreteWithin.mono (by tauto) (circleMap_preimage_codiscrete hR hf)
-
-theorem circleAverage.average_finset_sum {ι : Type*} {s : Finset ι} {f : ι → ℂ → E}
-    {c : ℂ} {R : ℝ} (h : ∀ i ∈ s, CircleIntegrable (f i) c R) :
-    circleAverage (∑ i ∈ s, f i) c R = ∑ i ∈ s, circleAverage (f i) c R := by
-  unfold circleAverage
-  simp [← Finset.smul_sum, intervalIntegral.integral_finset_sum h]
-
-theorem CircleAverage.const_smul {c : ℂ} {a R : ℝ} {f : ℂ → E} :
-    circleAverage (a • f) c R = a • circleAverage f c R := by
-  unfold circleAverage
-  rw [smul_comm]
-  congr
-  exact intervalIntegral.integral_smul a fun x ↦ f (circleMap c R x)
-
-theorem CircleAverage.const_smul_fun {c : ℂ} {a R : ℝ} {f : ℂ → E} :
-    circleAverage (fun z ↦ a • f z) c R = a • circleAverage f c R := by
-  apply CircleAverage.const_smul
-
-theorem circleAverage.average_add {f g : ℂ → E} {c : ℂ} {R : ℝ}
-    (hf : CircleIntegrable f c R) (hg : CircleIntegrable g c R) :
-    circleAverage (f + g) c R = circleAverage f c R + circleAverage g c R := by
-  rw [circleAverage, circleAverage, circleAverage, ← smul_add]
-  congr
-  apply intervalIntegral.integral_add hf hg
 
 
 /-!
@@ -91,7 +40,8 @@ theorem Jensen₀
   rw [int₅ hR hu, smul_eq_mul, ← mul_assoc, inv_mul_cancel₀ (mul_ne_zero two_ne_zero pi_ne_zero)]
   ring
 
-@[simp] theorem Jensen₁
+@[simp]
+theorem Jensen₁
     {R : ℝ}
     (D : Function.locallyFinsuppWithin (closedBall (0 : ℂ) |R|) ℤ) :
     circleAverage (∑ᶠ u, fun z ↦ (D u) * log ‖z - u‖) 0 R = ∑ᶠ u, (D u) * log R := by
@@ -113,39 +63,28 @@ theorem Jensen₀
     apply IntervalIntegrable.const_mul
     apply MeromorphicOn.circleIntegrable_log_norm (f := (· - u))
     apply (analyticOnNhd_id.sub analyticOnNhd_const).meromorphicOn
-  rw [circleAverage.average_finset_sum this]
+  rw [circleAverage_sum this]
   -- Identify summands
   apply Finset.sum_congr rfl
   intro u hu
   simp_rw [← smul_eq_mul]
-  rw [CircleAverage.const_smul_fun]
+  rw [circleAverage_smul_fun]
   congr
   apply Jensen₀
   apply D.supportWithinDomain
   simp_all
 
-@[simp] theorem Jensen₂
-    {R : ℝ}
-    {g : ℂ → ℂ}
+@[simp]
+theorem Jensen₂ {R : ℝ} {g : ℂ → ℂ}
     (h₁g : AnalyticOnNhd ℂ g (closedBall 0 |R|))
     (h₂g : ∀ u : (closedBall (0 : ℂ) |R|), g u ≠ 0) :
-    circleAverage (fun x ↦ log ‖g x‖) 0 |R| = log ‖g 0‖ := by
-  unfold circleAverage
-  by_cases hR : R = 0
-  · simp only [hR, abs_zero, circleMap_zero_radius, Function.const_apply,
-      intervalIntegral.integral_const, sub_zero, smul_eq_mul]
-    rw [← mul_assoc, inv_mul_cancel₀ (mul_ne_zero two_ne_zero pi_ne_zero)]
-    simp
+    circleAverage (fun x ↦ log ‖g x‖) 0 R = log ‖g 0‖ := by
+  apply harmonic_meanValue₂
+    (fun x hx ↦ logabs_of_holomorphicAt_is_harmonic (h₁g x hx).holomorphicAt (h₂g ⟨x, hx⟩))
 
-  rw [harmonic_meanValue₁ |R| (abs_pos.mpr hR)
-    (fun x hx ↦ logabs_of_holomorphicAt_is_harmonic (h₁g x hx).holomorphicAt (h₂g ⟨x, hx⟩))]
-  rw [smul_eq_mul, ← mul_assoc, inv_mul_cancel₀ (mul_ne_zero two_ne_zero pi_ne_zero)]
-  simp
-
-theorem jensenNT {R : ℝ} (hR : R ≠ 0)
-    (f : ℂ → ℂ)
-    (h₁f : MeromorphicNFOn f (closedBall 0 |R|))
-    (h₂f : ∀ u : (closedBall (0 : ℂ) |R|), (h₁f u.2).meromorphicAt.order ≠ ⊤) :
+theorem jensenNT {R : ℝ} (hR : R ≠ 0) (f : ℂ → ℂ)
+    (h₁f : MeromorphicOn f (closedBall 0 |R|))
+    (h₂f : ∀ u : (closedBall (0 : ℂ) |R|), (h₁f u u.2).order ≠ ⊤) :
     ∃ g : ℂ → ℂ, AnalyticOnNhd ℂ g (closedBall 0 |R|)
       ∧ (∀ u : (closedBall (0 : ℂ) |R|), g u ≠ 0)
       ∧ (log ‖f ·‖) =ᶠ[Filter.codiscreteWithin (closedBall 0 |R|)]
@@ -154,7 +93,7 @@ theorem jensenNT {R : ℝ} (hR : R ≠ 0)
         = ∑ᶠ (i : ℂ), ↑((divisor f (closedBall 0 |R|)) i) * log R + log ‖g 0‖ := by
   -- Decompose f modulo equality on codiscrete sets, extracting zeros and poles
   have h₃f := (divisor f (closedBall 0 |R|)).finiteSupport (isCompact_closedBall 0 |R|)
-  obtain ⟨g, h₁g, h₂g, h₃g⟩ := h₁f.meromorphicOn.extract_zeros_poles_log h₂f h₃f
+  obtain ⟨g, h₁g, h₂g, h₃g⟩ := h₁f.extract_zeros_poles_log h₂f h₃f
   use g, h₁g, h₂g, h₃g
   -- Apply the decomposition of f under the integral
   rw [circleAverage_congr_codiscreteWithin (codiscreteWithin.mono sphere_subset_closedBall h₃g) hR]
@@ -164,10 +103,7 @@ theorem jensenNT {R : ℝ} (hR : R ≠ 0)
     intro u
     apply CircleIntegrable.const_mul
     apply (analyticOnNhd_id.sub analyticOnNhd_const).meromorphicOn.circleIntegrable_log_norm
-  rw [circleAverage.average_add this
+  rw [circleAverage_add this
     (h₁g.mono sphere_subset_closedBall).meromorphicOn.circleIntegrable_log_norm]
   -- Identify pieces
   simp [h₁g, h₂g]
-  rw [← Jensen₂ h₁g]
-  apply circleAverage_congr_absRadius
-  simp_all

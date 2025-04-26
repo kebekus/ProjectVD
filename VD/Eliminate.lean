@@ -35,7 +35,7 @@ variable
   {U : Set 𝕜}
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [CompleteSpace E]
 
-open Real
+open Filter Real
 
 /-!
 ## Extration of Zeros and Poles
@@ -52,7 +52,7 @@ theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] {f : 𝕜 → E}
     (h₁f : MeromorphicOn f U) (h₂f : ∀ u : U, (h₁f u u.2).order ≠ ⊤)
     (h₃f : (divisor f U).support.Finite) :
     ∃ g : 𝕜 → E, AnalyticOnNhd 𝕜 g U ∧ (∀ u : U, g u ≠ 0) ∧
-      f =ᶠ[Filter.codiscreteWithin U] (∏ᶠ u, (· - u) ^ divisor f U u) • g := by
+      f =ᶠ[codiscreteWithin U] (∏ᶠ u, (· - u) ^ divisor f U u) • g := by
   -- Take `g` as the inverse of the Laurent polynomial defined below, converted
   -- to a meromorphic function in normal form. Then check all the properties.
   let φ := ∏ᶠ u, (· - u) ^ (divisor f U u)
@@ -75,10 +75,10 @@ theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] {f : 𝕜 → E}
     lift (h₁f u hu).order to ℤ using (h₂f ⟨u, hu⟩) with n hn
     rw [WithTop.untop₀_coe, (by rfl : -↑(n : WithTop ℤ) = (↑(-n) : WithTop ℤ)), ← WithTop.coe_add]
     simp
-  · -- f =ᶠ[Filter.codiscreteWithin U] (∏ᶠ (u : 𝕜), fun z ↦ (z - u) ^ (divisor f U) u) * g
+  · -- f =ᶠ[codiscreteWithin U] (∏ᶠ (u : 𝕜), fun z ↦ (z - u) ^ (divisor f U) u) * g
     filter_upwards [(divisor f U).supportDiscreteWithinDomain,
       (hφ.inv.smul h₁f).meromorphicNFAt_mem_codiscreteWithin,
-      Filter.codiscreteWithin_self U] with a h₂a h₃a h₄a
+      codiscreteWithin_self U] with a h₂a h₃a h₄a
     unfold g
     simp only [Pi.smul_apply', toMeromorphicNFOn_eq_toMeromorphicNFAt (hφ.inv.smul h₁f) h₄a,
       toMeromorphicNFAt_eq_self.2 h₃a, Pi.inv_apply]
@@ -97,12 +97,12 @@ theorem MeromorphicOn.extract_zeros_poles_log [CompleteSpace 𝕜] {f : 𝕜 →
     (h₁f : MeromorphicOn f U) (h₂f : ∀ u : U, (h₁f u u.2).order ≠ ⊤)
     (h₃f : (divisor f U).support.Finite) :
     ∃ g : 𝕜 → E, AnalyticOnNhd 𝕜 g U ∧ (∀ u : U, g u ≠ 0) ∧
-      (log ‖f ·‖) =ᶠ[Filter.codiscreteWithin U]
+      (log ‖f ·‖) =ᶠ[codiscreteWithin U]
         ∑ᶠ u, (divisor f U u * log ‖· - u‖) + (log ‖g ·‖) := by
   obtain ⟨g, h₁g, h₂g, h₃g⟩ := h₁f.extract_zeros_poles h₂f h₃f
   use g, h₁g, h₂g
   filter_upwards [h₃g, (divisor f U).supportDiscreteWithinDomain,
-    Filter.codiscreteWithin_self U] with z hz h₂z h₃z
+    codiscreteWithin_self U] with z hz h₂z h₃z
   -- Identify finprod with prod over h₃f.toFinset
   have : (fun u ↦ (· - u) ^ (divisor f U) u).mulSupport ⊆ h₃f.toFinset := by
     intro u hu

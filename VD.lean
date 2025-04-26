@@ -1,6 +1,8 @@
+import VD.CircleAverage
 import VD.Eliminate
 import VD.Jensen
 import VD.Laplace
+import VD.LeadCoefficient
 import VD.ToMathlib.Congruence_Divisor
 import VD.ToMathlib.CountingFunction
 import VD.ToMathlib.FactorizedRational
