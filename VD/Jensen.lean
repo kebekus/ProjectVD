@@ -23,7 +23,7 @@ theorem CircleIntegrable.const_mul_fun {c : ℂ} {a R : ℝ} {f : ℂ → ℝ} (
   apply CircleIntegrable.const_mul h
 
 /-!
-# Circle Averages
+## Circle Averages
 -/
 
 theorem circleAverage_logAbs_affine
