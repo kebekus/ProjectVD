@@ -25,16 +25,6 @@ theorem AnalyticAt.order_congr (hf₁ : AnalyticAt 𝕜 f₁ z₀) (h : f₁ =�
   intro a h₁a h₂a
   rw [← h₂a, h₁a]
 
-/-- The hpow of an analytic function is analytic -/
-@[fun_prop]
-lemma AnalyticAt.hpow {f : 𝕜 → 𝕜} (hf : AnalyticAt 𝕜 f z₀) (n : ℕ) :
-    AnalyticAt 𝕜 (HPow.hPow f n) z₀ := by apply hf.pow
-
-/-- The hpow of an analytic function is analytic -/
-@[fun_prop]
-lemma AnalyticAt.fun_hpow  {f : 𝕜 → 𝕜} (hf : AnalyticAt 𝕜 f z₀) (n : ℕ) :
-    AnalyticAt 𝕜 (fun z ↦ HPow.hPow (f z) n) z₀ := by apply hf.pow
-
 /-- Helper lemma, required to state analyticAt_order_centeredMonomial below -/
 lemma analyticAt_centeredMonomial (z₀ : 𝕜) (n : ℕ) :
     AnalyticAt 𝕜 ((· - z₀) ^ n) z₀ := by fun_prop
