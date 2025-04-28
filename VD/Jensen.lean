@@ -1,5 +1,5 @@
 import Mathlib.Analysis.Complex.Basic
-import VD.CircleAverage
+import VD.ToMathlib.CircleAverage
 import VD.specialFunctions_CircleIntegral_affine
 import VD.stronglyMeromorphicOn_eliminate
 import VD.Eliminate

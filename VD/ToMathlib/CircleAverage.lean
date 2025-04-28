@@ -48,7 +48,7 @@ center `c` and radius `R`.
 noncomputable def circleAverage : E :=
   (2 * π)⁻¹ • ∫ θ in (0)..2 * π, f (circleMap c R θ)
 
-/-- Expression in terms of interval averages. -/
+/-- Expression of `circleAverage´ in terms of interval averages. -/
 lemma circleAverage_eq_intervalAverage :
     circleAverage f c R = ⨍ θ in (0)..2 * π, f (circleMap c R θ) := by
   simp_all [circleAverage, interval_average_eq]
@@ -63,7 +63,8 @@ lemma circleAverage_eq_intervalAverage :
     one_smul]
 
 /--
-Expression of `circleAverage´ in terms of `circleAverage` with center zero.
+Expression of `circleAverage´ with arbitrary center in terms of `circleAverage`
+with center zero.
 -/
 lemma circleAverage_shiftCenter :
     circleAverage f c R = circleAverage (fun z ↦ f (z + c)) 0 R := by
@@ -100,7 +101,7 @@ theorem circleAverage_congr_absRadius :
   · rw [abs_of_neg (not_le.1 hR), circleAverage_congr_negRadius]
 
 /--
-If two functions agree outside of a discrete set in the sphere, then their
+If two functions agree outside of a discrete set in the circle, then their
 averages agree.
 -/
 theorem circleAverage_congr_codiscreteWithin
@@ -130,8 +131,7 @@ theorem circleAverage_smul_fun :
   apply circleAverage_smul
 
 /-- Circle averages commute with addition. -/
-theorem circleAverage_add
-    (hf₁ : CircleIntegrable f₁ c R) (hf₂ : CircleIntegrable f₂ c R) :
+theorem circleAverage_add (hf₁ : CircleIntegrable f₁ c R) (hf₂ : CircleIntegrable f₂ c R) :
     circleAverage (f₁ + f₂) c R = circleAverage f₁ c R + circleAverage f₂ c R := by
   rw [circleAverage, circleAverage, circleAverage, ← smul_add]
   congr
