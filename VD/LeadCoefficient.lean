@@ -48,19 +48,12 @@ lemma leadCoefficient_def₁ {g : 𝕜 → E} {n : ℤ}
     (h₂ : g x ≠ 0)
     (h₃ : f =ᶠ[𝓝[≠] x] fun z ↦ (z - x) ^ n • g z) :
     leadCoefficient f x = g x := by
-  have h : MeromorphicAt f x := by
+  have h₄ : MeromorphicAt f x := by
     rw [MeromorphicAt.meromorphicAt_congr h₃]
     fun_prop
-  have t₀ : h.order = n := by
-    apply h.order_eq_int_iff.2
+  have : h₄.order = n := by
+    apply h₄.order_eq_int_iff.2
     simp only [ne_eq, zpow_natCast]
     use g, h₁, h₂
     exact h₃
-  have : h.order.untop₀ = n := by
-    sorry
-  apply leadCoefficient_def₀ h₁ h
-  --
-  rw [t₀]
-  tauto
-  --
-  sorry
+  apply leadCoefficient_def₀ h₁ h₄ (by simp [this]) (by simp_all [this])
