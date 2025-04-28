@@ -1,13 +1,11 @@
 import VD.Eliminate
 import VD.Jensen
-import VD.Laplace
 import VD.LeadCoefficient
 import VD.ToMathlib.CircleAverage
 import VD.ToMathlib.Congruence_Divisor
 import VD.ToMathlib.CountingFunction
 import VD.ToMathlib.FactorizedRational
 import VD.ToMathlib.MeromorphicAt_order
-import VD.ToMathlib.analyticAt_order
 import VD.ToMathlib.codiscreteWithin
 import VD.cauchyRiemann
 import VD.firstMain
