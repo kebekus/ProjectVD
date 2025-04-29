@@ -97,8 +97,7 @@ theorem MeromorphicOn.extract_zeros_poles_log [CompleteSpace 𝕜] {f : 𝕜 →
     (h₁f : MeromorphicOn f U) (h₂f : ∀ u : U, (h₁f u u.2).order ≠ ⊤)
     (h₃f : (divisor f U).support.Finite) :
     ∃ g : 𝕜 → E, AnalyticOnNhd 𝕜 g U ∧ (∀ u : U, g u ≠ 0) ∧
-      (log ‖f ·‖) =ᶠ[codiscreteWithin U]
-        ∑ᶠ u, (divisor f U u * log ‖· - u‖) + (log ‖g ·‖) := by
+      (log ‖f ·‖) =ᶠ[codiscreteWithin U] ∑ᶠ u, (divisor f U u * log ‖· - u‖) + (log ‖g ·‖) := by
   obtain ⟨g, h₁g, h₂g, h₃g⟩ := h₁f.extract_zeros_poles h₂f h₃f
   use g, h₁g, h₂g
   filter_upwards [h₃g, (divisor f U).supportDiscreteWithinDomain,
