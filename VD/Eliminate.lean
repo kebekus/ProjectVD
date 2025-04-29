@@ -87,19 +87,68 @@ theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] {f : 𝕜 → E}
       Function.FactorizedRational.order, h₂a, Pi.zero_apply, WithTop.coe_zero]
 
 /--
-If `f` is meromorphic on a set `U`, if `f` is nowhere locally constant zero, and
-if the support of the divisor of `f` is finite, then there exists an analytic
-function `g` on `U` without zeros such that `log ‖f‖` is equivalent, modulo
-equality on codiscrete subsets of `U` to `∑ᶠ u, (divisor f U u * log ‖· - u‖) +
-log ‖g ·‖`.
+In the setting of `MeromorphicOn.extract_zeros_poles`, the function `log ‖f‖` is
+equivalent, modulo equality on codiscrete subsets of `U`, to `∑ᶠ u, (divisor f U
+u * log ‖· - u‖) + log ‖g ·‖`.
 -/
-theorem MeromorphicOn.extract_zeros_poles_log [CompleteSpace 𝕜] {f : 𝕜 → E}
-    (h₁f : MeromorphicOn f U) (h₂f : ∀ u : U, (h₁f u u.2).order ≠ ⊤)
-    (h₃f : (divisor f U).support.Finite) :
-    ∃ g : 𝕜 → E, AnalyticOnNhd 𝕜 g U ∧ (∀ u : U, g u ≠ 0) ∧
-      (log ‖f ·‖) =ᶠ[codiscreteWithin U] ∑ᶠ u, (divisor f U u * log ‖· - u‖) + (log ‖g ·‖) := by
-  obtain ⟨g, h₁g, h₂g, h₃g⟩ := h₁f.extract_zeros_poles h₂f h₃f
-  use g, h₁g, h₂g
+theorem MeromorphicOn.extract_zeros_poles_log [CompleteSpace 𝕜] {f g : 𝕜 → E}
+    (h₃f : (divisor f U).support.Finite)
+    (h₂g : ∀ u : U, g u ≠ 0)
+    (h₃g : f =ᶠ[codiscreteWithin U] (∏ᶠ u, (· - u) ^ divisor f U u) • g) :
+    (log ‖f ·‖) =ᶠ[codiscreteWithin U] ∑ᶠ u, (divisor f U u * log ‖· - u‖) + (log ‖g ·‖) := by
+
+  have : (fun u ↦ (· - u) ^ (divisor f U) u).mulSupport
+    = (fun u ↦ (divisor f U u * log ‖· - u‖)).support := by
+    ext u
+    constructor
+    · contrapose
+      simp
+      intro hu
+
+      sorry
+    · contrapose
+      simp
+      intro hu
+      have := congrFun hu u
+      simp_all [Pi.pow_apply, sub_self, Pi.one_apply, zero_zpow_eq_one₀]
+      rfl
+
+
+  have : (fun u ↦ (· - u) ^ (divisor f U) u).mulSupport = (divisor f U).support := by
+    ext u
+    constructor
+    · intro hu
+      by_contra hCon
+      simp_all only [ne_eq, Subtype.forall, Pi.smul_apply', divisor_apply, Pi.zero_apply,
+        WithTop.untopD_eq_self_iff, WithTop.coe_zero, or_false, Function.mem_mulSupport,
+        Set.Finite.coe_toFinset, Function.mem_support, Decidable.not_not, zpow_zero]
+      tauto
+    · intro hu
+      by_contra hCon
+      rw [Function.mem_support, Function.mem_mulSupport, not_not] at *
+      have := congrFun hCon u
+      rw [Pi.pow_apply, sub_self, Pi.one_apply, zero_zpow_eq_one₀] at this
+      tauto
+  have : (fun u ↦ (divisor f U u * log ‖· - u‖)).support = (divisor f U).support := by
+    ext u
+    constructor
+    · intro u hu
+      simp_all only [ne_eq, Subtype.forall, Pi.smul_apply', divisor_apply, Pi.zero_apply,
+        WithTop.untop₀_eq_zero, or_false, Set.Finite.coe_toFinset, Function.mulSupport_subset_iff,
+        Function.mem_support]
+      by_contra hCon
+      simp_all only [Int.cast_zero, zero_mul]
+      tauto
+    · intro hu
+      by_contra hCon
+      rw [Function.mem_support, not_not] at *
+      have := congrFun hCon (2 + u)
+      simp [two_ne_zero] at this
+      have := two_ne_zero
+
+      sorry
+
+
   filter_upwards [h₃g, (divisor f U).supportDiscreteWithinDomain,
     codiscreteWithin_self U] with z hz h₂z h₃z
   -- Identify finprod with prod over h₃f.toFinset
