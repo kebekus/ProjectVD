@@ -1,6 +1,8 @@
 import Mathlib.Analysis.Complex.TaylorSeries
 import Mathlib.Data.ENNReal.Basic
 
+open Interval
+
 noncomputable def primitive
   {E : Type u} [NormedAddCommGroup E] [NormedSpace ℂ E] [CompleteSpace E] :
   ℂ  → (ℂ → E) → (ℂ → E) := by

@@ -1,7 +1,7 @@
 import VD.specialFunctions_CircleIntegral_affine
 import VD.stronglyMeromorphicOn_eliminate
 
-open Real
+open Interval Real
 
 theorem jensen₀
   {R : ℝ}
