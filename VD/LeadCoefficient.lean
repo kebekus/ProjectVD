@@ -99,7 +99,8 @@ lemma leadCoefficient_of_order_eq_finite₁ (h₁ : AnalyticAt 𝕜 g x) (h₂ :
 -/
 
 /--
-If `f` is meromorphic of finite order at `x`, the leading coefficient is never zero.
+If `f` is meromorphic of finite order at `x`, then the leading coefficient is
+not zero.
 -/
 lemma leadCoefficient_ne_zero (h₁ : MeromorphicAt f x) (h₂ : h₁.order ≠ ⊤) :
     leadCoefficient f x ≠ 0 := by
@@ -111,7 +112,7 @@ lemma leadCoefficient_ne_zero (h₁ : MeromorphicAt f x) (h₂ : h₁.order ≠ 
 -/
 
 /--
-If two functions agree in a pointed neighborhood, then their leading coefficients agree.
+If two functions agree in a punctured neighborhood, then their leading coefficients agree.
 -/
 lemma leadCoefficient_congr_nhdNE {f₁ f₂ : 𝕜 → E} (h : f₁ =ᶠ[𝓝[≠] x] f₂) :
     leadCoefficient f₁ x = leadCoefficient f₂ x := by
