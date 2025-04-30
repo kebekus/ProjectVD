@@ -105,10 +105,11 @@ theorem jensenNT {R : ℝ} (hR : R ≠ 0) (f : ℂ → ℂ)
         = ∑ᶠ (i : ℂ), ↑((divisor f (closedBall 0 |R|)) i) * log R + log ‖g 0‖ := by
   -- Decompose f modulo equality on codiscrete sets, extracting zeros and poles
   have h₃f := (divisor f (closedBall 0 |R|)).finiteSupport (isCompact_closedBall 0 |R|)
-  obtain ⟨g, h₁g, h₂g, h₃g⟩ := h₁f.extract_zeros_poles_log h₂f h₃f
-  use g, h₁g, h₂g, h₃g
+  obtain ⟨g, h₁g, h₂g, h₃g⟩ := h₁f.extract_zeros_poles h₂f h₃f
+  have h₄g := MeromorphicOn.extract_zeros_poles_log h₂g h₃g
+  use g, h₁g, h₂g, h₄g
   -- Apply the decomposition of f under the integral
-  rw [circleAverage_congr_codiscreteWithin (codiscreteWithin.mono sphere_subset_closedBall h₃g) hR]
+  rw [circleAverage_congr_codiscreteWithin (codiscreteWithin.mono sphere_subset_closedBall h₄g) hR]
   -- Decompose the integral
   rw [circleAverage_add (circleIntegrable_logAbs_factorizedRational (divisor f (closedBall 0 |R|)))
     (h₁g.mono sphere_subset_closedBall).meromorphicOn.circleIntegrable_log_norm]

@@ -26,10 +26,11 @@ theorem MeromorphicOn.intervalIntegrable_log_norm [NormedSpace ℝ E] [CompleteS
     (hf : MeromorphicOn f [[a, b]]) :
     IntervalIntegrable (log ‖f ·‖) volume a b := by
   by_cases t₀ : ∀ u : [[a, b]], (hf u u.2).order ≠ ⊤
-  · obtain ⟨g, h₁g, h₂g, h₃g⟩ := hf.extract_zeros_poles_log t₀
+  · obtain ⟨g, h₁g, h₂g, h₃g⟩ := hf.extract_zeros_poles t₀
       ((divisor f [[a, b]]).finiteSupport isCompact_uIcc)
+    have h₄g := MeromorphicOn.extract_zeros_poles_log h₂g h₃g
     rw [intervalIntegrable_congr_codiscreteWithin
-      (h₃g.filter_mono (codiscreteWithin.mono Set.uIoc_subset_uIcc))]
+      (h₄g.filter_mono (codiscreteWithin.mono Set.uIoc_subset_uIcc))]
     apply IntervalIntegrable.add
     · apply IntervalIntegrable.finsum
       intro i
@@ -98,9 +99,10 @@ theorem MeromorphicOn.circleIntegrable_log_norm [NormedSpace ℂ E] [CompleteSpa
     (hf : MeromorphicOn f (sphere c |R|)) :
     CircleIntegrable (log ‖f ·‖) c R := by
   by_cases t₀ : ∀ u : (sphere c |R|), (hf u u.2).order ≠ ⊤
-  · obtain ⟨g, h₁g, h₂g, h₃g⟩ := hf.extract_zeros_poles_log t₀
+  · obtain ⟨g, h₁g, h₂g, h₃g⟩ := hf.extract_zeros_poles t₀
       ((divisor f (sphere c |R|)).finiteSupport (isCompact_sphere c |R|))
-    apply CircleIntegrable.congr_codiscreteWithin' _ h₃g.symm
+    have h₄g := MeromorphicOn.extract_zeros_poles_log h₂g h₃g
+    apply CircleIntegrable.congr_codiscreteWithin' _ h₄g.symm
     apply CircleIntegrable.add
     · apply CircleIntegrable.finsum
       intro i

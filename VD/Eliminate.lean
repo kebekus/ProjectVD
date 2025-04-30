@@ -33,7 +33,7 @@ theorem Function.locallyFinsuppWithin.supportDiscreteWithinDomain
 variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {U : Set 𝕜}
-  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [CompleteSpace E]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
 
 open Filter Real
 
@@ -48,7 +48,7 @@ analytic function `g` on `U` without zeros such that `f` is equivalent, modulo
 equality on a codiscrete set, to the product of `g` and the factorized rational
 function associated with the divisor of `f.
 -/
-theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] {f : 𝕜 → E}
+theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] [CompleteSpace E] {f : 𝕜 → E}
     (h₁f : MeromorphicOn f U) (h₂f : ∀ u : U, (h₁f u u.2).order ≠ ⊤)
     (h₃f : (divisor f U).support.Finite) :
     ∃ g : 𝕜 → E, AnalyticOnNhd 𝕜 g U ∧ (∀ u : U, g u ≠ 0) ∧
@@ -92,86 +92,43 @@ equivalent, modulo equality on codiscrete subsets of `U`, to `∑ᶠ u, (divisor
 u * log ‖· - u‖) + log ‖g ·‖`.
 -/
 theorem MeromorphicOn.extract_zeros_poles_log [CompleteSpace 𝕜] {f g : 𝕜 → E}
-    (h₃f : (divisor f U).support.Finite)
-    (h₂g : ∀ u : U, g u ≠ 0)
-    (h₃g : f =ᶠ[codiscreteWithin U] (∏ᶠ u, (· - u) ^ divisor f U u) • g) :
-    (log ‖f ·‖) =ᶠ[codiscreteWithin U] ∑ᶠ u, (divisor f U u * log ‖· - u‖) + (log ‖g ·‖) := by
-
-  have : (fun u ↦ (· - u) ^ (divisor f U) u).mulSupport
-    = (fun u ↦ (divisor f U u * log ‖· - u‖)).support := by
+    {D : Function.locallyFinsuppWithin U ℤ} (hg : ∀ u : U, g u ≠ 0)
+    (h : f =ᶠ[codiscreteWithin U] (∏ᶠ u, (· - u) ^ D u) • g) :
+    (log ‖f ·‖) =ᶠ[codiscreteWithin U] ∑ᶠ u, (D u * log ‖· - u‖) + (log ‖g ·‖) := by
+  -- Identify support of the sum in the goal
+  have t₁ : (fun u ↦ (D u * log ‖· - u‖)).support = D.support := by
     ext u
-    constructor
-    · contrapose
-      simp
-      intro hu
-
-      sorry
-    · contrapose
-      simp
-      intro hu
-      have := congrFun hu u
-      simp_all [Pi.pow_apply, sub_self, Pi.one_apply, zero_zpow_eq_one₀]
+    rw [← not_iff_not]
+    simp only [Function.mem_mulSupport, ne_eq, not_not, Function.mem_support, Decidable.not_not]
+    constructor <;> intro hx
+    · obtain ⟨y, hy⟩ := NormedField.exists_one_lt_norm 𝕜
+      have := congrFun hx (y + u)
+      simp only [add_sub_cancel_right, Pi.zero_apply, mul_eq_zero, Int.cast_eq_zero, log_eq_zero,
+        norm_eq_zero] at this
+      rcases this with h | h | h | h
+      · assumption
+      · simp only [h, norm_zero] at hy
+        linarith
+      · simp only [h, lt_self_iff_false] at hy
+      · simp only [h, lt_neg_self_iff] at hy
+        linarith
+    · simp_all only [ne_eq, Subtype.forall, Int.cast_zero, zero_mul]
       rfl
-
-
-  have : (fun u ↦ (· - u) ^ (divisor f U) u).mulSupport = (divisor f U).support := by
-    ext u
-    constructor
-    · intro hu
-      by_contra hCon
-      simp_all only [ne_eq, Subtype.forall, Pi.smul_apply', divisor_apply, Pi.zero_apply,
-        WithTop.untopD_eq_self_iff, WithTop.coe_zero, or_false, Function.mem_mulSupport,
-        Set.Finite.coe_toFinset, Function.mem_support, Decidable.not_not, zpow_zero]
-      tauto
-    · intro hu
-      by_contra hCon
-      rw [Function.mem_support, Function.mem_mulSupport, not_not] at *
-      have := congrFun hCon u
-      rw [Pi.pow_apply, sub_self, Pi.one_apply, zero_zpow_eq_one₀] at this
-      tauto
-  have : (fun u ↦ (divisor f U u * log ‖· - u‖)).support = (divisor f U).support := by
-    ext u
-    constructor
-    · intro u hu
-      simp_all only [ne_eq, Subtype.forall, Pi.smul_apply', divisor_apply, Pi.zero_apply,
-        WithTop.untop₀_eq_zero, or_false, Set.Finite.coe_toFinset, Function.mulSupport_subset_iff,
-        Function.mem_support]
-      by_contra hCon
-      simp_all only [Int.cast_zero, zero_mul]
-      tauto
-    · intro hu
-      by_contra hCon
-      rw [Function.mem_support, not_not] at *
-      have := congrFun hCon (2 + u)
-      simp [two_ne_zero] at this
-      have := two_ne_zero
-
-      sorry
-
-
-  filter_upwards [h₃g, (divisor f U).supportDiscreteWithinDomain,
+  -- Trivial case: the support of D is infinite
+  by_cases h₃f : ¬D.support.Finite
+  · rw [finsum_of_infinite_support (by simpa [t₁] using h₃f)]
+    rw [finprod_of_infinite_mulSupport
+      (by simpa [Function.FactorizedRational.mulSupport] using h₃f)] at h
+    filter_upwards [h] with x hx
+    simp [hx]
+  rw [not_not] at h₃f
+  -- General case
+  filter_upwards [h, D.supportDiscreteWithinDomain,
     codiscreteWithin_self U] with z hz h₂z h₃z
-  -- Identify finprod with prod over h₃f.toFinset
-  have : (fun u ↦ (· - u) ^ (divisor f U) u).mulSupport ⊆ h₃f.toFinset := by
-    intro u hu
-    by_contra hCon
-    simp_all only [ne_eq, Subtype.forall, Pi.smul_apply', divisor_apply, Pi.zero_apply,
-      WithTop.untopD_eq_self_iff, WithTop.coe_zero, or_false, Function.mem_mulSupport,
-      Set.Finite.coe_toFinset, Function.mem_support, Decidable.not_not, zpow_zero]
-    tauto
-  rw [hz, finprod_eq_prod_of_mulSupport_subset _ this]
-  -- Identify finsum with sum over h₃f.toFinset
-  have : (Function.support fun u ↦ (divisor f U u * log ‖· - u‖)) ⊆ h₃f.toFinset := by
-    intro u hu
-    simp_all only [ne_eq, Subtype.forall, Pi.smul_apply', divisor_apply, Pi.zero_apply,
-      WithTop.untop₀_eq_zero, or_false, Set.Finite.coe_toFinset, Function.mulSupport_subset_iff,
-      Function.mem_support]
-    by_contra hCon
-    simp_all only [Int.cast_zero, zero_mul]
-    tauto
-  rw [finsum_eq_sum_of_support_subset _ this]
-  -- Decompose LHS of the equation
-  have : ∀ x ∈ h₃f.toFinset, ‖z - x‖ ^ (divisor f U) x ≠ 0 := by
+  rw [hz, finprod_eq_prod_of_mulSupport_subset (s := h₃f.toFinset) _
+    (by simp_all [Function.FactorizedRational.mulSupport]),
+    finsum_eq_sum_of_support_subset (s := h₃f.toFinset) _ (by simp_all)]
+  have : ∀ x ∈ h₃f.toFinset, ‖z - x‖ ^ D x ≠ 0 := by
     intro x hx
     rw [Set.Finite.mem_toFinset, Function.mem_support, ne_eq] at hx
     rw [ne_eq, zpow_eq_zero_iff hx, norm_eq_zero]
@@ -180,5 +137,5 @@ theorem MeromorphicOn.extract_zeros_poles_log [CompleteSpace 𝕜] {f g : 𝕜 �
     rw [hCon] at h₂z
     tauto
   simp only [Pi.smul_apply', Finset.prod_apply, Pi.pow_apply, norm_smul, norm_prod, norm_zpow]
-  rw [log_mul (Finset.prod_ne_zero_iff.2 this) (by simp [h₂g ⟨z, h₃z⟩]), log_prod _ _ this]
+  rw [log_mul (Finset.prod_ne_zero_iff.2 this) (by simp [hg ⟨z, h₃z⟩]), log_prod _ _ this]
   simp [log_zpow]
