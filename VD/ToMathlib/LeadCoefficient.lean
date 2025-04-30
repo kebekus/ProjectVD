@@ -163,4 +163,35 @@ lemma leadCoefficient_mul {f₁ f₂ : 𝕜 → 𝕜} (hf₁ : MeromorphicAt f�
     leadCoefficient (f₁ * f₂) x = (leadCoefficient f₁ x) * (leadCoefficient f₂ x) := by
   exact leadCoefficient_smul hf₁ hf₂
 
+
+theorem MeromorphicAt.order_ne_top_iff₁ {f : 𝕜 → E} (hf : MeromorphicAt f x) :
+    hf.order ≠ ⊤ ↔ ∀ᶠ x in 𝓝[≠] x, f x ≠ 0 := by
+  constructor
+  · intro h
+    rw [hf.order_ne_top_iff] at h
+    sorry
+  · simp_all [hf.order_eq_top_iff, Eventually.frequently]
+
+
+/--
+The leading coefficient of the inverse function is the inverse of the leading
+coefficient.
+-/
+lemma leadCoefficient_inv {f : 𝕜 → 𝕜} :
+    leadCoefficient f⁻¹ x = (leadCoefficient f x)⁻¹ := by
+  by_cases h₁ : ¬MeromorphicAt f x
+  · simp_all
+  rw [not_not] at h₁
+  --
+  by_cases h₂ : h₁.order = ⊤
+  · simp_all [h₁.order_inv]
+  rw [← mul_eq_one_iff_eq_inv₀ (h₁.zero_ne_leadCoefficient h₂).symm]
+  rw [← leadCoefficient_mul h₁.inv h₁]
+  have : f⁻¹ * f =ᶠ[𝓝[≠] x] 1 := by
+    have := h₁.order_ne_top_iff.1 h₂
+    rw [h₁.order_ne_top_iff] at h₂
+    sorry
+  rw [leadCoefficient_congr_nhdNE this]
+  sorry
+
 end MeromorphicAt
