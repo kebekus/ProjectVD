@@ -170,7 +170,7 @@ lemma leadCoefficient_mul {f₁ f₂ : 𝕜 → 𝕜} (hf₁ : MeromorphicAt f�
     leadCoefficient (f₁ * f₂) x = (leadCoefficient f₁ x) * (leadCoefficient f₂ x) := by
   exact leadCoefficient_smul hf₁ hf₂
 
-theorem order_ne_top_iff₁ {f : 𝕜 → E} (hf : MeromorphicAt f x) :
+theorem order_ne_top_iff₂ {f : 𝕜 → E} (hf : MeromorphicAt f x) :
     hf.order ≠ ⊤ ↔ ∀ᶠ x in 𝓝[≠] x, f x ≠ 0 := by
   constructor
   · intro h
@@ -190,7 +190,7 @@ lemma leadCoefficient_inv {f : 𝕜 → 𝕜} :
   · by_cases h₂ : h₁.order = ⊤
     · simp_all [h₁.order_inv]
     have : f⁻¹ * f =ᶠ[𝓝[≠] x] 1 := by
-      filter_upwards [h₁.order_ne_top_iff₁.1 h₂]
+      filter_upwards [h₁.order_ne_top_iff₂.1 h₂]
       simp_all
     rw [← mul_eq_one_iff_eq_inv₀ (h₁.zero_ne_leadCoefficient h₂).symm,
       ← leadCoefficient_mul h₁.inv h₁, leadCoefficient_congr_nhdNE this,
