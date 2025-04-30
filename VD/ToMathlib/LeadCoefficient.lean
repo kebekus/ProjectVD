@@ -27,6 +27,8 @@ variable
 
 open Filter Topology
 
+namespace MeromorphicAt
+
 variable (f x) in
 /--
 If `f` is meromorphic of finite order at a point `x`, the leading coefficient is
@@ -63,6 +65,7 @@ by definition.
 Definition of the leading coefficient in case where `f` is meromorphic of finite
 order and a presentation is given.
 -/
+@[simp]
 lemma leadCoefficient_of_order_eq_finite (h₁ : MeromorphicAt f x) (h₂ : AnalyticAt 𝕜 g x)
     (h₃ : h₁.order ≠ ⊤) (h₄ : f =ᶠ[𝓝[≠] x] fun z ↦ (z - x) ^ h₁.order.untop₀ • g z) :
     leadCoefficient f x = g x := by
@@ -81,6 +84,7 @@ Variant of `leadCoefficient_of_order_eq_finite`: Definition of the leading
 coefficient in case where `f` is meromorphic of finite order and a presentation
 is given.
 -/
+@[simp]
 lemma leadCoefficient_of_order_eq_finite₁ (h₁ : AnalyticAt 𝕜 g x) (h₂ : g x ≠ 0)
     (h₃ : f =ᶠ[𝓝[≠] x] fun z ↦ (z - x) ^ n • g z) :
     leadCoefficient f x = g x := by
@@ -102,10 +106,10 @@ lemma leadCoefficient_of_order_eq_finite₁ (h₁ : AnalyticAt 𝕜 g x) (h₂ :
 If `f` is meromorphic of finite order at `x`, then the leading coefficient is
 not zero.
 -/
-lemma leadCoefficient_ne_zero (h₁ : MeromorphicAt f x) (h₂ : h₁.order ≠ ⊤) :
-    leadCoefficient f x ≠ 0 := by
+lemma zero_ne_leadCoefficient (h₁ : MeromorphicAt f x) (h₂ : h₁.order ≠ ⊤) :
+    0 ≠ leadCoefficient f x := by
   obtain ⟨g, h₁g, h₂g, h₃g⟩ := h₁.order_ne_top_iff.1 h₂
-  rwa [leadCoefficient_of_order_eq_finite₁ h₁g h₂g h₃g]
+  simpa [leadCoefficient_of_order_eq_finite₁ h₁g h₂g h₃g] using h₂g.symm
 
 /-!
 ## Congruence Lemmata
@@ -158,3 +162,5 @@ lemma leadCoefficient_mul {f₁ f₂ : 𝕜 → 𝕜} (hf₁ : MeromorphicAt f�
     (hf₂ : MeromorphicAt f₂ x) :
     leadCoefficient (f₁ * f₂) x = (leadCoefficient f₁ x) * (leadCoefficient f₂ x) := by
   exact leadCoefficient_smul hf₁ hf₂
+
+end MeromorphicAt
