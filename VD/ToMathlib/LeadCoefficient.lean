@@ -14,10 +14,7 @@ meromorphic at a point `x`, the leading coefficient is defined as the (unique!)
 value `g x` for a presentation of `f` in the form `(z - x) ^ order • g z` with
 `g` analytic at `x`.
 
-### TODOs
-
-- Characterization in terms of limits
-- Characterization in terms of Laurent series
+The lemma `leadCoefficient_eq_limit` expresses the leading term as a limit.
 -/
 
 variable
@@ -97,12 +94,38 @@ lemma _root_.AnalyticAt.leadCoefficient_of_order_eq_finite₁ (h₁ : AnalyticAt
     exact h₃
   simp_all [leadCoefficient_of_order_eq_finite h₄ h₁, this]
 
+/--
+If `f` is analytic and does not vanish at `x`, then the leading coefficient of
+`f` at `x` is `f x`.
+-/
 @[simp]
-lemma _root_.AnalyticAt.leadCoefficient_of_nonvanish (h₁ : AnalyticAt 𝕜 g x) (h₂ : g x ≠ 0) :
-    leadCoefficient g x = g x := by
+lemma _root_.AnalyticAt.leadCoefficient_of_nonvanish (h₁ : AnalyticAt 𝕜 f x) (h₂ : f x ≠ 0) :
+    leadCoefficient f x = f x := by
   rw [h₁.leadCoefficient_of_order_eq_finite₁ (n := 0) h₂]
   filter_upwards
   simp
+
+/--
+If `f` is meromorphic at `x`, then the leading coefficient of `f` at `x` is the
+limit of the function `(· - x) ^ (-h₁.order.untop₀) • f`.
+-/
+lemma leadCoefficient_eq_limit (h : MeromorphicAt f x) :
+    Tendsto ((· - x) ^ (-h.order.untop₀) • f) (𝓝[≠] x) (𝓝 (leadCoefficient f x)) := by
+  by_cases h₂ : h.order = ⊤
+  · simp_all only [WithTop.untop₀_top, neg_zero, zpow_zero, one_smul, leadCoefficient_of_order_eq_top]
+    apply Tendsto.congr' (f₁ := 0)
+    filter_upwards [h.order_eq_top_iff.1 h₂] with y hy
+    · simp_all
+    · apply Tendsto.congr' (f₁ := 0) (by rfl) continuousWithinAt_const.tendsto
+  obtain ⟨g, h₁g, h₂g, h₃g⟩ := h.order_ne_top_iff.1 h₂
+  apply Tendsto.congr' (f₁ := g)
+  · filter_upwards [h₃g, self_mem_nhdsWithin] with y h₁y h₂y
+    rw [zpow_neg, Pi.smul_apply', Pi.inv_apply, Pi.pow_apply, h₁y, ← smul_assoc, smul_eq_mul, ← zpow_neg,
+      ← zpow_add', neg_add_cancel, zpow_zero, one_smul]
+    left
+    simp_all [sub_ne_zero]
+  · rw [leadCoefficient_of_order_eq_finite h h₁g h₂ h₃g]
+    apply h₁g.continuousAt.continuousWithinAt
 
 /-!
 ## Elementary Properties
@@ -118,7 +141,7 @@ lemma zero_ne_leadCoefficient (h₁ : MeromorphicAt f x) (h₂ : h₁.order ≠ 
   simpa [h₁g.leadCoefficient_of_order_eq_finite₁ h₂g h₃g] using h₂g.symm
 
 /-!
-## Congruence Lemmata
+## Congruence Lemma
 -/
 
 /--
@@ -199,6 +222,10 @@ lemma leadCoefficient_inv {f : 𝕜 → 𝕜} :
     exact eventuallyEq_nhdsWithin_of_eqOn fun _ ↦ congrFun rfl
   · simp_all
 
+/--
+Except for edge cases, the leading coefficient of the power of a function is the
+power of the leading coefficient.
+-/
 lemma leadCoefficient_zpow₁ {f : 𝕜 → 𝕜} (h₁ : MeromorphicAt f x) (h₂ : h₁.order ≠ ⊤) :
     leadCoefficient (f ^ n) x = (leadCoefficient f x) ^ n := by
   obtain ⟨g, h₁g, h₂g, h₃g⟩ := h₁.order_ne_top_iff.1 h₂
@@ -209,17 +236,29 @@ lemma leadCoefficient_zpow₁ {f : 𝕜 → 𝕜} (h₁ : MeromorphicAt f x) (h�
   filter_upwards [h₃g] with a ha
   simp_all [ha, mul_zpow, ← zpow_mul, h₁.order_zpow, mul_comm]
 
+/--
+Except for edge cases, the leading coefficient of the power of a function is the
+power of the leading coefficient.
+-/
 lemma leadCoefficient_zpow₂ {f : 𝕜 → 𝕜} (h : MeromorphicAt f x) (hn : n ≠ 0):
     leadCoefficient (f ^ n) x = (leadCoefficient f x) ^ n := by
   by_cases h₁ : h.order = ⊤
   · simp_all [h.order_zpow, h₁, h.zpow n, zero_zpow n hn]
   apply leadCoefficient_zpow₁ h h₁
 
+/--
+Except for edge cases, the leading coefficient of the power of a function is the
+power of the leading coefficient.
+-/
 lemma leadCoefficient_pow₁ {n : ℕ} {f : 𝕜 → 𝕜} (h₁ : MeromorphicAt f x) (h₂ : h₁.order ≠ ⊤) :
     leadCoefficient (f ^ n) x = (leadCoefficient f x) ^ n := by
   convert leadCoefficient_zpow₁ h₁ h₂ (n := n)
   <;> simp
 
+/--
+Except for edge cases, the leading coefficient of the power of a function is the
+power of the leading coefficient.
+-/
 lemma leadCoefficient_pow₂ {n : ℕ} {f : 𝕜 → 𝕜} (h : MeromorphicAt f x) (hn : n ≠ 0):
     leadCoefficient (f ^ n) x = (leadCoefficient f x) ^ n := by
   convert leadCoefficient_zpow₂ h (n := n) (Int.ofNat_ne_zero.mpr hn)
