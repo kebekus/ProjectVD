@@ -1,11 +1,10 @@
 import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
 import VD.leftovers.LaurentPolynomial
-import VD.ToMathlib.Congruence_Divisor
 
 variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {U : Set 𝕜}
-  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [CompleteSpace E]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
 
 open Real
 

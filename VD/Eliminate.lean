@@ -1,6 +1,5 @@
 import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
 import VD.ToMathlib.FactorizedRational
-import VD.ToMathlib.Congruence_Divisor
 -- -----------------
 
 /--

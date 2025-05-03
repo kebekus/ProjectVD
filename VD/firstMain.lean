@@ -2,7 +2,7 @@ import Mathlib.Analysis.Meromorphic.NormalForm
 import Mathlib.MeasureTheory.Integral.CircleIntegral
 import VD.meromorphicOn_integrability
 import VD.stronglyMeromorphic_JensenFormula
-import VD.ToMathlib.CountingFunction
+import Mathlib.Analysis.Complex.ValueDistribution.CountingFunction
 
 open Real
 
@@ -56,7 +56,7 @@ noncomputable def MeromorphicOn.T_infty
   {f : ℂ → ℂ}
   (hf : MeromorphicOn f ⊤) :
   ℝ → ℝ :=
-  hf.m_infty + VD.logCounting f ⊤
+  hf.m_infty + ValueDistribution.logCounting f ⊤
 
 
 theorem Nevanlinna_firstMain₁
@@ -75,11 +75,11 @@ theorem Nevanlinna_firstMain₁
   rw [this]
   clear this
 
-  rw [← VD.logCounting_inv]
-  rw [← VD.log_counting_zero_sub_logCounting_top]
+  rw [ValueDistribution.logCounting_inv]
+  rw [← ValueDistribution.log_counting_zero_sub_logCounting_top]
   unfold Function.locallyFinsuppWithin.logCounting
-  have XX {r : ℝ} : (MeromorphicOn.divisor f ⊤).toBall r  = MeromorphicOn.divisor f (Metric.closedBall 0 |r|) := by
-    unfold Function.locallyFinsuppWithin.toBall
+  have XX {r : ℝ} : (MeromorphicOn.divisor f ⊤).toClosedBall r  = MeromorphicOn.divisor f (Metric.closedBall 0 |r|) := by
+    unfold Function.locallyFinsuppWithin.toClosedBall
     exact MeromorphicOn.divisor_restrict h₁f fun ⦃a⦄ a ↦ trivial
   simp_all
   clear XX
@@ -157,7 +157,7 @@ theorem Nevanlinna_firstMain₂
 
   have : (h₁f.T_infty r) - ((h₁f.sub (MeromorphicOn.const a)).T_infty r) = (h₁f.m_infty r) - ((h₁f.sub (MeromorphicOn.const a)).m_infty r) := by
     unfold MeromorphicOn.T_infty
-    rw [VD.logCounting_sub_const_right h₁f]
+    rw [ValueDistribution.logCounting_sub_const h₁f]
     simp
   rw [this]
   clear this
