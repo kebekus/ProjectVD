@@ -22,7 +22,7 @@ theorem IntervalIntegrable.finsum {f : ι → ℝ → E} (h : ∀ i, IntervalInt
     apply intervalIntegrable_const_iff.2
     tauto
 
-theorem MeromorphicOn.intervalIntegrable_log_norm [NormedSpace ℝ E] [CompleteSpace E] {f : ℝ → E}
+theorem MeromorphicOn.intervalIntegrable_log_norm [NormedSpace ℝ E] {f : ℝ → E}
     (hf : MeromorphicOn f [[a, b]]) :
     IntervalIntegrable (log ‖f ·‖) volume a b := by
   by_cases t₀ : ∀ u : [[a, b]], (hf u u.2).order ≠ ⊤
@@ -55,7 +55,7 @@ theorem MeromorphicOn.intervalIntegrable_log_norm [NormedSpace ℝ E] [CompleteS
     apply _root_.intervalIntegrable_const_iff.2
     tauto
 
-theorem MeromorphicOn.intervalIntegrable_posLog_norm [NormedSpace ℝ E] [CompleteSpace E] {f : ℝ → E}
+theorem MeromorphicOn.intervalIntegrable_posLog_norm [NormedSpace ℝ E] {f : ℝ → E}
     (hf : MeromorphicOn f [[a, b]]) :
     IntervalIntegrable (log⁺ ‖f ·‖) volume a b := by
   simp_rw [← half_mul_log_add_log_abs, mul_add]
@@ -95,7 +95,7 @@ theorem CircleIntegrable.finsum {f : ι → ℂ → E} (h : ∀ i, CircleIntegra
   · rw [finsum_of_infinite_support h₁]
     apply circleIntegrable_const
 
-theorem MeromorphicOn.circleIntegrable_log_norm [NormedSpace ℂ E] [CompleteSpace E] {f : ℂ → E}
+theorem MeromorphicOn.circleIntegrable_log_norm [NormedSpace ℂ E] {f : ℂ → E}
     (hf : MeromorphicOn f (sphere c |R|)) :
     CircleIntegrable (log ‖f ·‖) c R := by
   by_cases t₀ : ∀ u : (sphere c |R|), (hf u u.2).order ≠ ⊤
@@ -132,7 +132,7 @@ theorem MeromorphicOn.circleIntegrable_log_norm [NormedSpace ℂ E] [CompleteSpa
       simp_all [← h₁x.order_eq_zero_iff, t₀ ⟨x, h₂x⟩]
     apply CircleIntegrable.congr_codiscreteWithin' (circleIntegrable_const 0 c R) this.symm
 
-theorem MeromorphicOn.circleIntegrable_posLog_norm [NormedSpace ℂ E] [CompleteSpace E] {f : ℂ → E}
+theorem MeromorphicOn.circleIntegrable_posLog_norm [NormedSpace ℂ E] {f : ℂ → E}
     (hf : MeromorphicOn f (sphere c |R|)) :
     CircleIntegrable (log⁺ ‖f ·‖) c R := by
   simp_rw [← half_mul_log_add_log_abs, mul_add]

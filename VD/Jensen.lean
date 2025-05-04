@@ -1,9 +1,7 @@
 import Mathlib.Analysis.Complex.Basic
 import VD.ToMathlib.CircleAverage
 import VD.specialFunctions_CircleIntegral_affine
---import VD.stronglyMeromorphicOn_eliminate
 import VD.ToMathlib.Eliminate
-import VD.intervalIntegrability
 
 open Filter MeromorphicOn Metric Real
 

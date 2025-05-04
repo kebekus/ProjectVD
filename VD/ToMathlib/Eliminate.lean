@@ -54,7 +54,7 @@ analytic function `g` on `U` without zeros such that `f` is equivalent, modulo
 equality on codiscrete sets, to the product of `g` and the factorized rational
 function associated with the divisor of `f`.
 -/
-theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] [CompleteSpace E] {f : 𝕜 → E}
+theorem MeromorphicOn.extract_zeros_poles {f : 𝕜 → E}
     (h₁f : MeromorphicOn f U) (h₂f : ∀ u : U, (h₁f u u.2).order ≠ ⊤)
     (h₃f : (divisor f U).support.Finite) :
     ∃ g : 𝕜 → E, AnalyticOnNhd 𝕜 g U ∧ (∀ u : U, g u ≠ 0) ∧
@@ -97,7 +97,7 @@ In the setting of `MeromorphicOn.extract_zeros_poles`, the function `log ‖f‖
 equivalent, modulo equality on codiscrete subsets, to `∑ᶠ u, (divisor f U u *
 log ‖· - u‖) + log ‖g ·‖`.
 -/
-theorem MeromorphicOn.extract_zeros_poles_log [CompleteSpace 𝕜] {f g : 𝕜 → E}
+theorem MeromorphicOn.extract_zeros_poles_log {f g : 𝕜 → E}
     {D : Function.locallyFinsuppWithin U ℤ} (hg : ∀ u : U, g u ≠ 0)
     (h : f =ᶠ[codiscreteWithin U] (∏ᶠ u, (· - u) ^ D u) • g) :
     (log ‖f ·‖) =ᶠ[codiscreteWithin U] ∑ᶠ u, (D u * log ‖· - u‖) + (log ‖g ·‖) := by
