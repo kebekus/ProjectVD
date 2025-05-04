@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Meromorphic.Order
-import VD.ToMathlib.MeromorphicAt_order
 
 /-!
 # The Leading Coefficient of a Meromorphic Function

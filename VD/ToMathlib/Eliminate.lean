@@ -1,5 +1,5 @@
 import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
-import VD.ToMathlib.FactorizedRational
+import Mathlib.Analysis.Meromorphic.FactorizedRational
 -- -----------------
 
 /--
@@ -69,7 +69,7 @@ theorem MeromorphicOn.extract_zeros_poles [CompleteSpace 𝕜] [CompleteSpace E]
   · -- AnalyticOnNhd 𝕜 g U
     rw [← hg.divisor_nonneg_iff_analyticOnNhd, divisor_of_toMeromorphicNFOn (hφ.inv.smul h₁f),
       divisor_smul hφ.inv h₁f _ (fun z hz ↦ h₂f ⟨z, hz⟩), divisor_inv,
-      Function.FactorizedRational.divisor _ h₃f, neg_add_cancel]
+      Function.FactorizedRational.divisor h₃f, neg_add_cancel]
     intro z hz
     simp [(hφ z hz).order_inv, Function.FactorizedRational.order_ne_top (divisor f U)]
   · -- ∀ (u : ↑U), g ↑u ≠ 0
