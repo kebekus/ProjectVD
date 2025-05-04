@@ -3,7 +3,7 @@ import Mathlib.Analysis.SpecialFunctions.Integrals
 import Mathlib.Analysis.SpecialFunctions.Log.PosLog
 import Mathlib.Data.Complex.FiniteDimensional
 import Mathlib.MeasureTheory.Integral.CircleIntegral
-import VD.Eliminate
+import VD.ToMathlib.Eliminate
 
 open Filter Interval MeasureTheory Metric Real Topology intervalIntegral
 

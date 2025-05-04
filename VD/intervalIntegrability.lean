@@ -2,7 +2,6 @@ import Mathlib.Analysis.Analytic.Linear
 import Mathlib.MeasureTheory.Integral.CircleIntegral
 import Mathlib.MeasureTheory.Integral.IntervalAverage
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Periodic
-import VD.ToMathlib.codiscreteWithin
 
 open scoped Interval Topology
 open Real Filter MeasureTheory intervalIntegral
