@@ -2,10 +2,7 @@ import VD.Jensen
 import VD.Laplace
 import VD.ToMathlib.CircleAverage
 import VD.ToMathlib.Eliminate
-import VD.ToMathlib.FactorizedRational
 import VD.ToMathlib.LeadCoefficient
-import VD.ToMathlib.MeromorphicAt_order
-import VD.ToMathlib.codiscreteWithin
 import VD.cauchyRiemann
 import VD.firstMain
 import VD.harmonicAt
@@ -16,6 +13,7 @@ import VD.holomorphic_examples
 import VD.holomorphic_primitive
 import VD.intervalIntegrability
 import VD.laplace
+import VD.leftovers.LaurentPolynomial
 import VD.leftovers.diffOp
 import VD.leftovers.holomorphic
 import VD.meromorphicAt_topology

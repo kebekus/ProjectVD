@@ -1,5 +1,5 @@
 import VD.leftovers.LaurentPolynomial
-import VD.ToMathlib.codiscreteWithin
+--import VD.ToMathlib.codiscreteWithin
 import Mathlib.Analysis.Meromorphic.NormalForm
 import Mathlib.Analysis.Complex.Basic
 
@@ -163,7 +163,7 @@ theorem MeromorphicOn.decompose₂
       funext w
       simp
     rw [this]
-    apply Finset.analyticAt_prod
+    apply Finset.analyticAt_fun_prod
     intro p hp
     apply AnalyticAt.zpow
     fun_prop
