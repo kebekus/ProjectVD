@@ -1,7 +1,7 @@
 import Mathlib.Analysis.Meromorphic.FactorizedRational
 import VD.ToMathlib.LeadCoefficient
 
-open Function.FactorizedRational MeromorphicAt MeromorphicOn
+open Function.FactorizedRational MeromorphicAt MeromorphicOn Topology
 
 variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜]
@@ -62,7 +62,15 @@ theorem Function.FactorizedRational.leadCoefficient {d : 𝕜 → ℤ} {x : 𝕜
   · by_contra hCon
     simp_all [sub_eq_zero]
   --
-
-  rw [MeromorphicAt.order_ne_top_iff]
-  sorry
+  rw [MeromorphicAt.order_ne_top_iff₂]
+  apply mem_nhdsWithin.2
+  by_cases h : x = y
+  · use Set.univ
+    simp only [isOpen_univ, Set.mem_univ, Set.univ_inter, ne_eq, true_and]
+    intro z hz
+    simp_all
+  · use {y}ᶜ, isOpen_compl_singleton
+    simp only [Set.mem_compl_iff, Set.mem_singleton_iff, h, not_false_eq_true, ne_eq, true_and]
+    intro z hz
+    simp_all [sub_eq_zero]
   exact fun _ ↦ by fun_prop
