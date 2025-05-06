@@ -47,30 +47,27 @@ theorem Function.FactorizedRational.leadCoefficient {d : 𝕜 → ℤ} {x : 𝕜
     (h₁ : d.support.Finite) (h₂ : x ∉ d.support) :
     leadCoefficient (∏ᶠ u, (· - u) ^ d u) x = ∏ᶠ u, (x - u) ^ d u := by
   have : (fun u ↦ (· - u) ^ d u).mulSupport ⊆ h₁.toFinset := by
-    sorry
-  rw [finprod_eq_prod_of_mulSupport_subset _ this]
-  rw [leadCoefficient_prod]
+    simp [mulSupport]
+  rw [finprod_eq_prod_of_mulSupport_subset _ this, leadCoefficient_prod (fun _ ↦ by fun_prop)]
   have : (fun u ↦ (x - u) ^ d u).mulSupport ⊆ h₁.toFinset := by
-    sorry
+    intro u
+    contrapose
+    simp_all
   rw [finprod_eq_prod_of_mulSupport_subset _ this]
   apply Finset.prod_congr rfl
   intro y hy
-  rw [leadCoefficient_zpow₁ (by fun_prop)]
-  congr
-  rw [AnalyticAt.leadCoefficient_of_nonvanish (by fun_prop)]
-  --
-  · by_contra hCon
-    simp_all [sub_eq_zero]
-  --
-  rw [MeromorphicAt.order_ne_top_iff₂]
-  apply mem_nhdsWithin.2
-  by_cases h : x = y
-  · use Set.univ
-    simp only [isOpen_univ, Set.mem_univ, Set.univ_inter, ne_eq, true_and]
-    intro z hz
+  have : x ≠ y := by
+    by_contra hCon
     simp_all
-  · use {y}ᶜ, isOpen_compl_singleton
-    simp only [Set.mem_compl_iff, Set.mem_singleton_iff, h, not_false_eq_true, ne_eq, true_and]
-    intro z hz
-    simp_all [sub_eq_zero]
-  exact fun _ ↦ by fun_prop
+  have t₁ : MeromorphicAt (· - y) x := (analyticAt_id.fun_sub analyticAt_const).meromorphicAt
+  have t₂ : t₁.order ≠ ⊤ := by
+    rw [MeromorphicAt.order_ne_top_iff₂]
+    apply mem_nhdsWithin.2
+    use {y}ᶜ, isOpen_compl_singleton
+    constructor
+    · simp_all
+    · intro z hz
+      simp_all [sub_eq_zero]
+  rw [leadCoefficient_zpow₁ (by fun_prop) t₂,
+    AnalyticAt.leadCoefficient_of_nonvanish (by fun_prop)]
+  simp_all [sub_eq_zero]
