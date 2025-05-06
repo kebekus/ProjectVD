@@ -1,3 +1,4 @@
+import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import Mathlib.Analysis.Meromorphic.FactorizedRational
 import VD.ToMathlib.LeadCoefficient
 
@@ -71,3 +72,93 @@ theorem Function.FactorizedRational.leadCoefficient {d : 𝕜 → ℤ} {x : 𝕜
   rw [leadCoefficient_zpow₁ (by fun_prop) t₂,
     AnalyticAt.leadCoefficient_of_nonvanish (by fun_prop)]
   simp_all [sub_eq_zero]
+
+open Classical
+
+theorem leadCoefficientx {d : 𝕜 → ℤ} {x : 𝕜} (h : d.support.Finite) :
+    leadCoefficient (∏ᶠ u, (· - u) ^ d u) x = ∏ᶠ u, (x - u) ^ Function.update d x 0 u := by
+  have : (fun u ↦ (· - u) ^ d u).mulSupport ⊆ h.toFinset := by
+    simp [mulSupport]
+  rw [finprod_eq_prod_of_mulSupport_subset _ this, leadCoefficient_prod (fun _ ↦ by fun_prop)]
+  have : (fun u ↦ (x - u) ^ Function.update d x 0 u).mulSupport ⊆ h.toFinset := by
+    intro u
+    contrapose
+    intro hu
+    simp_all
+    by_cases h₁ : u = x
+    · rw [h₁]
+      simp
+    · simp_all
+  rw [finprod_eq_prod_of_mulSupport_subset _ this]
+  apply Finset.prod_congr rfl
+  intro y hy
+  have t₁ : MeromorphicAt (· - y) x := (analyticAt_id.fun_sub analyticAt_const).meromorphicAt
+  by_cases hxy : x = y
+  · have t₂ : t₁.order ≠ ⊤ := by
+      rw [MeromorphicAt.order_ne_top_iff₂]
+      apply mem_nhdsWithin.2
+      use Set.univ
+      simp
+      rw [hxy]
+      intro z hz
+      simp_all [sub_eq_zero]
+    rw [leadCoefficient_zpow₁ (by fun_prop) t₂, hxy]
+    simp
+    convert one_zpow (d y)
+    apply AnalyticAt.leadCoefficient_of_order_eq_finite₁ (n := 1) (by fun_prop) (by apply one_ne_zero)
+    simp
+  have t₂ : t₁.order ≠ ⊤ := by
+    rw [MeromorphicAt.order_ne_top_iff₂]
+    apply mem_nhdsWithin.2
+    use {y}ᶜ, isOpen_compl_singleton
+    constructor
+    · simp_all
+    · intro z hz
+      simp_all [sub_eq_zero]
+  rw [leadCoefficient_zpow₁ (by fun_prop) t₂,
+    AnalyticAt.leadCoefficient_of_nonvanish (by fun_prop)]
+  simp_all [sub_eq_zero]
+  have : Function.update d x 0 y = d y := by
+    exact Function.update_of_ne (fun a ↦ hxy (_root_.id (Eq.symm a))) 0 d
+  simp_all [sub_eq_zero]
+  simp_all [sub_eq_zero]
+
+theorem log_norm_leadCoefficient {d : 𝕜 → ℤ} {x : 𝕜} (h : d.support.Finite) :
+    Real.log ‖leadCoefficient (∏ᶠ u, (· - u) ^ d u) x‖ = ∑ᶠ u, (d u) * Real.log ‖x - u‖ := by
+  rw [leadCoefficientx h]
+  have : (fun u ↦ (x - u) ^ Function.update d x 0 u).mulSupport ⊆ h.toFinset := by
+    intro u
+    contrapose
+    intro hu
+    simp_all
+    by_cases h₁ : u = x
+    · rw [h₁]
+      simp
+    · simp_all
+  rw [finprod_eq_prod_of_mulSupport_subset _ this]
+  have : ∀ y ∈ h.toFinset, ‖(x - y) ^ Function.update d x 0 y‖ ≠ 0 := by
+    intro y hy
+    simp_all
+    by_cases h : x = y
+    · rw [h]
+      simp
+    · rw [Function.update_of_ne]
+      apply zpow_ne_zero
+      simpa [sub_eq_zero]
+      tauto
+  rw [norm_prod, Real.log_prod _ _ this]
+  --
+  have : (Function.support fun u ↦ ↑(d u) * Real.log ‖x - u‖) ⊆ h.toFinset := by
+    intro u
+    contrapose
+    simp_all
+  rw [finsum_eq_sum_of_support_subset _ this]
+  --
+  apply Finset.sum_congr rfl
+  intro y hy
+  rw [norm_zpow, Real.log_zpow]
+  by_cases h : x = y
+  · simp [h]
+  · congr
+    apply Function.update_of_ne
+    tauto
