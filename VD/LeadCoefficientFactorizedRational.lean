@@ -2,7 +2,7 @@ import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import Mathlib.Analysis.Meromorphic.FactorizedRational
 import VD.ToMathlib.LeadCoefficient
 
-open Function.FactorizedRational MeromorphicAt MeromorphicOn Topology
+open Function Function.FactorizedRational MeromorphicAt MeromorphicOn Real Topology
 
 variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜]
@@ -76,9 +76,9 @@ theorem Function.FactorizedRational.leadCoefficient {d : 𝕜 → ℤ} {x : 𝕜
 open Classical
 
 theorem leadCoefficientx {d : 𝕜 → ℤ} {x : 𝕜} (h : d.support.Finite) :
-    leadCoefficient (∏ᶠ u, (· - u) ^ d u) x = ∏ᶠ u, (x - u) ^ Function.update d x 0 u := by
+    leadCoefficient (∏ᶠ u, (· - u) ^ d u) x = ∏ᶠ u, (x - u) ^ update d x 0 u := by
   have : (fun u ↦ (· - u) ^ d u).mulSupport ⊆ h.toFinset := by
-    simp [mulSupport]
+    simp [Function.FactorizedRational.mulSupport]
   rw [finprod_eq_prod_of_mulSupport_subset _ this, leadCoefficient_prod (fun _ ↦ by fun_prop)]
   have : (fun u ↦ (x - u) ^ Function.update d x 0 u).mulSupport ⊆ h.toFinset := by
     intro u
@@ -124,9 +124,9 @@ theorem leadCoefficientx {d : 𝕜 → ℤ} {x : 𝕜} (h : d.support.Finite) :
   simp_all [sub_eq_zero]
 
 theorem log_norm_leadCoefficient {d : 𝕜 → ℤ} {x : 𝕜} (h : d.support.Finite) :
-    Real.log ‖leadCoefficient (∏ᶠ u, (· - u) ^ d u) x‖ = ∑ᶠ u, (d u) * Real.log ‖x - u‖ := by
+    log ‖leadCoefficient (∏ᶠ u, (· - u) ^ d u) x‖ = ∑ᶠ u, (d u) * log ‖x - u‖ := by
   rw [leadCoefficientx h]
-  have : (fun u ↦ (x - u) ^ Function.update d x 0 u).mulSupport ⊆ h.toFinset := by
+  have : (fun u ↦ (x - u) ^ update d x 0 u).mulSupport ⊆ h.toFinset := by
     intro u
     contrapose
     intro hu
@@ -136,19 +136,16 @@ theorem log_norm_leadCoefficient {d : 𝕜 → ℤ} {x : 𝕜} (h : d.support.Fi
       simp
     · simp_all
   rw [finprod_eq_prod_of_mulSupport_subset _ this]
-  have : ∀ y ∈ h.toFinset, ‖(x - y) ^ Function.update d x 0 y‖ ≠ 0 := by
+  have : ∀ y ∈ h.toFinset, ‖(x - y) ^ update d x 0 y‖ ≠ 0 := by
     intro y hy
     simp_all
     by_cases h : x = y
     · rw [h]
-      simp
-    · rw [Function.update_of_ne]
-      apply zpow_ne_zero
-      simpa [sub_eq_zero]
-      tauto
-  rw [norm_prod, Real.log_prod _ _ this]
+      simp_all
+    · simp_all [update_of_ne (by tauto), zpow_ne_zero, sub_ne_zero]
+  rw [norm_prod, log_prod _ _ this]
   --
-  have : (Function.support fun u ↦ ↑(d u) * Real.log ‖x - u‖) ⊆ h.toFinset := by
+  have : (fun u ↦ (d u) * log ‖x - u‖).support ⊆ h.toFinset := by
     intro u
     contrapose
     simp_all
