@@ -1,6 +1,7 @@
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import Mathlib.Analysis.Meromorphic.FactorizedRational
 import VD.ToMathlib.LeadCoefficient
+import VD.ToMathlib.Eliminate
 
 open Classical Function Function.FactorizedRational MeromorphicAt MeromorphicOn Real Topology
 
@@ -153,3 +154,18 @@ theorem log_norm_leadCoefficient {d : 𝕜 → ℤ} {x : 𝕜} (h : d.support.Fi
   by_cases h : x = y
   · simp [h]
   · rw [Function.update_of_ne (by tauto)]
+
+/-!
+# Special Terms in Elimination
+-/
+
+theorem MeromorphicOn.extract_zeros_poles_centralTerm
+    {U : Set 𝕜} {x : 𝕜} {f g : 𝕜 → E}
+    {D : Function.locallyFinsuppWithin U ℤ}
+    (h₁f : MeromorphicOn f U)
+    (h₂f : ∀ u : U, (h₁f u u.2).order ≠ ⊤)
+    (h₁g : AnalyticOnNhd 𝕜 g U)
+    (h₂g : ∀ u : U, g u ≠ 0)
+    (h₃g : f =ᶠ[Filter.codiscreteWithin U] (∏ᶠ u, (· - u) ^ D u) • g) :
+    g x = 0 := by
+  sorry
