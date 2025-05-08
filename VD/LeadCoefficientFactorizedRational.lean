@@ -217,13 +217,13 @@ theorem MeromorphicAt.eventuallyEq_nhdNE_of_eventuallyEq_codiscreteWithin
 # Special Terms in Elimination
 -/
 
-theorem MeromorphicOn.extract_zeros_poles_centralTerm
+theorem MeromorphicOn.extract_zeros_poles_leadCoefficient
     {U : Set 𝕜} {x : 𝕜} {f g : 𝕜 → E}
     {D : Function.locallyFinsuppWithin U ℤ}
+    (hD : D.support.Finite)
     (h₁x : x ∈ U)
     (h₂x : Uᶜ ∉ 𝓝[≠] x)
     (h₁f : MeromorphicOn f U)
-    (h₂f : ∀ u : U, (h₁f u u.2).order ≠ ⊤)
     (h₁g : AnalyticOnNhd 𝕜 g U)
     (h₂g : ∀ u : U, g u ≠ 0)
     (h₃g : f =ᶠ[Filter.codiscreteWithin U] (∏ᶠ u, (· - u) ^ D u) • g) :
@@ -236,5 +236,41 @@ theorem MeromorphicOn.extract_zeros_poles_centralTerm
     (h₁f x h₁x) t₀ h₁x h₂x h₃g
   rw [leadCoefficient_congr_nhdNE t₁]
   rw [MeromorphicAt.leadCoefficient_smul ((FactorizedRational.meromorphicNFOn D U).meromorphicOn x h₁x)
-    ]
-  sorry
+    (h₁g x h₁x).meromorphicAt]
+  rw [(h₁g x h₁x).leadCoefficient_of_nonvanish (h₂g ⟨x, h₁x⟩)]
+  congr
+  apply Function.FactorizedRational.leadCoefficient hD
+
+theorem MeromorphicOn.extract_zeros_poles_leadCoefficient_log_norm
+    {U : Set 𝕜} {x : 𝕜} {f g : 𝕜 → E}
+    {D : Function.locallyFinsuppWithin U ℤ}
+    (hD : D.support.Finite)
+    (h₁x : x ∈ U)
+    (h₂x : Uᶜ ∉ 𝓝[≠] x)
+    (h₁f : MeromorphicOn f U)
+    (h₁g : AnalyticOnNhd 𝕜 g U)
+    (h₂g : ∀ u : U, g u ≠ 0)
+    (h₃g : f =ᶠ[Filter.codiscreteWithin U] (∏ᶠ u, (· - u) ^ D u) • g) :
+    log ‖leadCoefficient f x‖ = ∑ᶠ u, (D u) * log ‖x - u‖ + log ‖g x‖ := by
+  have t₀ : MeromorphicAt ((∏ᶠ u, (· - u) ^ D u) • g) x := by
+    apply MeromorphicAt.smul
+    apply (FactorizedRational.meromorphicNFOn D U).meromorphicOn x h₁x
+    apply (h₁g x h₁x).meromorphicAt
+  have t₁ := MeromorphicAt.eventuallyEq_nhdNE_of_eventuallyEq_codiscreteWithin
+    (h₁f x h₁x) t₀ h₁x h₂x h₃g
+  rw [leadCoefficient_congr_nhdNE t₁]
+  rw [MeromorphicAt.leadCoefficient_smul ((FactorizedRational.meromorphicNFOn D U).meromorphicOn x h₁x)
+    (h₁g x h₁x).meromorphicAt]
+  rw [(h₁g x h₁x).leadCoefficient_of_nonvanish (h₂g ⟨x, h₁x⟩)]
+  rw [norm_smul]
+  rw [log_mul]
+  congr
+  apply log_norm_leadCoefficient hD
+  --
+  simp
+  rw [eq_comm]
+  apply MeromorphicAt.zero_ne_leadCoefficient
+    ((FactorizedRational.meromorphicNFOn D U).meromorphicOn x h₁x)
+  apply FactorizedRational.order_ne_top
+  --
+  simp_all
