@@ -220,10 +220,21 @@ theorem MeromorphicAt.eventuallyEq_nhdNE_of_eventuallyEq_codiscreteWithin
 theorem MeromorphicOn.extract_zeros_poles_centralTerm
     {U : Set 𝕜} {x : 𝕜} {f g : 𝕜 → E}
     {D : Function.locallyFinsuppWithin U ℤ}
+    (h₁x : x ∈ U)
+    (h₂x : Uᶜ ∉ 𝓝[≠] x)
     (h₁f : MeromorphicOn f U)
     (h₂f : ∀ u : U, (h₁f u u.2).order ≠ ⊤)
     (h₁g : AnalyticOnNhd 𝕜 g U)
     (h₂g : ∀ u : U, g u ≠ 0)
     (h₃g : f =ᶠ[Filter.codiscreteWithin U] (∏ᶠ u, (· - u) ^ D u) • g) :
-    g x = 0 := by
+    leadCoefficient f x = (∏ᶠ u, (x - u) ^ update D x 0 u) • g x := by
+  have t₀ : MeromorphicAt ((∏ᶠ u, (· - u) ^ D u) • g) x := by
+    apply MeromorphicAt.smul
+    apply (FactorizedRational.meromorphicNFOn D U).meromorphicOn x h₁x
+    apply (h₁g x h₁x).meromorphicAt
+  have t₁ := MeromorphicAt.eventuallyEq_nhdNE_of_eventuallyEq_codiscreteWithin
+    (h₁f x h₁x) t₀ h₁x h₂x h₃g
+  rw [leadCoefficient_congr_nhdNE t₁]
+  rw [MeromorphicAt.leadCoefficient_smul ((FactorizedRational.meromorphicNFOn D U).meromorphicOn x h₁x)
+    ]
   sorry
