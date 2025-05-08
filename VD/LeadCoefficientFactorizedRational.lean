@@ -156,6 +156,33 @@ theorem log_norm_leadCoefficient {d : 𝕜 → ℤ} {x : 𝕜} (h : d.support.Fi
   · rw [Function.update_of_ne (by tauto)]
 
 /-!
+# MeromorphicAt
+-/
+
+theorem MeromorphicAt.frequently_zero_iff_eventually_zero {f : 𝕜 → E} {x : 𝕜}
+    (hf : MeromorphicAt f x) :
+    (∃ᶠ z in 𝓝[≠] x, f z = 0) ↔ ∀ᶠ z in 𝓝[≠] x, f z = 0 :=
+  ⟨hf.eventually_eq_zero_or_eventually_ne_zero.resolve_right,
+    fun h ↦ h.frequently⟩
+
+theorem MeromorphicAt.eventuallyEq_nhdNE_of_eventuallyEq_codiscreteWithin
+    {U : Set 𝕜} {x : 𝕜} {f g : 𝕜 → E}
+    (h₁f : MeromorphicOn f U)
+    (h₁x : x ∈ U)
+    (h₃g : f =ᶠ[Filter.codiscreteWithin U] 0) :
+    f =ᶠ[𝓝[≠] x] 0 := by
+  rw [← MeromorphicAt.frequently_zero_iff_eventually_zero (h₁f x h₁x)]
+
+  sorry
+
+
+theorem MeromorphicAt.frequently_eq_iff_eventually_eq {f g : 𝕜 → E} {x : 𝕜}
+    (hf : MeromorphicAt f x) (hg : MeromorphicAt g x) :
+    (∃ᶠ z in 𝓝[≠] x, f z = g z) ↔ f =ᶠ[𝓝[≠] x] g := by
+  simpa [sub_eq_zero] using frequently_zero_iff_eventually_zero (hf.sub hg)
+
+
+/-!
 # Special Terms in Elimination
 -/
 
