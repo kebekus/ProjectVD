@@ -13,7 +13,8 @@ variable
 ## Theorems concerning MeromorphicAt
 -/
 
-theorem meromorphicAt_prod  {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → 𝕜} {x : 𝕜}
+/-- Finite products of meromorphic functions are analytic. -/
+theorem Finset.meromorphicAt_prod  {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → 𝕜} {x : 𝕜}
     (h : ∀ σ, MeromorphicAt (f σ) x) :
     MeromorphicAt (∏ n ∈ s, f n) x := by
   classical
@@ -24,9 +25,24 @@ theorem meromorphicAt_prod  {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → �
     rw [Finset.prod_insert hσ]
     exact (h σ).mul hind
 
-/-!
-# MeromorphicAt
--/
+/-- Finite products of meromorphic functions are analytic. -/
+theorem Finset.meromorphicAt_fun_prod  {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → 𝕜} {x : 𝕜}
+    (h : ∀ σ, MeromorphicAt (f σ) x) :
+    MeromorphicAt (fun z ↦ ∏ n ∈ s, f n z) x := by
+  convert s.meromorphicAt_prod h
+  simp
+
+/-- Finite products of meromorphic functions are analytic. -/
+theorem Finset.meromorphicOn_prod {U : Set 𝕜} {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → 𝕜}
+    (h : ∀ σ, MeromorphicOn (f σ) U) :
+    MeromorphicOn (∏ n ∈ s, f n) U :=
+  fun z hz ↦ s.meromorphicAt_prod (fun σ ↦ h σ z hz)
+
+/-- Finite products of meromorphic functions are analytic. -/
+theorem Finset.meromorphicOn_fun_prod {U : Set 𝕜} {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → 𝕜}
+    (h : ∀ σ, MeromorphicOn (f σ) U) :
+    MeromorphicOn (fun z ↦ ∏ n ∈ s, f n z) U :=
+  fun z hz ↦ s.meromorphicAt_fun_prod (fun σ ↦ h σ z hz)
 
 theorem MeromorphicAt.frequently_zero_iff_eventually_zero {f : 𝕜 → E} {x : 𝕜}
     (hf : MeromorphicAt f x) :
@@ -40,10 +56,13 @@ assume that `x ∈ U` is not an isolated point of `U`. If a function `f` is
 meromorphic at `x` and vanishes along a subset that is codiscrete within `U`,
 then `f` vanishes in a punctured neighbourhood of `f`.
 
-For a typical application, let `U` be the closure of the Mandelbrot set and let
-`x` be a point in its frontier. If `f` is meromorphic at `x` and vanishes on
-`U`, then it will vanish in a punctured neighbourhood of `x`, even though this
-neighbourhood is not contained in `U`.
+For a typical application, let `U` be a closed ball and let `x` be a point on
+the circumference. If `f` is meromorphic at `x` and vanishes on `U`, then it
+will vanish in a punctured neighbourhood of `x`, which intersects `U`
+non-trivally but is not contained in `U`.
+
+The assumption that `x` is not an isolated point of `U` is expressed in `h₂x` as
+`Uᶜ ∉ 𝓝[≠] x`.
 -/
 theorem MeromorphicAt.eventuallyEq_zero_nhdNE_of_eventuallyEq_zero_codiscreteWithin
     {U : Set 𝕜} {x : 𝕜} {f : 𝕜 → E}
@@ -104,7 +123,7 @@ theorem leadCoefficient_prod {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → �
   · simp only [Finset.univ_eq_empty, Finset.prod_empty, forall_const]
     apply leadCoefficient_const
   · intro σ s₁ hσ hind
-    rw [Finset.prod_insert hσ, Finset.prod_insert hσ, leadCoefficient_mul (h σ) (meromorphicAt_prod h),
+    rw [Finset.prod_insert hσ, Finset.prod_insert hσ, leadCoefficient_mul (h σ) (Finset.meromorphicAt_prod h),
       hind]
 
 /-!
