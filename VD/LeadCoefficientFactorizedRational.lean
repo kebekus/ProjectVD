@@ -39,12 +39,11 @@ theorem leadCoefficient_prod {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → �
 ## Theorems concerning Affine Functions
 -/
 
-theorem meromorphicOn_affine {y : 𝕜} :
-    MeromorphicOn (· - y) Set.univ :=
-  fun _ _ ↦ by fun_prop
+theorem meromorphicAt_affine (y x : 𝕜) :
+    MeromorphicAt (· - y) x := by fun_prop
 
 theorem MeromorphicAt.order_affine {x y : 𝕜} :
-    (meromorphicOn_affine (y := y) x (by tauto)).order ≠ ⊤ := by
+    (meromorphicAt_affine y x).order ≠ ⊤ := by
   rw [MeromorphicAt.order_ne_top_iff₂]
   apply mem_nhdsWithin.2
   by_cases h : x = y
