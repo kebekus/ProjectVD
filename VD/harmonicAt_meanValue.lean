@@ -3,7 +3,9 @@ import Mathlib.Topology.MetricSpace.Thickening
 import Mathlib.Analysis.Complex.CauchyIntegral
 import VD.holomorphic_examples
 import VD.intervalIntegrability
-import VD.ToMathlib.CircleAverage
+import Mathlib.MeasureTheory.Integral.CircleAverage
+
+open Real
 
 theorem harmonic_meanValue
   {f : ℂ → ℝ}

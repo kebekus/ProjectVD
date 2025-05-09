@@ -1,5 +1,5 @@
 import Mathlib.Analysis.Complex.Basic
-import VD.ToMathlib.CircleAverage
+import Mathlib.MeasureTheory.Integral.CircleAverage
 import VD.specialFunctions_CircleIntegral_affine
 import VD.ToMathlib.Eliminate
 
@@ -28,7 +28,7 @@ theorem circleAverage_logAbs_affine
     {R : ℝ} {c u : ℂ}
     (hu : u ∈ closedBall c |R|) :
     circleAverage (log ‖· - u‖) c R = log R := by
-  rw [circleAverage_shiftCenter]
+  rw [← circleAverage_fun_add]
   have : (fun z ↦ log ‖z + c - u‖) = (log ‖· - (u - c)‖) := by
     ext z
     congr 2
@@ -67,7 +67,7 @@ theorem circleAverage_logAbs_factorizedRational {R : ℝ} {c : ℂ}
   apply Finset.sum_congr rfl
   intro u hu
   simp_rw [← smul_eq_mul]
-  rw [circleAverage_smul_fun]
+  rw [circleAverage_fun_smul]
   congr
   apply circleAverage_logAbs_affine
   apply D.supportWithinDomain
