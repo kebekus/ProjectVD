@@ -1,5 +1,4 @@
 import Mathlib.Analysis.Meromorphic.Basic
-import VD.ToMathlib.FinprodMeromorphic
 
 open Topology
 

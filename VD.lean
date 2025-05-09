@@ -1,9 +1,9 @@
+import VD.IsolatedZeros
 import VD.Jensen
 import VD.Laplace2
 import VD.LeadCoefficientFactorizedRational
 import VD.ToMathlib.CircleAverage
 import VD.ToMathlib.Eliminate
-import VD.ToMathlib.FinprodMeromorphic
 import VD.ToMathlib.LeadCoefficient
 import VD.cauchyRiemann
 import VD.firstMain

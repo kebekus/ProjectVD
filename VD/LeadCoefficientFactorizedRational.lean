@@ -2,7 +2,6 @@ import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import Mathlib.Analysis.Meromorphic.FactorizedRational
 import VD.ToMathlib.LeadCoefficient
 import VD.ToMathlib.Eliminate
-import VD.ToMathlib.FinprodMeromorphic
 import VD.IsolatedZeros
 
 open Classical Function Function.FactorizedRational MeromorphicAt MeromorphicOn Real Topology
@@ -33,7 +32,7 @@ theorem leadCoefficient_prod {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → �
   · simp only [Finset.univ_eq_empty, Finset.prod_empty, forall_const]
     apply leadCoefficient_const
   · intro σ s₁ hσ hind
-    rw [Finset.prod_insert hσ, Finset.prod_insert hσ, leadCoefficient_mul (h σ) (Finset.meromorphicAt_prod h),
+    rw [Finset.prod_insert hσ, Finset.prod_insert hσ, leadCoefficient_mul (h σ) (MeromorphicAt.prod h),
       hind]
 
 /-!
