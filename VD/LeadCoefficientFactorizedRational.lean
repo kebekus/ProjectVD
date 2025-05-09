@@ -25,6 +25,64 @@ theorem meromorphicAt_prod  {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → �
     exact (h σ).mul hind
 
 /-!
+# MeromorphicAt
+-/
+
+theorem MeromorphicAt.frequently_zero_iff_eventually_zero {f : 𝕜 → E} {x : 𝕜}
+    (hf : MeromorphicAt f x) :
+    (∃ᶠ z in 𝓝[≠] x, f z = 0) ↔ f =ᶠ[𝓝[≠] x] 0 :=
+  ⟨hf.eventually_eq_zero_or_eventually_ne_zero.resolve_right,
+    fun h ↦ h.frequently⟩
+
+/--
+Variant of the principle of isolated zeros: Let `U` be a subset of `𝕜` and
+assume that `x ∈ U` is not an isolated point of `U`. If a function `f` is
+meromorphic at `x` and vanishes along a subset that is codiscrete within `U`,
+then `f` vanishes in a punctured neighbourhood of `f`.
+
+For a typical application, let `U` be the closure of the Mandelbrot set and let
+`x` be a point in its frontier. If `f` is meromorphic at `x` and vanishes on
+`U`, then it will vanish in a punctured neighbourhood of `x`, even though this
+neighbourhood is not contained in `U`.
+-/
+theorem MeromorphicAt.eventuallyEq_zero_nhdNE_of_eventuallyEq_zero_codiscreteWithin
+    {U : Set 𝕜} {x : 𝕜} {f : 𝕜 → E}
+    (hf : MeromorphicAt f x)
+    (h₁x : x ∈ U)
+    (h₂x : Uᶜ ∉ 𝓝[≠] x)
+    (h : f =ᶠ[Filter.codiscreteWithin U] 0) :
+    f =ᶠ[𝓝[≠] x] 0 := by
+  rw [← (hf).frequently_zero_iff_eventually_zero]
+  by_contra hCon
+  rw [Filter.EventuallyEq, Filter.Eventually, mem_codiscreteWithin] at h
+  have := h x h₁x
+  simp only [Pi.zero_apply, Filter.disjoint_principal_right, Set.compl_diff] at this
+  have := Filter.inter_mem (Filter.not_frequently.1 hCon) this
+  simp_all [Set.inter_union_distrib_left, (by tauto_set : {x | ¬f x = 0} ∩ {x | f x = 0} = ∅)]
+
+/--
+Variant of the principle of isolated zeros: Let `U` be a subset of `𝕜` and
+assume that `x ∈ U` is not an isolated point of `U`. If a function `f` is
+meromorphic at `x` and vanishes along a subset that is codiscrete within `U`,
+then `f` vanishes in a punctured neighbourhood of `f`.
+
+For a typical application, let `U` be the closure of the Mandelbrot set and let
+`x` be a point in its frontier. If `f` is meromorphic at `x` and vanishes on
+`U`, then it will vanish in a punctured neighbourhood of `x`, even though this
+neighbourhood is not contained in `U`.
+-/
+theorem MeromorphicAt.eventuallyEq_nhdNE_of_eventuallyEq_codiscreteWithin
+    {U : Set 𝕜} {x : 𝕜} {f g : 𝕜 → E}
+    (hf : MeromorphicAt f x)
+    (hg : MeromorphicAt g x)
+    (h₁x : x ∈ U)
+    (h₂x : Uᶜ ∉ 𝓝[≠] x)
+    (h : f =ᶠ[Filter.codiscreteWithin U] g) :
+    f =ᶠ[𝓝[≠] x] g := by
+  rw [Filter.eventuallyEq_iff_sub] at *
+  apply (hf.sub hg).eventuallyEq_zero_nhdNE_of_eventuallyEq_zero_codiscreteWithin h₁x h₂x h
+
+/-!
 ## Theorems concerning the Leading Coefficient
 -/
 
@@ -156,64 +214,6 @@ theorem log_norm_leadCoefficient {d : 𝕜 → ℤ} {x : 𝕜} (h : d.support.Fi
   · rw [Function.update_of_ne (by tauto)]
 
 /-!
-# MeromorphicAt
--/
-
-theorem MeromorphicAt.frequently_zero_iff_eventually_zero {f : 𝕜 → E} {x : 𝕜}
-    (hf : MeromorphicAt f x) :
-    (∃ᶠ z in 𝓝[≠] x, f z = 0) ↔ f =ᶠ[𝓝[≠] x] 0 :=
-  ⟨hf.eventually_eq_zero_or_eventually_ne_zero.resolve_right,
-    fun h ↦ h.frequently⟩
-
-/--
-Variant of the principle of isolated zeros: Let `U` be a subset of `𝕜` and
-assume that `x ∈ U` is not an isolated point of `U`. If a function `f` is
-meromorphic at `x` and vanishes along a subset that is codiscrete within `U`,
-then `f` vanishes in a punctured neighbourhood of `f`.
-
-For a typical application, let `U` be the closure of the Mandelbrot set and let
-`x` be a point in its frontier. If `f` is meromorphic at `x` and vanishes on
-`U`, then it will vanish in a punctured neighbourhood of `x`, even though this
-neighbourhood is not contained in `U`.
--/
-theorem MeromorphicAt.eventuallyEq_zero_nhdNE_of_eventuallyEq_zero_codiscreteWithin
-    {U : Set 𝕜} {x : 𝕜} {f : 𝕜 → E}
-    (hf : MeromorphicAt f x)
-    (h₁x : x ∈ U)
-    (h₂x : Uᶜ ∉ 𝓝[≠] x)
-    (h : f =ᶠ[Filter.codiscreteWithin U] 0) :
-    f =ᶠ[𝓝[≠] x] 0 := by
-  rw [← (hf).frequently_zero_iff_eventually_zero]
-  by_contra hCon
-  rw [Filter.EventuallyEq, Filter.Eventually, mem_codiscreteWithin] at h
-  have := h x h₁x
-  simp only [Pi.zero_apply, Filter.disjoint_principal_right, Set.compl_diff] at this
-  have := Filter.inter_mem (Filter.not_frequently.1 hCon) this
-  simp_all [Set.inter_union_distrib_left, (by tauto_set : {x | ¬f x = 0} ∩ {x | f x = 0} = ∅)]
-
-/--
-Variant of the principle of isolated zeros: Let `U` be a subset of `𝕜` and
-assume that `x ∈ U` is not an isolated point of `U`. If a function `f` is
-meromorphic at `x` and vanishes along a subset that is codiscrete within `U`,
-then `f` vanishes in a punctured neighbourhood of `f`.
-
-For a typical application, let `U` be the closure of the Mandelbrot set and let
-`x` be a point in its frontier. If `f` is meromorphic at `x` and vanishes on
-`U`, then it will vanish in a punctured neighbourhood of `x`, even though this
-neighbourhood is not contained in `U`.
--/
-theorem MeromorphicAt.eventuallyEq_nhdNE_of_eventuallyEq_codiscreteWithin
-    {U : Set 𝕜} {x : 𝕜} {f g : 𝕜 → E}
-    (hf : MeromorphicAt f x)
-    (hg : MeromorphicAt g x)
-    (h₁x : x ∈ U)
-    (h₂x : Uᶜ ∉ 𝓝[≠] x)
-    (h : f =ᶠ[Filter.codiscreteWithin U] g) :
-    f =ᶠ[𝓝[≠] x] g := by
-  rw [Filter.eventuallyEq_iff_sub] at *
-  apply (hf.sub hg).eventuallyEq_zero_nhdNE_of_eventuallyEq_zero_codiscreteWithin h₁x h₂x h
-
-/-!
 # Special Terms in Elimination
 -/
 
@@ -223,23 +223,18 @@ theorem MeromorphicOn.extract_zeros_poles_leadCoefficient
     (hD : D.support.Finite)
     (h₁x : x ∈ U)
     (h₂x : Uᶜ ∉ 𝓝[≠] x)
-    (h₁f : MeromorphicOn f U)
-    (h₁g : AnalyticOnNhd 𝕜 g U)
-    (h₂g : ∀ u : U, g u ≠ 0)
+    (h₁f : MeromorphicAt f x)
+    (h₁g : AnalyticAt 𝕜 g x)
+    (h₂g : g x ≠ 0)
     (h₃g : f =ᶠ[Filter.codiscreteWithin U] (∏ᶠ u, (· - u) ^ D u) • g) :
     leadCoefficient f x = (∏ᶠ u, (x - u) ^ update D x 0 u) • g x := by
-  have t₀ : MeromorphicAt ((∏ᶠ u, (· - u) ^ D u) • g) x := by
-    apply MeromorphicAt.smul
-    apply (FactorizedRational.meromorphicNFOn D U).meromorphicOn x h₁x
-    apply (h₁g x h₁x).meromorphicAt
-  have t₁ := MeromorphicAt.eventuallyEq_nhdNE_of_eventuallyEq_codiscreteWithin
-    (h₁f x h₁x) t₀ h₁x h₂x h₃g
-  rw [leadCoefficient_congr_nhdNE t₁]
-  rw [MeromorphicAt.leadCoefficient_smul ((FactorizedRational.meromorphicNFOn D U).meromorphicOn x h₁x)
-    (h₁g x h₁x).meromorphicAt]
-  rw [(h₁g x h₁x).leadCoefficient_of_nonvanish (h₂g ⟨x, h₁x⟩)]
-  congr
-  apply Function.FactorizedRational.leadCoefficient hD
+  have t₀ : MeromorphicAt (∏ᶠ u, (· - u) ^ D u) x :=
+    (FactorizedRational.meromorphicNFOn D U).meromorphicOn x h₁x
+  rw [leadCoefficient_congr_nhdNE
+    (h₁f.eventuallyEq_nhdNE_of_eventuallyEq_codiscreteWithin (by fun_prop) h₁x h₂x h₃g),
+    t₀.leadCoefficient_smul h₁g.meromorphicAt,
+    h₁g.leadCoefficient_of_nonvanish h₂g]
+  simp [Function.FactorizedRational.leadCoefficient hD]
 
 theorem MeromorphicOn.extract_zeros_poles_leadCoefficient_log_norm
     {U : Set 𝕜} {x : 𝕜} {f g : 𝕜 → E}
@@ -247,21 +242,21 @@ theorem MeromorphicOn.extract_zeros_poles_leadCoefficient_log_norm
     (hD : D.support.Finite)
     (h₁x : x ∈ U)
     (h₂x : Uᶜ ∉ 𝓝[≠] x)
-    (h₁f : MeromorphicOn f U)
-    (h₁g : AnalyticOnNhd 𝕜 g U)
-    (h₂g : ∀ u : U, g u ≠ 0)
+    (h₁f : MeromorphicAt f x)
+    (h₁g : AnalyticAt 𝕜 g x)
+    (h₂g : g x ≠ 0)
     (h₃g : f =ᶠ[Filter.codiscreteWithin U] (∏ᶠ u, (· - u) ^ D u) • g) :
     log ‖leadCoefficient f x‖ = ∑ᶠ u, (D u) * log ‖x - u‖ + log ‖g x‖ := by
   have t₀ : MeromorphicAt ((∏ᶠ u, (· - u) ^ D u) • g) x := by
     apply MeromorphicAt.smul
     apply (FactorizedRational.meromorphicNFOn D U).meromorphicOn x h₁x
-    apply (h₁g x h₁x).meromorphicAt
+    apply h₁g.meromorphicAt
   have t₁ := MeromorphicAt.eventuallyEq_nhdNE_of_eventuallyEq_codiscreteWithin
-    (h₁f x h₁x) t₀ h₁x h₂x h₃g
-  rw [leadCoefficient_congr_nhdNE t₁]
-  rw [MeromorphicAt.leadCoefficient_smul ((FactorizedRational.meromorphicNFOn D U).meromorphicOn x h₁x)
-    (h₁g x h₁x).meromorphicAt]
-  rw [(h₁g x h₁x).leadCoefficient_of_nonvanish (h₂g ⟨x, h₁x⟩)]
+    h₁f t₀ h₁x h₂x h₃g
+  rw [leadCoefficient_congr_nhdNE t₁,
+    ((FactorizedRational.meromorphicNFOn D U).meromorphicOn x h₁x).leadCoefficient_smul
+    h₁g.meromorphicAt]
+  rw [h₁g.leadCoefficient_of_nonvanish h₂g]
   rw [norm_smul]
   rw [log_mul]
   congr
@@ -269,8 +264,7 @@ theorem MeromorphicOn.extract_zeros_poles_leadCoefficient_log_norm
   --
   simp
   rw [eq_comm]
-  apply MeromorphicAt.zero_ne_leadCoefficient
-    ((FactorizedRational.meromorphicNFOn D U).meromorphicOn x h₁x)
+  apply ((FactorizedRational.meromorphicNFOn D U).meromorphicOn x h₁x).zero_ne_leadCoefficient
   apply FactorizedRational.order_ne_top
   --
   simp_all
