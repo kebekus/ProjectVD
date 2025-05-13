@@ -16,6 +16,7 @@ variable
   {a b R : ℝ}
   {c : ℂ}
 
+/-- Finsums of interval integrable functions are interval integrable. -/
 theorem IntervalIntegrable.finsum {f : ι → ℝ → E} (h : ∀ i, IntervalIntegrable (f i) μ a b) :
     IntervalIntegrable (∑ᶠ i, f i) μ a b := by
   by_cases h₁ : f.support.Finite
@@ -24,6 +25,10 @@ theorem IntervalIntegrable.finsum {f : ι → ℝ → E} (h : ∀ i, IntervalInt
     apply intervalIntegrable_const_iff.2
     tauto
 
+/--
+If `f` is meromorphic over `ℝ`, then functions of the form `log ‖f ·‖` are
+interval integrable.
+-/
 theorem MeromorphicOn.intervalIntegrable_log_norm [NormedSpace ℝ E] {f : ℝ → E}
     (hf : MeromorphicOn f [[a, b]]) :
     IntervalIntegrable (log ‖f ·‖) volume a b := by
@@ -57,6 +62,10 @@ theorem MeromorphicOn.intervalIntegrable_log_norm [NormedSpace ℝ E] {f : ℝ �
     apply _root_.intervalIntegrable_const_iff.2
     tauto
 
+/--
+If `f` is meromorphic over `ℝ`, then functions of the form `log ‖f⁺ ·‖` are
+interval integrable.
+-/
 theorem MeromorphicOn.intervalIntegrable_posLog_norm [NormedSpace ℝ E] {f : ℝ → E}
     (hf : MeromorphicOn f [[a, b]]) :
     IntervalIntegrable (log⁺ ‖f ·‖) volume a b := by
@@ -65,6 +74,10 @@ theorem MeromorphicOn.intervalIntegrable_posLog_norm [NormedSpace ℝ E] {f : �
   · apply hf.intervalIntegrable_log_norm.const_mul
   · apply hf.intervalIntegrable_log_norm.abs.const_mul
 
+/--
+If `f` is meromorphic over `ℝ`, then functions of the form `log ∘ f` are
+interval integrable.
+-/
 theorem MeromorphicOn.intervalIntegrable_log {f : ℝ → ℝ}
     (hf : MeromorphicOn f [[a, b]]) :
     IntervalIntegrable (log ∘ f) volume a b := by
@@ -83,12 +96,14 @@ theorem CircleIntegrable.congr_codiscreteWithin' {f₁ f₂ : ℂ → E} (hf₁ 
     codiscreteWithin.mono (by simp only [Set.subset_univ]) (circleMap_preimage_codiscrete hR hf),
     by tauto⟩
 
+/-- Sums of circle integrable functions are circle integrable. -/
 theorem CircleIntegrable.sum (s : Finset ι) {f : ι → ℂ → E} (h : ∀ i ∈ s, CircleIntegrable (f i) c R) :
     CircleIntegrable (∑ i ∈ s, f i) c R := by
   rw [CircleIntegrable,
     (by aesop : (fun θ ↦ (∑ i ∈ s, f i) (circleMap c R θ)) = ∑ i ∈ s, fun θ ↦ f i (circleMap c R θ))] at *
   exact IntervalIntegrable.sum s h
 
+/-- Finsums of circle integrable functions are circle integrable. -/
 theorem CircleIntegrable.finsum {f : ι → ℂ → E} (h : ∀ i, CircleIntegrable (f i) c R) :
     CircleIntegrable (∑ᶠ i, f i) c R := by
   by_cases h₁ : (Function.support f).Finite
