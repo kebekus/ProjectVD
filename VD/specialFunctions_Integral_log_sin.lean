@@ -7,40 +7,6 @@ import Mathlib.Analysis.Complex.CauchyIntegral
 open scoped Interval Topology
 open Real Filter MeasureTheory intervalIntegral
 
-theorem analyticOnNhd_realPart {f : ℂ → ℂ} (h : AnalyticOnNhd ℂ f Set.univ) :
-    AnalyticOnNhd ℝ (fun x ↦ (f x).re : ℝ → ℝ) Set.univ := by
-  have : (fun x ↦ (f x).re : ℝ → ℝ) = Complex.reCLM ∘ f ∘ Complex.ofRealCLM := by
-    ext x
-    tauto
-  rw [this]
-  apply ContinuousLinearMap.comp_analyticOnNhd Complex.reCLM
-  apply AnalyticOnNhd.comp'
-  apply AnalyticOnNhd.mono (t := Set.univ)
-  apply AnalyticOnNhd.restrictScalars (𝕜' := ℂ)
-  exact h
-  tauto
-  exact ContinuousLinearMap.analyticOnNhd Complex.ofRealCLM Set.univ
-
-theorem analyticOnNhd_sin :
-    AnalyticOnNhd ℝ Real.sin Set.univ := by
-  apply analyticOnNhd_realPart (f := Complex.sin)
-  apply Complex.analyticOnNhd_univ_iff_differentiable.mpr
-  exact Complex.differentiable_sin
-
-theorem intervalIntegrable_log_sin {a b : ℝ} :
-    IntervalIntegrable (log ∘ sin) volume a b := by
-  apply MeromorphicOn.intervalIntegrable_log
-  apply AnalyticOnNhd.meromorphicOn
-  apply analyticOnNhd_sin.mono
-  tauto
-
-theorem intervalIntegrable_log_cos : IntervalIntegrable (log ∘ cos) volume 0 (π / 2) := by
-  let A := IntervalIntegrable.comp_sub_left (intervalIntegrable_log_sin (a := 0) (b := π / 2)) (π / 2)
-  simp only [Function.comp_apply, sub_zero, sub_self] at A
-  simp_rw [sin_pi_div_two_sub] at A
-  have : (fun x => log (cos x)) = log ∘ cos := rfl
-  apply IntervalIntegrable.symm
-  rwa [← this]
 
 theorem intervalIntegral.integral_congr_volume
   {E : Type u_3} [NormedAddCommGroup E] [NormedSpace ℝ E]

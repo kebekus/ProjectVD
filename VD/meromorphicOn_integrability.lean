@@ -4,6 +4,8 @@ import Mathlib.Analysis.SpecialFunctions.Log.PosLog
 import Mathlib.Data.Complex.FiniteDimensional
 import Mathlib.MeasureTheory.Integral.CircleIntegral
 import VD.ToMathlib.Eliminate
+import Mathlib.Analysis.Complex.CauchyIntegral
+
 
 open Filter Interval MeasureTheory Metric Real Topology intervalIntegral
 
@@ -140,3 +142,34 @@ theorem MeromorphicOn.circleIntegrable_posLog_norm [NormedSpace ℂ E] {f : ℂ 
   · apply hf.circleIntegrable_log_norm.const_mul
   · apply IntervalIntegrable.const_mul
     apply hf.circleIntegrable_log_norm.abs
+
+theorem analyticOnNhd_realPart {f : ℂ → ℂ} (h : AnalyticOnNhd ℂ f Set.univ) :
+    AnalyticOnNhd ℝ (fun x ↦ (f x).re : ℝ → ℝ) Set.univ := by
+  have : (fun x ↦ (f x).re : ℝ → ℝ) = Complex.reCLM ∘ f ∘ Complex.ofRealCLM := by
+    ext x
+    tauto
+  rw [this]
+  apply ContinuousLinearMap.comp_analyticOnNhd Complex.reCLM
+  apply AnalyticOnNhd.comp'
+  apply ((h.restrictScalars (𝕜' := ℂ)).mono (t := Set.univ))
+  tauto
+  exact Complex.ofRealCLM.analyticOnNhd Set.univ
+
+theorem analyticOnNhd_sin :
+    AnalyticOnNhd ℝ Real.sin Set.univ := by
+  apply analyticOnNhd_realPart (f := Complex.sin)
+  apply Complex.analyticOnNhd_univ_iff_differentiable.mpr
+  exact Complex.differentiable_sin
+
+theorem intervalIntegrable_log_sin {a b : ℝ} :
+    IntervalIntegrable (log ∘ sin) volume a b := by
+  apply MeromorphicOn.intervalIntegrable_log
+  apply AnalyticOnNhd.meromorphicOn
+  apply analyticOnNhd_sin.mono
+  tauto
+
+theorem intervalIntegrable_log_cos : IntervalIntegrable (log ∘ cos) volume 0 (π / 2) := by
+  let A := (intervalIntegrable_log_sin (a := 0) (b := π / 2)).comp_sub_left (π / 2)
+  simp only [Function.comp_apply, sub_zero, sub_self, sin_pi_div_two_sub] at A
+  apply IntervalIntegrable.symm
+  rwa [← (by rfl : (fun x => log (cos x)) = log ∘ cos)]
