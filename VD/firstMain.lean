@@ -190,7 +190,6 @@ theorem Nevanlinna_firstMain₂
       convert posLog_add using 1
       ring
 
-
   have t₁₀ (x : ℝ) : log⁺ ‖f (circleMap 0 r x)‖ - log⁺ ‖g (circleMap 0 r x)‖ ≤ log⁺ ‖a‖ + log 2 := by
     rw [sub_le_iff_le_add]
     nth_rw 1 [add_comm]
@@ -286,6 +285,4 @@ theorem Nevanlinna_firstMain'₂ {f : ℂ → ℂ} {a : ℂ} (hf : MeromorphicOn
   · rw [Filter.eventually_atTop]
     use 0
     intro b hb
-    simp only [Pi.abs_apply, Pi.sub_apply, norm_eq_abs, abs_abs, Pi.one_apply,
-      norm_one, mul_one]
-    apply Nevanlinna_firstMain₂
+    simp [Nevanlinna_firstMain₂]
