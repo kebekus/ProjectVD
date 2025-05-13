@@ -1,10 +1,10 @@
+import Mathlib.Analysis.Complex.CauchyIntegral
+import Mathlib.Analysis.Meromorphic.FactorizedRational
 import Mathlib.Analysis.NormedSpace.Connected
 import Mathlib.Analysis.SpecialFunctions.Integrals
 import Mathlib.Analysis.SpecialFunctions.Log.PosLog
 import Mathlib.Data.Complex.FiniteDimensional
 import Mathlib.MeasureTheory.Integral.CircleIntegral
-import VD.ToMathlib.Eliminate
-import Mathlib.Analysis.Complex.CauchyIntegral
 
 
 open Filter Interval MeasureTheory Metric Real Topology intervalIntegral
@@ -53,7 +53,7 @@ theorem MeromorphicOn.intervalIntegrable_log_norm [NormedSpace ℝ E] {f : ℝ �
     have : (log ‖f ·‖) =ᶠ[codiscreteWithin (Ι a b)] 0 := by
       apply EventuallyEq.filter_mono _ (codiscreteWithin.mono Set.uIoc_subset_uIcc)
       filter_upwards [hf.meromorphicNFAt_mem_codiscreteWithin,
-        codiscreteWithin_self [[a, b]]] with x h₁x h₂x
+        self_mem_codiscreteWithin [[a, b]]] with x h₁x h₂x
       simp only [Pi.zero_apply, log_eq_zero, norm_eq_zero]
       left
       by_contra hCon
@@ -142,7 +142,7 @@ theorem MeromorphicOn.circleIntegrable_log_norm [NormedSpace ℂ E] {f : ℂ →
     push_neg at t₀
     have : (log ‖f ·‖) =ᶠ[codiscreteWithin (sphere c |R|)] 0 := by
       filter_upwards [hf.meromorphicNFAt_mem_codiscreteWithin,
-        codiscreteWithin_self (sphere c |R|)] with x h₁x h₂x
+        self_mem_codiscreteWithin (sphere c |R|)] with x h₁x h₂x
       simp only [Pi.zero_apply, log_eq_zero, norm_eq_zero]
       left
       by_contra hCon

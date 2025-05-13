@@ -6,7 +6,7 @@ Authors: Stefan Kebekus
 import Mathlib.Analysis.Meromorphic.Divisor
 import Mathlib.Analysis.SpecialFunctions.Log.PosLog
 import Mathlib.MeasureTheory.Integral.CircleAverage
-import VD.meromorphicOn_integrability
+import VD.ToMathlib.meromorphicOn_integrability
 
 /-!
 # Circle Averages

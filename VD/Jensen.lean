@@ -1,7 +1,7 @@
 import Mathlib.Analysis.Complex.Basic
+import Mathlib.Analysis.Meromorphic.FactorizedRational
 import Mathlib.MeasureTheory.Integral.CircleAverage
 import VD.specialFunctions_CircleIntegral_affine
-import VD.ToMathlib.Eliminate
 
 open Filter MeromorphicOn Metric Real
 

@@ -1,6 +1,6 @@
 import Mathlib.Analysis.Meromorphic.NormalForm
 import Mathlib.MeasureTheory.Integral.CircleIntegral
-import VD.meromorphicOn_integrability
+import VD.ToMathlib.meromorphicOn_integrability
 import VD.stronglyMeromorphic_JensenFormula
 import Mathlib.Analysis.Complex.ValueDistribution.CountingFunction
 

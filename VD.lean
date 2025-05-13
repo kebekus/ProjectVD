@@ -2,8 +2,9 @@ import VD.IsolatedZeros
 import VD.Jensen
 import VD.Laplace2
 import VD.LeadCoefficientFactorizedRational
-import VD.ToMathlib.Eliminate
+import VD.ProximityFunction
 import VD.ToMathlib.LeadCoefficient
+import VD.ToMathlib.meromorphicOn_integrability
 import VD.cauchyRiemann
 import VD.firstMain
 import VD.harmonicAt
@@ -18,7 +19,6 @@ import VD.leftovers.LaurentPolynomial
 import VD.leftovers.diffOp
 import VD.leftovers.holomorphic
 import VD.meromorphicAt_topology
-import VD.meromorphicOn_integrability
 import VD.partialDeriv
 import VD.specialFunctions_CircleIntegral_affine
 import VD.specialFunctions_Integral_log_sin

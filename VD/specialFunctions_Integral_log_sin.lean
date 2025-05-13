@@ -1,7 +1,7 @@
 import Mathlib.Analysis.SpecialFunctions.Integrals
 import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
 import Mathlib.Analysis.Convex.SpecificFunctions.Deriv
-import VD.meromorphicOn_integrability
+import VD.ToMathlib.meromorphicOn_integrability
 import Mathlib.Analysis.Complex.CauchyIntegral
 
 open scoped Interval Topology
