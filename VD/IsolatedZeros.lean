@@ -29,13 +29,13 @@ assume that `x ∈ U` is not an isolated point of `U`. If a function `f` is
 meromorphic at `x` and vanishes along a subset that is codiscrete within `U`,
 then `f` vanishes in a punctured neighbourhood of `f`.
 
-For a typical application, let `U` be a closed ball and let `x` be a point on
-the circumference. If `f` is meromorphic at `x` and vanishes on `U`, then it
+For a typical application, let `U` be a path in the complex plane and let `x` be
+one of the end points. If `f` is meromorphic at `x` and vanishes on `U`, then it
 will vanish in a punctured neighbourhood of `x`, which intersects `U`
 non-trivally but is not contained in `U`.
 
-The assumption that `x` is not an isolated point of `U` is expressed in `h₂x` as
-`Uᶜ ∉ 𝓝[≠] x`.
+The assumption that `x` is not an isolated point of `U` is expressed as `Uᶜ ∉
+𝓝[≠] x`.
 -/
 theorem MeromorphicAt.eventuallyEq_zero_nhdNE_of_eventuallyEq_zero_codiscreteWithin
     (hf : MeromorphicAt f x)
@@ -56,11 +56,6 @@ Variant of the principle of isolated zeros: Let `U` be a subset of `𝕜` and
 assume that `x ∈ U` is not an isolated point of `U`. If a function `f` is
 meromorphic at `x` and vanishes along a subset that is codiscrete within `U`,
 then `f` vanishes in a punctured neighbourhood of `f`.
-
-For a typical application, let `U` be the closure of the Mandelbrot set and let
-`x` be a point in its frontier. If `f` is meromorphic at `x` and vanishes on
-`U`, then it will vanish in a punctured neighbourhood of `x`, even though this
-neighbourhood is not contained in `U`.
 -/
 theorem MeromorphicAt.eventuallyEq_nhdNE_of_eventuallyEq_codiscreteWithin
     (hf : MeromorphicAt f x)
