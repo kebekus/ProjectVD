@@ -66,8 +66,7 @@ theorem circleAverage_logAbs_factorizedRational {R : ℝ} {c : ℂ}
   -- Identify summands
   apply Finset.sum_congr rfl
   intro u hu
-  simp_rw [← smul_eq_mul]
-  rw [circleAverage_fun_smul]
+  simp_rw [← smul_eq_mul, circleAverage_fun_smul]
   congr
   apply circleAverage_logAbs_affine
   apply D.supportWithinDomain

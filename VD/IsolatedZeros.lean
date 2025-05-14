@@ -23,14 +23,6 @@ theorem MeromorphicAt.frequently_zero_iff_eventuallyEq_zero
   ⟨hf.eventually_eq_zero_or_eventually_ne_zero.resolve_right,
     fun h ↦ h.frequently⟩
 
-/-!
-## Isolated points of subsets in topological spaces
--/
-
-theorem isl {X : Type*} [TopologicalSpace X] {U : Set X} {x : X} (h : x ∈ U) :
-    Uᶜ ∉ 𝓝[≠] x ↔ {x}ᶜ ∈ Filter.codiscreteWithin U := by
-  sorry
-
 /--
 Variant of the principle of isolated zeros: Let `U` be a subset of `𝕜` and
 assume that `x ∈ U` is not an isolated point of `U`. If a function `f` is

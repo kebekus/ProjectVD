@@ -51,16 +51,36 @@ counting multiplicities.  In the special case where `a = ⊤`, it counts the pol
 -/
 noncomputable def proximity : ℝ → ℝ := by
   by_cases h : a = ⊤
-  · exact fun R ↦ circleAverage (log⁺ ‖f ·‖) 0 R
-  · exact fun R ↦ circleAverage (fun z ↦ log⁺ ‖1 / (f z - a.untop₀)‖) 0 R
+  · exact circleAverage (log⁺ ‖f ·‖) 0
+  · exact circleAverage (fun z ↦ log⁺ ‖1 / (f z - a.untop₀)‖) 0
 
 /--
 For finite values `a₀`, the logarithmic counting function `logCounting f a₀` is the counting
 function associated with the zero-divisor of the meromorphic function `f - a₀`.
 -/
 lemma proximity_coe :
-    proximity f a₀ = fun R ↦ circleAverage (fun z ↦ log⁺ ‖1 / (f z - a₀)‖) 0 R := by
+    proximity f a₀ = circleAverage (fun z ↦ log⁺ ‖1 / (f z - a₀)‖) 0 := by
   simp [proximity]
+
+/--
+The logarithmic counting function `logCounting f 0` is the counting function associated with the
+zero-divisor of `f`.
+-/
+lemma proximity_zero :
+    proximity f 0 = circleAverage (log⁺ ‖f⁻¹ ·‖) 0 := by
+  simp [proximity]
+
+/--
+The logarithmic counting function `logCounting f ⊤` is the counting function associated with
+the pole-divisor of `f`.
+-/
+lemma proximity_top :
+    proximity f ⊤ = circleAverage (log⁺ ‖f ·‖) 0 := by
+  simp [proximity]
+
+/-!
+## Elementary Properties of the Counting Function
+-/
 
 /--
 For finite values `a₀`, the logarithmic counting function `logCounting f a₀` equals the logarithmic
@@ -71,33 +91,17 @@ lemma proximity_coe_eq_proximity_sub_const_zero :
   simp [proximity]
 
 /--
-The logarithmic counting function `logCounting f 0` is the counting function associated with the
-zero-divisor of `f`.
--/
-lemma proximity_zero :
-    proximity f 0 = fun R ↦ circleAverage (log⁺ ‖f⁻¹ ·‖) 0 R := by
-  simp [proximity]
-
-/--
-The logarithmic counting function `logCounting f ⊤` is the counting function associated with
-the pole-divisor of `f`.
--/
-lemma proximity_top :
-    proximity f ⊤ = fun R ↦ circleAverage (log⁺ ‖f ·‖) 0 R := by
-  simp [proximity]
-
-/--
 The counting function associated with the divisor of `f` is the difference between `logCounting f 0`
 and `logCounting f ⊤`.
 -/
-theorem Nevanlinna_proximity {R : ℝ} (h₁f : MeromorphicOn f ⊤) :
-  circleAverage (log ‖f ·‖) 0 R = proximity f ⊤ R - proximity f⁻¹ ⊤ R := by
-  simp [proximity]
+theorem Nevanlinna_proximity (h₁f : MeromorphicOn f ⊤) :
+  circleAverage (log ‖f ·‖) 0 = proximity f ⊤ - proximity f⁻¹ ⊤ := by
+  ext R
+  simp only [proximity, ↓reduceDIte, Pi.inv_apply, norm_inv, Pi.sub_apply]
   rw [← circleAverage_sub]
   congr
   funext x
-  simp_rw [← posLog_sub_posLog_inv];
-  simp
+  simp [← posLog_sub_posLog_inv]
   --
   apply MeromorphicOn.circleIntegrable_posLog_norm
   intro z hx
@@ -106,10 +110,6 @@ theorem Nevanlinna_proximity {R : ℝ} (h₁f : MeromorphicOn f ⊤) :
   simp_rw [← norm_inv]
   apply MeromorphicOn.circleIntegrable_posLog_norm
   exact MeromorphicOn.inv_iff.mpr fun x a => h₁f x trivial
-
-/-!
-## Elementary Properties of the Counting Function
--/
 
 /--
 Relation between the logarithmic counting function of `f` and of `f⁻¹`.
