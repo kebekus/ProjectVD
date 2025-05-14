@@ -2,6 +2,7 @@ import Mathlib.Analysis.Meromorphic.NormalForm
 import Mathlib.MeasureTheory.Integral.CircleIntegral
 import VD.ToMathlib.meromorphicOn_integrability
 import VD.stronglyMeromorphic_JensenFormula
+import VD.ProximityFunction
 import Mathlib.Analysis.Complex.ValueDistribution.CountingFunction
 
 open Real
@@ -26,37 +27,13 @@ theorem MeromorphicOn.restrict_inv
 
 --
 
-noncomputable def MeromorphicOn.m_infty
-  {f : ℂ → ℂ}
-  (_ : MeromorphicOn f ⊤) :
-  ℝ → ℝ :=
-  fun r ↦ (2 * π)⁻¹ * ∫ x in (0)..(2 * π), log⁺ ‖f (circleMap 0 r x)‖
 
-theorem Nevanlinna_proximity
-  {f : ℂ → ℂ}
-  {r : ℝ}
-  (h₁f : MeromorphicOn f ⊤) :
-  (2 * π)⁻¹ * ∫ x in (0)..(2 * π), log ‖f (circleMap 0 r x)‖ = (h₁f.m_infty r) - (h₁f.inv.m_infty r) := by
-
-  unfold MeromorphicOn.m_infty
-  rw [← mul_sub]; congr
-  rw [← intervalIntegral.integral_sub]; congr
-  funext x
-  simp_rw [← posLog_sub_posLog_inv]; congr
-  exact Eq.symm (IsAbsoluteValue.abv_inv Norm.norm (f (circleMap 0 r x)))
-  --
-  apply MeromorphicOn.circleIntegrable_posLog_norm
-  intro z hx
-  exact h₁f z trivial
-  --
-  apply MeromorphicOn.circleIntegrable_posLog_norm
-  exact MeromorphicOn.inv_iff.mpr fun x a => h₁f x trivial
 
 noncomputable def MeromorphicOn.T_infty
   {f : ℂ → ℂ}
   (hf : MeromorphicOn f ⊤) :
   ℝ → ℝ :=
-  hf.m_infty + ValueDistribution.logCounting f ⊤
+  ValueDistribution.proximity f ⊤ + ValueDistribution.logCounting f ⊤
 
 
 theorem Nevanlinna_firstMain₁
@@ -155,15 +132,16 @@ theorem Nevanlinna_firstMain₂
 
   -- See Lang, p. 168
 
-  have : (h₁f.T_infty r) - ((h₁f.sub (MeromorphicOn.const a)).T_infty r) = (h₁f.m_infty r) - ((h₁f.sub (MeromorphicOn.const a)).m_infty r) := by
+  have : (h₁f.T_infty r) - ((h₁f.sub (MeromorphicOn.const a)).T_infty r) =
+      (ValueDistribution.proximity f ⊤ r) - (ValueDistribution.proximity (f - fun _ ↦ a) ⊤ r) := by
     unfold MeromorphicOn.T_infty
     rw [ValueDistribution.logCounting_sub_const h₁f]
     simp
   rw [this]
   clear this
 
-  unfold MeromorphicOn.m_infty
-  rw [←mul_sub]
+  unfold ValueDistribution.proximity
+  simp
   rw [←intervalIntegral.integral_sub]
 
   let g := f - (fun _ ↦ a)
