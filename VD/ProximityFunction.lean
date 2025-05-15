@@ -6,7 +6,7 @@ Authors: Stefan Kebekus
 import Mathlib.Analysis.SpecialFunctions.Log.PosLog
 import Mathlib.MeasureTheory.Integral.CircleAverage
 import VD.ToMathlib.meromorphicOn_integrability
-import VD.ToMathlib.ProximityFunction
+import Mathlib.Analysis.Complex.ValueDistribution.ProximityFunction
 
 /-!
 # Circle Averages
