@@ -3,9 +3,10 @@ import Mathlib.MeasureTheory.Integral.CircleIntegral
 import VD.ToMathlib.meromorphicOn_integrability
 import VD.stronglyMeromorphic_JensenFormula
 import VD.ProximityFunction
+import VD.CharacteristicFunction
 import Mathlib.Analysis.Complex.ValueDistribution.CountingFunction
 
-open Real
+open Asymptotics Real
 
 
 -- Lang p. 164
@@ -27,12 +28,9 @@ theorem MeromorphicOn.restrict_inv
 
 --
 
-
-
-noncomputable def T_infty
-  (f : ℂ → ℂ) :
-  ℝ → ℝ :=
-  ValueDistribution.proximity f ⊤ + ValueDistribution.logCounting f ⊤
+variable
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
+  --{f g : ℂ → E} {a : WithTop E} {a₀ : E}
 
 
 theorem Nevanlinna_firstMain₁
@@ -40,11 +38,11 @@ theorem Nevanlinna_firstMain₁
   (h₁f : MeromorphicOn f ⊤)
   (h₂f : MeromorphicNFAt f 0)
   (h₃f : f 0 ≠ 0) :
-  (fun _ ↦ log ‖f 0‖) + T_infty f⁻¹ = T_infty f := by
+  (fun _ ↦ log ‖f 0‖) + ValueDistribution.characteristic f⁻¹ ⊤ = ValueDistribution.characteristic f ⊤ := by
   classical
 
   rw [add_eq_of_eq_sub]
-  unfold T_infty
+  unfold ValueDistribution.characteristic
 
   have {A B C D : ℝ → ℝ} : A + B - (C + D) = A - C - (D - B) := by
     ring
@@ -130,17 +128,17 @@ theorem Nevanlinna_firstMain₁
 
 
 theorem Nevanlinna_firstMain₂
-  {f : ℂ → ℂ}
-  {a : ℂ}
+  {f : ℂ → E}
+  {a : E}
   {r : ℝ}
   (h₁f : MeromorphicOn f ⊤) :
-  |(T_infty f r) - (T_infty (f - fun _ ↦ a) r)| ≤ posLog ‖a‖ + log 2 := by
+  |(ValueDistribution.characteristic f ⊤ r) - (ValueDistribution.characteristic (f - fun _ ↦ a) ⊤ r)| ≤ log⁺ ‖a‖ + log 2 := by
 
   -- See Lang, p. 168
 
-  have : (T_infty f r) - (T_infty (f - fun _ ↦ a) r) =
+  have : (ValueDistribution.characteristic f ⊤ r) - (ValueDistribution.characteristic (f - fun _ ↦ a) ⊤ r) =
       (ValueDistribution.proximity f ⊤ r) - (ValueDistribution.proximity (f - fun _ ↦ a) ⊤ r) := by
-    unfold T_infty
+    unfold ValueDistribution.characteristic
     rw [ValueDistribution.logCounting_sub_const h₁f]
     simp
   rw [this]
@@ -254,21 +252,15 @@ theorem Nevanlinna_firstMain₂
   exact fun x a => h₁f x trivial
   apply MeromorphicOn.const a
 
-
-open Asymptotics
-
-
-/- The Nevanlinna height functions `T_infty` of a meromorphic function `f` and
-of `f - const` agree asymptotically, up to a constant. -/
+/-
+The Nevanlinna height functions `T_infty` of a meromorphic function `f` and of
+`f - const` agree asymptotically, up to a constant.
+-/
 theorem Nevanlinna_firstMain'₂ {f : ℂ → ℂ} {a : ℂ} (hf : MeromorphicOn f ⊤) :
-    |(T_infty f) - (T_infty (f - fun _ ↦ a))| =O[Filter.atTop] (1 : ℝ → ℝ) := by
-  rw [Asymptotics.isBigO_iff']
-  use posLog ‖a‖ + log 2
-  constructor
-  · apply add_pos_of_nonneg_of_pos
-    apply posLog_nonneg
-    apply log_pos one_lt_two
-  · rw [Filter.eventually_atTop]
-    use 0
-    intro b hb
-    simp [Nevanlinna_firstMain₂ hf]
+    |(ValueDistribution.characteristic f ⊤) - (ValueDistribution.characteristic (f - fun _ ↦ a) ⊤)| =O[Filter.atTop] (1 : ℝ → ℝ) := by
+  rw [isBigO_iff']
+  use posLog ‖a‖ + log 2, add_pos_of_nonneg_of_pos posLog_nonneg (log_pos one_lt_two)
+  rw [Filter.eventually_atTop]
+  use 0
+  intro b hb
+  simp [Nevanlinna_firstMain₂ hf]
