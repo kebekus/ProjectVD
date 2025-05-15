@@ -261,7 +261,7 @@ theorem MeromorphicOn.decompose₂
             rw [(hf u.2).meromorphicAt.order_congr h₆g₀]
             let C := (h₁g₀ u u.2).order_mul h₀.meromorphicAt
             rw [C]
-            let D := h₀.order_eq_zero_iff.2 h₁
+            let D := h₀.analyticOrderAt_eq_zero.2 h₁
             let E := h₀.meromorphicAt_order
             rw [E, D]
             simp
@@ -404,7 +404,7 @@ theorem MeromorphicOn.decompose₃'
             filter_upwards [h, P]
             intro y hy h₂y
             have z₀ : divisor f U y = 0 := by
-              have F := h₂y.order_eq_zero_iff.2 hy
+              have F := h₂y.analyticOrderAt_eq_zero.2 hy
               rw [MeromorphicOn.divisor_def]
               simp_rw [h₂y.meromorphicAt_order, F]
               simp

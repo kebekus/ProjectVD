@@ -29,9 +29,8 @@ theorem MeromorphicOn.restrict_inv
 
 
 
-noncomputable def MeromorphicOn.T_infty
-  {f : ℂ → ℂ}
-  (hf : MeromorphicOn f ⊤) :
+noncomputable def T_infty
+  (f : ℂ → ℂ) :
   ℝ → ℝ :=
   ValueDistribution.proximity f ⊤ + ValueDistribution.logCounting f ⊤
 
@@ -41,11 +40,11 @@ theorem Nevanlinna_firstMain₁
   (h₁f : MeromorphicOn f ⊤)
   (h₂f : MeromorphicNFAt f 0)
   (h₃f : f 0 ≠ 0) :
-  (fun _ ↦ log ‖f 0‖) + h₁f.inv.T_infty = h₁f.T_infty := by
+  (fun _ ↦ log ‖f 0‖) + T_infty f⁻¹ = T_infty f := by
   classical
 
   rw [add_eq_of_eq_sub]
-  unfold MeromorphicOn.T_infty
+  unfold T_infty
 
   have {A B C D : ℝ → ℝ} : A + B - (C + D) = A - C - (D - B) := by
     ring
@@ -67,37 +66,38 @@ theorem Nevanlinna_firstMain₁
     exact rfl
     assumption
     trivial
-  rw [ZZ]
-  simp
+  rw [ValueDistribution.proximity_sub_proximity_inv_eq_circleAverage]
+  --rw [ZZ]
+  --simp
   funext r
   simp
-  rw [← Nevanlinna_proximity h₁f]
+  --rw [← Nevanlinna_proximity h₁f]
 
   by_cases h₁r : r = 0
-  rw [h₁r]
-  simp
-  have : π⁻¹ * 2⁻¹ * (2 * π * log (norm (f 0))) = (π⁻¹ * (2⁻¹ * 2) * π) * log (norm (f 0)) := by
-    ring
-  rw [this]
-  clear this
-  simp [pi_ne_zero]
+  · rw [h₁r]
+    simp
 
   by_cases hr : 0 < r
-  let A := jensen hr f (h₁f.restrict r) h₂f h₃f
-  simp at A
-  rw [A]
-  clear A
-  simp
-  have {A B : ℝ} : -A + B = B - A := by ring
-  rw [this]
-  have : |r| = r := by
-    rw [← abs_of_pos hr]
+  · let A := jensen hr f (h₁f.restrict r) h₂f h₃f
+    --simp at A
+    rw [A]
+    simp_rw [← h₂f.order_eq_zero_iff] at h₃f
+    rw [h₃f]
+    clear A
     simp
-  rw [this]
+    have {A B : ℝ} : -A + B = B - A := by ring
+    rw [this]
+    have : |r| = r := by
+      rw [← abs_of_pos hr]
+      simp
+    rw [this]
+    congr
+    simp
 
   -- case 0 < -r
   have h₂r : 0 < -r := by
     simp [h₁r, hr]
+
     by_contra hCon
     -- Assume ¬(r < 0), which means r >= 0
     push_neg at hCon
@@ -109,18 +109,24 @@ theorem Nevanlinna_firstMain₁
   simp at A
   rw [A]
   clear A
-  simp
+  --simp
   have {A B : ℝ} : -A + B = B - A := by ring
   rw [this]
 
   congr 1
   congr 1
+  simp
   let A := integrabl_congr_negRadius (f := (fun z ↦ log (norm (f z)))) (r := r) (c := 0)
   rw [A]
   have : |r| = -r := by
     rw [← abs_of_pos h₂r]
     simp
   rw [this]
+  simp_rw [← h₂f.order_eq_zero_iff] at h₃f
+  rw [h₃f]
+  simp
+  assumption
+
 
 
 theorem Nevanlinna_firstMain₂
@@ -128,13 +134,13 @@ theorem Nevanlinna_firstMain₂
   {a : ℂ}
   {r : ℝ}
   (h₁f : MeromorphicOn f ⊤) :
-  |(h₁f.T_infty r) - ((h₁f.sub (MeromorphicOn.const a)).T_infty r)| ≤ posLog ‖a‖ + log 2 := by
+  |(T_infty f r) - (T_infty (f - fun _ ↦ a) r)| ≤ posLog ‖a‖ + log 2 := by
 
   -- See Lang, p. 168
 
-  have : (h₁f.T_infty r) - ((h₁f.sub (MeromorphicOn.const a)).T_infty r) =
+  have : (T_infty f r) - (T_infty (f - fun _ ↦ a) r) =
       (ValueDistribution.proximity f ⊤ r) - (ValueDistribution.proximity (f - fun _ ↦ a) ⊤ r) := by
-    unfold MeromorphicOn.T_infty
+    unfold T_infty
     rw [ValueDistribution.logCounting_sub_const h₁f]
     simp
   rw [this]
@@ -142,6 +148,8 @@ theorem Nevanlinna_firstMain₂
 
   unfold ValueDistribution.proximity
   simp
+  rw [circleAverage, circleAverage]
+  rw [← smul_sub]
   rw [←intervalIntegral.integral_sub]
 
   let g := f - (fun _ ↦ a)
@@ -219,7 +227,7 @@ theorem Nevanlinna_firstMain₂
     exact t₂
   clear t₂
   simp only [norm_eq_abs, sub_zero] at s₀
-  rw [abs_mul]
+  rw [smul_eq_mul, abs_mul]
 
   have s₁ : |(2 * π)⁻¹| * |∫ (x : ℝ) in (0)..(2 * π), log⁺ ‖f (circleMap 0 r x)‖ - log⁺ ‖g (circleMap 0 r x)‖| ≤ |(2 * π)⁻¹| * ((log⁺ ‖a‖ + log 2) * |2 * π|) := by
     apply mul_le_mul_of_nonneg_left
@@ -241,7 +249,7 @@ theorem Nevanlinna_firstMain₂
   apply MeromorphicOn.circleIntegrable_posLog_norm
   exact fun x a => h₁f x trivial
   --
-  apply MeromorphicOn.circleIntegrable_posLog_norm
+  apply MeromorphicOn.circleIntegrable_posLog_norm (f := fun z ↦ f z - a)
   apply MeromorphicOn.sub
   exact fun x a => h₁f x trivial
   apply MeromorphicOn.const a
@@ -253,7 +261,7 @@ open Asymptotics
 /- The Nevanlinna height functions `T_infty` of a meromorphic function `f` and
 of `f - const` agree asymptotically, up to a constant. -/
 theorem Nevanlinna_firstMain'₂ {f : ℂ → ℂ} {a : ℂ} (hf : MeromorphicOn f ⊤) :
-    |(hf.T_infty) - ((hf.sub (MeromorphicOn.const a)).T_infty)| =O[Filter.atTop] (1 : ℝ → ℝ) := by
+    |(T_infty f) - (T_infty (f - fun _ ↦ a))| =O[Filter.atTop] (1 : ℝ → ℝ) := by
   rw [Asymptotics.isBigO_iff']
   use posLog ‖a‖ + log 2
   constructor
@@ -263,4 +271,4 @@ theorem Nevanlinna_firstMain'₂ {f : ℂ → ℂ} {a : ℂ} (hf : MeromorphicOn
   · rw [Filter.eventually_atTop]
     use 0
     intro b hb
-    simp [Nevanlinna_firstMain₂]
+    simp [Nevanlinna_firstMain₂ hf]

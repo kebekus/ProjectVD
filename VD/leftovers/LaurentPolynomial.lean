@@ -169,7 +169,7 @@ theorem order_LaurentPolynomial_ne_top {z : 𝕜} (d : 𝕜 → ℤ) :
   · rw [← mulsupport_LaurentPolynomial] at hd
     have : AnalyticAt 𝕜 (1 : 𝕜 → 𝕜) z := analyticAt_const
     simp [finprod_of_infinite_mulSupport hd, this.meromorphicAt_order,
-      this.order_eq_zero_iff.2 (by simp)]
+      this.analyticOrderAt_eq_zero.2 (by simp)]
 
 /--
 The divisor function associated with the divisor of the Laurent polynomial
