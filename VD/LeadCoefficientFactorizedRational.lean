@@ -75,8 +75,7 @@ private lemma Function.FactorizedRational.mulSupport_update {d : 𝕜 → ℤ} {
     (fun u ↦ (x - u) ^ Function.update d x 0 u).mulSupport ⊆ h.toFinset := by
   intro u
   contrapose
-  intro hu
-  simp_all
+  simp only [mem_mulSupport, ne_eq, Decidable.not_not]
   by_cases h₁ : u = x
   · rw [h₁]
     simp
