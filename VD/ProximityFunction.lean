@@ -26,7 +26,6 @@ theorem circleAverage_sub (hf₁ : CircleIntegrable f₁ c R) (hf₂ : CircleInt
   congr
   apply intervalIntegral.integral_sub hf₁ hf₂
 
-
 open MeromorphicOn Metric Real Set
 
 namespace ValueDistribution
@@ -37,7 +36,6 @@ variable
 
 open Real
 
-
 /--
 For complex-valued `f`, the difference between `proximity f ⊤` and `proximity
 f⁻¹ ⊤` is the circle average of `log ‖f ·‖`.
@@ -45,11 +43,10 @@ f⁻¹ ⊤` is the circle average of `log ‖f ·‖`.
 theorem proximity_sub_proximity_inv_eq_circleAverage {f : ℂ → ℂ} (h₁f : MeromorphicOn f ⊤) :
     proximity f ⊤ - proximity f⁻¹ ⊤ = circleAverage (log ‖f ·‖) 0 := by
   ext R
-  have i₀ : CircleIntegrable (log⁺ ‖f ·‖) 0 R :=
-    (h₁f.mono_set (by tauto)).circleIntegrable_posLog_norm
-  have i₁ : CircleIntegrable (fun x ↦ log⁺ ‖f x‖⁻¹) 0 R := by
+  have : CircleIntegrable (log⁺ ‖f ·‖⁻¹) 0 R := by
     simpa [← norm_inv] using (h₁f.inv.mono_set (by tauto)).circleIntegrable_posLog_norm
-  simp [proximity, ← circleAverage_sub i₀ i₁, ← posLog_sub_posLog_inv]
+  simp [proximity, ← circleAverage_sub (h₁f.mono_set (by tauto)).circleIntegrable_posLog_norm this,
+    ← posLog_sub_posLog_inv]
   rfl
 
 end ValueDistribution

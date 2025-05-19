@@ -4,13 +4,14 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import VD.ProximityFunction
-import VD.CharacteristicFunction
+import VD.ToMathlib.CharacteristicFunction
 
 /-!
 # The First Main Theorem of Value Distribution Theory
 
-The First Main Theorem of Value Distribution Theory is a two-part statement
-about characteristic functions.
+The First Main Theorem of Value Distribution Theory is a two-part statement,
+establishing invariance of the characteristic function `characteristic f ⊤`
+under modifications of `f`.
 
 - If `f` is meromorphic on the complex plane, then the characteristic functions
   for the value `⊤` of the function `f` and `f⁻¹` agree up to a constant, see
@@ -36,9 +37,13 @@ namespace ValueDistribution
 
 variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
-  {f : ℂ → E} {a : WithTop E} {a₀ : E}
+  {f : ℂ → E} {a₀ : E}
 
 open Asymptotics Real
+
+/-!
+## Second part of the First Main Theorem
+-/
 
 /--
 Second part of the First Main Theorem of Value Distribution Theory, quantitative
@@ -46,7 +51,7 @@ version: If `f` is meromorphic on the complex plane, then the characteristic
 functions (for value `⊤`) of `f` and `f - a₀` differ at most by `log⁺ ‖a₀‖ + log
 2`.
 -/
-theorem Nevanlinna_firstMain₂ {r : ℝ} (h : MeromorphicOn f ⊤) :
+theorem FirstMainTheorem₂ {r : ℝ} (h : MeromorphicOn f ⊤) :
     |characteristic f ⊤ r - characteristic (f · - a₀) ⊤ r| ≤ log⁺ ‖a₀‖ + log 2 := by
   rw [← Pi.sub_apply, characteristic_sub_characteristic_eq_proximity_sub_proximity h]
   simp only [proximity, reduceDIte, Pi.sub_apply]
@@ -161,14 +166,10 @@ version: If `f` is meromorphic on the complex plane, then the characteristic
 functions for the value `⊤` of the function `f` and `f - a₀` agree
 asymptotically up to a bounded function.
 -/
-theorem Nevanlinna_firstMain'₂ {f : ℂ → ℂ} {a : ℂ} (hf : MeromorphicOn f ⊤) :
-    |(characteristic f ⊤) - (characteristic (f - fun _ ↦ a) ⊤)| =O[Filter.atTop] (1 : ℝ → ℝ) := by
-  rw [isBigO_iff']
-  use posLog ‖a‖ + log 2, add_pos_of_nonneg_of_pos posLog_nonneg (log_pos one_lt_two)
-  rw [Filter.eventually_atTop]
-  use 0
-  intro b hb
-  simp
-  exact Nevanlinna_firstMain₂ hf
+theorem FirstMainTheorem₂' (h : MeromorphicOn f ⊤) :
+    |(characteristic f ⊤) - (characteristic (f · - a₀) ⊤)| =O[Filter.atTop] (1 : ℝ → ℝ) := by
+  simp_rw [isBigO_iff', Filter.eventually_atTop]
+  use posLog ‖a₀‖ + log 2, add_pos_of_nonneg_of_pos posLog_nonneg (log_pos one_lt_two), 0
+  simp [FirstMainTheorem₂ h]
 
 end ValueDistribution
