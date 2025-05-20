@@ -40,19 +40,6 @@ lemma circleMap_neg {r x : ℝ} {c : ℂ} :
     circleMap c (-r) x = circleMap c r (x + π) := by
   simp [circleMap, add_mul, Complex.exp_add]
 
--- unused
-theorem circleIntegrable_congr_negRadius {f : ℂ → ℝ} {r : ℝ} :
-  CircleIntegrable f 0 r → CircleIntegrable f 0 (-r) := by
-  unfold CircleIntegrable
-  intro h
-  simp_rw [circleMap_neg]
-  have t₀ : (fun θ ↦ f (circleMap 0 r θ)).Periodic (2 * π) := by
-    intro x
-    simp [periodic_circleMap 0 r x]
-  rw [← zero_add (2 * π)] at h
-  have := (t₀.intervalIntegrable two_pi_pos h π (3 * π)).comp_add_right π
-  simp_all [← (by ring : 3 * π - π = 2 * π)]
-
 theorem integrabl_congr_negRadius
   {f : ℂ → ℝ}
   {r : ℝ} {c : ℂ} :

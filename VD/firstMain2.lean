@@ -33,6 +33,51 @@ detailed discussion.
 - Formalize the first part of the First Main Theorem.
 -/
 
+
+
+/-!
+# Circle Averages
+-/
+
+variable
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  {𝕜 : Type*} [NontriviallyNormedField 𝕜] [NormedSpace 𝕜 E] [SMulCommClass ℝ 𝕜 E]
+  {f f₁ f₂ : ℂ → ℝ} {c : ℂ} {R : ℝ} {a : 𝕜}
+
+open Real
+
+/--
+If `f x` is smaller than `a` on for every point of the circle, then the circle
+average of `f` is smaller than `a`.
+-/
+theorem circleAverage_const {a : ℝ} :
+    circleAverage (fun _ ↦ a) c R = a := by
+  simp only [circleAverage, mul_inv_rev, intervalIntegral.integral_const, sub_zero, smul_eq_mul]
+  ring_nf
+  simp [mul_inv_cancel₀ pi_ne_zero]
+
+/--
+If `f x` is smaller than `a` on for every point of the circle, then the circle
+average of `f` is smaller than `a`.
+-/
+theorem circleAverage_le_of_le {a : ℝ} (hf : CircleIntegrable f c R)
+    (h₂f : ∀ x ∈ Metric.sphere c |R|, f x < a) :
+    circleAverage f c R ≤ a := by
+  rw [← circleAverage_const (a := a) (c := c) (R := |R|)]
+  unfold circleAverage
+  rw [smul_eq_mul, smul_eq_mul]
+  rw [mul_le_mul_iff_of_pos_left]
+  apply intervalIntegral.integral_mono_on_of_le_Ioo
+
+  unfold CircleIntegrable at hf
+  have : 0 ≤ 2 * π := by sorry
+  have Z := intervalIntegral.integral_mono_on_of_le_Ioo this hf (g := fun z ↦ a)
+
+
+  sorry
+
+
+
 namespace ValueDistribution
 
 variable
