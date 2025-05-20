@@ -176,8 +176,8 @@ theorem MeromorphicOn.extract_zeros_poles_leadCoefficient_log_norm
     apply MeromorphicAt.smul
     apply (FactorizedRational.meromorphicNFOn D U).meromorphicOn x h₁x
     apply h₁g.meromorphicAt
-  have t₁ := MeromorphicAt.eventuallyEq_nhdNE_of_eventuallyEq_codiscreteWithin
-    h₁f t₀ h₁x h₂x h₃g
+  have t₁ : f =ᶠ[𝓝[≠] x] (∏ᶠ (u : 𝕜), (fun x ↦ x - u) ^ D u) • g :=
+    h₁f.eventuallyEq_nhdNE_of_eventuallyEq_codiscreteWithin t₀ h₁x h₂x h₃g
   rw [leadCoefficient_congr_nhdNE t₁,
     ((FactorizedRational.meromorphicNFOn D U).meromorphicOn x h₁x).leadCoefficient_smul
     h₁g.meromorphicAt]
