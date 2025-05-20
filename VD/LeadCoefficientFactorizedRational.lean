@@ -1,7 +1,7 @@
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import Mathlib.Analysis.Meromorphic.FactorizedRational
 import VD.ToMathlib.LeadCoefficient
-import VD.IsolatedZeros
+import VD.ToMathlib.IsolatedZeros
 
 open Classical Function Function.FactorizedRational MeromorphicAt MeromorphicOn Real Topology
 

@@ -1,9 +1,9 @@
-import VD.IsolatedZeros
 import VD.Jensen
 import VD.Laplace2
 import VD.LeadCoefficientFactorizedRational
 import VD.ProximityFunction
 import VD.ToMathlib.CharacteristicFunction
+import VD.ToMathlib.IsolatedZeros
 import VD.ToMathlib.LeadCoefficient
 import VD.ToMathlib.meromorphicOn_integrability
 import VD.cauchyRiemann
