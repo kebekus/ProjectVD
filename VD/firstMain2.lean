@@ -30,10 +30,9 @@ detailed discussion.
 
 ### TODO
 
-- Formalize the first part of the First Main Theorem.
+- Formalize the first part of the First Main Theorem, which is the more
+  substantial part of the statement.
 -/
-
-
 
 /-!
 # Circle Averages
@@ -47,36 +46,74 @@ variable
 open Real
 
 /--
-If `f x` is smaller than `a` on for every point of the circle, then the circle
-average of `f` is smaller than `a`.
+Analogue of `IntervalIntegrable.abs`: If a function real-valued funcion `f` is
+circle integrable, then so is `|f|`.
 -/
-theorem circleAverage_const {a : ℝ} :
-    circleAverage (fun _ ↦ a) c R = a := by
+theorem CircleIntegrable.abs {f : ℂ → ℝ} (hf : CircleIntegrable f c R) :
+    CircleIntegrable |f| c R := IntervalIntegrable.abs hf
+
+/--
+The circle average of a constant function equals the constant.
+-/
+theorem circleAverage_const (a : ℝ) (c : ℂ) (R : ℝ) : circleAverage (fun _ ↦ a) c R = a := by
   simp only [circleAverage, mul_inv_rev, intervalIntegral.integral_const, sub_zero, smul_eq_mul]
   ring_nf
   simp [mul_inv_cancel₀ pi_ne_zero]
 
 /--
+If `f x` equals `a` on for every point of the circle, then the circle average of
+`f` equals `a`.
+-/
+theorem circleAverage_const_on_circle {a : ℝ} (hf : ∀ x ∈ Metric.sphere c |R|, f x = a) :
+    circleAverage f c R = a := by
+  rw [circleAverage]
+  conv =>
+    left; arg 2; arg 1
+    intro θ
+    rw [hf (circleMap c R θ) (circleMap_mem_sphere' c R θ)]
+  apply circleAverage_const a c R
+
+/--
 If `f x` is smaller than `a` on for every point of the circle, then the circle
 average of `f` is smaller than `a`.
 -/
-theorem circleAverage_le_of_le {a : ℝ} (hf : CircleIntegrable f c R)
-    (h₂f : ∀ x ∈ Metric.sphere c |R|, f x < a) :
+theorem circleAverage_mono_on_of_le_circle {a : ℝ} (hf : CircleIntegrable f c R)
+    (h₂f : ∀ x ∈ Metric.sphere c |R|, f x ≤ a) :
     circleAverage f c R ≤ a := by
-  rw [← circleAverage_const (a := a) (c := c) (R := |R|)]
-  unfold circleAverage
-  rw [smul_eq_mul, smul_eq_mul]
-  rw [mul_le_mul_iff_of_pos_left]
-  apply intervalIntegral.integral_mono_on_of_le_Ioo
+  rw [← circleAverage_const a c |R|, circleAverage, circleAverage, smul_eq_mul, smul_eq_mul,
+    mul_le_mul_iff_of_pos_left (inv_pos.2 two_pi_pos)]
+  apply intervalIntegral.integral_mono_on_of_le_Ioo (le_of_lt two_pi_pos) hf
+  apply intervalIntegral.intervalIntegrable_const a
+  exact fun θ _ ↦ h₂f (circleMap c R θ) (circleMap_mem_sphere' c R θ)
 
-  unfold CircleIntegrable at hf
-  have : 0 ≤ 2 * π := by sorry
-  have Z := intervalIntegral.integral_mono_on_of_le_Ioo this hf (g := fun z ↦ a)
+/--
+Analogue of `intervalIntegral.abs_integral_le_integral_abs`: The absolute value
+of a circle average is less than or equal to the circle average of the absolute
+value of the function.
+-/
+theorem abs_circleAverage_le_circleAverage_abs :
+    |circleAverage f c R| ≤ circleAverage |f| c R := by
+  rw [circleAverage, circleAverage, smul_eq_mul, smul_eq_mul, abs_mul, abs_of_pos (inv_pos.2 two_pi_pos),
+    mul_le_mul_iff_of_pos_left (inv_pos.2 two_pi_pos)]
+  exact intervalIntegral.abs_integral_le_integral_abs (le_of_lt two_pi_pos)
 
+/--
+Variant of `posLog_add` for norms of elements in normed additive commutative
+groups, using monotonicity of `log⁺` and the triangle inequality.
+-/
+lemma posLog_norm_add_le {E : Type*} [NormedAddCommGroup E] (a b : E) :
+    log⁺ ‖a + b‖ ≤ log⁺ ‖a‖ + log⁺ ‖b‖ + log 2 := by
+  calc log⁺ ‖a + b‖
+  _ ≤ log⁺ (‖a‖ + ‖b‖) := by
+    apply monotoneOn_posLog _ _ (norm_add_le a b)
+    <;> simp [add_nonneg (norm_nonneg a) (norm_nonneg b)]
+  _ ≤ log⁺ ‖a‖ + log⁺ ‖b‖ + log 2 := by
+    convert posLog_add using 1
+    ring
 
-  sorry
-
-
+/-!
+# File Body
+-/
 
 namespace ValueDistribution
 
@@ -84,7 +121,7 @@ variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
   {f : ℂ → E} {a₀ : E}
 
-open Asymptotics Real
+open Asymptotics Filter Real
 
 /-!
 ## Second part of the First Main Theorem
@@ -96,114 +133,29 @@ version: If `f` is meromorphic on the complex plane, then the characteristic
 functions (for value `⊤`) of `f` and `f - a₀` differ at most by `log⁺ ‖a₀‖ + log
 2`.
 -/
-theorem FirstMainTheorem₂ {r : ℝ} (h : MeromorphicOn f ⊤) :
+theorem FirstMainTheorem₂_quant {r : ℝ} (h : MeromorphicOn f ⊤) :
     |characteristic f ⊤ r - characteristic (f · - a₀) ⊤ r| ≤ log⁺ ‖a₀‖ + log 2 := by
+  have h₁f : CircleIntegrable (fun x ↦ log⁺ ‖f x‖) 0 r :=
+    MeromorphicOn.circleIntegrable_posLog_norm (fun x a ↦ h x trivial)
+  have h₂f : CircleIntegrable (fun x ↦ log⁺ ‖f x - a₀‖) 0 r := by
+    apply MeromorphicOn.circleIntegrable_posLog_norm
+    apply MeromorphicOn.sub (fun x a => h x trivial) (MeromorphicOn.const a₀)
   rw [← Pi.sub_apply, characteristic_sub_characteristic_eq_proximity_sub_proximity h]
-  simp only [proximity, reduceDIte, Pi.sub_apply]
-  rw [← circleAverage_sub]
-  rw [circleAverage]
-
-  let g := f - (fun _ ↦ a₀)
-
-  have t₀₀ (x : ℝ) : log⁺ ‖f (circleMap 0 r x)‖ ≤ log⁺ ‖g (circleMap 0 r x)‖ + log⁺ ‖a₀‖ + log 2 := by
-    unfold g
-    simp only [Pi.sub_apply]
-
-    calc log⁺ ‖f (circleMap 0 r x)‖
-    _ = log⁺ ‖g (circleMap 0 r x) + a₀‖ := by
-      unfold g
-      simp
-    _ ≤ log⁺ (‖g (circleMap 0 r x)‖ + ‖a₀‖) := by
-      apply monotoneOn_posLog
-      refine Set.mem_Ici.mpr ?_
-      apply norm_nonneg
-      refine Set.mem_Ici.mpr ?_
-      apply add_nonneg
-      apply norm_nonneg
-      apply norm_nonneg
-      --
-      apply norm_add_le
-    _ ≤ log⁺ ‖g (circleMap 0 r x)‖ + log⁺ ‖a₀‖ + log 2 := by
-      convert posLog_add using 1
-      ring
-
-  have t₁₀ (x : ℝ) : log⁺ ‖f (circleMap 0 r x)‖ - log⁺ ‖g (circleMap 0 r x)‖ ≤ log⁺ ‖a₀‖ + log 2 := by
-    rw [sub_le_iff_le_add]
-    nth_rw 1 [add_comm]
-    rw [←add_assoc]
-    apply t₀₀ x
-  clear t₀₀
-
-  have t₀₁ (x : ℝ) : log⁺ ‖g (circleMap 0 r x)‖ ≤ log⁺ ‖f (circleMap 0 r x)‖ + log⁺ ‖a₀‖ + log 2 := by
-    unfold g
-    simp only [Pi.sub_apply]
-
-    calc log⁺ ‖g (circleMap 0 r x)‖
-    _ = log⁺ ‖f (circleMap 0 r x) - a₀‖ := by
-      unfold g
-      simp
-    _ ≤ log⁺ (‖f (circleMap 0 r x)‖ + ‖a₀‖) := by
-      apply monotoneOn_posLog
-      refine Set.mem_Ici.mpr ?_
-      apply norm_nonneg
-      refine Set.mem_Ici.mpr ?_
-      apply add_nonneg
-      apply norm_nonneg
-      apply norm_nonneg
-      --
-      apply norm_sub_le
-    _ ≤ log⁺ ‖f (circleMap 0 r x)‖ + log⁺ ‖a₀‖ + log 2 := by
-      convert posLog_add using 1
-      ring
-
-  have t₁₁ (x : ℝ) : log⁺ ‖g (circleMap 0 r x)‖ - log⁺ ‖f (circleMap 0 r x)‖ ≤ log⁺ ‖a₀‖ + log 2 := by
-    rw [sub_le_iff_le_add]
-    nth_rw 1 [add_comm]
-    rw [←add_assoc]
-    apply t₀₁ x
-  clear t₀₁
-
-  have t₂ {x : ℝ} : ‖log⁺ ‖f (circleMap 0 r x)‖ - log⁺ ‖g (circleMap 0 r x)‖‖ ≤ log⁺ ‖a₀‖ + log 2 := by
-    by_cases h : 0 ≤ log⁺ ‖f (circleMap 0 r x)‖ - log⁺ ‖g (circleMap 0 r x)‖
-    · rw [norm_of_nonneg h]
-      exact t₁₀ x
-    · rw [norm_of_nonpos (by linarith)]
-      rw [neg_sub]
-      exact t₁₁ x
-  clear t₁₀ t₁₁
-
-  have s₀ : ‖∫ (x : ℝ) in (0)..(2 * π), log⁺ ‖f (circleMap 0 r x)‖ - log⁺ ‖g (circleMap 0 r x)‖‖ ≤ (log⁺ ‖a₀‖ + log 2) * |2 * π - 0| := by
-    apply intervalIntegral.norm_integral_le_of_norm_le_const
-    intro x hx
-    exact t₂
-  clear t₂
-  simp only [norm_eq_abs, sub_zero] at s₀
-  rw [smul_eq_mul, abs_mul]
-
-  have s₁ : |(2 * π)⁻¹| * |∫ (x : ℝ) in (0)..(2 * π), log⁺ ‖f (circleMap 0 r x)‖ - log⁺ ‖g (circleMap 0 r x)‖| ≤ |(2 * π)⁻¹| * ((log⁺ ‖a₀‖ + log 2) * |2 * π|) := by
-    apply mul_le_mul_of_nonneg_left
-    exact s₀
-    apply abs_nonneg
-  have : |(2 * π)⁻¹| * ((log⁺ ‖a₀‖ + log 2) * |2 * π|) = log⁺ ‖a₀‖ + log 2 := by
-    rw [mul_comm, mul_assoc]
-    have : |2 * π| * |(2 * π)⁻¹| = 1 := by
-      rw [abs_mul, abs_inv, abs_mul]
-      rw [abs_of_pos pi_pos]
-      simp [pi_ne_zero]
-      ring_nf
-      simp [pi_ne_zero]
-    rw [this]
-    simp
-  rw [this] at s₁
-  assumption
-  --
-  apply MeromorphicOn.circleIntegrable_posLog_norm
-  exact fun x a => h x trivial
-  --
-  apply MeromorphicOn.circleIntegrable_posLog_norm (f := fun z ↦ f z - a₀)
-  apply MeromorphicOn.sub
-  exact fun x a => h x trivial
-  apply MeromorphicOn.const a₀
+  simp only [proximity, reduceDIte, Pi.sub_apply, ← circleAverage_sub h₁f h₂f]
+  apply le_trans abs_circleAverage_le_circleAverage_abs
+  apply circleAverage_mono_on_of_le_circle
+  apply (h₁f.sub h₂f).abs
+  intro θ hθ
+  simp only [Pi.abs_apply, Pi.sub_apply]
+  by_cases h : 0 ≤ log⁺ ‖f θ‖ - log⁺ ‖f θ - a₀‖
+  · simpa [abs_of_nonneg h, sub_le_iff_le_add, add_comm (log⁺ ‖a₀‖ + log 2), ← add_assoc]
+      using (posLog_norm_add_le (f θ - a₀) a₀)
+  · simp [abs_of_nonpos (le_of_not_ge h), neg_sub, sub_le_iff_le_add, add_comm (log⁺ ‖a₀‖ + log 2),
+      ← add_assoc]
+    convert posLog_norm_add_le (-f θ) (a₀) using 2
+    · rw [← norm_neg]
+      abel_nf
+    · simp
 
 /--
 Second part of the First Main Theorem of Value Distribution Theory, qualitative
@@ -211,10 +163,10 @@ version: If `f` is meromorphic on the complex plane, then the characteristic
 functions for the value `⊤` of the function `f` and `f - a₀` agree
 asymptotically up to a bounded function.
 -/
-theorem FirstMainTheorem₂' (h : MeromorphicOn f ⊤) :
-    |(characteristic f ⊤) - (characteristic (f · - a₀) ⊤)| =O[Filter.atTop] (1 : ℝ → ℝ) := by
-  simp_rw [isBigO_iff', Filter.eventually_atTop]
-  use posLog ‖a₀‖ + log 2, add_pos_of_nonneg_of_pos posLog_nonneg (log_pos one_lt_two), 0
-  simp [FirstMainTheorem₂ h]
+theorem FirstMainTheorem₂_qual (h : MeromorphicOn f ⊤) :
+    |(characteristic f ⊤) - (characteristic (f · - a₀) ⊤)| =O[atTop] (1 : ℝ → ℝ) := by
+  simp_rw [isBigO_iff', eventually_atTop]
+  use log⁺ ‖a₀‖ + log 2, add_pos_of_nonneg_of_pos posLog_nonneg (log_pos one_lt_two), 0
+  simp [FirstMainTheorem₂_quant h]
 
 end ValueDistribution
