@@ -7,7 +7,7 @@ import VD.ToMathlib.IsolatedZeros
 import VD.ToMathlib.LeadCoefficient
 import VD.ToMathlib.meromorphicOn_integrability
 import VD.cauchyRiemann
-import VD.firstMain
+import VD.firstMain1
 import VD.firstMain2
 import VD.harmonicAt
 import VD.harmonicAt_examples
