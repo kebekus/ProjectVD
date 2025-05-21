@@ -38,10 +38,10 @@ theorem Nevanlinna_firstMain₁
   (h₁f : MeromorphicOn f ⊤)
   (h₂f : MeromorphicNFAt f 0)
   (h₃f : f 0 ≠ 0) :
-  (fun _ ↦ log ‖f 0‖) + ValueDistribution.characteristic f⁻¹ ⊤ = ValueDistribution.characteristic f ⊤ := by
+  (fun _ ↦ log ‖f 0‖) = ValueDistribution.characteristic f ⊤ - ValueDistribution.characteristic f⁻¹ ⊤ := by
+
   classical
 
-  rw [add_eq_of_eq_sub]
   unfold ValueDistribution.characteristic
 
   have {A B C D : ℝ → ℝ} : A + B - (C + D) = A - C - (D - B) := by
