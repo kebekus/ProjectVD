@@ -142,14 +142,31 @@ theorem jensenNTT {R : ℝ} (hR : R ≠ 0) (f : ℂ → ℂ)
     apply compl_not_mem
     apply mem_nhdsWithin.mpr
     use ball 0 |R|
-    simp [hR]
-    intro x hx
-    simp_all
-    linarith
+    simpa [hR] using fun _ ⟨h, _⟩ ↦ ball_subset_closedBall h
   have {a b c : ℝ} (h : a = b + c) : c = a - b := by
     rw [h]
     ring
   rw [this s₀]
   clear s₀ this
   simp
+  have {a b c : ℝ} : a + (b - c) = (a - c) + b := by ring
+  rw [this]
+  clear this
+  have : ∑ᶠ (u : ℂ), ↑((divisor f (closedBall 0 |R|)) u) * log R - ∑ᶠ (u : ℂ), ↑((divisor f (closedBall 0 |R|)) u) * log ‖u‖
+      = ∑ᶠ (u : ℂ), (↑((divisor f (closedBall 0 |R|)) u) * log R - ↑((divisor f (closedBall 0 |R|)) u) * log ‖u‖) := by
+    rw [finsum_sub_distrib]
+    · apply Set.Finite.subset h₃f
+      intro x
+      contrapose
+      simp_all
+    · apply Set.Finite.subset h₃f
+      intro x
+      contrapose
+      simp_all
+  rw [this]
+  clear this
+  simp_rw [← mul_sub]
+  have {u : ℂ} : log R - log ‖u‖ = log (R * ‖u‖⁻¹) := by
+
+    sorry
   sorry
