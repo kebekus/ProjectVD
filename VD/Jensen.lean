@@ -2,6 +2,7 @@ import Mathlib.Analysis.Complex.Basic
 import Mathlib.Analysis.Meromorphic.FactorizedRational
 import Mathlib.MeasureTheory.Integral.CircleAverage
 import VD.specialFunctions_CircleIntegral_affine
+import VD.LeadCoefficientFactorizedRational
 
 open Filter MeromorphicOn Metric Real
 
@@ -112,3 +113,43 @@ theorem jensenNT {R : ℝ} (hR : R ≠ 0) (f : ℂ → ℂ)
     (h₁g.mono sphere_subset_closedBall).meromorphicOn.circleIntegrable_log_norm]
   -- Identify pieces
   simp [h₁g, h₂g]
+
+theorem jensenNTT {R : ℝ} (hR : R ≠ 0) (f : ℂ → ℂ)
+    (h₁f : MeromorphicOn f (closedBall 0 |R|))
+    (h₂f : ∀ u : (closedBall (0 : ℂ) |R|), (h₁f u u.2).order ≠ ⊤) :
+    ∃ g : ℂ → ℂ, AnalyticOnNhd ℂ g (closedBall 0 |R|)
+      ∧ (∀ u : (closedBall (0 : ℂ) |R|), g u ≠ 0)
+      ∧ (log ‖f ·‖) =ᶠ[Filter.codiscreteWithin (closedBall 0 |R|)]
+        ∑ᶠ u, (divisor f (closedBall (0 : ℂ) |R|) u * log ‖· - u‖) + (log ‖g ·‖)
+      ∧ circleAverage (log ‖f ·‖) 0 R
+        = 0 := by
+  -- Decompose f modulo equality on codiscrete sets, extracting zeros and poles
+  have h₃f := (divisor f (closedBall 0 |R|)).finiteSupport (isCompact_closedBall 0 |R|)
+  obtain ⟨g, h₁g, h₂g, h₃g⟩ := h₁f.extract_zeros_poles h₂f h₃f
+  have h₄g := MeromorphicOn.extract_zeros_poles_log h₂g h₃g
+  use g, h₁g, h₂g, h₄g
+  -- Apply the decomposition of f under the integral
+  rw [circleAverage_congr_codiscreteWithin (codiscreteWithin.mono sphere_subset_closedBall h₄g) hR]
+  -- Decompose the integral
+  rw [circleAverage_add (circleIntegrable_logAbs_factorizedRational (divisor f (closedBall 0 |R|)))
+    (h₁g.mono sphere_subset_closedBall).meromorphicOn.circleIntegrable_log_norm]
+  -- Identify pieces
+  simp [h₁g, h₂g]
+  have s₀ : log ‖MeromorphicAt.leadCoefficient f 0‖ =
+      ∑ᶠ (u : ℂ), ↑((divisor f (closedBall 0 |R|)) u) * log ‖0 - u‖ + log ‖g 0‖ := by
+    apply MeromorphicOn.extract_zeros_poles_leadCoefficient_log_norm h₃f
+    <;> simp_all [h₁f 0, h₁g 0, h₂g]
+    apply compl_not_mem
+    apply mem_nhdsWithin.mpr
+    use ball 0 |R|
+    simp [hR]
+    intro x hx
+    simp_all
+    linarith
+  have {a b c : ℝ} (h : a = b + c) : c = a - b := by
+    rw [h]
+    ring
+  rw [this s₀]
+  clear s₀ this
+  simp
+  sorry
