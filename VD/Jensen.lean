@@ -45,33 +45,31 @@ theorem circleAverage_logAbs_affine
 theorem circleAverage_logAbs_factorizedRational {R : ℝ} {c : ℂ}
     (D : Function.locallyFinsuppWithin (closedBall c |R|) ℤ) :
     circleAverage (∑ᶠ u, ((D u) * log ‖· - u‖)) c R = ∑ᶠ u, (D u) * log R := by
-  -- Turn finsums into sums
   have h := D.finiteSupport (isCompact_closedBall c |R|)
-  have : (fun u x ↦ (D u) * log ‖x - u‖).support ⊆ h.toFinset := by
+  calc circleAverage (∑ᶠ u, ((D u) * log ‖· - u‖)) c R
+  _ = circleAverage (∑ u ∈ h.toFinset, ((D u) * log ‖· - u‖)) c R := by
+    rw [finsum_eq_sum_of_support_subset]
     intro u
     contrapose
     aesop
-  simp_rw [finsum_eq_sum_of_support_subset _ this]
-  have : (fun u ↦ (D u) * log R).support ⊆ h.toFinset := by
-    intro u
-    contrapose
-    aesop
-  simp_rw [finsum_eq_sum_of_support_subset _ this]
-  -- Take the sum out of the integral
-  have : ∀ i ∈ h.toFinset, CircleIntegrable (fun x ↦ (D i) * log ‖x - i‖) c R := by
+  _ = ∑ i ∈ h.toFinset, circleAverage (fun x ↦ ↑(D i) * log ‖x - i‖) c R := by
+    rw [circleAverage_sum]
     intro u hu
     apply IntervalIntegrable.const_mul
     apply MeromorphicOn.circleIntegrable_log_norm (f := (· - u))
     apply (analyticOnNhd_id.sub analyticOnNhd_const).meromorphicOn
-  rw [circleAverage_sum this]
-  -- Identify summands
-  apply Finset.sum_congr rfl
-  intro u hu
-  simp_rw [← smul_eq_mul, circleAverage_fun_smul]
-  congr
-  apply circleAverage_logAbs_affine
-  apply D.supportWithinDomain
-  simp_all
+  _ = ∑ u ∈ h.toFinset, ↑(D u) * log R := by
+    apply Finset.sum_congr rfl
+    intro u hu
+    simp_rw [← smul_eq_mul, circleAverage_fun_smul]
+    congr
+    apply circleAverage_logAbs_affine
+    apply D.supportWithinDomain
+    simp_all
+  _ = ∑ᶠ u, (D u) * log R := by
+    rw [finsum_eq_sum_of_support_subset]
+    intro u
+    aesop
 
 theorem circleIntegrable_logAbs_factorizedRational {R : ℝ} {c : ℂ} (D : ℂ → ℤ) :
     CircleIntegrable (∑ᶠ u, ((D u) * log ‖· - u‖)) c R := by
@@ -122,40 +120,50 @@ theorem xx {R : ℝ} {D : ℂ → ℤ} (hR : R ≠ 0) (hD : D.support.Finite) :
 -/
 
 -- WARNING: Want that for function to E
-theorem JensenFormula {R : ℝ} {f : ℂ → ℂ} (hR : R ≠ 0) (h₁f : MeromorphicOn f (closedBall 0 |R|))
-    (h₂f : ∀ u : closedBall (0 : ℂ) |R|, (h₁f u u.2).order ≠ ⊤) :
+-- WARNING: h₂f is not needed
+theorem JensenFormula {R : ℝ} {f : ℂ → ℂ} (hR : R ≠ 0) (h₁f : MeromorphicOn f (closedBall 0 |R|)) :
     circleAverage (log ‖f ·‖) 0 R
-      = ∑ᶠ (u : ℂ), (divisor f (closedBall 0 |R|) u) * log (R * ‖u‖⁻¹)
-        + (divisor f (closedBall 0 |R|) 0) * log R + log ‖leadCoefficient f 0‖ := by
-  -- Shorthand notation to keep line size in check
-  let CB := closedBall (0 : ℂ) |R|
-  have h₃f := (divisor f CB).finiteSupport (isCompact_closedBall 0 |R|)
-  obtain ⟨g, h₁g, h₂g, h₃g⟩ := h₁f.extract_zeros_poles h₂f h₃f
-
-  calc circleAverage (log ‖f ·‖) 0 R
-  _ = circleAverage ((∑ᶠ u, (divisor f CB u * log ‖· - u‖)) + (log ‖g ·‖)) 0 R := by
-    have h₄g := extract_zeros_poles_log h₂g h₃g
-    rw [circleAverage_congr_codiscreteWithin (codiscreteWithin.mono sphere_subset_closedBall h₄g) hR]
-  _ = circleAverage (∑ᶠ u, (divisor f CB u * log ‖· - u‖)) 0 R + circleAverage (log ‖g ·‖) 0 R := by
-    apply circleAverage_add
-    exact circleIntegrable_logAbs_factorizedRational (divisor f CB)
-    exact (h₁g.mono sphere_subset_closedBall).meromorphicOn.circleIntegrable_log_norm
-  _ = ∑ᶠ u, divisor f CB u * log R + log ‖g 0‖ := by
-    simp [h₁g, h₂g]
-  _ = ∑ᶠ u, divisor f CB u * log R + (log ‖leadCoefficient f 0‖ - ∑ᶠ u, divisor f CB u * log ‖u‖) := by
-    have t₀ : 0 ∈ CB := by simp [CB]
-    have t₁ : CBᶜ ∉ nhdsWithin 0 {0}ᶜ := by
-      apply compl_not_mem
-      apply mem_nhdsWithin.mpr
-      use ball 0 |R|
-      simpa [hR] using fun _ ⟨h, _⟩ ↦ ball_subset_closedBall h
-    simp [extract_zeros_poles_leadCoefficient_log_norm h₃f t₀ t₁ (h₁f 0 t₀) (h₁g 0 t₀) (h₂g ⟨0, t₀⟩) h₃g]
-  _ = ∑ᶠ u, divisor f CB u * log R - ∑ᶠ u, divisor f CB u * log ‖u‖ + log ‖leadCoefficient f 0‖ := by
-    ring
-  _ = (∑ᶠ u, divisor f CB u * (log R - log ‖u‖)) + log ‖leadCoefficient f 0‖ := by
-    rw [← finsum_sub_distrib]
-    simp_rw [← mul_sub]
-    repeat
-      apply h₃f.subset (fun _ ↦ (by simp_all))
-  _ = ∑ᶠ u, divisor f CB u * log (R * ‖u‖⁻¹) + divisor f CB 0 * log R + log ‖leadCoefficient f 0‖ := by
-    rw [xx hR h₃f]
+      = ∑ᶠ u, divisor f (closedBall 0 |R|) u * log (R * ‖u‖⁻¹)
+        + divisor f (closedBall 0 |R|) 0 * log R + log ‖leadCoefficient f 0‖ := by
+  by_cases h₂f : ∀ u : closedBall (0 : ℂ) |R|, (h₁f u u.2).order ≠ ⊤
+  · -- Shorthand notation to keep line size in check
+    let CB := closedBall (0 : ℂ) |R|
+    have h₃f := (divisor f CB).finiteSupport (isCompact_closedBall 0 |R|)
+    -- Extract zeros & poles and compute
+    obtain ⟨g, h₁g, h₂g, h₃g⟩ := h₁f.extract_zeros_poles h₂f h₃f
+    calc circleAverage (log ‖f ·‖) 0 R
+    _ = circleAverage ((∑ᶠ u, (divisor f CB u * log ‖· - u‖)) + (log ‖g ·‖)) 0 R := by
+      have h₄g := extract_zeros_poles_log h₂g h₃g
+      rw [circleAverage_congr_codiscreteWithin (codiscreteWithin.mono sphere_subset_closedBall h₄g) hR]
+    _ = circleAverage (∑ᶠ u, (divisor f CB u * log ‖· - u‖)) 0 R + circleAverage (log ‖g ·‖) 0 R := by
+      apply circleAverage_add
+      exact circleIntegrable_logAbs_factorizedRational (divisor f CB)
+      exact (h₁g.mono sphere_subset_closedBall).meromorphicOn.circleIntegrable_log_norm
+    _ = ∑ᶠ u, divisor f CB u * log R + log ‖g 0‖ := by simp [h₁g, h₂g]
+    _ = ∑ᶠ u, divisor f CB u * log R + (log ‖leadCoefficient f 0‖ - ∑ᶠ u, divisor f CB u * log ‖u‖) := by
+      have t₀ : 0 ∈ CB := by simp [CB]
+      have t₁ : CBᶜ ∉ nhdsWithin 0 {0}ᶜ := by
+        apply compl_not_mem
+        apply mem_nhdsWithin.mpr
+        use ball 0 |R|
+        simpa [hR] using fun _ ⟨h, _⟩ ↦ ball_subset_closedBall h
+      simp [extract_zeros_poles_leadCoefficient_log_norm h₃f t₀ t₁ (h₁f 0 t₀) (h₁g 0 t₀) (h₂g ⟨0, t₀⟩) h₃g]
+    _ = ∑ᶠ u, divisor f CB u * log R - ∑ᶠ u, divisor f CB u * log ‖u‖ + log ‖leadCoefficient f 0‖ := by
+      ring
+    _ = (∑ᶠ u, divisor f CB u * (log R - log ‖u‖)) + log ‖leadCoefficient f 0‖ := by
+      rw [← finsum_sub_distrib]
+      simp_rw [← mul_sub]
+      repeat apply h₃f.subset (fun _ ↦ (by simp_all))
+    _ = ∑ᶠ u, divisor f CB u * log (R * ‖u‖⁻¹) + divisor f CB 0 * log R + log ‖leadCoefficient f 0‖ := by
+      rw [xx hR h₃f]
+  · -- Trivial case: `f` vanishes on a codiscrete set
+    rw [← exists_order_ne_top_iff_forall h₁f
+      ⟨nonempty_closedBall.mpr (abs_nonneg R), (convex_closedBall 0 |R|).isPreconnected⟩] at h₂f
+    push_neg at h₂f
+    have : divisor f (closedBall 0 |R|) = 0 := by
+      ext x
+      by_cases h : x ∈ closedBall 0 |R|
+      <;> simp_all [divisor_def]
+    simp [this]
+    rw [leadCoefficient_of_order_eq_top (by aesop) (by aesop), norm_zero, log_zero]
+    sorry

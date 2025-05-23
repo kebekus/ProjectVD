@@ -4,10 +4,9 @@ import VD.ToMathlib.meromorphicOn_integrability
 import VD.stronglyMeromorphic_JensenFormula
 import VD.ProximityFunction
 import VD.ToMathlib.CharacteristicFunction
-import VD.Jensen
 import Mathlib.Analysis.Complex.ValueDistribution.CountingFunction
 
-open Asymptotics MeromorphicOn Real ValueDistribution
+open Asymptotics Real
 
 
 -- Lang p. 164
@@ -125,36 +124,3 @@ theorem Nevanlinna_firstMain₁
   rw [h₃f]
   simp
   assumption
-
-theorem Nevanlinna_firstMain {f : ℂ → ℂ} (h₁f : MeromorphicOn f ⊤) :
-  characteristic f ⊤ - characteristic f⁻¹ ⊤ = circleAverage (log ‖f ·‖) 0 - (divisor f Set.univ).logCounting := by
-  calc characteristic f ⊤ - characteristic f⁻¹ ⊤
-  _ = proximity f ⊤ - proximity f⁻¹ ⊤ - (logCounting f⁻¹ ⊤ - logCounting f ⊤) := by
-    unfold characteristic
-    ring
-  _ = circleAverage (log ‖f ·‖) 0 - (logCounting f⁻¹ ⊤ - logCounting f ⊤) := by
-    rw [proximity_sub_proximity_inv_eq_circleAverage h₁f]
-  _ = circleAverage (log ‖f ·‖) 0 - (logCounting f 0 - logCounting f ⊤) := by
-    rw [logCounting_inv]
-  _ = circleAverage (log ‖f ·‖) 0 - (divisor f Set.univ).logCounting := by
-    rw [← ValueDistribution.log_counting_zero_sub_logCounting_top]
-
-theorem Nevanlinna_firstMain' {f : ℂ → ℂ} {R : ℝ} (hR : R ≠ 0) (h₁f : MeromorphicOn f ⊤) :
-  characteristic f ⊤ R - characteristic f⁻¹ ⊤ R = log ‖MeromorphicAt.leadCoefficient f 0‖ := by
-  calc characteristic f ⊤ R - characteristic f⁻¹ ⊤ R
-  _ = (characteristic f ⊤ - characteristic f⁻¹ ⊤) R  := by simp
-  _ = circleAverage (log ‖f ·‖) 0 R - (divisor f Set.univ).logCounting R := by
-    rw [Nevanlinna_firstMain]
-  _ = log ‖MeromorphicAt.leadCoefficient f 0‖ := by
-    rw [JensenFormula hR (h₁f.mono_set (by tauto))]
-    unfold Function.locallyFinsuppWithin.logCounting
-    simp
-    have : (Function.locallyFinsuppWithin.toClosedBall R) (divisor f Set.univ) =
-      (divisor f (Metric.closedBall 0 |R|)) := by
-      sorry
-    rw [this]
-    have : divisor f Set.univ 0 = divisor f (Metric.closedBall 0 |R|) 0 := by
-      sorry
-    rw [this]
-    ring
-    --
