@@ -17,12 +17,9 @@ import VD.holomorphic_examples
 import VD.holomorphic_primitive
 import VD.intervalIntegrability
 import VD.laplace
-import VD.leftovers.LaurentPolynomial
 import VD.leftovers.diffOp
 import VD.leftovers.holomorphic
 import VD.meromorphicAt_topology
 import VD.partialDeriv
 import VD.specialFunctions_CircleIntegral_affine
 import VD.specialFunctions_Integral_log_sin
-import VD.stronglyMeromorphicOn_eliminate
-import VD.stronglyMeromorphic_JensenFormula
