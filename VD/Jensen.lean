@@ -11,24 +11,70 @@ variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
 
 /-!
+# Counting Function
+-/
+
+/--
+Alternate presentation of the finsum that appears in the counting function.
+-/
+lemma CountingFunction.finsum_eq_finsum_add {R : ℝ} {D : ℂ → ℤ} (hR : R ≠ 0) (hD : D.support.Finite) :
+    ∑ᶠ u, (D u) * (log R - log ‖u‖) = ∑ᶠ u, (D u) * log (R * ‖u‖⁻¹) + D 0 * log R := by
+  by_cases h : 0 ∈ D.support
+  · have {g : ℂ → ℝ} : (fun u ↦ (D u) * (g u)).support ⊆ hD.toFinset := by
+      intro x
+      contrapose
+      simp_all
+    simp only [finsum_eq_sum_of_support_subset _ this,
+      Finset.sum_eq_sum_diff_singleton_add ((Set.Finite.mem_toFinset hD).mpr h), norm_zero,
+      log_zero, sub_zero, inv_zero, mul_zero, add_zero, add_left_inj]
+    apply Finset.sum_congr rfl
+    intro x hx
+    simp only [Finset.mem_sdiff, Set.Finite.mem_toFinset, Function.mem_support, ne_eq,
+      Finset.mem_singleton] at hx
+    congr
+    rw [log_mul hR (inv_ne_zero (norm_ne_zero_iff.mpr hx.2)), log_inv]
+    ring
+  · simp_all only [ne_eq, Function.mem_support, Decidable.not_not, Int.cast_zero, zero_mul,
+      add_zero]
+    apply finsum_congr
+    intro x
+    by_cases h₁ : x = 0
+    · simp_all
+    · simp only [log_mul hR (inv_ne_zero (norm_ne_zero_iff.mpr h₁)), log_inv, mul_eq_mul_left_iff,
+        Int.cast_eq_zero]
+      left
+      ring
+
+/-!
 # Circle Integrability
 -/
 
-theorem CircleIntegrable.const_mul {c : ℂ} {a R : ℝ} {f : ℂ → ℝ} (h : CircleIntegrable f c R) :
+theorem CircleIntegrable.const_smul {c : ℂ} {a R : ℝ} {f : ℂ → ℝ} (h : CircleIntegrable f c R) :
     CircleIntegrable (a • f) c R := by
   apply IntervalIntegrable.const_mul h
 
-theorem CircleIntegrable.const_mul_fun {c : ℂ} {a R : ℝ} {f : ℂ → ℝ} (h : CircleIntegrable f c R) :
+theorem CircleIntegrable.const_smul_fun {c : ℂ} {a R : ℝ} {f : ℂ → ℝ} (h : CircleIntegrable f c R) :
     CircleIntegrable (fun z ↦ a * f z) c R := by
-  apply CircleIntegrable.const_mul h
+  apply CircleIntegrable.const_smul h
+
+theorem circleIntegrable_logAbs_factorizedRational {R : ℝ} {c : ℂ} (D : ℂ → ℤ) :
+    CircleIntegrable (∑ᶠ u, ((D u) * log ‖· - u‖)) c R := by
+  apply CircleIntegrable.finsum
+  intro u
+  apply CircleIntegrable.const_smul
+  apply (analyticOnNhd_id.sub analyticOnNhd_const).meromorphicOn.circleIntegrable_log_norm
 
 /-!
 ## Circle Averages
+
+In preparation to the proof of Jensen's formula, compute several circle
+integrals.
 -/
 
-theorem circleAverage_logAbs_affine
-    {R : ℝ} {c u : ℂ}
-    (hu : u ∈ closedBall c |R|) :
+/--
+-/
+@[simp]
+lemma circleAverage_logAbs_affine {R : ℝ} {c u : ℂ} (hu : u ∈ closedBall c |R|) :
     circleAverage (log ‖· - u‖) c R = log R := by
   rw [← circleAverage_fun_add]
   have : (fun z ↦ log ‖z + c - u‖) = (log ‖· - (u - c)‖) := by
@@ -43,7 +89,7 @@ theorem circleAverage_logAbs_affine
   ring
 
 @[simp]
-theorem circleAverage_logAbs_factorizedRational {R : ℝ} {c : ℂ}
+lemma circleAverage_logAbs_factorizedRational {R : ℝ} {c : ℂ}
     (D : Function.locallyFinsuppWithin (closedBall c |R|) ℤ) :
     circleAverage (∑ᶠ u, ((D u) * log ‖· - u‖)) c R = ∑ᶠ u, (D u) * log R := by
   have h := D.finiteSupport (isCompact_closedBall c |R|)
@@ -72,64 +118,28 @@ theorem circleAverage_logAbs_factorizedRational {R : ℝ} {c : ℂ}
     intro u
     aesop
 
-theorem circleIntegrable_logAbs_factorizedRational {R : ℝ} {c : ℂ} (D : ℂ → ℤ) :
-    CircleIntegrable (∑ᶠ u, ((D u) * log ‖· - u‖)) c R := by
-  apply CircleIntegrable.finsum
-  intro u
-  apply CircleIntegrable.const_mul
-  apply (analyticOnNhd_id.sub analyticOnNhd_const).meromorphicOn.circleIntegrable_log_norm
-
 -- WARNING: Want that for function to E
 @[simp]
-theorem circleAverage_nonVanishAnalytic {R : ℝ} {c : ℂ} {g : ℂ → ℂ}
+lemma circleAverage_nonVanishAnalytic {R : ℝ} {c : ℂ} {g : ℂ → ℂ}
     (h₁g : AnalyticOnNhd ℂ g (closedBall c |R|))
     (h₂g : ∀ u : closedBall c |R|, g u ≠ 0) :
     circleAverage (log ‖g ·‖) c R = log ‖g c‖ := by
   apply harmonic_meanValue₂
     (fun x hx ↦ logabs_of_holomorphicAt_is_harmonic (h₁g x hx).holomorphicAt (h₂g ⟨x, hx⟩))
 
-theorem xx {R : ℝ} {D : ℂ → ℤ} (hR : R ≠ 0) (hD : D.support.Finite) :
-    ∑ᶠ u, (D u) * (log R - log ‖u‖) = ∑ᶠ u, (D u) * log (R * ‖u‖⁻¹) + D 0 * log R := by
-  by_cases h : 0 ∈ D.support
-  · have t₀ {g : ℂ → ℝ} : (fun u ↦ (D u) * (g u)).support ⊆ hD.toFinset := by
-      intro x
-      contrapose
-      simp_all
-    simp only [finsum_eq_sum_of_support_subset _ t₀,
-      Finset.sum_eq_sum_diff_singleton_add ((Set.Finite.mem_toFinset hD).mpr h), norm_zero,
-      log_zero, sub_zero, inv_zero, mul_zero, add_zero, add_left_inj]
-    apply Finset.sum_congr rfl
-    intro x hx
-    simp only [Finset.mem_sdiff, Set.Finite.mem_toFinset, Function.mem_support, ne_eq,
-      Finset.mem_singleton] at hx
-    congr
-    rw [log_mul hR (inv_ne_zero (norm_ne_zero_iff.mpr hx.2)), log_inv]
-    ring
-  · simp_all only [ne_eq, Function.mem_support, Decidable.not_not, Int.cast_zero, zero_mul,
-      add_zero]
-    apply finsum_congr
-    intro x
-    by_cases h₁ : x = 0
-    · simp_all
-    · simp only [log_mul hR (inv_ne_zero (norm_ne_zero_iff.mpr h₁)), log_inv, mul_eq_mul_left_iff,
-        Int.cast_eq_zero]
-      left
-      ring
-
 /-!
 ## Jensen's Formula
 -/
 
 -- WARNING: Want that for function to E
--- WARNING: h₂f is not needed
-theorem JensenFormula {R : ℝ} {f : ℂ → ℂ} (hR : R ≠ 0) (h₁f : MeromorphicOn f (closedBall 0 |R|)) :
+theorem MeromorphicOn.JensenFormula {R : ℝ} {f : ℂ → ℂ} (hR : R ≠ 0) (h₁f : MeromorphicOn f (closedBall 0 |R|)) :
     circleAverage (log ‖f ·‖) 0 R
       = ∑ᶠ u, divisor f (closedBall 0 |R|) u * log (R * ‖u‖⁻¹)
         + divisor f (closedBall 0 |R|) 0 * log R + log ‖leadCoefficient f 0‖ := by
-  by_cases h₂f : ∀ u : closedBall (0 : ℂ) |R|, (h₁f u u.2).order ≠ ⊤
-  · -- Shorthand notation to keep line size in check
-    let CB := closedBall (0 : ℂ) |R|
-    have h₃f := (divisor f CB).finiteSupport (isCompact_closedBall 0 |R|)
+  -- Shorthand notation to keep line size in check
+  let CB := closedBall (0 : ℂ) |R|
+  by_cases h₂f : ∀ u : CB, (h₁f u u.2).order ≠ ⊤
+  · have h₃f := (divisor f CB).finiteSupport (isCompact_closedBall 0 |R|)
     -- Extract zeros & poles and compute
     obtain ⟨g, h₁g, h₂g, h₃g⟩ := h₁f.extract_zeros_poles h₂f h₃f
     calc circleAverage (log ‖f ·‖) 0 R
@@ -156,25 +166,25 @@ theorem JensenFormula {R : ℝ} {f : ℂ → ℂ} (hR : R ≠ 0) (h₁f : Meromo
       simp_rw [← mul_sub]
       repeat apply h₃f.subset (fun _ ↦ (by simp_all))
     _ = ∑ᶠ u, divisor f CB u * log (R * ‖u‖⁻¹) + divisor f CB 0 * log R + log ‖leadCoefficient f 0‖ := by
-      rw [xx hR h₃f]
+      rw [CountingFunction.finsum_eq_finsum_add hR h₃f]
   · -- Trivial case: `f` vanishes on a codiscrete set
     rw [← exists_order_ne_top_iff_forall h₁f
       ⟨nonempty_closedBall.mpr (abs_nonneg R), (convex_closedBall 0 |R|).isPreconnected⟩] at h₂f
     push_neg at h₂f
-    have : divisor f (closedBall 0 |R|) = 0 := by
+    have : divisor f CB = 0 := by
       ext x
-      by_cases h : x ∈ closedBall 0 |R|
-      <;> simp_all [divisor_def]
-    simp only [this, Function.locallyFinsuppWithin.coe_zero, Pi.zero_apply, Int.cast_zero, zero_mul,
+      by_cases h : x ∈ CB
+      <;> simp_all [CB, divisor_def]
+    simp only [CB, this, Function.locallyFinsuppWithin.coe_zero, Pi.zero_apply, Int.cast_zero, zero_mul,
       finsum_zero, add_zero, zero_add]
     rw [leadCoefficient_of_order_eq_top (by aesop) (by aesop), norm_zero, log_zero]
-    have : f =ᶠ[codiscreteWithin (closedBall 0 |R|)] 0 := by
-      filter_upwards [h₁f.meromorphicNFAt_mem_codiscreteWithin, self_mem_codiscreteWithin (closedBall 0 |R|)]
+    have : f =ᶠ[codiscreteWithin CB] 0 := by
+      filter_upwards [h₁f.meromorphicNFAt_mem_codiscreteWithin, self_mem_codiscreteWithin CB]
         with z h₁z h₂z
       simpa [h₂f ⟨z, h₂z⟩] using (not_iff_not.2 h₁z.order_eq_zero_iff)
     rw [circleAverage_congr_codiscreteWithin (f₂ := 0) _ hR]
     simp only [circleAverage, mul_inv_rev, Pi.zero_apply, intervalIntegral.integral_zero,
       smul_eq_mul, mul_zero]
-    apply Filter.codiscreteWithin.mono (U := closedBall 0 |R|) sphere_subset_closedBall
+    apply Filter.codiscreteWithin.mono (U := CB) sphere_subset_closedBall
     filter_upwards [this] with z hz
     simp_all

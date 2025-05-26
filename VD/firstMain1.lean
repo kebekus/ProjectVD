@@ -9,7 +9,16 @@ variable
 
 namespace ValueDistribution
 
-theorem characteristic_sub_characteristic_inv (h : MeromorphicOn f ⊤) :
+/-!
+## First Part of the First Main Theorem
+-/
+
+/--
+Helper lemma for the first part of the First Main Theorem: Given a meromorphic
+function `f`, compute difference between the characteristic functions of `f`
+and its inverse.
+-/
+lemma characteristic_sub_characteristic_inv (h : MeromorphicOn f ⊤) :
     characteristic f ⊤ - characteristic f⁻¹ ⊤ =
       circleAverage (log ‖f ·‖) 0 - (divisor f Set.univ).logCounting := by
   calc characteristic f ⊤ - characteristic f⁻¹ ⊤
@@ -23,16 +32,11 @@ theorem characteristic_sub_characteristic_inv (h : MeromorphicOn f ⊤) :
   _ = circleAverage (log ‖f ·‖) 0 - (divisor f Set.univ).logCounting := by
     rw [← ValueDistribution.log_counting_zero_sub_logCounting_top]
 
-theorem characteristic_sub_characteristic_inv_off_zero (h : MeromorphicOn f ⊤) :
-    characteristic f ⊤ 0 - characteristic f⁻¹ ⊤ 0 = log ‖f 0‖ := by
-  calc characteristic f ⊤ 0 - characteristic f⁻¹ ⊤ 0
-  _ = (characteristic f ⊤ - characteristic f⁻¹ ⊤) 0 := by simp
-  _ = circleAverage (log ‖f ·‖) 0 0 - (divisor f Set.univ).logCounting 0 := by
-    rw [ValueDistribution.characteristic_sub_characteristic_inv h]
-    rfl
-  _ = log ‖f 0‖ := by
-    simp
-
+/--
+First part of the First Main Theorem: Away from zero, the difference between the
+characteristic functions of `f`  and `f⁻¹` equals `log ‖leadCoefficient f 0‖`.
+-/
+@[simp]
 theorem characteristic_sub_characteristic_inv_at_zero (hf : MeromorphicOn f ⊤) (hR : R ≠ 0) :
     characteristic f ⊤ R - characteristic f⁻¹ ⊤ R = log ‖leadCoefficient f 0‖ := by
   calc characteristic f ⊤ R - characteristic f⁻¹ ⊤ R
@@ -46,5 +50,19 @@ theorem characteristic_sub_characteristic_inv_at_zero (hf : MeromorphicOn f ⊤)
     have : (divisor f (closedBall 0 |R|)) = (divisor f Set.univ).toClosedBall R :=
       (divisor_restrict hf (by tauto)).symm
     simp [this, toClosedBall, restrictMonoidHom, restrict_apply]
+
+/--
+Complement to the first part of the First Main Theorem: At 0, the difference
+between the characteristic functions of `f`  and `f⁻¹` equals `log ‖f 0‖`.
+-/
+theorem characteristic_sub_characteristic_inv_off_zero (h : MeromorphicOn f ⊤) :
+    characteristic f ⊤ 0 - characteristic f⁻¹ ⊤ 0 = log ‖f 0‖ := by
+  calc characteristic f ⊤ 0 - characteristic f⁻¹ ⊤ 0
+  _ = (characteristic f ⊤ - characteristic f⁻¹ ⊤) 0 := by simp
+  _ = circleAverage (log ‖f ·‖) 0 0 - (divisor f Set.univ).logCounting 0 := by
+    rw [ValueDistribution.characteristic_sub_characteristic_inv h]
+    rfl
+  _ = log ‖f 0‖ := by
+    simp
 
 end ValueDistribution

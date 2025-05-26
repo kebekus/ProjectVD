@@ -124,7 +124,7 @@ variable
 open Asymptotics Filter Real
 
 /-!
-## Second part of the First Main Theorem
+## Second Part of the First Main Theorem
 -/
 
 /--
