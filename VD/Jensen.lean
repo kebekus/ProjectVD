@@ -1,5 +1,6 @@
 import Mathlib.Analysis.Complex.Basic
 import Mathlib.Analysis.Meromorphic.FactorizedRational
+import Mathlib.Analysis.Meromorphic.NormalForm
 import Mathlib.MeasureTheory.Integral.CircleAverage
 import VD.specialFunctions_CircleIntegral_affine
 import VD.LeadCoefficientFactorizedRational
@@ -164,12 +165,16 @@ theorem JensenFormula {R : ℝ} {f : ℂ → ℂ} (hR : R ≠ 0) (h₁f : Meromo
       ext x
       by_cases h : x ∈ closedBall 0 |R|
       <;> simp_all [divisor_def]
-    simp [this]
+    simp only [this, Function.locallyFinsuppWithin.coe_zero, Pi.zero_apply, Int.cast_zero, zero_mul,
+      finsum_zero, add_zero, zero_add]
     rw [leadCoefficient_of_order_eq_top (by aesop) (by aesop), norm_zero, log_zero]
     have : f =ᶠ[codiscreteWithin (closedBall 0 |R|)] 0 := by
-      sorry
+      filter_upwards [h₁f.meromorphicNFAt_mem_codiscreteWithin, self_mem_codiscreteWithin (closedBall 0 |R|)]
+        with z h₁z h₂z
+      simpa [h₂f ⟨z, h₂z⟩] using (not_iff_not.2 h₁z.order_eq_zero_iff)
     rw [circleAverage_congr_codiscreteWithin (f₂ := 0) _ hR]
-    simp [circleAverage]
+    simp only [circleAverage, mul_inv_rev, Pi.zero_apply, intervalIntegral.integral_zero,
+      smul_eq_mul, mul_zero]
     apply Filter.codiscreteWithin.mono (U := closedBall 0 |R|) sphere_subset_closedBall
     filter_upwards [this] with z hz
     simp_all
