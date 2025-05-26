@@ -1,160 +1,50 @@
-import Mathlib.Analysis.Meromorphic.NormalForm
-import Mathlib.MeasureTheory.Integral.CircleIntegral
-import VD.ToMathlib.meromorphicOn_integrability
-import VD.stronglyMeromorphic_JensenFormula
 import VD.ProximityFunction
 import VD.ToMathlib.CharacteristicFunction
 import VD.Jensen
-import Mathlib.Analysis.Complex.ValueDistribution.CountingFunction
 
-open Asymptotics MeromorphicOn Real ValueDistribution
-
-
--- Lang p. 164
-
-theorem MeromorphicOn.restrict
-  {f : ℂ → ℂ}
-  (h₁f : MeromorphicOn f ⊤)
-  (r : ℝ) :
-  MeromorphicOn f (Metric.closedBall 0 r) := by
-  exact fun x a => h₁f x trivial
-
-theorem MeromorphicOn.restrict_inv
-  {f : ℂ → ℂ}
-  (h₁f : MeromorphicOn f ⊤)
-  (r : ℝ) :
-  h₁f.inv.restrict r = (h₁f.restrict r).inv := by
-  funext x
-  simp
-
---
+open Function.locallyFinsuppWithin MeromorphicAt MeromorphicOn Metric Real
 
 variable
-  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
-  --{f g : ℂ → E} {a : WithTop E} {a₀ : E}
+  {f : ℂ → ℂ} {R : ℝ}
 
+namespace ValueDistribution
 
-theorem Nevanlinna_firstMain₁
-  {f : ℂ → ℂ}
-  (h₁f : MeromorphicOn f ⊤)
-  (h₂f : MeromorphicNFAt f 0)
-  (h₃f : f 0 ≠ 0) :
-  (fun _ ↦ log ‖f 0‖) = ValueDistribution.characteristic f ⊤ - ValueDistribution.characteristic f⁻¹ ⊤ := by
-
-  classical
-
-  unfold ValueDistribution.characteristic
-
-  have {A B C D : ℝ → ℝ} : A + B - (C + D) = A - C - (D - B) := by
-    ring
-  rw [this]
-  clear this
-
-  rw [ValueDistribution.logCounting_inv]
-  rw [← ValueDistribution.log_counting_zero_sub_logCounting_top]
-  unfold Function.locallyFinsuppWithin.logCounting
-  have XX {r : ℝ} : (MeromorphicOn.divisor f ⊤).toClosedBall r  = MeromorphicOn.divisor f (Metric.closedBall 0 |r|) := by
-    unfold Function.locallyFinsuppWithin.toClosedBall
-    exact MeromorphicOn.divisor_restrict h₁f fun ⦃a⦄ a ↦ trivial
-  simp_all
-  clear XX
-  have ZZ : (MeromorphicOn.divisor f Set.univ) 0 = 0 := by
-    rw [MeromorphicOn.divisor_apply]
-    simp_rw [← h₂f.order_eq_zero_iff] at h₃f
-    simp_rw [h₃f]
-    exact rfl
-    assumption
-    trivial
-  rw [ValueDistribution.proximity_sub_proximity_inv_eq_circleAverage]
-  --rw [ZZ]
-  --simp
-  funext r
-  simp
-  --rw [← Nevanlinna_proximity h₁f]
-
-  by_cases h₁r : r = 0
-  · rw [h₁r]
-    simp
-
-  by_cases hr : 0 < r
-  · let A := jensen hr f (h₁f.restrict r) h₂f h₃f
-    --simp at A
-    rw [A]
-    simp_rw [← h₂f.order_eq_zero_iff] at h₃f
-    rw [h₃f]
-    clear A
-    simp
-    have {A B : ℝ} : -A + B = B - A := by ring
-    rw [this]
-    have : |r| = r := by
-      rw [← abs_of_pos hr]
-      simp
-    rw [this]
-    congr
-    simp
-
-  -- case 0 < -r
-  have h₂r : 0 < -r := by
-    simp [h₁r, hr]
-
-    by_contra hCon
-    -- Assume ¬(r < 0), which means r >= 0
-    push_neg at hCon
-    -- Now h is r ≥ 0, so we split into cases
-    rcases lt_or_eq_of_le hCon with h|h
-    · tauto
-    · tauto
-  let A := jensen h₂r f (h₁f.restrict (-r)) h₂f h₃f
-  simp at A
-  rw [A]
-  clear A
-  --simp
-  have {A B : ℝ} : -A + B = B - A := by ring
-  rw [this]
-
-  congr 1
-  congr 1
-  simp
-  let A := integrabl_congr_negRadius (f := (fun z ↦ log (norm (f z)))) (r := r) (c := 0)
-  rw [A]
-  have : |r| = -r := by
-    rw [← abs_of_pos h₂r]
-    simp
-  rw [this]
-  simp_rw [← h₂f.order_eq_zero_iff] at h₃f
-  rw [h₃f]
-  simp
-  assumption
-
-theorem Nevanlinna_firstMain {f : ℂ → ℂ} (h₁f : MeromorphicOn f ⊤) :
-  characteristic f ⊤ - characteristic f⁻¹ ⊤ = circleAverage (log ‖f ·‖) 0 - (divisor f Set.univ).logCounting := by
+theorem characteristic_sub_characteristic_inv (h : MeromorphicOn f ⊤) :
+    characteristic f ⊤ - characteristic f⁻¹ ⊤ =
+      circleAverage (log ‖f ·‖) 0 - (divisor f Set.univ).logCounting := by
   calc characteristic f ⊤ - characteristic f⁻¹ ⊤
   _ = proximity f ⊤ - proximity f⁻¹ ⊤ - (logCounting f⁻¹ ⊤ - logCounting f ⊤) := by
     unfold characteristic
     ring
   _ = circleAverage (log ‖f ·‖) 0 - (logCounting f⁻¹ ⊤ - logCounting f ⊤) := by
-    rw [proximity_sub_proximity_inv_eq_circleAverage h₁f]
+    rw [proximity_sub_proximity_inv_eq_circleAverage h]
   _ = circleAverage (log ‖f ·‖) 0 - (logCounting f 0 - logCounting f ⊤) := by
     rw [logCounting_inv]
   _ = circleAverage (log ‖f ·‖) 0 - (divisor f Set.univ).logCounting := by
     rw [← ValueDistribution.log_counting_zero_sub_logCounting_top]
 
-theorem Nevanlinna_firstMain' {f : ℂ → ℂ} {R : ℝ} (hR : R ≠ 0) (h₁f : MeromorphicOn f ⊤) :
-  characteristic f ⊤ R - characteristic f⁻¹ ⊤ R = log ‖MeromorphicAt.leadCoefficient f 0‖ := by
+theorem characteristic_sub_characteristic_inv_off_zero (h : MeromorphicOn f ⊤) :
+    characteristic f ⊤ 0 - characteristic f⁻¹ ⊤ 0 = log ‖f 0‖ := by
+  calc characteristic f ⊤ 0 - characteristic f⁻¹ ⊤ 0
+  _ = (characteristic f ⊤ - characteristic f⁻¹ ⊤) 0 := by simp
+  _ = circleAverage (log ‖f ·‖) 0 0 - (divisor f Set.univ).logCounting 0 := by
+    rw [ValueDistribution.characteristic_sub_characteristic_inv h]
+    rfl
+  _ = log ‖f 0‖ := by
+    simp
+
+theorem characteristic_sub_characteristic_inv_at_zero (hf : MeromorphicOn f ⊤) (hR : R ≠ 0) :
+    characteristic f ⊤ R - characteristic f⁻¹ ⊤ R = log ‖leadCoefficient f 0‖ := by
   calc characteristic f ⊤ R - characteristic f⁻¹ ⊤ R
   _ = (characteristic f ⊤ - characteristic f⁻¹ ⊤) R  := by simp
   _ = circleAverage (log ‖f ·‖) 0 R - (divisor f Set.univ).logCounting R := by
-    rw [Nevanlinna_firstMain]
-  _ = log ‖MeromorphicAt.leadCoefficient f 0‖ := by
-    rw [JensenFormula hR (h₁f.mono_set (by tauto))]
+    rw [characteristic_sub_characteristic_inv hf]
+    rfl
+  _ = log ‖leadCoefficient f 0‖ := by
+    rw [JensenFormula hR (hf.mono_set (by tauto))]
     unfold Function.locallyFinsuppWithin.logCounting
-    simp
-    have : (Function.locallyFinsuppWithin.toClosedBall R) (divisor f Set.univ) =
-      (divisor f (Metric.closedBall 0 |R|)) := by
-      sorry
-    rw [this]
-    have : divisor f Set.univ 0 = divisor f (Metric.closedBall 0 |R|) 0 := by
-      sorry
-    rw [this]
-    ring
-    --
+    have : (divisor f (closedBall 0 |R|)) = (divisor f Set.univ).toClosedBall R :=
+      (divisor_restrict hf (by tauto)).symm
+    simp [this, toClosedBall, restrictMonoidHom, restrict_apply]
+
+end ValueDistribution

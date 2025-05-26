@@ -166,4 +166,10 @@ theorem JensenFormula {R : ℝ} {f : ℂ → ℂ} (hR : R ≠ 0) (h₁f : Meromo
       <;> simp_all [divisor_def]
     simp [this]
     rw [leadCoefficient_of_order_eq_top (by aesop) (by aesop), norm_zero, log_zero]
-    sorry
+    have : f =ᶠ[codiscreteWithin (closedBall 0 |R|)] 0 := by
+      sorry
+    rw [circleAverage_congr_codiscreteWithin (f₂ := 0) _ hR]
+    simp [circleAverage]
+    apply Filter.codiscreteWithin.mono (U := closedBall 0 |R|) sphere_subset_closedBall
+    filter_upwards [this] with z hz
+    simp_all
