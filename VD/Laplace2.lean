@@ -4,7 +4,9 @@ import VD.IteratedFDeriv_two
 
 open InnerProductSpace TensorProduct
 
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+variable
+  {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
+  {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
 
 
 variable (E) in
@@ -39,7 +41,7 @@ theorem InnerProductSpace.canonicalCovariantTensor_eq_sum
     simp only [w.sum_repr' (v _)]
 
 
-noncomputable def Real.Laplace (f : E → E) : E → E :=
+noncomputable def Real.Laplace (f : E → F) : E → F :=
   fun x ↦ tensor_of_iteratedFDeriv_two ℝ f x (InnerProductSpace.canonicalCovariantTensor E)
 
 notation "Δ" => Real.Laplace
