@@ -1,6 +1,6 @@
 import Mathlib.Analysis.Calculus.ContDiff.FTaylorSeries
 
-open TensorProduct
+open TensorProduct Topology
 
 variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜]
@@ -37,3 +37,13 @@ lemma tensor_of_iteratedFDeriv_two_eq_iteratedFDeriv (f : E → F) (e e₁ e₂ 
     tensor_of_iteratedFDeriv_two 𝕜 f e (e₁ ⊗ₜ[𝕜] e₂) = iteratedFDeriv 𝕜 2 f e ![e₁, e₂] := by
   rw [← bilinear_of_iteratedFDeriv_two_eq_iteratedFDeriv, tensor_of_iteratedFDeriv_two]
   rfl
+
+variable (𝕜) in
+/--
+If two functions agree in a neighborhood, then so do their iterated derivatives.
+-/
+theorem Filter.EventuallyEq.iteratedFDeriv
+    {f₁ f₂ : E → F} {x : E} (h : f₁ =ᶠ[𝓝 x] f₂) (n : ℕ) :
+    iteratedFDeriv 𝕜 n f₁ =ᶠ[𝓝 x] iteratedFDeriv 𝕜 n f₂ := by
+  simp_all [← nhdsWithin_univ, ← iteratedFDerivWithin_univ,
+    Filter.EventuallyEq.iteratedFDerivWithin]

@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Calculus.ContDiff.Basic
+import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.Analysis.InnerProductSpace.CanonicalTensor
 import VD.IteratedFDeriv_two
 
@@ -78,30 +79,31 @@ theorem laplace_eq_iteratedFDeriv_complexPlane (f : ℂ → F) :
 ## Congruence Lemmata
 -/
 
-theorem laplace_eventuallyEq' (h : f₁ =ᶠ[𝓝 x] f₂) : Δ f₁ =ᶠ[𝓝 x] Δ f₂ := by
-  sorry
+theorem laplace_congr_nhd (h : f₁ =ᶠ[𝓝 x] f₂) :
+    Δ f₁ =ᶠ[𝓝 x] Δ f₂ := by
+  filter_upwards [Filter.EventuallyEq.iteratedFDeriv ℝ h 2] with x hx
+  simp [laplace_eq_iteratedFDeriv_stdOrthonormalBasis, hx]
 
 /-!
 ## ℂ-Linearity on Continuously Differentiable Functions
 -/
 
-theorem ContDiffAt.laplace_add_nhd (h₁ : ContDiffAt ℝ 2 f₁ x) (h₂ : ContDiffAt ℝ 2 f₂ x) :
-    Δ (f₁ + f₂) =ᶠ[𝓝 x] (Δ f₁) + (Δ f₂):= by
-  sorry
-
 theorem ContDiffAt.laplace_add (h₁ : ContDiffAt ℝ 2 f₁ x) (h₂ : ContDiffAt ℝ 2 f₂ x) :
     Δ (f₁ + f₂) x = (Δ f₁) x + (Δ f₂) x := by
-  sorry
+  simp [laplace_eq_iteratedFDeriv_stdOrthonormalBasis,
+    ← Finset.sum_add_distrib, iteratedFDeriv_add_apply h₁ h₂]
 
-theorem ContDiffAt.laplace_sub_nhd (h₁ : ContDiffAt ℝ 2 f₁ x) (h₂ : ContDiffAt ℝ 2 f₂ x) :
-    Δ (f₁ - f₂) =ᶠ[𝓝 x] (Δ f₁) - (Δ f₂):= by
-  sorry
+theorem ContDiffAt.laplace_add_nhd (h₁ : ContDiffAt ℝ 2 f₁ x) (h₂ : ContDiffAt ℝ 2 f₂ x) :
+    Δ (f₁ + f₂) =ᶠ[𝓝 x] (Δ f₁) + (Δ f₂):= by
+  filter_upwards [h₁.eventually (by simp), h₂.eventually (by simp)] with x h₁x h₂x
+  exact h₁x.laplace_add h₂x
 
-theorem ContDiffAt.laplace_sub (h₁ : ContDiffAt ℝ 2 f₁ x) (h₂ : ContDiffAt ℝ 2 f₂ x) :
-    Δ (f₁ - f₂) x = (Δ f₁) x - (Δ f₂) x := by
-  sorry
-
-theorem laplace_smul : ∀ v : ℝ, Δ (v • f) = v • (Δ f) := by
+theorem laplace_smul (v : ℝ) (hf : ContDiffAt ℝ 2 f x) : Δ (v • f) = v • (Δ f) := by
+  rw [laplace_eq_iteratedFDeriv_stdOrthonormalBasis]
+  rw [laplace_eq_iteratedFDeriv_stdOrthonormalBasis]
+  ext z
+  simp
+  have := iteratedFDeriv_const_smul_apply (a := v) hf
   sorry
 
 /-!
