@@ -1,71 +1,82 @@
+/-
+Copyright (c) 2025 Stefan Kebekus. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Stefan Kebekus
+-/
 import Mathlib.Analysis.Calculus.ContDiff.Basic
-import Mathlib.Analysis.InnerProductSpace.PiL2
---import Mathlib.Analysis.InnerProductSpace.CanonicalTensor
+import Mathlib.Analysis.InnerProductSpace.CanonicalTensor
 import VD.IteratedFDeriv_two
 
-open InnerProductSpace TensorProduct Topology
+/-!
+# The Laplace Operator
+
+This file defines the Laplace operator for functions on real,
+finite-dimensional, inner product spaces. It provides supporting API and
+establishes the standard formula, computing the Laplace operator from any
+orthonormal basis.
+-/
 
 variable
   {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
   {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
   {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G]
+  {f f₁ f₂ : E → F} {x : E}
 
+open InnerProductSpace TensorProduct Topology
 
-variable (E) in
-/--
-The canonical covariant tensor corresponding to `InnerProductSpace.canonicalContravariantTensor`
-under the identification of `E` with its dual.
+/-!
+## Definition of the Laplace Operator
 -/
-noncomputable def InnerProductSpace.canonicalCovariantTensor :
-    E ⊗[ℝ] E := ∑ i, ((stdOrthonormalBasis ℝ E) i) ⊗ₜ[ℝ] ((stdOrthonormalBasis ℝ E) i)
 
-/-- Representation of the canonical covariant tensor in terms of an orthonormal basis. -/
-theorem InnerProductSpace.canonicalCovariantTensor_eq_sum
-    {ι : Type*} [Fintype ι] (v : OrthonormalBasis ι ℝ E) :
-    InnerProductSpace.canonicalCovariantTensor E = ∑ i, (v i) ⊗ₜ[ℝ] (v i) := by
-  let w := stdOrthonormalBasis ℝ E
-  calc ∑ m, w m ⊗ₜ[ℝ] w m
-  _ = ∑ m, ∑ n, ⟪w m, w n⟫_ℝ • w m ⊗ₜ[ℝ] w n := by
-    congr 1 with m
-    rw [Fintype.sum_eq_single m _, orthonormal_iff_ite.1 w.orthonormal]
-    · simp only [↓reduceIte, one_smul]
-    simp only [orthonormal_iff_ite.1 w.orthonormal, ite_smul, one_smul, zero_smul,
-      ite_eq_right_iff]
-    tauto
-  _ = ∑ m, ∑ n, (∑ i, ⟪w m, v i⟫_ℝ * ⟪v i, w n⟫_ℝ) • w m ⊗ₜ[ℝ] w n := by
-    simp_rw [OrthonormalBasis.sum_inner_mul_inner v]
-  _ = ∑ m, ∑ n, (∑ i, ⟪w m, v i⟫_ℝ * ⟪w n, v i⟫_ℝ) • w m ⊗ₜ[ℝ] w n := by
-    simp only [real_inner_comm (w _)]
-  _ = ∑ i, (∑ m, ⟪w m, v i⟫_ℝ • w m) ⊗ₜ[ℝ] ∑ n, ⟪w n, v i⟫_ℝ • w n := by
-    simp only [sum_tmul, tmul_sum, smul_tmul_smul, Finset.sum_comm (γ := ι), Finset.sum_smul]
-    rw [Finset.sum_comm]
-  _ = ∑ i, v i ⊗ₜ[ℝ] v i := by
-    simp only [w.sum_repr' (v _)]
-
-
-noncomputable def Laplace (f : E → F) : E → F :=
+variable (f) in
+/--
+Definition of the Laplace operator for functions on real inner product spaces.
+-/
+noncomputable def Real.Laplace : E → F :=
   fun x ↦ tensor_of_iteratedFDeriv_two ℝ f x (InnerProductSpace.canonicalCovariantTensor E)
 
-notation "Δ" => Laplace
+/--
+Introduce `Δ` as a notation for the Laplace operator.
+-/
+notation "Δ" => Real.Laplace
 
+/-!
+## Computation in Terms of Orthonormal Bases
+-/
+
+variable (f) in
 /--
 Standard formula, computing the Laplace operator from any orthonormal basis.
 -/
-theorem laplace_eq_iteratedFDeriv {ι : Type*} [Fintype ι] (v : OrthonormalBasis ι ℝ E) (f : E → F) :
+theorem laplace_eq_iteratedFDeriv_orthonormalBasis {ι : Type*} [Fintype ι]
+    (v : OrthonormalBasis ι ℝ E) :
     Δ f = fun x ↦ ∑ i, iteratedFDeriv ℝ 2 f x ![v i, v i] := by
   ext x
-  simp [Laplace, InnerProductSpace.canonicalCovariantTensor_eq_sum v,
+  simp [Real.Laplace, canonicalCovariantTensor_eq_sum E v,
     tensor_of_iteratedFDeriv_two_eq_iteratedFDeriv]
 
-/-!
-# TODO: Computation of Laplace in terms of standard basis, for ℝ^n, ℂ^n and ℂ
+variable (f) in
+/--
+Standard formula, computing the Laplace operator from the standard orthonormal
+basis of a real inner product space.
 -/
+theorem laplace_eq_iteratedFDeriv_stdOrthonormalBasis :
+    Δ f = fun x ↦
+      ∑ i, iteratedFDeriv ℝ 2 f x ![(stdOrthonormalBasis ℝ E) i, (stdOrthonormalBasis ℝ E) i] :=
+  laplace_eq_iteratedFDeriv_orthonormalBasis f (stdOrthonormalBasis ℝ E)
+
+/--
+Special case of the standard formula for functions on `ℂ`, considered as a real
+inner product space.
+-/
+theorem laplace_eq_iteratedFDeriv_complexPlane (f : ℂ → F) :
+    Δ f = fun x ↦
+      iteratedFDeriv ℝ 2 f x ![1, 1] + iteratedFDeriv ℝ 2 f x ![Complex.I, Complex.I] := by
+  simp [laplace_eq_iteratedFDeriv_orthonormalBasis f Complex.orthonormalBasisOneI]
 
 /-!
 ## Congruence Lemmata
 -/
-
-variable {f f₁ f₂ : E → F} {x : E}
 
 theorem laplace_eventuallyEq' (h : f₁ =ᶠ[𝓝 x] f₂) : Δ f₁ =ᶠ[𝓝 x] Δ f₂ := by
   sorry
@@ -97,7 +108,7 @@ theorem laplace_smul : ∀ v : ℝ, Δ (v • f) = v • (Δ f) := by
 ## Commutativity with Linear Operators
 
 This section establishes commutativity with linear operators, showing in
-particular that Δ commutes with taking real and imaginary parts of
+particular that `Δ` commutes with taking real and imaginary parts of
 complex-valued functions.
 -/
 
