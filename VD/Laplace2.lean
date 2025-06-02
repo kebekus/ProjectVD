@@ -98,13 +98,9 @@ theorem ContDiffAt.laplace_add_nhd (h₁ : ContDiffAt ℝ 2 f₁ x) (h₂ : Cont
   filter_upwards [h₁.eventually (by simp), h₂.eventually (by simp)] with x h₁x h₂x
   exact h₁x.laplace_add h₂x
 
-theorem laplace_smul (v : ℝ) (hf : ContDiffAt ℝ 2 f x) : Δ (v • f) = v • (Δ f) := by
-  rw [laplace_eq_iteratedFDeriv_stdOrthonormalBasis]
-  rw [laplace_eq_iteratedFDeriv_stdOrthonormalBasis]
-  ext z
-  simp
-  have := iteratedFDeriv_const_smul_apply (a := v) hf
-  sorry
+theorem laplace_smul (v : ℝ) (hf : ContDiffAt ℝ 2 f x) : Δ (v • f) x = v • (Δ f) x := by
+  simp [laplace_eq_iteratedFDeriv_stdOrthonormalBasis, iteratedFDeriv_const_smul_apply hf,
+    Finset.smul_sum]
 
 /-!
 ## Commutativity with Linear Operators
@@ -116,6 +112,8 @@ complex-valued functions.
 
 theorem ContDiffAt.laplace_CLM_comp {l : F →L[ℝ] G} (h : ContDiffAt ℝ 2 f x) :
     Δ (l ∘ f) x = (l ∘ (Δ f)) x := by
+  simp [laplace_eq_iteratedFDeriv_stdOrthonormalBasis]
+  rw [iteratedFDeriv_clm_apply_const_apply]
   sorry
 
 theorem laplace_CLE_comp {l : F ≃L[ℝ] G} :
