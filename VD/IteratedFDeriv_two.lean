@@ -72,3 +72,9 @@ theorem Filter.EventuallyEq.iteratedFDeriv
     iteratedFDeriv 𝕜 n f₁ =ᶠ[𝓝 x] iteratedFDeriv 𝕜 n f₂ := by
   simp_all [← nhdsWithin_univ, ← iteratedFDerivWithin_univ,
     Filter.EventuallyEq.iteratedFDerivWithin]
+
+theorem ContinuousLinearEquiv.iteratedFDeriv_comp_left {f : E → F} {x : E} (g : F ≃L[𝕜] G) {i : ℕ} :
+    iteratedFDeriv 𝕜 i (g ∘ f) x =
+      (g : F →L[𝕜] G).compContinuousMultilinearMap (iteratedFDeriv 𝕜 i f x) := by
+  simp only [← iteratedFDerivWithin_univ]
+  apply g.iteratedFDerivWithin_comp_left f uniqueDiffOn_univ trivial

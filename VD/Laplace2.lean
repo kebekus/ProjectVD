@@ -112,10 +112,10 @@ complex-valued functions.
 
 theorem ContDiffAt.laplace_CLM_comp {l : F →L[ℝ] G} (h : ContDiffAt ℝ 2 f x) :
     Δ (l ∘ f) x = (l ∘ (Δ f)) x := by
-  simp [laplace_eq_iteratedFDeriv_stdOrthonormalBasis]
-  rw [iteratedFDeriv_comp]
-  sorry
+  simp [laplace_eq_iteratedFDeriv_stdOrthonormalBasis,
+    l.iteratedFDeriv_comp_left h, (by rfl : (2 : ℕ∞) = (2 : ℕ))]
 
 theorem laplace_CLE_comp {l : F ≃L[ℝ] G} :
     Δ (l ∘ f) = l ∘ (Δ f) := by
-  sorry
+  ext x
+  simp [laplace_eq_iteratedFDeriv_stdOrthonormalBasis, l.iteratedFDeriv_comp_left]
