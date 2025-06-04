@@ -42,7 +42,7 @@ Introduce `Δ` as a notation for the Laplace operator.
 notation "Δ" => Real.Laplace
 
 /-!
-## Computation in Terms of Orthonormal Bases
+## Computation of Δ in Terms of Orthonormal Bases
 -/
 
 variable (f) in
@@ -67,8 +67,8 @@ theorem laplace_eq_iteratedFDeriv_stdOrthonormalBasis :
   laplace_eq_iteratedFDeriv_orthonormalBasis f (stdOrthonormalBasis ℝ E)
 
 /--
-Special case of the standard formula for functions on `ℂ`, considered as a real
-inner product space.
+Special case of the standard formula for functions on `ℂ`, with the standard
+structure as a real inner product space.
 -/
 theorem laplace_eq_iteratedFDeriv_complexPlane (f : ℂ → F) :
     Δ f = fun x ↦
@@ -76,16 +76,16 @@ theorem laplace_eq_iteratedFDeriv_complexPlane (f : ℂ → F) :
   simp [laplace_eq_iteratedFDeriv_orthonormalBasis f Complex.orthonormalBasisOneI]
 
 /-!
-## Congruence Lemmata
+## Congruence Lemmata for Δ
 -/
 
-theorem laplace_congr_nhd (h : f₁ =ᶠ[𝓝 x] f₂) :
+theorem laplace_congr_nhds (h : f₁ =ᶠ[𝓝 x] f₂) :
     Δ f₁ =ᶠ[𝓝 x] Δ f₂ := by
   filter_upwards [Filter.EventuallyEq.iteratedFDeriv ℝ h 2] with x hx
   simp [laplace_eq_iteratedFDeriv_stdOrthonormalBasis, hx]
 
 /-!
-## ℂ-Linearity on Continuously Differentiable Functions
+## ℂ-Linearity of Δ on Continuously Differentiable Functions
 -/
 
 theorem ContDiffAt.laplace_add (h₁ : ContDiffAt ℝ 2 f₁ x) (h₂ : ContDiffAt ℝ 2 f₂ x) :
@@ -103,7 +103,7 @@ theorem laplace_smul (v : ℝ) (hf : ContDiffAt ℝ 2 f x) : Δ (v • f) x = v 
     Finset.smul_sum]
 
 /-!
-## Commutativity with Linear Operators
+## Commutativity of Δ with Linear Operators
 
 This section establishes commutativity with linear operators, showing in
 particular that `Δ` commutes with taking real and imaginary parts of
