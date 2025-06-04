@@ -164,7 +164,7 @@ functions for the value `⊤` of the function `f` and `f - a₀` agree
 asymptotically up to a bounded function.
 -/
 theorem FirstMainTheorem₂_qual (h : MeromorphicOn f ⊤) :
-    |(characteristic f ⊤) - (characteristic (f · - a₀) ⊤)| =O[atTop] (1 : ℝ → ℝ) := by
+    |characteristic f ⊤ - characteristic (f · - a₀) ⊤| =O[atTop] (1 : ℝ → ℝ) := by
   simp_rw [isBigO_iff', eventually_atTop]
   use log⁺ ‖a₀‖ + log 2, add_pos_of_nonneg_of_pos posLog_nonneg (log_pos one_lt_two), 0
   simp [FirstMainTheorem₂_quant h]

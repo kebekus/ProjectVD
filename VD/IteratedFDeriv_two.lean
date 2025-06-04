@@ -29,26 +29,6 @@ theorem fderiv_const_clm_apply {x : E} {f : E → F} {c : F →L[𝕜] G} (hf : 
   simp [this]
 
 /-!
-# ContDiff.Basic
--/
-
-theorem iteratedFDeriv_const_clm_apply
-    {c : F →L[𝕜] G} {x : E} {f : E → F} (hf : ContDiff 𝕜 n f)
-    {i : ℕ} (hi : i ≤ n) {x : E} {u : F}  :
-    iteratedFDeriv 𝕜 i (c ∘ f) x = c ∘ (iteratedFDeriv 𝕜 i f x) := by
-  induction i with
-  | zero =>
-    ext m
-    simp [iteratedFDeriv_zero_apply]
-  | succ a ia =>
-    ext m
-    rw [iteratedFDeriv_succ_apply_right]
-    have : (iteratedFDeriv 𝕜 a (⇑c ∘ f) x) = ⇑c ∘ ⇑(iteratedFDeriv 𝕜 a f x) := by
-      sorry
-    simp_rw [this]
-    sorry
-
-/-!
 # Main File Starts Here
 -/
 
