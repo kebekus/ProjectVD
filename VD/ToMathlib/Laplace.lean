@@ -6,15 +6,77 @@ Authors: Stefan Kebekus
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.Analysis.InnerProductSpace.CanonicalTensor
-import VD.IteratedFDeriv_two
+import VD.ToMathlib.IteratedFDeriv_two
 
 /-!
 # The Laplace Operator
 
-This file defines the Laplace operator for functions on real,
-finite-dimensional, inner product spaces. It provides supporting API and
-establishes the standard formula, computing the Laplace operator from any
-orthonormal basis.
+This file defines the Laplace operator for functions `f : E → F` on real,
+finite-dimensional, inner product spaces `E`. In essence, we define the
+Laplacian of `f` as the second derivative, applied to the canonical covariant
+tensor of `E`, as defined and discussed in
+`Mathlib.Analysis.InnerProductSpace.CanonicalTensor`.
+
+We show that the Laplace operator is `ℂ`-linear on continuously differentiable
+functions, and establish the standard formula for computing the Laplace operator
+in terms of orthonormal bases of `E`.
+-/
+
+open InnerProductSpace TensorProduct Topology
+
+section secondDerivativeAPI
+
+/-!
+## Supporting API
+
+The definition of the Laplace Operator of a function `f : E → F` involves the
+notion of the second derivative, which can be seen as a continous multilinear
+map `ContinuousMultilinearMap 𝕜 (fun (i : Fin 2) ↦ E) F`, a bilinear map `E
+→ₗ[𝕜] E →ₗ[𝕜] F`, or a linear map on tensors `E ⊗[𝕜] E →ₗ[𝕜] F`. This
+section provides convenience API to convert between these notions.
+-/
+
+variable
+  {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+  {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
+  {G : Type*} [NormedAddCommGroup G] [NormedSpace 𝕜 G]
+
+variable (𝕜) in
+/--
+Convenience reformulation of the second iterated derivative, as a map from `E`
+to bilinear maps `E →ₗ[ℝ] E →ₗ[ℝ] ℝ
+-/
+noncomputable def bilinear_of_iteratedFDeriv_two (f : E → F) : E → E →ₗ[𝕜] E →ₗ[𝕜] F :=
+  fun x ↦ (fderiv 𝕜 (fderiv 𝕜 f) x).toLinearMap₂
+
+/--
+Expression of `bilinear_of_iteratedFDeriv_two` in terms of `iteratedFDeriv`.
+-/
+lemma bilinear_of_iteratedFDeriv_two_eq_iteratedFDeriv (f : E → F) (e e₁ e₂ : E) :
+    bilinear_of_iteratedFDeriv_two 𝕜 f e e₁ e₂ = iteratedFDeriv 𝕜 2 f e ![e₁, e₂] := by
+  simp [iteratedFDeriv_two_apply f e ![e₁, e₂], bilinear_of_iteratedFDeriv_two]
+
+variable (𝕜) in
+/--
+Convenience reformulation of the second iterated derivative, as a map from `E`
+to linear maps `E ⊗[𝕜] E →ₗ[𝕜] F`.
+-/
+noncomputable def tensor_of_iteratedFDeriv_two (f : E → F) : E → E ⊗[𝕜] E →ₗ[𝕜] F :=
+  fun e ↦ lift (bilinear_of_iteratedFDeriv_two 𝕜 f e)
+
+/--
+Expression of `tensor_of_iteratedFDeriv_two` in terms of `iteratedFDeriv`.
+-/
+lemma tensor_of_iteratedFDeriv_two_eq_iteratedFDeriv (f : E → F) (e e₁ e₂ : E) :
+    tensor_of_iteratedFDeriv_two 𝕜 f e (e₁ ⊗ₜ[𝕜] e₂) = iteratedFDeriv 𝕜 2 f e ![e₁, e₂] := by
+  rw [← bilinear_of_iteratedFDeriv_two_eq_iteratedFDeriv, tensor_of_iteratedFDeriv_two]
+  rfl
+
+end secondDerivativeAPI
+
+/-!
+## Definition of the Laplace Operator
 -/
 
 variable
@@ -22,12 +84,6 @@ variable
   {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
   {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G]
   {f f₁ f₂ : E → F} {x : E}
-
-open InnerProductSpace TensorProduct Topology
-
-/-!
-## Definition of the Laplace Operator
--/
 
 variable (f) in
 /--
@@ -76,7 +132,7 @@ theorem laplace_eq_iteratedFDeriv_complexPlane (f : ℂ → F) :
   simp [laplace_eq_iteratedFDeriv_orthonormalBasis f Complex.orthonormalBasisOneI]
 
 /-!
-## Congruence Lemmata for Δ
+## Congruence Lemma for Δ
 -/
 
 theorem laplace_congr_nhds (h : f₁ =ᶠ[𝓝 x] f₂) :
