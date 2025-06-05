@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import VD.ProximityFunction
-import VD.ToMathlib.CharacteristicFunction
+import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
 
 /-!
 # The First Main Theorem of Value Distribution Theory

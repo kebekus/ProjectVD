@@ -4,7 +4,6 @@ import Mathlib.Analysis.Meromorphic.NormalForm
 import Mathlib.MeasureTheory.Integral.CircleAverage
 import VD.specialFunctions_CircleIntegral_affine
 import VD.LeadCoefficientFactorizedRational
-import VD.ToMathlib.CountingFunction
 
 open Filter MeromorphicAt MeromorphicOn Metric Real
 
@@ -101,10 +100,10 @@ lemma circleAverage_nonVanishAnalytic {R : ℝ} {c : ℂ} {g : ℂ → ℂ}
 theorem MeromorphicOn.JensenFormula {R : ℝ} {f : ℂ → ℂ} (hR : R ≠ 0) (h₁f : MeromorphicOn f (closedBall 0 |R|)) :
     circleAverage (log ‖f ·‖) 0 R
       = ∑ᶠ u, divisor f (closedBall 0 |R|) u * log (R * ‖u‖⁻¹)
-        + divisor f (closedBall 0 |R|) 0 * log R + log ‖leadCoefficient f 0‖ := by
+        + divisor f (closedBall 0 |R|) 0 * log R + log ‖meromorphicTrailingCoeffAt f 0‖ := by
   -- Shorthand notation to keep line size in check
   let CB := closedBall (0 : ℂ) |R|
-  by_cases h₂f : ∀ u : CB, (h₁f u u.2).order ≠ ⊤
+  by_cases h₂f : ∀ u : CB, meromorphicOrderAt f u ≠ ⊤
   · have h₃f := (divisor f CB).finiteSupport (isCompact_closedBall 0 |R|)
     -- Extract zeros & poles and compute
     obtain ⟨g, h₁g, h₂g, h₃g⟩ := h₁f.extract_zeros_poles h₂f h₃f
@@ -117,24 +116,24 @@ theorem MeromorphicOn.JensenFormula {R : ℝ} {f : ℂ → ℂ} (hR : R ≠ 0) (
       exact circleIntegrable_logAbs_factorizedRational (divisor f CB)
       exact (h₁g.mono sphere_subset_closedBall).meromorphicOn.circleIntegrable_log_norm
     _ = ∑ᶠ u, divisor f CB u * log R + log ‖g 0‖ := by simp [h₁g, h₂g]
-    _ = ∑ᶠ u, divisor f CB u * log R + (log ‖leadCoefficient f 0‖ - ∑ᶠ u, divisor f CB u * log ‖u‖) := by
+    _ = ∑ᶠ u, divisor f CB u * log R + (log ‖meromorphicTrailingCoeffAt f 0‖ - ∑ᶠ u, divisor f CB u * log ‖u‖) := by
       have t₀ : 0 ∈ CB := by simp [CB]
       have t₁ : CBᶜ ∉ nhdsWithin 0 {0}ᶜ := by
-        apply compl_not_mem
+        apply compl_notMem
         apply mem_nhdsWithin.mpr
         use ball 0 |R|
         simpa [hR] using fun _ ⟨h, _⟩ ↦ ball_subset_closedBall h
       simp [extract_zeros_poles_leadCoefficient_log_norm h₃f t₀ t₁ (h₁f 0 t₀) (h₁g 0 t₀) (h₂g ⟨0, t₀⟩) h₃g]
-    _ = ∑ᶠ u, divisor f CB u * log R - ∑ᶠ u, divisor f CB u * log ‖u‖ + log ‖leadCoefficient f 0‖ := by
+    _ = ∑ᶠ u, divisor f CB u * log R - ∑ᶠ u, divisor f CB u * log ‖u‖ + log ‖meromorphicTrailingCoeffAt f 0‖ := by
       ring
-    _ = (∑ᶠ u, divisor f CB u * (log R - log ‖u‖)) + log ‖leadCoefficient f 0‖ := by
+    _ = (∑ᶠ u, divisor f CB u * (log R - log ‖u‖)) + log ‖meromorphicTrailingCoeffAt f 0‖ := by
       rw [← finsum_sub_distrib]
       simp_rw [← mul_sub]
       repeat apply h₃f.subset (fun _ ↦ (by simp_all))
-    _ = ∑ᶠ u, divisor f CB u * log (R * ‖u‖⁻¹) + divisor f CB 0 * log R + log ‖leadCoefficient f 0‖ := by
-      rw [CountingFunction.finsum_eq_finsum_add hR h₃f]
+    _ = ∑ᶠ u, divisor f CB u * log (R * ‖u‖⁻¹) + divisor f CB 0 * log R + log ‖meromorphicTrailingCoeffAt f 0‖ := by
+      rw [Function.locallyFinsuppWithin.countingFunction_finsum_eq_finsum_add hR h₃f]
   · -- Trivial case: `f` vanishes on a codiscrete set
-    rw [← exists_order_ne_top_iff_forall h₁f
+    rw [← h₁f.exists_meromorphicOrderAt_ne_top_iff_forall
       ⟨nonempty_closedBall.mpr (abs_nonneg R), (convex_closedBall 0 |R|).isPreconnected⟩] at h₂f
     push_neg at h₂f
     have : divisor f CB = 0 := by
