@@ -169,7 +169,7 @@ theorem MeromorphicOn.extract_zeros_poles_leadCoefficient_log_norm
   congr
   apply log_norm_leadCoefficient hD
   --
-  simp
+  simp only [ne_eq, norm_eq_zero]
   apply ((FactorizedRational.meromorphicNFOn D U).meromorphicOn x h₁x).meromorphicTrailingCoeffAt_ne_zero
   apply FactorizedRational.meromorphicOrderAt_ne_top
   --

@@ -1,10 +1,8 @@
 import VD.Jensen
-import VD.Laplace2
 import VD.LeadCoefficientFactorizedRational
 import VD.ProximityFunction
-import VD.ToMathlib.CharacteristicFunction
-import VD.ToMathlib.IsolatedZeros
-import VD.ToMathlib.LeadCoefficient
+import VD.ToMathlib.IteratedFDeriv_two
+import VD.ToMathlib.Laplace
 import VD.ToMathlib.meromorphicOn_integrability
 import VD.cauchyRiemann
 import VD.firstMain1
@@ -19,7 +17,7 @@ import VD.intervalIntegrability
 import VD.laplace
 import VD.leftovers.diffOp
 import VD.leftovers.holomorphic
-import VD.meromorphicAt_topology
+import VD.leftovers.meromorphicAt_topology
 import VD.partialDeriv
 import VD.specialFunctions_CircleIntegral_affine
 import VD.specialFunctions_Integral_log_sin

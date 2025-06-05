@@ -4,6 +4,8 @@ import Mathlib.Analysis.Meromorphic.NormalForm
 import Mathlib.MeasureTheory.Integral.CircleAverage
 import VD.specialFunctions_CircleIntegral_affine
 import VD.LeadCoefficientFactorizedRational
+import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
+
 
 open Filter MeromorphicAt MeromorphicOn Metric Real
 
@@ -118,7 +120,8 @@ theorem MeromorphicOn.JensenFormula {R : ℝ} {f : ℂ → ℂ} (hR : R ≠ 0) (
     _ = ∑ᶠ u, divisor f CB u * log R + log ‖g 0‖ := by simp [h₁g, h₂g]
     _ = ∑ᶠ u, divisor f CB u * log R + (log ‖meromorphicTrailingCoeffAt f 0‖ - ∑ᶠ u, divisor f CB u * log ‖u‖) := by
       have t₀ : 0 ∈ CB := by simp [CB]
-      have t₁ : CBᶜ ∉ nhdsWithin 0 {0}ᶜ := by
+      have t₁ : AccPt 0 (𝓟 CB) := by
+        apply accPt_iff_frequently_nhdsNE.mpr
         apply compl_notMem
         apply mem_nhdsWithin.mpr
         use ball 0 |R|
@@ -142,11 +145,11 @@ theorem MeromorphicOn.JensenFormula {R : ℝ} {f : ℂ → ℂ} (hR : R ≠ 0) (
       <;> simp_all [CB, divisor_def]
     simp only [CB, this, Function.locallyFinsuppWithin.coe_zero, Pi.zero_apply, Int.cast_zero, zero_mul,
       finsum_zero, add_zero, zero_add]
-    rw [leadCoefficient_of_order_eq_top (by aesop) (by aesop), norm_zero, log_zero]
+    rw [MeromorphicAt.meromorphicTrailingCoeffAt_of_order_eq_top (by aesop), norm_zero, log_zero]
     have : f =ᶠ[codiscreteWithin CB] 0 := by
       filter_upwards [h₁f.meromorphicNFAt_mem_codiscreteWithin, self_mem_codiscreteWithin CB]
         with z h₁z h₂z
-      simpa [h₂f ⟨z, h₂z⟩] using (not_iff_not.2 h₁z.order_eq_zero_iff)
+      simpa [h₂f ⟨z, h₂z⟩] using (not_iff_not.2 h₁z.meromorphicOrderAt_eq_zero_iff)
     rw [circleAverage_congr_codiscreteWithin (f₂ := 0) _ hR]
     simp only [circleAverage, mul_inv_rev, Pi.zero_apply, intervalIntegral.integral_zero,
       smul_eq_mul, mul_zero]

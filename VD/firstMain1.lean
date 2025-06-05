@@ -1,5 +1,5 @@
 import VD.ProximityFunction
-import VD.ToMathlib.CharacteristicFunction
+import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
 import VD.Jensen
 
 open Function.locallyFinsuppWithin MeromorphicAt MeromorphicOn Metric Real
@@ -38,13 +38,13 @@ characteristic functions of `f`  and `f⁻¹` equals `log ‖leadCoefficient f 0
 -/
 @[simp]
 theorem characteristic_sub_characteristic_inv_at_zero (hf : MeromorphicOn f ⊤) (hR : R ≠ 0) :
-    characteristic f ⊤ R - characteristic f⁻¹ ⊤ R = log ‖leadCoefficient f 0‖ := by
+    characteristic f ⊤ R - characteristic f⁻¹ ⊤ R = log ‖meromorphicTrailingCoeffAt f 0‖ := by
   calc characteristic f ⊤ R - characteristic f⁻¹ ⊤ R
   _ = (characteristic f ⊤ - characteristic f⁻¹ ⊤) R  := by simp
   _ = circleAverage (log ‖f ·‖) 0 R - (divisor f Set.univ).logCounting R := by
     rw [characteristic_sub_characteristic_inv hf]
     rfl
-  _ = log ‖leadCoefficient f 0‖ := by
+  _ = log ‖meromorphicTrailingCoeffAt f 0‖ := by
     rw [JensenFormula hR (hf.mono_set (by tauto))]
     unfold Function.locallyFinsuppWithin.logCounting
     have : (divisor f (closedBall 0 |R|)) = (divisor f Set.univ).toClosedBall R :=
