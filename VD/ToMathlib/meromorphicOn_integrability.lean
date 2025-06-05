@@ -32,7 +32,7 @@ interval integrable.
 theorem MeromorphicOn.intervalIntegrable_log_norm [NormedSpace ℝ E] {f : ℝ → E}
     (hf : MeromorphicOn f [[a, b]]) :
     IntervalIntegrable (log ‖f ·‖) volume a b := by
-  by_cases t₀ : ∀ u : [[a, b]], (hf u u.2).order ≠ ⊤
+  by_cases t₀ : ∀ u : [[a, b]], meromorphicOrderAt f u ≠ ⊤
   · obtain ⟨g, h₁g, h₂g, h₃g⟩ := hf.extract_zeros_poles t₀
       ((divisor f [[a, b]]).finiteSupport isCompact_uIcc)
     have h₄g := MeromorphicOn.extract_zeros_poles_log h₂g h₃g
@@ -48,7 +48,7 @@ theorem MeromorphicOn.intervalIntegrable_log_norm [NormedSpace ℝ E] {f : ℝ �
     · apply ContinuousOn.intervalIntegrable
       apply h₁g.continuousOn.norm.log
       simp_all
-  · rw [← hf.exists_order_ne_top_iff_forall (isConnected_Icc inf_le_sup)] at t₀
+  · rw [← MeromorphicOn.exists_meromorphicOrderAt_ne_top_iff_forall hf (isConnected_Icc inf_le_sup)] at t₀
     push_neg at t₀
     have : (log ‖f ·‖) =ᶠ[codiscreteWithin (Ι a b)] 0 := by
       apply EventuallyEq.filter_mono _ (codiscreteWithin.mono Set.uIoc_subset_uIcc)
@@ -57,7 +57,7 @@ theorem MeromorphicOn.intervalIntegrable_log_norm [NormedSpace ℝ E] {f : ℝ �
       simp only [Pi.zero_apply, log_eq_zero, norm_eq_zero]
       left
       by_contra hCon
-      simp_all [← h₁x.order_eq_zero_iff, t₀ ⟨x, h₂x⟩]
+      simp_all [← MeromorphicNFAt.meromorphicOrderAt_eq_zero_iff h₁x, t₀ ⟨x, h₂x⟩]
     rw [intervalIntegrable_congr_codiscreteWithin this]
     apply _root_.intervalIntegrable_const_iff.2
     tauto
@@ -115,7 +115,7 @@ theorem CircleIntegrable.finsum {f : ι → ℂ → E} (h : ∀ i, CircleIntegra
 theorem MeromorphicOn.circleIntegrable_log_norm [NormedSpace ℂ E] {f : ℂ → E}
     (hf : MeromorphicOn f (sphere c |R|)) :
     CircleIntegrable (log ‖f ·‖) c R := by
-  by_cases t₀ : ∀ u : (sphere c |R|), (hf u u.2).order ≠ ⊤
+  by_cases t₀ : ∀ u : (sphere c |R|), meromorphicOrderAt f u ≠ ⊤
   · obtain ⟨g, h₁g, h₂g, h₃g⟩ := hf.extract_zeros_poles t₀
       ((divisor f (sphere c |R|)).finiteSupport (isCompact_sphere c |R|))
     have h₄g := MeromorphicOn.extract_zeros_poles_log h₂g h₃g
@@ -138,7 +138,7 @@ theorem MeromorphicOn.circleIntegrable_log_norm [NormedSpace ℂ E] {f : ℂ →
       · intro x hx
         rw [ne_eq, norm_eq_zero]
         apply h₂g ⟨circleMap c R x, circleMap_mem_sphere' c R x⟩
-  · rw [← hf.exists_order_ne_top_iff_forall (isConnected_sphere (by simp) c (abs_nonneg R))] at t₀
+  · rw [← MeromorphicOn.exists_meromorphicOrderAt_ne_top_iff_forall hf (isConnected_sphere (by simp) c (abs_nonneg R))] at t₀
     push_neg at t₀
     have : (log ‖f ·‖) =ᶠ[codiscreteWithin (sphere c |R|)] 0 := by
       filter_upwards [hf.meromorphicNFAt_mem_codiscreteWithin,
@@ -146,7 +146,7 @@ theorem MeromorphicOn.circleIntegrable_log_norm [NormedSpace ℂ E] {f : ℂ →
       simp only [Pi.zero_apply, log_eq_zero, norm_eq_zero]
       left
       by_contra hCon
-      simp_all [← h₁x.order_eq_zero_iff, t₀ ⟨x, h₂x⟩]
+      simp_all [← MeromorphicNFAt.meromorphicOrderAt_eq_zero_iff h₁x, t₀ ⟨x, h₂x⟩]
     apply CircleIntegrable.congr_codiscreteWithin' (circleIntegrable_const 0 c R) this.symm
 
 theorem MeromorphicOn.circleIntegrable_posLog_norm [NormedSpace ℂ E] {f : ℂ → E}
