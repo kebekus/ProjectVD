@@ -7,6 +7,24 @@ import Mathlib.Analysis.Complex.CauchyIntegral
 open scoped Interval Topology
 open Real Filter MeasureTheory intervalIntegral
 
+-- 150 lines max
+
+lemma log_sin_eventuallyEq :
+    (fun y ↦ log (sin y)) =ᶠ[Filter.codiscreteWithin ⊤] fun y ↦ log (sin (2 * y)) - log 2 - log (cos y) := by
+  have : sin ⁻¹' {0}ᶜ ∈ Filter.codiscrete ℝ := by
+    refine contDiff_sin.analyticOnNhd.preimage_mem_codiscreteWithin ?_ ?_
+    sorry
+    apply Filter.codiscreteWithin.mono (U := ⊤) (by tauto)
+    apply mem_codiscrete'.2
+    simp [compl_compl, Subsingleton.discreteTopology]
+  filter_upwards with y
+  rw [sin_two_mul, log_mul, log_mul]
+  ring
+  · simp
+  · sorry
+  · sorry
+  · sorry
+
 
 theorem intervalIntegral.integral_congr_volume
   {E : Type u_3} [NormedAddCommGroup E] [NormedSpace ℝ E]
