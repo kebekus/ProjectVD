@@ -14,16 +14,16 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 
 /-- A meromorphic function has non-negative order if there exists a continuous extension. -/
 theorem MeromorphicAt.order_nonneg_if_exists_continuous_extension (hf : MeromorphicAt f z₀)
-    (h : ∃ (g : 𝕜 → E), ContinuousAt g z₀ ∧ f =ᶠ[𝓝[≠] z₀] g) : 0 ≤ hf.order := by
+    (h : ∃ (g : 𝕜 → E), ContinuousAt g z₀ ∧ f =ᶠ[𝓝[≠] z₀] g) : 0 ≤ meromorphicOrderAt f z₀ := by
   by_contra h₀
   push_neg at h₀
-  set n := (hf.order).untop (by exact LT.lt.ne_top h₀) with h₁
-  have h₁ : hf.order = n := by simp [n]
+  set n := (meromorphicOrderAt f z₀).untop (by exact LT.lt.ne_top h₀) with h₁
+  have h₁ : meromorphicOrderAt f z₀ = n := by simp [n]
   simp [h₁] at h₀
   have nneg : 0 < -n := by linarith
   obtain ⟨a, ha⟩ := Int.eq_succ_of_zero_lt nneg
   obtain ⟨g, hg, hfg⟩ := h
-  obtain ⟨h, hh₁, hh₂, hfh⟩ := hf.order_eq_int_iff.mp h₁
+  obtain ⟨h, hh₁, hh₂, hfh⟩ := (meromorphicOrderAt_eq_int_iff hf).mp h₁
   have h₂ : Tendsto (fun z ↦ ‖(z - z₀) ^ n • h z‖) (𝓝[≠] z₀) (𝓝 ‖g z₀‖) := by
     apply tendsto_norm.comp
     exact (tendsto_nhdsWithin_of_tendsto_nhds hg).congr' (hfg.symm.trans hfh)
@@ -48,14 +48,15 @@ theorem MeromorphicAt.order_nonneg_if_exists_continuous_extension (hf : Meromorp
   exact hh₁.continuousAt.norm
 
 /-- If a meromorphic function has non-negative order then there exists an analytic extension. -/
-theorem MeromorphicAt.exists_analytic_extension_if_order_nonneg (hf : MeromorphicAt f z₀) (nneg : 0 ≤ hf.order) :
+theorem MeromorphicAt.exists_analytic_extension_if_order_nonneg (hf : MeromorphicAt f z₀)
+    (nneg : 0 ≤ meromorphicOrderAt f z₀) :
     ∃ (g : 𝕜 → E), AnalyticAt 𝕜 g z₀ ∧ f =ᶠ[𝓝[≠] z₀] g := by
-  by_cases h' : hf.order = ⊤
+  by_cases h' : meromorphicOrderAt f z₀ = ⊤
   · use 0
-    exact ⟨analyticAt_const, hf.order_eq_top_iff.mp h'⟩
-  · let n := (hf.order).untop (LT.lt.ne_top (WithTop.lt_top_iff_ne_top.mpr h'))
-    have h₀ : hf.order = n := by simp [n]
-    obtain ⟨g, hg, hfg⟩ := hf.order_eq_int_iff.mp h₀
+    exact ⟨analyticAt_const, meromorphicOrderAt_eq_top_iff.mp h'⟩
+  · let n := (meromorphicOrderAt f z₀).untop (LT.lt.ne_top (WithTop.lt_top_iff_ne_top.mpr h'))
+    have h₀ : meromorphicOrderAt f z₀ = n := by simp [n]
+    obtain ⟨g, hg, hfg⟩ := (meromorphicOrderAt_eq_int_iff hf).mp h₀
     use (fun z ↦ (z - z₀) ^ n • g z)
     constructor
     · apply AnalyticAt.smul _ hg
@@ -67,7 +68,7 @@ theorem MeromorphicAt.exists_analytic_extension_if_order_nonneg (hf : Meromorphi
 
 /-- A meromorphic function has non-negative order iff there exists a continuous extension. -/
 theorem MeromorphicAt.order_nonneg_iff_exists_continuous_extension (hf : MeromorphicAt f z₀) :
-    0 ≤ hf.order ↔ ∃ (g : 𝕜 → E), ContinuousAt g z₀ ∧ f =ᶠ[𝓝[≠] z₀] g := by
+    0 ≤ meromorphicOrderAt f z₀ ↔ ∃ (g : 𝕜 → E), ContinuousAt g z₀ ∧ f =ᶠ[𝓝[≠] z₀] g := by
   constructor <;> intro h
   · obtain ⟨g, hg, hfg⟩ := MeromorphicAt.exists_analytic_extension_if_order_nonneg hf h
     use g
@@ -76,10 +77,10 @@ theorem MeromorphicAt.order_nonneg_iff_exists_continuous_extension (hf : Meromor
 
 /-- A meromorphic function has non-negative order iff there exists an analytic extension. -/
 theorem MeromorphicAt.order_nonneg_iff_exists_analytic_extension (hf : MeromorphicAt f z₀) :
-    0 ≤ hf.order ↔ ∃ (g : 𝕜 → E), AnalyticAt 𝕜 g z₀ ∧ f =ᶠ[𝓝[≠] z₀] g := by
+    0 ≤ meromorphicOrderAt f z₀ ↔ ∃ (g : 𝕜 → E), AnalyticAt 𝕜 g z₀ ∧ f =ᶠ[𝓝[≠] z₀] g := by
   constructor <;> intro h
   · apply MeromorphicAt.exists_analytic_extension_if_order_nonneg hf h
   · obtain ⟨g, hg₁, hg₂⟩ := h
-    rw [MeromorphicAt.order_nonneg_iff_exists_continuous_extension]
+    rw [hf.order_nonneg_iff_exists_continuous_extension]
     use g
     exact ⟨hg₁.continuousAt, hg₂⟩

@@ -3,7 +3,7 @@ import Mathlib.Analysis.Meromorphic.FactorizedRational
 import Mathlib.Analysis.Meromorphic.NormalForm
 import Mathlib.MeasureTheory.Integral.CircleAverage
 import VD.specialFunctions_CircleIntegral_affine
-import VD.LeadCoefficientFactorizedRational
+import VD.ToMathlib.TrailingCoefficientFactorizedRational
 import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
 
 
@@ -126,7 +126,7 @@ theorem MeromorphicOn.JensenFormula {R : ℝ} {f : ℂ → ℂ} (hR : R ≠ 0) (
         apply mem_nhdsWithin.mpr
         use ball 0 |R|
         simpa [hR] using fun _ ⟨h, _⟩ ↦ ball_subset_closedBall h
-      simp [extract_zeros_poles_leadCoefficient_log_norm h₃f t₀ t₁ (h₁f 0 t₀) (h₁g 0 t₀) (h₂g ⟨0, t₀⟩) h₃g]
+      simp [MeromorphicOn.meromorphicTrailingCoeffAt_extract_zeros_poles_log h₃f t₀ t₁ (h₁f 0 t₀) (h₁g 0 t₀) (h₂g ⟨0, t₀⟩) h₃g]
     _ = ∑ᶠ u, divisor f CB u * log R - ∑ᶠ u, divisor f CB u * log ‖u‖ + log ‖meromorphicTrailingCoeffAt f 0‖ := by
       ring
     _ = (∑ᶠ u, divisor f CB u * (log R - log ‖u‖)) + log ‖meromorphicTrailingCoeffAt f 0‖ := by
