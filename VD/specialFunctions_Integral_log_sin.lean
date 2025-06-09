@@ -9,156 +9,86 @@ open Real Filter MeasureTheory intervalIntegral
 
 -- 150 lines max
 
+theorem analyticOnNhd_cos :
+    AnalyticOnNhd ℝ Real.cos Set.univ := by
+  apply analyticOnNhd_realPart (f := Complex.cos)
+  apply Complex.analyticOnNhd_univ_iff_differentiable.mpr
+  exact Complex.differentiable_cos
+
+/-- The set where an analytic function has zero or infinite order is discrete within its domain of
+analyticity. -/
+theorem AnalyticOnNhd.codiscreteWithin_setOf_analyticOrderAt_eq_zero_or_top {f : ℝ → ℝ} {U : Set ℝ}
+    (hf : AnalyticOnNhd ℝ f U) :
+    {u : ℝ | analyticOrderAt f u = 0 ∨ analyticOrderAt f u = ⊤} ∈ Filter.codiscreteWithin U := by
+  rw [mem_codiscreteWithin]
+  intro x hx
+  rw [Filter.disjoint_principal_right]
+  rcases (hf x hx).eventually_eq_zero_or_eventually_ne_zero with h₁f | h₁f
+  · filter_upwards [eventually_nhdsWithin_of_eventually_nhds h₁f.eventually_nhds] with a ha
+    simp +contextual [analyticOrderAt_eq_top, ha]
+  · filter_upwards [h₁f] with a ha
+    simp +contextual [(hf a _).analyticOrderAt_eq_zero, ha]
+
+lemma AnalyticOnNhd.xx {x : ℝ} {f : ℝ → ℝ} (hf : AnalyticOnNhd ℝ f Set.univ) (h₂f : f x ≠ 0) :
+    f ⁻¹' {0}ᶜ ∈ Filter.codiscrete ℝ := by
+  filter_upwards [hf.codiscreteWithin_setOf_analyticOrderAt_eq_zero_or_top] with a
+  rw [← (hf x trivial).analyticOrderAt_eq_zero] at h₂f
+  have {u : ℝ} : analyticOrderAt f u ≠ ⊤ := by
+    apply (hf.exists_analyticOrderAt_ne_top_iff_forall (by exact isConnected_univ)).1 _ ⟨u, trivial⟩
+    use ⟨x, trivial⟩
+    simp_all
+  simp only [Set.mem_univ, (hf a _).analyticOrderAt_eq_zero, ne_eq, Set.preimage_compl,
+    Set.mem_compl_iff, Set.mem_preimage, Set.mem_singleton_iff]
+  tauto
+
 lemma log_sin_eventuallyEq :
-    (fun y ↦ log (sin y)) =ᶠ[Filter.codiscreteWithin ⊤] fun y ↦ log (sin (2 * y)) - log 2 - log (cos y) := by
-  have : sin ⁻¹' {0}ᶜ ∈ Filter.codiscrete ℝ := by
-    refine contDiff_sin.analyticOnNhd.preimage_mem_codiscreteWithin ?_ ?_
-    sorry
-    apply Filter.codiscreteWithin.mono (U := ⊤) (by tauto)
-    apply mem_codiscrete'.2
-    simp [compl_compl, Subsingleton.discreteTopology]
-  filter_upwards with y
-  rw [sin_two_mul, log_mul, log_mul]
+    (fun y ↦ log (sin y)) =ᶠ[Filter.codiscrete ℝ] fun y ↦ log (sin (2 * y)) - log 2 - log (cos y) := by
+  have t₀ : sin ⁻¹' {0}ᶜ ∈ Filter.codiscrete ℝ := by
+    apply analyticOnNhd_sin.xx (x := π / 2)
+    simp
+  have t₁ : cos ⁻¹' {0}ᶜ ∈ Filter.codiscrete ℝ := by
+    apply analyticOnNhd_cos.xx (x := 0)
+    simp
+  filter_upwards [t₀, t₁] with y h₁y h₂y
+  simp_all only [Set.preimage_compl, Set.mem_compl_iff, Set.mem_preimage, Set.mem_singleton_iff,
+    sin_two_mul, ne_eq, mul_eq_zero, OfNat.ofNat_ne_zero, or_self, not_false_eq_true, log_mul]
   ring
-  · simp
-  · sorry
-  · sorry
-  · sorry
-
-
-theorem intervalIntegral.integral_congr_volume
-  {E : Type u_3} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  {f : ℝ → E}
-  {g : ℝ → E}
-  {a : ℝ}
-  {b : ℝ}
-  (h₀ : a < b)
-  (h₁ : Set.EqOn f g (Set.Ioo a b)) :
-  ∫ (x : ℝ) in a..b, f x = ∫ (x : ℝ) in a..b, g x := by
-
-  apply intervalIntegral.integral_congr_ae
-  rw [MeasureTheory.ae_iff]
-  apply nonpos_iff_eq_zero.1
-  push_neg
-  have : {x | x ∈ Ι a b ∧ f x ≠ g x} ⊆ {b} := by
-    intro x hx
-    have t₂ : x ∈ Ι a b \ Set.Ioo a b := by
-      constructor
-      · exact hx.1
-      · by_contra H
-        exact hx.2 (h₁ H)
-    rw [Set.uIoc_of_le h₀.le] at t₂
-    rw [Set.Ioc_diff_Ioo_same h₀] at t₂
-    assumption
-  calc volume {a_1 | a_1 ∈ Ι a b ∧ f a_1 ≠ g a_1}
-  _ ≤ volume {b} := volume.mono this
-  _ = 0 := volume_singleton
-
-theorem IntervalIntegrable.integral_congr_Ioo
-  {E : Type u_3} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  {f g : ℝ → E}
-  {a b : ℝ}
-  (hab : a ≤ b)
-  (hfg : Set.EqOn f g (Set.Ioo a b)) :
-  IntervalIntegrable f volume a b ↔ IntervalIntegrable g volume a b := by
-
-  rw [intervalIntegrable_iff_integrableOn_Ioo_of_le hab]
-  rw [MeasureTheory.integrableOn_congr_fun hfg measurableSet_Ioo]
-  rw [← intervalIntegrable_iff_integrableOn_Ioo_of_le hab]
 
 lemma integral_log_sin₀ : ∫ (x : ℝ) in (0)..π, log (sin x) = 2 * ∫ (x : ℝ) in (0)..(π / 2), log (sin x) := by
-  rw [← intervalIntegral.integral_add_adjacent_intervals (a := 0) (b := π / 2) (c := π)]
+  rw [← intervalIntegral.integral_add_adjacent_intervals (a := 0) (b := π / 2) (c := π)
+    (by apply intervalIntegrable_log_sin) (by apply intervalIntegrable_log_sin)]
   conv =>
-    left
-    right
-    arg 1
+    left; right; arg 1
     intro x
     rw [← sin_pi_sub]
-  rw [intervalIntegral.integral_comp_sub_left (fun x ↦ log (sin x)) π]
-  have : π - π / 2 = π / 2 := by linarith
-  rw [this]
-  simp
-  ring
-  -- IntervalIntegrable (fun x => log (sin x)) volume 0 (π / 2)
-  exact intervalIntegrable_log_sin
-  -- IntervalIntegrable (fun x => log (sin x)) volume (π / 2) π
-  exact intervalIntegrable_log_sin
+  rw [intervalIntegral.integral_comp_sub_left (fun x ↦ log (sin x)), sub_self,
+    (by linarith : π - π / 2 = π / 2)]
+  ring!
 
-lemma integral_log_sin₁ : ∫ (x : ℝ) in (0)..(π / 2), log (sin x) = -log 2 * π/2 := by
-
-  have t₁ {x : ℝ} : x ∈ Set.Ioo 0 (π / 2) → log (sin (2 * x)) = log 2 + log (sin x) + log (cos x) := by
-    intro hx
-    simp at hx
-
-    rw [sin_two_mul x, log_mul, log_mul]
-    exact Ne.symm (NeZero.ne' 2)
-    -- sin x ≠ 0
-    apply (fun a => (ne_of_lt a).symm)
-    apply sin_pos_of_mem_Ioo
-    constructor
-    · exact hx.1
-    · linarith [pi_pos, hx.2]
-    -- 2 * sin x ≠ 0
-    simp
-    apply (fun a => (ne_of_lt a).symm)
-    apply sin_pos_of_mem_Ioo
-    constructor
-    · exact hx.1
-    · linarith [pi_pos, hx.2]
-    -- cos x ≠ 0
-    apply (fun a => (ne_of_lt a).symm)
-    apply cos_pos_of_mem_Ioo
-    constructor
-    · linarith [pi_pos, hx.1]
-    · exact hx.2
-
-  have t₂ : Set.EqOn (fun y ↦ log (sin y)) (fun y ↦ log (sin (2 * y)) - log 2 - log (cos y)) (Set.Ioo 0 (π / 2)) := by
-    intro x hx
-    simp
-    rw [t₁ hx]
-    ring
-
-  rw [intervalIntegral.integral_congr_volume _ t₂]
-  rw [intervalIntegral.integral_sub, intervalIntegral.integral_sub]
-  rw [intervalIntegral.integral_const]
-  rw [intervalIntegral.integral_comp_mul_left (c := 2) (f := fun x ↦ log (sin x))]
-  simp
-  have : 2 * (π / 2) = π := by linarith
-  rw [this]
-  rw [integral_log_sin₀]
-
-  have : ∫ (x : ℝ) in (0)..(π / 2), log (sin x) = ∫ (x : ℝ) in (0)..(π / 2), log (cos x) := by
-    conv =>
-      right
-      arg 1
-      intro x
-      rw [← sin_pi_div_two_sub]
-    rw [intervalIntegral.integral_comp_sub_left (fun x ↦ log (sin x)) (π / 2)]
-    simp
-  rw [← this]
-  simp
-  linarith
-
-  exact Ne.symm (NeZero.ne' 2)
-  -- IntervalIntegrable (fun x => log (sin (2 * x))) volume 0 (π / 2)
-  let A := (intervalIntegrable_log_sin (a := 0) (b := π)).comp_mul_left 2
-  simp at A
-  assumption
-  -- IntervalIntegrable (fun x => log 2) volume 0 (π / 2)
-  simp
-  -- IntervalIntegrable (fun x => log (sin (2 * x)) - log 2) volume 0 (π / 2)
-  apply IntervalIntegrable.sub
-  -- -- IntervalIntegrable (fun x => log (sin (2 * x))) volume 0 (π / 2)
-  let A := (intervalIntegrable_log_sin (a := 0) (b := π)).comp_mul_left 2
-  simp at A
-  assumption
-  -- -- IntervalIntegrable (fun x => log 2) volume 0 (π / 2)
-  simp
-  -- -- IntervalIntegrable (fun x => log (cos x)) volume 0 (π / 2)
-  exact intervalIntegrable_log_cos
-  --
-  linarith [pi_pos]
-
+lemma integral_log_sin₁ : ∫ (x : ℝ) in (0)..(π / 2), log (sin x) = -log 2 * π / 2 := by
+  calc ∫ (x : ℝ) in (0)..(π / 2), log (sin x)
+    _ = (∫ (x : ℝ) in (0)..(π / 2), log (sin (2 * x))) - π / 2 * log 2 - ∫ (x : ℝ) in (0)..(π / 2), log (cos x) := by
+      rw [intervalIntegral.integral_congr_codiscreteWithin
+        (Filter.codiscreteWithin.mono (by tauto : Ι 0 (π / 2) ⊆ Set.univ) log_sin_eventuallyEq),
+        intervalIntegral.integral_sub _ _,
+        intervalIntegral.integral_sub _ intervalIntegrable_const,
+        intervalIntegral.integral_const]
+      simp
+      · simpa using (intervalIntegrable_log_sin (a := 0) (b := π)).comp_mul_left 2
+      · apply IntervalIntegrable.sub _ intervalIntegrable_const
+        simpa using (intervalIntegrable_log_sin (a := 0) (b := π)).comp_mul_left 2
+      · exact intervalIntegrable_log_cos
+    _ = -log 2 * π / 2 := by
+      rw [intervalIntegral.integral_comp_mul_left (f := fun x ↦ log (sin x)) two_ne_zero]
+      simp [(by linarith : 2 * (π / 2) = π), integral_log_sin₀]
+      have : ∫ (x : ℝ) in (0)..(π / 2), log (sin x) = ∫ (x : ℝ) in (0)..(π / 2), log (cos x) := by
+        conv =>
+          right; arg 1
+          intro x
+          rw [← sin_pi_div_two_sub]
+        simp [intervalIntegral.integral_comp_sub_left (fun x ↦ log (sin x)) (π / 2)]
+      rw [← this]
+      linarith
 
 lemma integral_log_sin₂ : ∫ (x : ℝ) in (0)..π, log (sin x) = -log 2 * π := by
   rw [integral_log_sin₀, integral_log_sin₁]
