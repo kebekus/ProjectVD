@@ -15,17 +15,18 @@ theorem analyticOnNhd_cos :
   apply Complex.analyticOnNhd_univ_iff_differentiable.mpr
   exact Complex.differentiable_cos
 
-/-- The set where an analytic function has zero or infinite order is discrete within its domain of
-analyticity. -/
+/--
+The set where an analytic function has zero or infinite order is discrete within
+its domain of analyticity.
+-/
 theorem AnalyticOnNhd.codiscreteWithin_setOf_analyticOrderAt_eq_zero_or_top {f : ℝ → ℝ} {U : Set ℝ}
     (hf : AnalyticOnNhd ℝ f U) :
     {u : ℝ | analyticOrderAt f u = 0 ∨ analyticOrderAt f u = ⊤} ∈ Filter.codiscreteWithin U := by
-  rw [mem_codiscreteWithin]
+  simp_rw [mem_codiscreteWithin, Filter.disjoint_principal_right]
   intro x hx
-  rw [Filter.disjoint_principal_right]
   rcases (hf x hx).eventually_eq_zero_or_eventually_ne_zero with h₁f | h₁f
   · filter_upwards [eventually_nhdsWithin_of_eventually_nhds h₁f.eventually_nhds] with a ha
-    simp +contextual [analyticOrderAt_eq_top, ha]
+    simp [analyticOrderAt_eq_top, ha]
   · filter_upwards [h₁f] with a ha
     simp +contextual [(hf a _).analyticOrderAt_eq_zero, ha]
 
@@ -54,7 +55,7 @@ lemma log_sin_eventuallyEq :
     sin_two_mul, ne_eq, mul_eq_zero, OfNat.ofNat_ne_zero, or_self, not_false_eq_true, log_mul]
   ring
 
-lemma integral_log_sin₀ : ∫ (x : ℝ) in (0)..π, log (sin x) = 2 * ∫ (x : ℝ) in (0)..(π / 2), log (sin x) := by
+lemma integral_log_sin₀ : ∫ x in (0)..π, log (sin x) = 2 * ∫ x in (0)..(π / 2), log (sin x) := by
   rw [← intervalIntegral.integral_add_adjacent_intervals (a := 0) (b := π / 2) (c := π)
     (by apply intervalIntegrable_log_sin) (by apply intervalIntegrable_log_sin)]
   conv =>
@@ -65,9 +66,17 @@ lemma integral_log_sin₀ : ∫ (x : ℝ) in (0)..π, log (sin x) = 2 * ∫ (x :
     (by linarith : π - π / 2 = π / 2)]
   ring!
 
-lemma integral_log_sin₁ : ∫ (x : ℝ) in (0)..(π / 2), log (sin x) = -log 2 * π / 2 := by
-  calc ∫ (x : ℝ) in (0)..(π / 2), log (sin x)
-    _ = (∫ (x : ℝ) in (0)..(π / 2), log (sin (2 * x))) - π / 2 * log 2 - ∫ (x : ℝ) in (0)..(π / 2), log (cos x) := by
+lemma integral_log_sin_eq_integral_log_cos :
+    ∫ x in (0)..(π / 2), log (sin x) = ∫ x in (0)..(π / 2), log (cos x) := by
+  conv =>
+    right; arg 1
+    intro x
+    rw [← sin_pi_div_two_sub]
+  simp [intervalIntegral.integral_comp_sub_left (fun x ↦ log (sin x)) (π / 2)]
+
+lemma integral_log_sin₁ : ∫ x in (0)..(π / 2), log (sin x) = -log 2 * π / 2 := by
+  calc ∫ x in (0)..(π / 2), log (sin x)
+    _ = (∫ x in (0)..(π / 2), log (sin (2 * x))) - π / 2 * log 2 - ∫ x in (0)..(π / 2), log (cos x) := by
       rw [intervalIntegral.integral_congr_codiscreteWithin
         (Filter.codiscreteWithin.mono (by tauto : Ι 0 (π / 2) ⊆ Set.univ) log_sin_eventuallyEq),
         intervalIntegral.integral_sub _ _,
@@ -79,17 +88,12 @@ lemma integral_log_sin₁ : ∫ (x : ℝ) in (0)..(π / 2), log (sin x) = -log 2
         simpa using (intervalIntegrable_log_sin (a := 0) (b := π)).comp_mul_left 2
       · exact intervalIntegrable_log_cos
     _ = -log 2 * π / 2 := by
-      rw [intervalIntegral.integral_comp_mul_left (f := fun x ↦ log (sin x)) two_ne_zero]
-      simp [(by linarith : 2 * (π / 2) = π), integral_log_sin₀]
-      have : ∫ (x : ℝ) in (0)..(π / 2), log (sin x) = ∫ (x : ℝ) in (0)..(π / 2), log (cos x) := by
-        conv =>
-          right; arg 1
-          intro x
-          rw [← sin_pi_div_two_sub]
-        simp [intervalIntegral.integral_comp_sub_left (fun x ↦ log (sin x)) (π / 2)]
-      rw [← this]
+      simp only [intervalIntegral.integral_comp_mul_left (f := fun x ↦ log (sin x)) two_ne_zero,
+        mul_zero, (by linarith : 2 * (π / 2) = π), integral_log_sin₀, smul_eq_mul, ne_eq,
+        OfNat.ofNat_ne_zero, not_false_eq_true, inv_mul_cancel_left₀, ←
+        integral_log_sin_eq_integral_log_cos, sub_sub_cancel_left, neg_mul]
       linarith
 
-lemma integral_log_sin₂ : ∫ (x : ℝ) in (0)..π, log (sin x) = -log 2 * π := by
+lemma integral_log_sin₂ : ∫ x in (0)..π, log (sin x) = -log 2 * π := by
   rw [integral_log_sin₀, integral_log_sin₁]
   ring
