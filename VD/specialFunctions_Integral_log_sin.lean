@@ -42,19 +42,6 @@ lemma AnalyticOnNhd.xx {x : ℝ} {f : ℝ → ℝ} (hf : AnalyticOnNhd ℝ f Set
     Set.mem_compl_iff, Set.mem_preimage, Set.mem_singleton_iff]
   tauto
 
-lemma log_sin_eventuallyEq :
-    (fun y ↦ log (sin y)) =ᶠ[Filter.codiscrete ℝ] fun y ↦ log (sin (2 * y)) - log 2 - log (cos y) := by
-  have t₀ : sin ⁻¹' {0}ᶜ ∈ Filter.codiscrete ℝ := by
-    apply analyticOnNhd_sin.xx (x := π / 2)
-    simp
-  have t₁ : cos ⁻¹' {0}ᶜ ∈ Filter.codiscrete ℝ := by
-    apply analyticOnNhd_cos.xx (x := 0)
-    simp
-  filter_upwards [t₀, t₁] with y h₁y h₂y
-  simp_all only [Set.preimage_compl, Set.mem_compl_iff, Set.mem_preimage, Set.mem_singleton_iff,
-    sin_two_mul, ne_eq, mul_eq_zero, OfNat.ofNat_ne_zero, or_self, not_false_eq_true, log_mul]
-  ring
-
 lemma integral_log_sin₀ : ∫ x in (0)..π, log (sin x) = 2 * ∫ x in (0)..(π / 2), log (sin x) := by
   rw [← intervalIntegral.integral_add_adjacent_intervals (a := 0) (b := π / 2) (c := π)
     (by apply intervalIntegrable_log_sin) (by apply intervalIntegrable_log_sin)]
@@ -66,20 +53,23 @@ lemma integral_log_sin₀ : ∫ x in (0)..π, log (sin x) = 2 * ∫ x in (0)..(�
     (by linarith : π - π / 2 = π / 2)]
   ring!
 
-lemma integral_log_sin_eq_integral_log_cos :
-    ∫ x in (0)..(π / 2), log (sin x) = ∫ x in (0)..(π / 2), log (cos x) := by
-  conv =>
-    right; arg 1
-    intro x
-    rw [← sin_pi_div_two_sub]
-  simp [intervalIntegral.integral_comp_sub_left (fun x ↦ log (sin x)) (π / 2)]
-
 lemma integral_log_sin₁ : ∫ x in (0)..(π / 2), log (sin x) = -log 2 * π / 2 := by
   calc ∫ x in (0)..(π / 2), log (sin x)
+    _ = ∫ x in (0)..(π / 2), (log (sin (2 * x)) - log 2 - log (cos x)) := by
+      apply intervalIntegral.integral_congr_codiscreteWithin
+      apply Filter.codiscreteWithin.mono (by tauto : Ι 0 (π / 2) ⊆ Set.univ)
+      have t₀ : sin ⁻¹' {0}ᶜ ∈ Filter.codiscrete ℝ := by
+        apply analyticOnNhd_sin.xx (x := π / 2)
+        simp
+      have t₁ : cos ⁻¹' {0}ᶜ ∈ Filter.codiscrete ℝ := by
+        apply analyticOnNhd_cos.xx (x := 0)
+        simp
+      filter_upwards [t₀, t₁] with y h₁y h₂y
+      simp_all only [Set.preimage_compl, Set.mem_compl_iff, Set.mem_preimage, Set.mem_singleton_iff,
+        sin_two_mul, ne_eq, mul_eq_zero, OfNat.ofNat_ne_zero, or_self, not_false_eq_true, log_mul]
+      ring
     _ = (∫ x in (0)..(π / 2), log (sin (2 * x))) - π / 2 * log 2 - ∫ x in (0)..(π / 2), log (cos x) := by
-      rw [intervalIntegral.integral_congr_codiscreteWithin
-        (Filter.codiscreteWithin.mono (by tauto : Ι 0 (π / 2) ⊆ Set.univ) log_sin_eventuallyEq),
-        intervalIntegral.integral_sub _ _,
+      rw [intervalIntegral.integral_sub _ _,
         intervalIntegral.integral_sub _ intervalIntegrable_const,
         intervalIntegral.integral_const]
       simp
@@ -87,11 +77,12 @@ lemma integral_log_sin₁ : ∫ x in (0)..(π / 2), log (sin x) = -log 2 * π / 
       · apply IntervalIntegrable.sub _ intervalIntegrable_const
         simpa using (intervalIntegrable_log_sin (a := 0) (b := π)).comp_mul_left 2
       · exact intervalIntegrable_log_cos
+    _ = (∫ x in (0)..(π / 2), log (sin (2 * x))) - π / 2 * log 2 - ∫ x in (0)..(π / 2), log (sin x) := by
+      simp [← sin_pi_div_two_sub, intervalIntegral.integral_comp_sub_left (fun x ↦ log (sin x)) (π / 2)]
     _ = -log 2 * π / 2 := by
       simp only [intervalIntegral.integral_comp_mul_left (f := fun x ↦ log (sin x)) two_ne_zero,
         mul_zero, (by linarith : 2 * (π / 2) = π), integral_log_sin₀, smul_eq_mul, ne_eq,
-        OfNat.ofNat_ne_zero, not_false_eq_true, inv_mul_cancel_left₀, ←
-        integral_log_sin_eq_integral_log_cos, sub_sub_cancel_left, neg_mul]
+        OfNat.ofNat_ne_zero, not_false_eq_true, inv_mul_cancel_left₀, sub_sub_cancel_left, neg_mul]
       linarith
 
 lemma integral_log_sin₂ : ∫ x in (0)..π, log (sin x) = -log 2 * π := by
