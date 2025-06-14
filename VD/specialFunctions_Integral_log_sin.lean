@@ -11,37 +11,6 @@ theorem analyticOnNhd_cos :
   exact Complex.differentiable_cos
 
 /--
-The set where an analytic function has zero or infinite order is discrete within
-its domain of analyticity.
--/
-theorem AnalyticOnNhd.codiscreteWithin_setOf_analyticOrderAt_eq_zero_or_top {f : ℝ → ℝ} {U : Set ℝ}
-    (hf : AnalyticOnNhd ℝ f U) :
-    {u : ℝ | analyticOrderAt f u = 0 ∨ analyticOrderAt f u = ⊤} ∈ Filter.codiscreteWithin U := by
-  simp_rw [mem_codiscreteWithin, Filter.disjoint_principal_right]
-  intro x hx
-  rcases (hf x hx).eventually_eq_zero_or_eventually_ne_zero with h₁f | h₁f
-  · filter_upwards [eventually_nhdsWithin_of_eventually_nhds h₁f.eventually_nhds] with a ha
-    simp [analyticOrderAt_eq_top, ha]
-  · filter_upwards [h₁f] with a ha
-    simp +contextual [(hf a _).analyticOrderAt_eq_zero, ha]
-
-/--
-If `f` is analytic on `𝕜` and non-zero at one point, then the set of non-zeros is codiscrete.
--/
-lemma AnalyticOnNhd.preimg_zero_comp_mem_codiscrete {x : ℝ} {f : ℝ → ℝ}
-    (hf : AnalyticOnNhd ℝ f Set.univ) (h₂f : f x ≠ 0) :
-    f ⁻¹' {0}ᶜ ∈ codiscrete ℝ := by
-  filter_upwards [hf.codiscreteWithin_setOf_analyticOrderAt_eq_zero_or_top] with a
-  rw [← (hf x trivial).analyticOrderAt_eq_zero] at h₂f
-  have {u : ℝ} : analyticOrderAt f u ≠ ⊤ := by
-    apply (hf.exists_analyticOrderAt_ne_top_iff_forall (by exact isConnected_univ)).1 _ ⟨u, trivial⟩
-    use ⟨x, trivial⟩
-    simp_all
-  simp only [Set.mem_univ, (hf a _).analyticOrderAt_eq_zero, ne_eq, Set.preimage_compl,
-    Set.mem_compl_iff, Set.mem_preimage, Set.mem_singleton_iff]
-  tauto
-
-/--
 Helper lemma for `integral_log_sin_zero_pi_div_two`: The integral of `log ∘ sin`
 on `0 … π` is double the integral on `0 … π/2`.
 -/
@@ -66,10 +35,10 @@ theorem integral_log_sin_zero_pi_div_two : ∫ x in (0)..(π / 2), log (sin x) =
       apply intervalIntegral.integral_congr_codiscreteWithin
       apply Filter.codiscreteWithin.mono (by tauto : Ι 0 (π / 2) ⊆ Set.univ)
       have t₀ : sin ⁻¹' {0}ᶜ ∈ Filter.codiscrete ℝ := by
-        apply analyticOnNhd_sin.preimg_zero_comp_mem_codiscrete (x := π / 2)
+        apply analyticOnNhd_sin.preimage_zero_mem_codiscrete (x := π / 2)
         simp
       have t₁ : cos ⁻¹' {0}ᶜ ∈ Filter.codiscrete ℝ := by
-        apply analyticOnNhd_cos.preimg_zero_comp_mem_codiscrete (x := 0)
+        apply analyticOnNhd_cos.preimage_zero_mem_codiscrete (x := 0)
         simp
       filter_upwards [t₀, t₁] with y h₁y h₂y
       simp_all only [Set.preimage_compl, Set.mem_compl_iff, Set.mem_preimage, Set.mem_singleton_iff,
