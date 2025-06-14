@@ -7,6 +7,13 @@ variable
 
 open Topology
 
+theorem laplace_smul_nhd {x : E} {f : E → F} (v : ℝ) (hf : ContDiffAt ℝ 2 f x) :
+    Δ (v • f) =ᶠ[𝓝 x] v • (Δ f) := by
+  filter_upwards [hf.eventually (not_eq_of_beq_eq_false rfl)] with a ha
+  simp [laplace_smul v ha]
+
+
+
 def HarmonicAt (f : E → F) (x : E) : Prop := (ContDiffAt ℝ 2 f x) ∧ (Δ f =ᶠ[𝓝 x] 0)
 
 def HarmonicOnNhd (f : E → F) (s : Set E) : Prop := ∀ x ∈ s, HarmonicAt f x
@@ -14,12 +21,15 @@ def HarmonicOnNhd (f : E → F) (s : Set E) : Prop := ∀ x ∈ s, HarmonicAt f 
 lemma HarmonicOnNhd.mono {f : E → F} {s t : Set E} (h : HarmonicOnNhd f s) (hst : t ⊆ s) :
     HarmonicOnNhd f t := fun x hx ↦ h x (hst hx)
 
+theorem HarmonicAt.eventually {f : E → F} {x : E} (h:  HarmonicAt f x) :
+    ∀ᶠ y in 𝓝 x, HarmonicAt f y := by
+  filter_upwards [h.1.eventually (not_eq_of_beq_eq_false rfl), h.2.eventually_nhds] with a h₁a h₂a
+  exact ⟨h₁a, h₂a⟩
+
 theorem harmonicAt_isOpen (f : E → F) : IsOpen { x : E | HarmonicAt f x } := by
   rw [isOpen_iff_mem_nhds]
   intro x hx
-  simp only [Set.mem_setOf_eq] at hx
-  filter_upwards [hx.1.eventually (not_eq_of_beq_eq_false rfl), hx.2.eventually_nhds] with a h₁a h₂a
-  exact ⟨h₁a, h₂a⟩
+  exact hx.eventually
 
 theorem harmonicAt_congr_nhds {f₁ f₂ : E → F} {x : E} (h : f₁ =ᶠ[𝓝 x] f₂) :
     HarmonicAt f₁ x ↔ HarmonicAt f₂ x := by
@@ -34,22 +44,39 @@ theorem HarmonicAt.add {f₁ f₂ : E → F} {x : E} (h₁ : HarmonicAt f₁ x) 
   · filter_upwards [h₁.1.laplace_add_nhd h₂.1, h₁.2, h₂.2] with a h₁a h₂a h₃a
     simp_all
 
-
-theorem laplace_smul_nhd {x : E} {f : E → F} (v : ℝ) (hf : ContDiffAt ℝ 2 f x) :
-    Δ (v • f) =ᶠ[𝓝 x] v • (Δ f) := by
-  filter_upwards [hf.1.eventually] with a ha
-
-
-  simp [laplace_eq_iteratedFDeriv_stdOrthonormalBasis, iteratedFDeriv_const_smul_apply hf,
-    Finset.smul_sum]
-
-
 theorem HarmonicAt.const_smul {f : E → F} {x : E} {c : ℝ} (h : HarmonicAt f x) :
     HarmonicAt (c • f) x := by
   constructor
   · exact h.1.const_smul c
-  · rw [laplace_smul c h.1]
+  · filter_upwards [laplace_smul_nhd c h.1, h.2] with a h₁a h₂a
     simp_all
+
+theorem harmonicAt_comp_CLM_is_harmonicAt {f : E → F} {z : E} {l : F →L[ℝ] G}
+    (h : HarmonicAt f z) : HarmonicAt (l ∘ f) z := by
+  constructor
+  · exact h.1.continuousLinearMap_comp l
+  · filter_upwards [h.1.laplace_CLM_comp (l := l), h.2] with a h₁a h₂a
+    simp_all
+
+
+
+  rw [HarmonicAt_iff] at *
+  obtain ⟨s, h₁s, h₂s, h₃s⟩ := h
+  use s
+  refine ⟨h₁s, h₂s, ?_⟩
+  apply harmonicOn_comp_CLM_is_harmonicOn h₁s h₃s
+
+theorem harmonicAt_iff_comp_CLE_is_harmonicAt {f : ℂ → F₁} {z : ℂ} {l : F₁ ≃L[ℝ] G₁} :
+  HarmonicAt f z ↔ HarmonicAt (l ∘ f) z := by
+  constructor
+  · have : l ∘ f = (l : F₁ →L[ℝ] G₁) ∘ f := by rfl
+    rw [this]
+    exact harmonicAt_comp_CLM_is_harmonicAt
+  · have : f = (l.symm : G₁ →L[ℝ] F₁) ∘ l ∘ f := by
+      unfold Function.comp
+      simp
+    nth_rewrite 2 [this]
+    exact harmonicAt_comp_CLM_is_harmonicAt
 
 
 section harmonicOn
