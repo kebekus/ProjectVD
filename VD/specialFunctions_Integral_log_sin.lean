@@ -1,11 +1,6 @@
-import Mathlib.Analysis.SpecialFunctions.Integrals
-import Mathlib.Analysis.SpecialFunctions.Log.NegMulLog
-import Mathlib.Analysis.Convex.SpecificFunctions.Deriv
 import VD.ToMathlib.meromorphicOn_integrability
-import Mathlib.Analysis.Complex.CauchyIntegral
 
-open scoped Interval Topology
-open Real Filter MeasureTheory intervalIntegral
+open Filter Interval Real
 
 -- 150 lines max
 
@@ -30,8 +25,12 @@ theorem AnalyticOnNhd.codiscreteWithin_setOf_analyticOrderAt_eq_zero_or_top {f :
   · filter_upwards [h₁f] with a ha
     simp +contextual [(hf a _).analyticOrderAt_eq_zero, ha]
 
-lemma AnalyticOnNhd.xx {x : ℝ} {f : ℝ → ℝ} (hf : AnalyticOnNhd ℝ f Set.univ) (h₂f : f x ≠ 0) :
-    f ⁻¹' {0}ᶜ ∈ Filter.codiscrete ℝ := by
+/--
+If `f` is analytic on `𝕜` and non-zero at one point, then the set of non-zeros is codiscrete.
+-/
+lemma AnalyticOnNhd.preimg_zero_comp_mem_codiscrete {x : ℝ} {f : ℝ → ℝ}
+    (hf : AnalyticOnNhd ℝ f Set.univ) (h₂f : f x ≠ 0) :
+    f ⁻¹' {0}ᶜ ∈ codiscrete ℝ := by
   filter_upwards [hf.codiscreteWithin_setOf_analyticOrderAt_eq_zero_or_top] with a
   rw [← (hf x trivial).analyticOrderAt_eq_zero] at h₂f
   have {u : ℝ} : analyticOrderAt f u ≠ ⊤ := by
@@ -42,7 +41,12 @@ lemma AnalyticOnNhd.xx {x : ℝ} {f : ℝ → ℝ} (hf : AnalyticOnNhd ℝ f Set
     Set.mem_compl_iff, Set.mem_preimage, Set.mem_singleton_iff]
   tauto
 
-lemma integral_log_sin₀ : ∫ x in (0)..π, log (sin x) = 2 * ∫ x in (0)..(π / 2), log (sin x) := by
+/--
+Helper lemma for `integral_log_sin_zero_pi_div_two`: The integral of `log ∘ sin`
+on `0 … π` is double the integral on `0 … π/2`.
+-/
+lemma integral_log_sin_zero_pi_eq_two_mul_integral_log_sin_zero_pi_div_two :
+    ∫ x in (0)..π, log (sin x) = 2 * ∫ x in (0)..(π / 2), log (sin x) := by
   rw [← intervalIntegral.integral_add_adjacent_intervals (a := 0) (b := π / 2) (c := π)
     (by apply intervalIntegrable_log_sin) (by apply intervalIntegrable_log_sin)]
   conv =>
@@ -53,16 +57,19 @@ lemma integral_log_sin₀ : ∫ x in (0)..π, log (sin x) = 2 * ∫ x in (0)..(�
     (by linarith : π - π / 2 = π / 2)]
   ring!
 
-lemma integral_log_sin₁ : ∫ x in (0)..(π / 2), log (sin x) = -log 2 * π / 2 := by
+/--
+The integral of `log ∘ sin` on `0 … π/2` equals `-log 2 * π / 2`.
+-/
+theorem integral_log_sin_zero_pi_div_two : ∫ x in (0)..(π / 2), log (sin x) = -log 2 * π / 2 := by
   calc ∫ x in (0)..(π / 2), log (sin x)
     _ = ∫ x in (0)..(π / 2), (log (sin (2 * x)) - log 2 - log (cos x)) := by
       apply intervalIntegral.integral_congr_codiscreteWithin
       apply Filter.codiscreteWithin.mono (by tauto : Ι 0 (π / 2) ⊆ Set.univ)
       have t₀ : sin ⁻¹' {0}ᶜ ∈ Filter.codiscrete ℝ := by
-        apply analyticOnNhd_sin.xx (x := π / 2)
+        apply analyticOnNhd_sin.preimg_zero_comp_mem_codiscrete (x := π / 2)
         simp
       have t₁ : cos ⁻¹' {0}ᶜ ∈ Filter.codiscrete ℝ := by
-        apply analyticOnNhd_cos.xx (x := 0)
+        apply analyticOnNhd_cos.preimg_zero_comp_mem_codiscrete (x := 0)
         simp
       filter_upwards [t₀, t₁] with y h₁y h₂y
       simp_all only [Set.preimage_compl, Set.mem_compl_iff, Set.mem_preimage, Set.mem_singleton_iff,
@@ -81,10 +88,13 @@ lemma integral_log_sin₁ : ∫ x in (0)..(π / 2), log (sin x) = -log 2 * π / 
       simp [← sin_pi_div_two_sub, intervalIntegral.integral_comp_sub_left (fun x ↦ log (sin x)) (π / 2)]
     _ = -log 2 * π / 2 := by
       simp only [intervalIntegral.integral_comp_mul_left (f := fun x ↦ log (sin x)) two_ne_zero,
-        mul_zero, (by linarith : 2 * (π / 2) = π), integral_log_sin₀, smul_eq_mul, ne_eq,
+        mul_zero, (by linarith : 2 * (π / 2) = π), integral_log_sin_zero_pi_eq_two_mul_integral_log_sin_zero_pi_div_two, smul_eq_mul, ne_eq,
         OfNat.ofNat_ne_zero, not_false_eq_true, inv_mul_cancel_left₀, sub_sub_cancel_left, neg_mul]
       linarith
 
-lemma integral_log_sin₂ : ∫ x in (0)..π, log (sin x) = -log 2 * π := by
-  rw [integral_log_sin₀, integral_log_sin₁]
+/--
+The integral of `log ∘ sin` on `0 … π` equals `-log 2 * π`.
+-/
+theorem integral_log_sin_zero_pi : ∫ x in (0)..π, log (sin x) = -log 2 * π := by
+  rw [integral_log_sin_zero_pi_eq_two_mul_integral_log_sin_zero_pi_div_two, integral_log_sin_zero_pi_div_two]
   ring

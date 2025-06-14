@@ -153,7 +153,7 @@ lemma int₁₁ : ∫ (x : ℝ) in (0)..π, log (4 * sin x ^ 2) = 0 := by
   rw [intervalIntegral.integral_add]
   rw [intervalIntegral.integral_const_mul]
   simp
-  rw [integral_log_sin₂]
+  rw [integral_log_sin_zero_pi]
   have : (4 : ℝ) = 2 * 2 := by norm_num
   rw [this, log_mul]
   ring
