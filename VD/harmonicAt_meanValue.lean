@@ -138,9 +138,8 @@ theorem harmonic_meanValue₁
   (hf : ∀ x ∈ Metric.closedBall z |R| , HarmonicAt f x) :
   circleAverage f z R = f z := by
   rw [circleAverage]
-  apply ltByCases 0 R
-  · intro hR
-    rw [abs_of_pos hR] at hf
+  rcases lt_trichotomy 0 R with hR | hR | hR
+  · rw [abs_of_pos hR] at hf
     rw [harmonic_meanValue₁ R hR hf]
     rw [smul_eq_mul]
     rw [← mul_assoc]
@@ -149,8 +148,7 @@ theorem harmonic_meanValue₁
     apply mul_ne_zero
     exact Ne.symm (NeZero.ne' 2)
     exact Real.pi_ne_zero
-  · intro hR
-    simp_rw [← hR]
+  · simp_rw [← hR]
     simp only [circleMap_zero_radius, Function.const_apply,
       intervalIntegral.integral_const]
     rw [sub_zero]
@@ -161,8 +159,7 @@ theorem harmonic_meanValue₁
     apply mul_ne_zero
     exact Ne.symm (NeZero.ne' 2)
     exact Real.pi_ne_zero
-  · intro hR
-    rw [integrabl_congr_negRadius]
+  · rw [integrabl_congr_negRadius]
     rw [abs_of_neg hR] at hf
     rw [harmonic_meanValue₁ (-R) _ hf]
     rw [smul_eq_mul]
