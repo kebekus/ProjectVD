@@ -1,8 +1,23 @@
+/-
+Copyright (c) 2025 Stefan Kebekus. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Stefan Kebekus
+-/
 import VD.ToMathlib.meromorphicOn_integrability
+
+/-!
+# Integral of `log ∘ sin`
+
+This file computes special values of the integral of `log ∘ sin`. Given that the
+indefinite integral involves the dilogarithm, this can be seen as computing
+special values of `Li₂`.
+-/
 
 open Filter Interval Real
 
--- 150 lines max
+/-!
+## Needs to go someplace
+-/
 
 theorem analyticOnNhd_cos :
     AnalyticOnNhd ℝ Real.cos Set.univ := by
