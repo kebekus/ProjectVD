@@ -40,19 +40,19 @@ theorem ContDiffAt.laplace_CLM_comp_nhds {l : F →L[ℝ] G} (h : ContDiffAt ℝ
 
 variable (f x) in
 /--
-Let `E` be a real, finite-dimensional, inner product spaces and `x` be a point
-of `E`. A function `f` on `E` is harmonic at `x` if it is two times continuously
-`ℝ`-differentiable and if its Laplacian vanishes in a neighbourhood of `x`.
+Let `E` be a real, finite-dimensional, inner product space and `x` be a point of
+`E`. A function `f` on `E` is harmonic at `x` if it is two times continuously
+`ℝ`-differentiable and if its Laplacian vanishes in a neighborhood of `x`.
 -/
-def HarmonicAt : Prop := (ContDiffAt ℝ 2 f x) ∧ (Δ f =ᶠ[𝓝 x] 0)
+def HarmonicAt := (ContDiffAt ℝ 2 f x) ∧ (Δ f =ᶠ[𝓝 x] 0)
 
 variable (f s) in
 /--
-Let `E` be a real, finite-dimensional, inner product spaces and `s` be a subset
+Let `E` be a real, finite-dimensional, inner product space and `s` be a subset
 of `E`. A function `f` on `E` is harmonic in a neighborhood of `s` if it is
 harmonic at every point of `s`.
 -/
-def HarmonicOnNhd : Prop := ∀ x ∈ s, HarmonicAt f x
+def HarmonicOnNhd := ∀ x ∈ s, HarmonicAt f x
 
 /-!
 ## Elementary Properties

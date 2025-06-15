@@ -1,8 +1,11 @@
+import VD.Harmonic
+import VD.Harmonic_constructions
 import VD.Jensen
-import VD.LeadCoefficientFactorizedRational
 import VD.ProximityFunction
+import VD.ToMathlib.IsolatedZeros
 import VD.ToMathlib.IteratedFDeriv_two
 import VD.ToMathlib.Laplace
+import VD.ToMathlib.TrailingCoefficientFactorizedRational
 import VD.ToMathlib.meromorphicOn_integrability
 import VD.cauchyRiemann
 import VD.firstMain1
