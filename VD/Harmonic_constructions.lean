@@ -1,13 +1,63 @@
+import Mathlib.Analysis.Calculus.FDeriv.Congr
 import VD.Harmonic
 
 variable
-  {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
-  {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+  {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [NormedSpace ℂ E] [FiniteDimensional ℝ E]
+  {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ F] [IsScalarTower ℝ ℂ F]
   {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G]
-  {f f₁ f₂ : E → F}
-  {x : E} {s t : Set E} {c : ℝ}
+  {f f₁ f₂ : ℂ → F}
+  {s t : Set E} {c : ℝ}
+
+open Topology
 
 variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ F] [CompleteSpace F]
+
+theorem y {f : E → F} {n : ℕ} {z : E} (h : ContDiffAt ℂ n f z) :
+    (fun x : E ↦ ((iteratedFDeriv ℂ n f x).restrictScalars ℝ)) =ᶠ[𝓝 z]
+      (fun x : E ↦ iteratedFDeriv ℝ n f x) := by
+  induction n with
+  | zero =>
+    filter_upwards with a
+    ext m
+    simp [iteratedFDeriv_zero_apply m]
+  | succ n hn =>
+    have : ContDiffAt ℂ n f z := by
+      apply h.of_le
+      apply Nat.cast_le.mpr
+      exact Nat.le_add_right n 1
+    have t₀ := hn this
+    have t₁ := this.eventually
+    simp at t₁
+    filter_upwards [t₀.eventually_nhds, t₁.eventually_nhds] with a h₁a h₂a
+    ext m
+    simp [iteratedFDeriv_succ_apply_left]
+
+    have : (fun x ↦ (iteratedFDeriv ℂ n f x).restrictScalars ℝ) =ᶠ[𝓝 a] (fun x ↦ iteratedFDeriv ℝ n f x) := h₁a
+    have := (this.fderiv (𝕜 := ℝ)).eq_of_nhds
+    rw [← this]
+    have s₀ : DifferentiableAt ℂ (iteratedFDeriv ℂ n f) a := by
+      sorry
+    have := s₀.fderiv_restrictScalars ℝ
+    simp_all
+    sorry
+
+
+  sorry
+
+theorem xx (h : ContDiffAt ℂ 2 f x) :
+    HarmonicAt f x := by
+  constructor
+  · exact ContDiffAt.restrict_scalars ℝ h
+  · have : Δ f x = 0 := by
+      rw [laplace_eq_iteratedFDeriv_complexPlane f]
+      simp
+      nth_rw 2 [iteratedFDeriv_two_apply]
+      simp
+      have := (h.differentiableAt one_le_two).fderiv_restrictScalars ℝ
+      rw [this]
+
+      sorry
+    sorry
 
 
 theorem holomorphicAt_is_harmonicAt
