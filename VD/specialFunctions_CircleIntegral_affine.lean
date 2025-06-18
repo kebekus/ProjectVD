@@ -1,6 +1,6 @@
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Periodic
 import Mathlib.MeasureTheory.Integral.CircleIntegral
-import VD.specialFunctions_Integral_log_sin
+import VD.ToMathlib.specialFunctions_Integral_log_sin
 import VD.harmonicAt_examples
 import VD.harmonicAt_meanValue
 import VD.intervalIntegrability
