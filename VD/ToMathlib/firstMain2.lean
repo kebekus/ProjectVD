@@ -3,7 +3,7 @@ Copyright (c) 2025 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import VD.ProximityFunction
+import VD.ToMathlib.ProximityFunction
 import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
 
 /-!
@@ -133,7 +133,7 @@ version: If `f` is meromorphic on the complex plane, then the characteristic
 functions (for value `⊤`) of `f` and `f - a₀` differ at most by `log⁺ ‖a₀‖ + log
 2`.
 -/
-theorem FirstMainTheorem₂_quant {r : ℝ} (h : MeromorphicOn f ⊤) :
+theorem abs_characteristic_sub_characteristic_shift_le {r : ℝ} (h : MeromorphicOn f ⊤) :
     |characteristic f ⊤ r - characteristic (f · - a₀) ⊤ r| ≤ log⁺ ‖a₀‖ + log 2 := by
   have h₁f : CircleIntegrable (fun x ↦ log⁺ ‖f x‖) 0 r :=
     MeromorphicOn.circleIntegrable_posLog_norm (fun x a ↦ h x trivial)
@@ -163,10 +163,10 @@ version: If `f` is meromorphic on the complex plane, then the characteristic
 functions for the value `⊤` of the function `f` and `f - a₀` agree
 asymptotically up to a bounded function.
 -/
-theorem FirstMainTheorem₂_qual (h : MeromorphicOn f ⊤) :
+theorem abs_characteristic_sub_characteristic_shift_eqO (h : MeromorphicOn f ⊤) :
     |characteristic f ⊤ - characteristic (f · - a₀) ⊤| =O[atTop] (1 : ℝ → ℝ) := by
   simp_rw [isBigO_iff', eventually_atTop]
   use log⁺ ‖a₀‖ + log 2, add_pos_of_nonneg_of_pos posLog_nonneg (log_pos one_lt_two), 0
-  simp [FirstMainTheorem₂_quant h]
+  simp [abs_characteristic_sub_characteristic_shift_le h]
 
 end ValueDistribution
