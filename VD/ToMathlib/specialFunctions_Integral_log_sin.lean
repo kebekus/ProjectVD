@@ -3,7 +3,7 @@ Copyright (c) 2025 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import VD.ToMathlib.meromorphicOn_integrability
+import Mathlib.Analysis.SpecialFunctions.Integrability.LogMeromorphic
 
 /-!
 # Integral of `log ∘ sin`
@@ -14,16 +14,6 @@ special values of `Li₂`.
 -/
 
 open Filter Interval Real
-
-/-!
-## Needs to go someplace
--/
-
-theorem analyticOnNhd_cos :
-    AnalyticOnNhd ℝ Real.cos Set.univ := by
-  apply analyticOnNhd_realPart (f := Complex.cos)
-  apply Complex.analyticOnNhd_univ_iff_differentiable.mpr
-  exact Complex.differentiable_cos
 
 /--
 Helper lemma for `integral_log_sin_zero_pi_div_two`: The integral of `log ∘ sin`
