@@ -83,7 +83,7 @@ theorem circleAverage_mono_on_of_le_circle {a : ℝ} (hf : CircleIntegrable f c 
   rw [← circleAverage_const a c |R|, circleAverage, circleAverage, smul_eq_mul, smul_eq_mul,
     mul_le_mul_iff_of_pos_left (inv_pos.2 two_pi_pos)]
   apply intervalIntegral.integral_mono_on_of_le_Ioo (le_of_lt two_pi_pos) hf
-  apply intervalIntegral.intervalIntegrable_const a
+  apply intervalIntegral.intervalIntegrable_const
   exact fun θ _ ↦ h₂f (circleMap c R θ) (circleMap_mem_sphere' c R θ)
 
 /--
@@ -136,9 +136,9 @@ functions (for value `⊤`) of `f` and `f - a₀` differ at most by `log⁺ ‖a
 theorem abs_characteristic_sub_characteristic_shift_le {r : ℝ} (h : MeromorphicOn f ⊤) :
     |characteristic f ⊤ r - characteristic (f · - a₀) ⊤ r| ≤ log⁺ ‖a₀‖ + log 2 := by
   have h₁f : CircleIntegrable (fun x ↦ log⁺ ‖f x‖) 0 r :=
-    MeromorphicOn.circleIntegrable_posLog_norm (fun x a ↦ h x trivial)
+    circleIntegrable_posLog_norm_meromorphicOn (fun x a ↦ h x trivial)
   have h₂f : CircleIntegrable (fun x ↦ log⁺ ‖f x - a₀‖) 0 r := by
-    apply MeromorphicOn.circleIntegrable_posLog_norm
+    apply circleIntegrable_posLog_norm_meromorphicOn
     apply MeromorphicOn.sub (fun x a => h x trivial) (MeromorphicOn.const a₀)
   rw [← Pi.sub_apply, characteristic_sub_characteristic_eq_proximity_sub_proximity h]
   simp only [proximity, reduceDIte, Pi.sub_apply, ← circleAverage_sub h₁f h₂f]

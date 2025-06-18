@@ -5,7 +5,7 @@ Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.SpecialFunctions.Log.PosLog
 import Mathlib.MeasureTheory.Integral.CircleAverage
-import VD.ToMathlib.meromorphicOn_integrability
+import Mathlib.Analysis.SpecialFunctions.Integrability.LogMeromorphic
 import Mathlib.Analysis.Complex.ValueDistribution.ProximityFunction
 
 /-!
@@ -44,9 +44,14 @@ theorem proximity_sub_proximity_inv_eq_circleAverage {f : ℂ → ℂ} (h₁f : 
     proximity f ⊤ - proximity f⁻¹ ⊤ = circleAverage (log ‖f ·‖) 0 := by
   ext R
   have : CircleIntegrable (log⁺ ‖f ·‖⁻¹) 0 R := by
-    simpa [← norm_inv] using (h₁f.inv.mono_set (by tauto)).circleIntegrable_posLog_norm
-  simp [proximity, ← circleAverage_sub (h₁f.mono_set (by tauto)).circleIntegrable_posLog_norm this,
-    ← posLog_sub_posLog_inv]
+    simp_rw [← norm_inv]
+    apply circleIntegrable_posLog_norm_meromorphicOn (h₁f.inv.mono_set (by tauto))
+  simp only [proximity, ↓reduceDIte, Pi.inv_apply, norm_inv, Pi.sub_apply]
+  rw [← circleAverage_sub]
+  simp_rw [← posLog_sub_posLog_inv]
   rfl
+  · apply circleIntegrable_posLog_norm_meromorphicOn (h₁f.mono_set (by tauto))
+  · simp_rw [← norm_inv]
+    apply circleIntegrable_posLog_norm_meromorphicOn  (h₁f.inv.mono_set (by tauto))
 
 end ValueDistribution
