@@ -12,6 +12,24 @@ open Topology
 
 variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ F] [CompleteSpace F]
 
+theorem DifferentiableAt.fderiv_restrictScalars' (h : DifferentiableAt ℂ f x) :
+    fderiv ℝ f x = (fderiv ℂ f x).restrictScalars ℝ := by
+  exact (h.hasFDerivAt.restrictScalars ℝ).fderiv
+
+theorem fxx {n : ℕ} {x : E}
+    {f : E → (ContinuousMultilinearMap ℂ (fun i : Fin n ↦ E) F)} :
+    (fderiv ℝ ((ContinuousMultilinearMap.restrictScalars ℝ) ∘ f) x)
+      = (ContinuousMultilinearMap.restrictScalars ℝ) ∘ ((fderiv ℂ f x).restrictScalars ℝ) := by
+  ext a b
+  simp
+  have := fderiv ℝ (fun e ↦ (f e).restrictScalars ℝ) x
+  have := fderiv ℂ (fun e ↦ (f e)) x
+  have := (ContinuousMultilinearMap.restrictScalars ℝ) ∘ ((fderiv ℂ (fun e ↦ (f e)) x).restrictScalars ℝ)
+
+  have := iteratedFDeriv ℂ n f x
+
+  sorry
+
 theorem y {f : E → F} {n : ℕ} {z : E} (h : ContDiffAt ℂ n f z) :
     (fun x : E ↦ ((iteratedFDeriv ℂ n f x).restrictScalars ℝ)) =ᶠ[𝓝 z]
       (fun x : E ↦ iteratedFDeriv ℝ n f x) := by
