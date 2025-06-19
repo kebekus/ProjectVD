@@ -1,4 +1,4 @@
-import VD.ProximityFunction
+import VD.ToMathlib.ProximityFunction
 import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
 import VD.Jensen
 

@@ -213,7 +213,7 @@ theorem harmonic_is_realOfHolomorphic
       -- DifferentiableAt ℝ (Complex.I • f_I)
       have : Complex.I • f_I = fun x ↦ Complex.I • f_I x := by rfl
       rw [this]
-      apply DifferentiableAt.const_smul
+      apply DifferentiableAt.fun_const_smul
       apply (reg₁f_I.differentiableOn le_rfl).differentiableAt
       apply IsOpen.mem_nhds Metric.isOpen_ball hx
 
@@ -224,7 +224,7 @@ theorem harmonic_is_realOfHolomorphic
       -- Differentiable ℝ (Complex.I • f_I)
       have : Complex.I • f_I = fun x ↦ Complex.I • f_I x := by rfl
       rw [this]
-      apply DifferentiableAt.const_smul
+      apply DifferentiableAt.fun_const_smul
       apply (reg₁f_I.differentiableOn le_rfl).differentiableAt
       apply IsOpen.mem_nhds Metric.isOpen_ball hx
 

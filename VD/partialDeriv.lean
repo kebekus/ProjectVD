@@ -56,11 +56,11 @@ theorem partialDeriv_smul₂ {f : E → F} {a : 𝕜} {v : E} :
   · rw [ha]
     simp
   · by_cases hf : DifferentiableAt 𝕜 f w
-    · rw [fderiv_const_smul hf]
+    · rw [fderiv_fun_const_smul hf]
       simp
     · have : ¬DifferentiableAt 𝕜 (fun y => a • f y) w := by
         by_contra contra
-        let ZZ := DifferentiableAt.const_smul contra a⁻¹
+        let ZZ := DifferentiableAt.fun_const_smul contra a⁻¹
         have : (fun y => a⁻¹ • a • f y) = f := by
           funext i
           rw [← smul_assoc, smul_eq_mul, mul_comm, mul_inv_cancel₀ ha]
@@ -82,7 +82,7 @@ theorem partialDeriv_add₂ {f₁ f₂ : E → F} (h₁ : Differentiable 𝕜 f�
     left
     intro w
     left
-    rw [fderiv_add (h₁ w) (h₂ w)]
+    rw [fderiv_fun_add (h₁ w) (h₂ w)]
   funext w
   simp
 
@@ -92,7 +92,7 @@ theorem partialDeriv_add₂_differentiableAt {f₁ f₂ : E → F} {v x : E}
   unfold partialDeriv
   have : f₁ + f₂ = fun y ↦ f₁ y + f₂ y := by rfl
   rw [this]
-  rw [fderiv_add h₁ h₂]
+  rw [fderiv_fun_add h₁ h₂]
   rfl
 
 theorem partialDeriv_add₂_contDiffAt {f₁ f₂ : E → F} {v x : E}
@@ -118,7 +118,7 @@ theorem partialDeriv_sub₂ {f₁ f₂ : E → F} (h₁ : Differentiable 𝕜 f�
     left
     intro w
     left
-    rw [fderiv_sub (h₁ w) (h₂ w)]
+    rw [fderiv_fun_sub (h₁ w) (h₂ w)]
   funext w
   simp
 
@@ -128,7 +128,7 @@ theorem partialDeriv_sub₂_differentiableAt {f₁ f₂ : E → F} {v x : E}
   unfold partialDeriv
   have : f₁ - f₂ = fun y ↦ f₁ y - f₂ y := by rfl
   rw [this]
-  rw [fderiv_sub h₁ h₂]
+  rw [fderiv_fun_sub h₁ h₂]
   rfl
 
 theorem partialDeriv_sub₂_contDiffAt {f₁ f₂ : E → F} {v x : E}
