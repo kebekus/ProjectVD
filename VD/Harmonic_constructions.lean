@@ -30,7 +30,8 @@ theorem fxx {n : ℕ} {x : E}
 
   sorry
 
-theorem y {f : E → F} {n : ℕ} {z : E} (h : ContDiffAt ℂ n f z) :
+theorem ContDiffAt.iteratedFDeric_restrictScalars {f : E → F} {n : ℕ} {z : E}
+    (h : ContDiffAt ℂ n f z) :
     (fun x : E ↦ ((iteratedFDeriv ℂ n f x).restrictScalars ℝ)) =ᶠ[𝓝 z]
       (fun x : E ↦ iteratedFDeriv ℝ n f x) := by
   induction n with
@@ -59,22 +60,16 @@ theorem y {f : E → F} {n : ℕ} {z : E} (h : ContDiffAt ℂ n f z) :
     simp_all
     sorry
 
-
-  sorry
-
-theorem xx (h : ContDiffAt ℂ 2 f x) :
+theorem ContDiffAt.harmonicAt  {f : ℂ → F} {x : ℂ} (h : ContDiffAt ℂ 2 f x) :
     HarmonicAt f x := by
   constructor
   · exact ContDiffAt.restrict_scalars ℝ h
-  · have : Δ f x = 0 := by
-      rw [laplace_eq_iteratedFDeriv_complexPlane f]
-      simp
-      nth_rw 2 [iteratedFDeriv_two_apply]
-      simp
-      have := (h.differentiableAt one_le_two).fderiv_restrictScalars ℝ
-      rw [this]
+  · filter_upwards [h.iteratedFDeric_restrictScalars] with a ha
+    rw [laplace_eq_iteratedFDeriv_complexPlane f]
+    simp
+    rw [← ha]
+    simp
 
-      sorry
     sorry
 
 
