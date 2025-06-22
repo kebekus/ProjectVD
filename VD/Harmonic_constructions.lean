@@ -30,7 +30,7 @@ theorem fxx {n : ℕ} {x : E}
 
   sorry
 
-theorem ContDiffAt.iteratedFDeric_restrictScalars {f : E → F} {n : ℕ} {z : E}
+theorem ContDiffAt.iteratedFDeriv_restrictScalars {f : E → F} {n : ℕ} {z : E}
     (h : ContDiffAt ℂ n f z) :
     (fun x : E ↦ ((iteratedFDeriv ℂ n f x).restrictScalars ℝ)) =ᶠ[𝓝 z]
       (fun x : E ↦ iteratedFDeriv ℝ n f x) := by
