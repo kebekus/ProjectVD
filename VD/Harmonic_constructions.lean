@@ -1,8 +1,9 @@
 import Mathlib.Analysis.Calculus.FDeriv.Congr
+import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 import VD.Harmonic
 
 variable
-  {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [NormedSpace ℂ E] [FiniteDimensional ℝ E]
+  {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [NormedSpace ℂ E]
   {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ F] [IsScalarTower ℝ ℂ F]
   {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G]
   {f f₁ f₂ : ℂ → F}
@@ -10,30 +11,41 @@ variable
 
 open Topology
 
-variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ F] [CompleteSpace F]
-
-theorem DifferentiableAt.fderiv_restrictScalars' (h : DifferentiableAt ℂ f x) :
-    fderiv ℝ f x = (fderiv ℂ f x).restrictScalars ℝ := by
-  exact (h.hasFDerivAt.restrictScalars ℝ).fderiv
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ F]
 
 theorem fxx {n : ℕ} {x : E}
-    {f : E → (ContinuousMultilinearMap ℂ (fun i : Fin n ↦ E) F)} :
-    (fderiv ℝ ((ContinuousMultilinearMap.restrictScalars ℝ) ∘ f) x)
+    {f : E → (ContinuousMultilinearMap ℂ (fun i : Fin n ↦ E) F)}
+    (h : DifferentiableAt ℂ f x) :
+    (fderiv ℝ ((ContinuousMultilinearMap.restrictScalarsLinear ℝ) ∘ f) x)
       = (ContinuousMultilinearMap.restrictScalars ℝ) ∘ ((fderiv ℂ f x).restrictScalars ℝ) := by
+  rw [fderiv_comp]
+  rw [ContinuousLinearMap.fderiv]
+  simp
   ext a b
   simp
-  have := fderiv ℝ (fun e ↦ (f e).restrictScalars ℝ) x
-  have := fderiv ℂ (fun e ↦ (f e)) x
-  have := (ContinuousMultilinearMap.restrictScalars ℝ) ∘ ((fderiv ℂ (fun e ↦ (f e)) x).restrictScalars ℝ)
+  have := h.fderiv_restrictScalars ℝ
+  rw [this]
+  simp
+  fun_prop
+  exact h.restrictScalars ℝ
 
-  have := iteratedFDeriv ℂ n f x
 
-  sorry
+theorem ContDiffAt.differentiableAt_iteratedDeriv
+    {𝕜 : Type u_1} [NontriviallyNormedField 𝕜] {F : Type u_2} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
+    {f : 𝕜 → F} {x : 𝕜} {n : WithTop ℕ∞} {m : ℕ}
+    (h : ContDiffAt 𝕜 n f x) (hmn : m < n) :
+    DifferentiableAt 𝕜 (iteratedFDeriv 𝕜 m f) x := by
+  apply ContDiffAt.differentiableAt (n := 1)
+  apply h.iteratedFDeriv_right (i := m) (m := 1)
+  · refine add_le_of_le_tsub_left_of_le ?_ ?_
+    · sorry
+    · sorry
+  · rfl
 
 theorem ContDiffAt.iteratedFDeriv_restrictScalars {f : E → F} {n : ℕ} {z : E}
     (h : ContDiffAt ℂ n f z) :
-    (fun x : E ↦ ((iteratedFDeriv ℂ n f x).restrictScalars ℝ)) =ᶠ[𝓝 z]
-      (fun x : E ↦ iteratedFDeriv ℝ n f x) := by
+    (ContinuousMultilinearMap.restrictScalarsLinear ℝ) ∘ (iteratedFDeriv ℂ n f) =ᶠ[𝓝 z]
+      (iteratedFDeriv ℝ n f) := by
   induction n with
   | zero =>
     filter_upwards with a
@@ -48,17 +60,17 @@ theorem ContDiffAt.iteratedFDeriv_restrictScalars {f : E → F} {n : ℕ} {z : E
     have t₁ := this.eventually
     simp at t₁
     filter_upwards [t₀.eventually_nhds, t₁.eventually_nhds] with a h₁a h₂a
+    rw [← Filter.EventuallyEq] at h₁a
     ext m
     simp [iteratedFDeriv_succ_apply_left]
-
-    have : (fun x ↦ (iteratedFDeriv ℂ n f x).restrictScalars ℝ) =ᶠ[𝓝 a] (fun x ↦ iteratedFDeriv ℝ n f x) := h₁a
-    have := (this.fderiv (𝕜 := ℝ)).eq_of_nhds
+    have := h₁a.fderiv_eq (𝕜 := ℝ)
     rw [← this]
-    have s₀ : DifferentiableAt ℂ (iteratedFDeriv ℂ n f) a := by
+    rw [fxx]
+    simp
+    · have := h.differentiableAt_iteratedDeriv (m := n)
+
       sorry
-    have := s₀.fderiv_restrictScalars ℝ
-    simp_all
-    sorry
+
 
 theorem ContDiffAt.harmonicAt  {f : ℂ → F} {x : ℂ} (h : ContDiffAt ℂ 2 f x) :
     HarmonicAt f x := by
