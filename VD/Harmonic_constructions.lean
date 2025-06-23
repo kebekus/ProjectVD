@@ -14,7 +14,7 @@ open Topology
 variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ F]
 
 theorem fxx {n : ℕ} {x : E}
-    {f : E → (ContinuousMultilinearMap ℂ (fun i : Fin n ↦ E) F)}
+    {f : E → (ContinuousMultilinearMap ℂ (fun _ : Fin n ↦ E) F)}
     (h : DifferentiableAt ℂ f x) :
     (fderiv ℝ ((ContinuousMultilinearMap.restrictScalarsLinear ℝ) ∘ f) x)
       = (ContinuousMultilinearMap.restrictScalars ℝ) ∘ ((fderiv ℂ f x).restrictScalars ℝ) := by
