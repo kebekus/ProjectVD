@@ -23,16 +23,16 @@ theorem fderiv_restrictScalarsLinear_comp {n : ℕ} {x : E}
   simp [h.fderiv_restrictScalars ℝ]
 
 theorem ContDiffAt.differentiableAt_iteratedDeriv
-    {𝕜 : Type u_1} [NontriviallyNormedField 𝕜] {F : Type u_2} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
-    {f : 𝕜 → F} {x : 𝕜} {n : WithTop ℕ∞} {m : ℕ}
-    (h : ContDiffAt 𝕜 n f x) (hmn : m < n) :
-    DifferentiableAt 𝕜 (iteratedFDeriv 𝕜 m f) x := by
+    {f : E → F} {x : E} {n : ℕ} {m : ℕ}
+    (h : ContDiffAt ℂ n f x) (hmn : m < n) :
+    DifferentiableAt ℂ (iteratedFDeriv ℂ m f) x := by
   apply ContDiffAt.differentiableAt (n := 1)
   apply h.iteratedFDeriv_right (i := m) (m := 1)
-  cases n
-  · simp
-  · sorry
-  rfl
+  rw [Nat.lt_iff_add_one_le, add_comm] at hmn
+  rw [← WithTop.coe_one]
+  simp_all
+  sorry
+  sorry
 
 theorem ContDiffAt.iteratedFDeriv_restrictScalars {f : E → F} {n : ℕ} {z : E}
     (h : ContDiffAt ℂ n f z) :
@@ -51,7 +51,8 @@ theorem ContDiffAt.iteratedFDeriv_restrictScalars {f : E → F} {n : ℕ} {z : E
     have t₀ := hn this
     have t₁ := this.eventually
     simp at t₁
-    filter_upwards [t₀.eventually_nhds, t₁.eventually_nhds] with a h₁a h₂a
+    filter_upwards [t₀.eventually_nhds, t₁.eventually_nhds,
+      h.eventually (by simp)] with a h₁a h₂a h₃a
     rw [← Filter.EventuallyEq] at h₁a
     ext m
     simp [iteratedFDeriv_succ_apply_left]
@@ -59,6 +60,5 @@ theorem ContDiffAt.iteratedFDeriv_restrictScalars {f : E → F} {n : ℕ} {z : E
     rw [← this]
     rw [fderiv_restrictScalarsLinear_comp]
     simp
-    · have := h.differentiableAt_iteratedDeriv (m := n)
-
-      sorry
+    · apply h₃a.differentiableAt_iteratedDeriv (m := n)
+      simp
