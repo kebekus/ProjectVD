@@ -1,50 +1,75 @@
-import Mathlib.LinearAlgebra.Multilinear.Basic
+import Mathlib.Analysis.Calculus.FDeriv.Congr
+import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
 import VD.Harmonic
-import Mathlib.Topology.Algebra.Module.Multilinear.Basic
-import Mathlib.Topology.Algebra.Module.Multilinear.Topology
 
-def MultilinearMap.restrictScalarsLM
-    (A : Type u_1) (R : Type uR) {ι : Type uι}
-    {M₁ : ι → Type v₁}
-    {M₂ : Type v₂}
-    [Semiring R]
-    [(i : ι) → AddCommMonoid (M₁ i)] [(i : ι) → Module R (M₁ i)]
-    [AddCommMonoid M₂] [Module R M₂]
-    [Semiring A] [SMul R A]
-    [(i : ι) → Module A (M₁ i)] [Module A M₂]
-    [∀ (i : ι), IsScalarTower R A (M₁ i)] [IsScalarTower R A M₂]
-    [SMulCommClass R R M₂] [SMulCommClass A R M₂] :
-    (MultilinearMap A M₁ M₂) →ₗ[R] (MultilinearMap R M₁ M₂) where
-      toFun := fun f ↦ f.restrictScalars R
-      map_add' _ _ := by
-        ext
-        simp
-      map_smul' _ _ := by
-        ext
-        simp
+variable
+  {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [NormedSpace ℂ E]
+  {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ F] [IsScalarTower ℝ ℂ F]
+  {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G]
+  {f f₁ f₂ : ℂ → F}
+  {s t : Set E} {c : ℝ}
 
-set_option diagnostics true
+open Topology
 
-def ContinuousMultilinearMap.restrictScalarsCLM
-    (A : Type u_1) (R : Type uR) {ι : Type uι}
-    {M₁ : ι → Type v₁}
-    {M₂ : Type v₂}
-    [NormedField R]
-    [(i : ι) → TopologicalSpace (M₁ i)] [(i : ι) → AddCommGroup (M₁ i)] [(i : ι) → Module R (M₁ i)]
-    [AddCommGroup M₂] [Module R M₂] [TopologicalSpace M₂]
-    [ContinuousAdd M₂] [ContinuousConstSMul R M₂] [TopologicalSpace M₂] [IsTopologicalAddGroup M₂]
-    [SMulCommClass R R M₂]
-    /-
-    [Semiring A] [SMul R A]
-    [(i : ι) → Module A (M₁ i)] [Module A M₂]
-    [∀ (i : ι), IsScalarTower R A (M₁ i)] [IsScalarTower R A M₂]
-    [SMulCommClass R R M₂] [SMulCommClass A R M₂]
-    -/ :
-    (ContinuousMultilinearMap R M₁ M₂) →L[R] (ContinuousMultilinearMap R M₁ M₂) where
-      toFun := fun f ↦ f.restrictScalars R
-      map_add' _ _ := by
-        ext
-        simp
-      map_smul' _ _ := by
-        ext
-        simp
+variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ F]
+
+theorem fxx {n : ℕ} {x : E}
+    {f : E → (ContinuousMultilinearMap ℂ (fun _ : Fin n ↦ E) F)}
+    (h : DifferentiableAt ℂ f x) :
+    (fderiv ℝ ((ContinuousMultilinearMap.restrictScalarsLinear ℝ) ∘ f) x)
+      = (ContinuousMultilinearMap.restrictScalars ℝ) ∘ ((fderiv ℂ f x).restrictScalars ℝ) := by
+  rw [fderiv_comp]
+  rw [ContinuousLinearMap.fderiv]
+  simp
+  ext a b
+  simp
+  have := h.fderiv_restrictScalars ℝ
+  rw [this]
+  simp
+  fun_prop
+  exact h.restrictScalars ℝ
+
+
+theorem ContDiffAt.differentiableAt_iteratedDeriv
+    {𝕜 : Type u_1} [NontriviallyNormedField 𝕜] {F : Type u_2} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
+    {f : 𝕜 → F} {x : 𝕜} {n : WithTop ℕ∞} {m : ℕ}
+    (h : ContDiffAt 𝕜 n f x) (hmn : m < n) :
+    DifferentiableAt 𝕜 (iteratedFDeriv 𝕜 m f) x := by
+  apply ContDiffAt.differentiableAt (n := 1)
+  apply h.iteratedFDeriv_right (i := m) (m := 1)
+  cases n
+  · simp
+  · apply add_le_of_add_le_left
+    · obtain ⟨b, rfl⟩ := WithTop.ne_top_iff_exists.1 ha
+      sorry
+    · sorry
+  · rfl
+
+theorem ContDiffAt.iteratedFDeriv_restrictScalars {f : E → F} {n : ℕ} {z : E}
+    (h : ContDiffAt ℂ n f z) :
+    (ContinuousMultilinearMap.restrictScalarsLinear ℝ) ∘ (iteratedFDeriv ℂ n f) =ᶠ[𝓝 z]
+      (iteratedFDeriv ℝ n f) := by
+  induction n with
+  | zero =>
+    filter_upwards with a
+    ext m
+    simp [iteratedFDeriv_zero_apply m]
+  | succ n hn =>
+    have : ContDiffAt ℂ n f z := by
+      apply h.of_le
+      apply Nat.cast_le.mpr
+      exact Nat.le_add_right n 1
+    have t₀ := hn this
+    have t₁ := this.eventually
+    simp at t₁
+    filter_upwards [t₀.eventually_nhds, t₁.eventually_nhds] with a h₁a h₂a
+    rw [← Filter.EventuallyEq] at h₁a
+    ext m
+    simp [iteratedFDeriv_succ_apply_left]
+    have := h₁a.fderiv_eq (𝕜 := ℝ)
+    rw [← this]
+    rw [fxx]
+    simp
+    · have := h.differentiableAt_iteratedDeriv (m := n)
+
+      sorry
