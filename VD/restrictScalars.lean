@@ -13,22 +13,14 @@ open Topology
 
 variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ F]
 
-theorem fxx {n : ℕ} {x : E}
+theorem fderiv_restrictScalarsLinear_comp {n : ℕ} {x : E}
     {f : E → (ContinuousMultilinearMap ℂ (fun _ : Fin n ↦ E) F)}
     (h : DifferentiableAt ℂ f x) :
     (fderiv ℝ ((ContinuousMultilinearMap.restrictScalarsLinear ℝ) ∘ f) x)
       = (ContinuousMultilinearMap.restrictScalars ℝ) ∘ ((fderiv ℂ f x).restrictScalars ℝ) := by
-  rw [fderiv_comp]
-  rw [ContinuousLinearMap.fderiv]
-  simp
+  rw [fderiv_comp _ (by fun_prop) (h.restrictScalars ℝ), ContinuousLinearMap.fderiv]
   ext a b
-  simp
-  have := h.fderiv_restrictScalars ℝ
-  rw [this]
-  simp
-  fun_prop
-  exact h.restrictScalars ℝ
-
+  simp [h.fderiv_restrictScalars ℝ]
 
 theorem ContDiffAt.differentiableAt_iteratedDeriv
     {𝕜 : Type u_1} [NontriviallyNormedField 𝕜] {F : Type u_2} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
@@ -39,11 +31,8 @@ theorem ContDiffAt.differentiableAt_iteratedDeriv
   apply h.iteratedFDeriv_right (i := m) (m := 1)
   cases n
   · simp
-  · apply add_le_of_add_le_left
-    · obtain ⟨b, rfl⟩ := WithTop.ne_top_iff_exists.1 ha
-      sorry
-    · sorry
-  · rfl
+  · sorry
+  rfl
 
 theorem ContDiffAt.iteratedFDeriv_restrictScalars {f : E → F} {n : ℕ} {z : E}
     (h : ContDiffAt ℂ n f z) :
@@ -68,7 +57,7 @@ theorem ContDiffAt.iteratedFDeriv_restrictScalars {f : E → F} {n : ℕ} {z : E
     simp [iteratedFDeriv_succ_apply_left]
     have := h₁a.fderiv_eq (𝕜 := ℝ)
     rw [← this]
-    rw [fxx]
+    rw [fderiv_restrictScalarsLinear_comp]
     simp
     · have := h.differentiableAt_iteratedDeriv (m := n)
 
