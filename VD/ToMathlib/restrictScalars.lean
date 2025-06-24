@@ -1,5 +1,18 @@
+/-
+Copyright (c) 2025 Stefan Kebekus. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Stefan Kebekus
+-/
 import Mathlib.Analysis.Calculus.FDeriv.RestrictScalars
 import Mathlib.Analysis.Calculus.IteratedDeriv.Defs
+
+/-!
+### Restricting Scalars in Iterated Derivatives
+
+This file establishes standard theorems on restriction of scalars for iterated
+Fréchet derivatives, similar to those found in
+`Mathlib.Analysis.Calculus.FDeriv.RestrictScalars`.
+-/
 
 variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜]
