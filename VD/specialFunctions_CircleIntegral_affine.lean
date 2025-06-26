@@ -1,9 +1,12 @@
+import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Periodic
 import Mathlib.MeasureTheory.Integral.CircleIntegral
 import Mathlib.Analysis.SpecialFunctions.Integrals.LogTrigonometric
+import Mathlib.Analysis.SpecialFunctions.Integrability.LogMeromorphic
 import VD.harmonicAt_examples
 import VD.harmonicAt_meanValue
 import VD.intervalIntegrability
+
 
 open scoped Interval Topology
 open Real Filter MeasureTheory intervalIntegral
@@ -134,22 +137,10 @@ lemma int₀
 -- integral
 lemma int₁₁ : ∫ (x : ℝ) in (0)..π, log (4 * sin x ^ 2) = 0 := by
 
-  have t₁ {x : ℝ} : x ∈ Set.Ioo 0 π → log (4 * sin x ^ 2) = log 4 + 2 * log (sin x) := by
-    intro hx
-    rw [log_mul, log_pow]
-    rfl
-    exact (NeZero.ne' 4).symm
-    apply pow_ne_zero 2
-    apply (fun a => (ne_of_lt a).symm)
-    exact sin_pos_of_mem_Ioo hx
-
-
-  have t₂ : Set.EqOn (fun y ↦ log (4 * sin y ^ 2)) (fun y ↦ log 4 + 2 * log (sin y)) (Set.Ioo 0 π) := by
-    intro x hx
-    simp
-    rw [t₁ hx]
-
-  rw [intervalIntegral.integral_congr_volume pi_pos t₂]
+  have t₀ : (fun x ↦ log (4 * sin x ^ 2)) =ᶠ[Filter.codiscreteWithin (Ι 0 π)]
+        fun x ↦ log 4 + 2 * log (sin x) := by
+    sorry
+  rw [intervalIntegral.integral_congr_codiscreteWithin t₀]
   rw [intervalIntegral.integral_add]
   rw [intervalIntegral.integral_const_mul]
   simp
@@ -190,21 +181,10 @@ lemma logAffineHelper {x : ℝ} : log ‖circleMap 0 1 x - 1‖ = log (4 * sin (
     ring
 
 lemma int'₁ : -- Integrability of log ‖circleMap 0 1 x - 1‖
-  IntervalIntegrable (fun x ↦ log ‖circleMap 0 1 x - 1‖) volume 0 (2 * π) := by
-
-  simp_rw [logAffineHelper]
-  apply IntervalIntegrable.div_const
-  rw [← IntervalIntegrable.comp_mul_left_iff (c := 2) (Ne.symm (NeZero.ne' 2))]
-  simp
-
-  have h₁ : Set.EqOn (fun x => log (4 * sin x ^ 2)) (fun x => log 4 + 2 * log (sin x)) (Set.Ioo 0 π) := by
-    intro x hx
-    simp [log_mul (Ne.symm (NeZero.ne' 4)), log_pow, ne_of_gt (sin_pos_of_mem_Ioo hx)]
-  rw [IntervalIntegrable.integral_congr_Ioo pi_nonneg h₁]
-  apply IntervalIntegrable.add
-  simp
-  apply IntervalIntegrable.const_mul
-  exact intervalIntegrable_log_sin
+    IntervalIntegrable (fun x ↦ log ‖circleMap 0 1 x - 1‖) volume 0 (2 * π) := by
+  apply circleIntegrable_log_norm_meromorphicOn (c := 0) (R := 1) (f := fun z ↦ z - 1)
+  intro x hx
+  fun_prop
 
 lemma int''₁ : -- Integrability of log ‖circleMap 0 1 x - 1‖ for arbitrary intervals
   ∀ (t₁ t₂ : ℝ), IntervalIntegrable (fun x ↦ log ‖circleMap 0 1 x - 1‖) volume t₁ t₂ := by
@@ -240,7 +220,7 @@ lemma int₁ :
       arg 1
       intro x
       rw [this]
-    rw [intervalIntegral.inv_mul_integral_comp_div 2]
+    rw [intervalIntegral.inv_mul_integral_comp_div]
     simp [f]
   rw [this]
   simp
@@ -480,13 +460,11 @@ lemma int₅
   (hR : R ≠ 0)
   (ha : a ∈ Metric.closedBall 0 |R|) :
   ∫ x in (0)..(2 * π), log ‖circleMap 0 R x - a‖ = (2 * π) * log R := by
-  apply ltByCases 0 R
-  · intro h
-    apply int₄ h
+  rcases lt_trichotomy 0 R with h | h | h
+  · apply int₄ h
     rwa [← abs_of_pos h]
   · tauto
-  · intro h
-    rw [integrabl_congr_negRadius (f := fun z ↦ log ‖z - a‖)]
+  · rw [integrabl_congr_negRadius (f := fun z ↦ log ‖z - a‖)]
     rw [← log_neg_eq_log]
     apply int₄
     exact Left.neg_pos_iff.mpr h
@@ -538,7 +516,7 @@ lemma intervalIntegrable_logAbs_circleMap_sub_const
   rw [this] at A
   rw [A]
 
-  apply IntervalIntegrable.add _ intervalIntegrable_const
+  apply IntervalIntegrable.add _ intervalIntegral.intervalIntegrable_const
   have {x : ℝ} : r⁻¹ * circleMap 0 r x = circleMap 0 1 x := by
     unfold circleMap
     simp [hr]

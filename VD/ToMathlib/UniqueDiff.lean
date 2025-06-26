@@ -21,6 +21,24 @@ theorem algebraMap_cobounded_le_cobounded :
   exact fun x hx ↦ by simpa [norm_algebraMap] using hs ((algebraMap 𝕜 𝕜') x) hx
 
 /--
+Given `x ∈ s` and a field extension `𝕜 ⊆ 𝕜'`, the tangent of `s` at `x` with
+respect to `𝕜` is contained in the tangent of `s` at `x` with respect to `𝕜'`.
+-/
+theorem tangentConeAt_mono_field : tangentConeAt 𝕜 s x ⊆ tangentConeAt 𝕜' s x := by
+  intro α hα
+  simp [tangentConeAt] at hα ⊢
+  obtain ⟨c, d, ⟨a, h₁a⟩, h₁, h₂⟩ := hα
+  use ((algebraMap 𝕜 𝕜') ∘ c), d
+  constructor
+  · use a
+  · constructor
+    · intro β hβ
+      rw [Filter.mem_map, Filter.mem_atTop_sets]
+      obtain ⟨n, hn⟩ := Filter.mem_atTop_sets.1 (Filter.mem_map.1 (h₁ (algebraMap_cobounded_le_cobounded (𝕜' := 𝕜') hβ)))
+      use n, fun _ _ ↦ by simp_all
+    · simpa
+
+/--
 Assume that `E` is a normed vector space over normed fields `𝕜 ⊆ 𝕜'` and that
 `x ∈ s` is a point of unique differentiability with respect to the set `s` and
 the smaller field `𝕜`, then `x` is also a point of unique differentiability
@@ -32,20 +50,7 @@ theorem UniqueDiffWithinAt.mono_field (h₂s : UniqueDiffWithinAt 𝕜 s x) :
   simp_all only [and_true]
   apply Dense.mono _ h₂s.1
   trans ↑(Submodule.span 𝕜 (tangentConeAt 𝕜' s x))
-  · apply Submodule.span_mono
-    intro α hα
-    simp [tangentConeAt] at hα ⊢
-    obtain ⟨c, d, ⟨a, h₁a⟩, h₁, h₂⟩ := hα
-    use ((algebraMap 𝕜 𝕜') ∘ c), d
-    constructor
-    · use a
-    · constructor
-      · intro β hβ
-        rw [Filter.mem_map, Filter.mem_atTop_sets]
-        obtain ⟨n, hn⟩ := Filter.mem_atTop_sets.1 (Filter.mem_map.1 (h₁ (algebraMap_cobounded_le_cobounded (𝕜' := 𝕜') hβ)))
-        use n, fun _ _ ↦ by simp_all
-      · simpa
-  · simp
+  <;> simp [Submodule.span_mono tangentConeAt_mono_field]
 
 /--
 Assume that `E` is a normed vector space over normed fields `𝕜 ⊆ 𝕜'` and all
