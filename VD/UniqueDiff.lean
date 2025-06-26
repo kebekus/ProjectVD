@@ -6,8 +6,6 @@ variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [NormedSpace 𝕜' E] [IsScalarTower 𝕜 𝕜' E]
   {x : E} {s : Set E}
 
-open ContinuousMultilinearMap Topology
-
 /--
 Filter version of the statement that preimages of cobounded sets under the
 algebra map are cobounded.
@@ -43,15 +41,9 @@ theorem UniqueDiffWithinAt.mono_field (h₂s : UniqueDiffWithinAt 𝕜 s x) :
     · use a
     · constructor
       · intro β hβ
-        apply Filter.mem_map.mpr
-        apply Filter.mem_atTop_sets.mpr
-        let γ : Set 𝕜 := (algebraMap 𝕜 𝕜')⁻¹' β
-        have h₂γ := h₁ (algebraMap_cobounded_le_cobounded (𝕜' := 𝕜') hβ)
-        rw [Filter.mem_map, Filter.mem_atTop_sets] at h₂γ
-        obtain ⟨n, hn⟩ := h₂γ
-        use n
-        intro b hb
-        simp_all
+        rw [Filter.mem_map, Filter.mem_atTop_sets]
+        obtain ⟨n, hn⟩ := Filter.mem_atTop_sets.1 (Filter.mem_map.1 (h₁ (algebraMap_cobounded_le_cobounded (𝕜' := 𝕜') hβ)))
+        use n, fun _ _ ↦ by simp_all
       · simpa
   · simp
 
