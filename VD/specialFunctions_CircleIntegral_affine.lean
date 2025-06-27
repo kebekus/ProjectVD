@@ -139,6 +139,11 @@ lemma int₁₁ : ∫ (x : ℝ) in (0)..π, log (4 * sin x ^ 2) = 0 := by
 
   have t₀ : (fun x ↦ log (4 * sin x ^ 2)) =ᶠ[Filter.codiscreteWithin (Ι 0 π)]
         fun x ↦ log 4 + 2 * log (sin x) := by
+    apply Filter.codiscreteWithin.mono (by tauto : Ι 0 π ⊆ Set.univ)
+    have : AnalyticOnNhd ℝ (fun x ↦ log (4 * sin x ^ 2)) Set.univ := by
+      sorry
+    have := this.preimage_zero_mem_codiscrete (x := π / 2)
+    simp at this
     sorry
   rw [intervalIntegral.integral_congr_codiscreteWithin t₀]
   rw [intervalIntegral.integral_add]
