@@ -80,10 +80,8 @@ variable (f) in
 /--
 Harmonicity is an open property.
 -/
-theorem harmonicAt_isOpen : IsOpen { x : E | HarmonicAt f x } := by
-  rw [isOpen_iff_mem_nhds]
-  intro x hx
-  exact hx.eventually
+theorem harmonicAt_isOpen : IsOpen { x : E | HarmonicAt f x } :=
+  isOpen_iff_mem_nhds.2 (fun _ hx ↦ hx.eventually)
 
 /--
 If `f` is harmonic in a neighborhood of `s`, it is harmonic in a neighborhood of
@@ -110,8 +108,7 @@ theorem HarmonicAt.add (h₁ : HarmonicAt f₁ x) (h₂ : HarmonicAt f₂ x) :
 Sums of harmonic functions are harmonic.
 -/
 theorem HarmonicOnNhd.add (h₁ : HarmonicOnNhd f₁ s) (h₂ : HarmonicOnNhd f₂ s) :
-    HarmonicOnNhd (f₁ + f₂) s :=
-  fun x hx ↦ (h₁ x hx).add (h₂ x hx)
+    HarmonicOnNhd (f₁ + f₂) s := fun x hx ↦ (h₁ x hx).add (h₂ x hx)
 
 /--
 Scalar multiples of harmonic functions are harmonic.
@@ -127,8 +124,7 @@ theorem HarmonicAt.const_smul (h : HarmonicAt f x) :
 Scalar multiples of harmonic functions are harmonic.
 -/
 theorem HarmonicOnNhd.const_smul (h : HarmonicOnNhd f s) :
-    HarmonicOnNhd (c • f) s :=
-  fun x hx ↦ (h x hx).const_smul
+    HarmonicOnNhd (c • f) s := fun x hx ↦ (h x hx).const_smul
 
 /-!
 ## Compatibility with Linear Maps
@@ -148,8 +144,7 @@ theorem HarmonicAt.comp_CLM {l : F →L[ℝ] G} (h : HarmonicAt f x) :
 Compositions of continuous linear maps with harmonic functions are harmonic.
 -/
 theorem HarmonicOnNhd.comp_CLM {l : F →L[ℝ] G} (h : HarmonicOnNhd f s) :
-    HarmonicOnNhd (l ∘ f) s :=
-  fun x hx ↦ (h x hx).comp_CLM
+    HarmonicOnNhd (l ∘ f) s := fun x hx ↦ (h x hx).comp_CLM
 
 /--
 Functions are harmonic iff their compositions with continuous linear
