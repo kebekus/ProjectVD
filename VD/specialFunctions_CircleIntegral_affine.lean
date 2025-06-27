@@ -11,6 +11,7 @@ import VD.intervalIntegrability
 open scoped Interval Topology
 open Real Filter MeasureTheory intervalIntegral
 
+-- Maximal 550 Zeilen
 
 
 -- Lemmas for the circleMap
@@ -140,11 +141,22 @@ lemma int₁₁ : ∫ (x : ℝ) in (0)..π, log (4 * sin x ^ 2) = 0 := by
   have t₀ : (fun x ↦ log (4 * sin x ^ 2)) =ᶠ[Filter.codiscreteWithin (Ι 0 π)]
         fun x ↦ log 4 + 2 * log (sin x) := by
     apply Filter.codiscreteWithin.mono (by tauto : Ι 0 π ⊆ Set.univ)
-    have : AnalyticOnNhd ℝ (fun x ↦ log (4 * sin x ^ 2)) Set.univ := by
-      sorry
-    have := this.preimage_zero_mem_codiscrete (x := π / 2)
-    simp at this
-    sorry
+    have s₀ : AnalyticOnNhd ℝ (fun x ↦ (4 * sin x ^ 2)) Set.univ := by
+      intro x hx
+      fun_prop
+    have s₁ := s₀.preimage_zero_mem_codiscrete (x := π / 2)
+    have s₂ : ¬(4 : ℝ) = -(1 : ℝ) := by norm_num
+    simp_all
+    filter_upwards [s₁] with a ha
+    simp_all
+    rw [log_mul]
+    congr
+    rw [log_pow]
+    rfl
+    norm_num
+    norm_num
+    exact ha
+
   rw [intervalIntegral.integral_congr_codiscreteWithin t₀]
   rw [intervalIntegral.integral_add]
   rw [intervalIntegral.integral_const_mul]
