@@ -1,11 +1,11 @@
 import Mathlib.Analysis.Complex.Basic
+import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
 import Mathlib.Analysis.Meromorphic.FactorizedRational
 import Mathlib.Analysis.Meromorphic.NormalForm
 import Mathlib.MeasureTheory.Integral.CircleAverage
+import Mathlib.Analysis.SpecialFunctions.Integrability.LogMeromorphic
 import VD.specialFunctions_CircleIntegral_affine
 import VD.ToMathlib.TrailingCoefficientFactorizedRational
-import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
-
 
 open Filter MeromorphicAt MeromorphicOn Metric Real
 
@@ -29,7 +29,7 @@ theorem circleIntegrable_logAbs_factorizedRational {R : ℝ} {c : ℂ} (D : ℂ 
   apply CircleIntegrable.finsum
   intro u
   apply CircleIntegrable.const_smul
-  apply (analyticOnNhd_id.sub analyticOnNhd_const).meromorphicOn.circleIntegrable_log_norm
+  apply circleIntegrable_log_norm_meromorphicOn (analyticOnNhd_id.sub analyticOnNhd_const).meromorphicOn
 
 /-!
 ## Circle Averages
@@ -70,7 +70,7 @@ lemma circleAverage_logAbs_factorizedRational {R : ℝ} {c : ℂ}
     rw [circleAverage_sum]
     intro u hu
     apply IntervalIntegrable.const_mul
-    apply MeromorphicOn.circleIntegrable_log_norm (f := (· - u))
+    apply circleIntegrable_log_norm_meromorphicOn (f := (· - u))
     apply (analyticOnNhd_id.sub analyticOnNhd_const).meromorphicOn
   _ = ∑ u ∈ h.toFinset, ↑(D u) * log R := by
     apply Finset.sum_congr rfl
@@ -116,7 +116,7 @@ theorem MeromorphicOn.JensenFormula {R : ℝ} {f : ℂ → ℂ} (hR : R ≠ 0) (
     _ = circleAverage (∑ᶠ u, (divisor f CB u * log ‖· - u‖)) 0 R + circleAverage (log ‖g ·‖) 0 R := by
       apply circleAverage_add
       exact circleIntegrable_logAbs_factorizedRational (divisor f CB)
-      exact (h₁g.mono sphere_subset_closedBall).meromorphicOn.circleIntegrable_log_norm
+      exact circleIntegrable_log_norm_meromorphicOn (h₁g.mono sphere_subset_closedBall).meromorphicOn
     _ = ∑ᶠ u, divisor f CB u * log R + log ‖g 0‖ := by simp [h₁g, h₂g]
     _ = ∑ᶠ u, divisor f CB u * log R + (log ‖meromorphicTrailingCoeffAt f 0‖ - ∑ᶠ u, divisor f CB u * log ‖u‖) := by
       have t₀ : 0 ∈ CB := by simp [CB]

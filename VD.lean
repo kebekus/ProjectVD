@@ -1,15 +1,12 @@
 import VD.Harmonic
 import VD.Harmonic_constructions
 import VD.Jensen
-import VD.ProximityFunction
-import VD.ToMathlib.IsolatedZeros
 import VD.ToMathlib.IteratedFDeriv_two
 import VD.ToMathlib.Laplace
 import VD.ToMathlib.TrailingCoefficientFactorizedRational
-import VD.ToMathlib.meromorphicOn_integrability
+import VD.ToMathlib.restrictScalars
 import VD.cauchyRiemann
 import VD.firstMain1
-import VD.firstMain2
 import VD.harmonicAt
 import VD.harmonicAt_examples
 import VD.harmonicAt_meanValue
@@ -23,4 +20,3 @@ import VD.leftovers.holomorphic
 import VD.leftovers.meromorphicAt_topology
 import VD.partialDeriv
 import VD.specialFunctions_CircleIntegral_affine
-import VD.specialFunctions_Integral_log_sin
