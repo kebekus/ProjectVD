@@ -69,7 +69,7 @@ theorem harmonicAt_congr_nhds {f₁ f₂ : E → F} {x : E} (h : f₁ =ᶠ[𝓝 
   · exact ⟨hf.1.congr_of_eventuallyEq h, (laplace_congr_nhds h).trans hf.2⟩
 
 /--
-If `f` is harmonic at `x`, then it is harmonic at points in a neighborhood of `x`.
+If `f` is harmonic at `x`, then it is harmonic at all points in a neighborhood of `x`.
 -/
 theorem HarmonicAt.eventually {f : E → F} {x : E} (h:  HarmonicAt f x) :
     ∀ᶠ y in 𝓝 x, HarmonicAt f y := by

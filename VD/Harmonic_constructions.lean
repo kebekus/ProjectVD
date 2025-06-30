@@ -94,18 +94,12 @@ private lemma lem₁ {z : ℂ} {g : ℂ → ℂ} (h₁g : AnalyticAt ℂ g z) (h
   -- Locally around z, rewrite Complex.log (g * gc) as Complex.log g + Complex.log.gc
   -- This uses the assumption that g z is in Complex.slitPlane
   have : (log ∘ (conjCLE ∘ g * g)) =ᶠ[𝓝 z] (log ∘ conjCLE ∘ g + log ∘ g) := by
-    apply Filter.eventuallyEq_iff_exists_mem.2
-    use g⁻¹' (slitPlane ∩ {0}ᶜ), t₀
-    · intro x hx
-      simp
-      rw [Complex.log_mul_eq_add_log_iff _ hx.2]
-      rw [Complex.arg_conj]
-      simp [Complex.slitPlane_arg_ne_pi hx.1]
-      constructor
-      · exact Real.pi_pos
-      · exact Real.pi_nonneg
-      simp
-      apply hx.2
+    filter_upwards [t₀] with x hx
+    simp only [Function.comp_apply, Pi.mul_apply, conjCLE_apply, Pi.add_apply]
+    rw [Complex.log_mul_eq_add_log_iff _ hx.2, Complex.arg_conj]
+    simp only [Complex.slitPlane_arg_ne_pi hx.1, ↓reduceIte, neg_add_cancel, Set.mem_Ioc,
+      Left.neg_neg_iff, Real.pi_pos, Real.pi_nonneg, and_self]
+    simpa [ne_eq, map_eq_zero] using hx.2
 
   -- Locally around z, rewrite Complex.log (g * gc) as Complex.log g + Complex.log.gc
   -- This uses the assumption that g z is in Complex.slitPlane
