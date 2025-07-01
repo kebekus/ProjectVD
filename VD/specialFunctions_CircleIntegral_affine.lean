@@ -19,15 +19,12 @@ open Real Filter MeasureTheory intervalIntegral
 lemma l₀ {x₁ x₂ : ℝ} : (circleMap 0 1 x₁) * (circleMap 0 1 x₂) = circleMap 0 1 (x₁+x₂) := by
   simp [circleMap, add_mul, Complex.exp_add]
 
-lemma l₁ {x : ℝ} : ‖circleMap 0 1 x‖ = 1 := by
-  simp [norm_circleMap_zero]
-
-lemma l₂ {x : ℝ} : ‖(circleMap 0 1 x) - a‖ = ‖1 - (circleMap 0 1 (-x)) * a‖ := by
+lemma l₂ {x : ℝ} {a : ℂ} : ‖(circleMap 0 1 x) - a‖ = ‖1 - (circleMap 0 1 (-x)) * a‖ := by
   calc ‖(circleMap 0 1 x) - a‖
   _ = 1 * ‖(circleMap 0 1 x) - a‖ := by
     exact Eq.symm (one_mul ‖circleMap 0 1 x - a‖)
   _ = ‖(circleMap 0 1 (-x))‖ * ‖(circleMap 0 1 x) - a‖ := by
-    rw [l₁]
+    simp [norm_circleMap_zero]
   _ = ‖(circleMap 0 1 (-x)) * ((circleMap 0 1 x) - a)‖ := by
     exact Eq.symm (Complex.norm_mul (circleMap 0 1 (-x)) (circleMap 0 1 x - a))
   _ = ‖(circleMap 0 1 (-x)) * (circleMap 0 1 x) - (circleMap 0 1 (-x)) * a‖ := by
@@ -37,26 +34,14 @@ lemma l₂ {x : ℝ} : ‖(circleMap 0 1 x) - a‖ = ‖1 - (circleMap 0 1 (-x))
     simp
   _ = ‖1 - (circleMap 0 1 (-x)) * a‖ := by
     congr
-    dsimp [circleMap]
-    simp
+    simp [circleMap]
 
-
--- Integral of log ‖circleMap 0 1 x - a‖, for ‖a‖ < 1.
-
-lemma int'₀
-  {a : ℂ}
-  (ha : ‖a‖ ≠ 1) :
-  IntervalIntegrable (fun x ↦ log ‖circleMap 0 1 x - a‖) volume 0 (2 * π) := by
-  apply Continuous.intervalIntegrable
-  apply Continuous.log
-  fun_prop
-  simp
-  intro x
-  by_contra h₁a
-  rw [sub_eq_zero] at h₁a
-  rw [← h₁a] at ha
-  simp at ha
-
+lemma int''₁ {a : ℂ} {t₁ t₂ : ℝ} :
+    IntervalIntegrable (log ‖circleMap 0 1 · - a‖) volume t₁ t₂ := by
+  apply Function.Periodic.intervalIntegrable₀ _ two_pi_pos
+  · apply circleIntegrable_log_norm_meromorphicOn (f := (· - a)) (fun _ _ ↦ by fun_prop)
+  · rw [(by rfl : (log ‖circleMap 0 1 · - a‖) = (log ‖· - a‖) ∘ (circleMap 0 1))]
+    apply (periodic_circleMap 0 1).comp
 
 lemma int₀
   {a : ℂ}
@@ -191,27 +176,6 @@ lemma logAffineHelper {x : ℝ} : log ‖circleMap 0 1 x - 1‖ = log (4 * sin (
   _ = 4 * sin (x / 2) ^ 2 := by
     nth_rw 1 [← mul_one 4, ← sin_sq_add_cos_sq (x / 2)]
     ring
-
-lemma int'₁ {a : ℂ} : -- Integrability of log ‖circleMap 0 1 x - 1‖
-    IntervalIntegrable (fun x ↦ log ‖circleMap 0 1 x - a‖) volume 0 (2 * π) := by
-  apply circleIntegrable_log_norm_meromorphicOn (c := 0) (R := 1) (f := fun z ↦ z - a)
-  intro x hx
-  fun_prop
-
-lemma int''₁ {a : ℂ} : -- Integrability of log ‖circleMap 0 1 x - 1‖ for arbitrary intervals
-  ∀ (t₁ t₂ : ℝ), IntervalIntegrable (fun x ↦ log ‖circleMap 0 1 x - a‖) volume t₁ t₂ := by
-  intro t₁ t₂
-
-  apply Function.Periodic.intervalIntegrable₀ (T := 2 * π)
-  --
-  have : (fun x => log ‖circleMap 0 1 x - a‖) = (fun x => log ‖x - a‖) ∘ (circleMap 0 1) := rfl
-  rw [this]
-  apply Function.Periodic.comp
-  exact periodic_circleMap 0 1
-  --
-  exact two_pi_pos
-  --
-  exact int'₁
 
 lemma int₁ :
   ∫ x in (0)..(2 * π), log ‖circleMap 0 1 x - 1‖ = 0 := by
@@ -396,23 +360,32 @@ lemma int₄
   --
   apply intervalIntegral.intervalIntegrable_const
   --
-  by_cases h₂a : ‖a / R‖ = 1
-  · exact int'₁
-  · exact int'₀ h₂a
+  exact int''₁
 
 -- integral
-lemma int₅
-  {a : ℂ}
-  {R : ℝ}
-  (hR : R ≠ 0)
-  (ha : a ∈ Metric.closedBall 0 |R|) :
-  ∫ x in (0)..(2 * π), log ‖circleMap 0 R x - a‖ = (2 * π) * log R := by
+lemma int₅ {a : ℂ} {R : ℝ} (ha : a ∈ Metric.closedBall 0 |R|) :
+    ∫ x in (0)..(2 * π), log ‖circleMap 0 R x - a‖ = (2 * π) * log R := by
   rcases lt_trichotomy 0 R with h | h | h
   · apply int₄ h
     rwa [← abs_of_pos h]
-  · tauto
-  · rw [integrabl_congr_negRadius (f := fun z ↦ log ‖z - a‖)]
-    rw [← log_neg_eq_log]
-    apply int₄
-    exact Left.neg_pos_iff.mpr h
+  · rw [eq_comm] at h
+    simp_all
+  · rw [integrabl_congr_negRadius (f := fun z ↦ log ‖z - a‖), ← log_neg_eq_log]
+    apply int₄ (Left.neg_pos_iff.mpr h)
+    rwa [← abs_of_neg h]
+
+lemma int₅yy {a : ℂ} {R : ℝ} (ha : a ∈ Metric.closedBall 0 |R|) :
+    circleAverage (log ‖· - a‖) 0 R = log R := by
+  unfold circleAverage
+  rcases lt_trichotomy 0 R with h | h | h
+  · rw [int₄ h, smul_eq_mul]
+    ring_nf
+    simp [pi_ne_zero]
+    rwa [← abs_of_pos h]
+  · rw [eq_comm] at h
+    simp_all
+  · rw [integrabl_congr_negRadius (f := fun z ↦ log ‖z - a‖), ← log_neg_eq_log]
+    rw [int₄ (Left.neg_pos_iff.mpr h), smul_eq_mul]
+    ring_nf
+    simp [pi_ne_zero]
     rwa [← abs_of_neg h]

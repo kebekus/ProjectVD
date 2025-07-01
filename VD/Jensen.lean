@@ -50,9 +50,7 @@ lemma circleAverage_logAbs_affine {R : ℝ} {c u : ℂ} (hu : u ∈ closedBall c
     ring
   rw [this]
   unfold circleAverage
-  by_cases hR : R = 0
-  · simp_all
-  rw [int₅ hR (by aesop), smul_eq_mul, ← mul_assoc, inv_mul_cancel₀ (mul_ne_zero two_ne_zero pi_ne_zero)]
+  rw [int₅ (by aesop), smul_eq_mul, ← mul_assoc, inv_mul_cancel₀ (mul_ne_zero two_ne_zero pi_ne_zero)]
   ring
 
 @[simp]
