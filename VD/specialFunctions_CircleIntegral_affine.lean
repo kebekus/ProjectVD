@@ -17,13 +17,10 @@ open Real Filter MeasureTheory intervalIntegral
 -- Lemmas for the circleMap
 
 lemma l₀ {x₁ x₂ : ℝ} : (circleMap 0 1 x₁) * (circleMap 0 1 x₂) = circleMap 0 1 (x₁+x₂) := by
-  dsimp [circleMap]
-  simp
-  rw [add_mul, Complex.exp_add]
+  simp [circleMap, add_mul, Complex.exp_add]
 
 lemma l₁ {x : ℝ} : ‖circleMap 0 1 x‖ = 1 := by
-  rw [norm_circleMap_zero]
-  simp
+  simp [norm_circleMap_zero]
 
 lemma l₂ {x : ℝ} : ‖(circleMap 0 1 x) - a‖ = ‖1 - (circleMap 0 1 (-x)) * a‖ := by
   calc ‖(circleMap 0 1 x) - a‖
@@ -67,9 +64,7 @@ lemma int₀
   ∫ (x : ℝ) in (0)..2 * π, log ‖circleMap 0 1 x - a‖ = 0 := by
 
   by_cases h₁a : a = 0
-  · -- case: a = 0
-    rw [h₁a]
-    simp
+  · simp_all
 
   -- case: a ≠ 0
   simp_rw [l₂]
@@ -197,19 +192,19 @@ lemma logAffineHelper {x : ℝ} : log ‖circleMap 0 1 x - 1‖ = log (4 * sin (
     nth_rw 1 [← mul_one 4, ← sin_sq_add_cos_sq (x / 2)]
     ring
 
-lemma int'₁ : -- Integrability of log ‖circleMap 0 1 x - 1‖
-    IntervalIntegrable (fun x ↦ log ‖circleMap 0 1 x - 1‖) volume 0 (2 * π) := by
-  apply circleIntegrable_log_norm_meromorphicOn (c := 0) (R := 1) (f := fun z ↦ z - 1)
+lemma int'₁ {a : ℂ} : -- Integrability of log ‖circleMap 0 1 x - 1‖
+    IntervalIntegrable (fun x ↦ log ‖circleMap 0 1 x - a‖) volume 0 (2 * π) := by
+  apply circleIntegrable_log_norm_meromorphicOn (c := 0) (R := 1) (f := fun z ↦ z - a)
   intro x hx
   fun_prop
 
-lemma int''₁ : -- Integrability of log ‖circleMap 0 1 x - 1‖ for arbitrary intervals
-  ∀ (t₁ t₂ : ℝ), IntervalIntegrable (fun x ↦ log ‖circleMap 0 1 x - 1‖) volume t₁ t₂ := by
+lemma int''₁ {a : ℂ} : -- Integrability of log ‖circleMap 0 1 x - 1‖ for arbitrary intervals
+  ∀ (t₁ t₂ : ℝ), IntervalIntegrable (fun x ↦ log ‖circleMap 0 1 x - a‖) volume t₁ t₂ := by
   intro t₁ t₂
 
   apply Function.Periodic.intervalIntegrable₀ (T := 2 * π)
   --
-  have : (fun x => log ‖circleMap 0 1 x - 1‖) = (fun x => log ‖x - 1‖) ∘ (circleMap 0 1) := rfl
+  have : (fun x => log ‖circleMap 0 1 x - a‖) = (fun x => log ‖x - a‖) ∘ (circleMap 0 1) := rfl
   rw [this]
   apply Function.Periodic.comp
   exact periodic_circleMap 0 1
@@ -243,72 +238,7 @@ lemma int₁ :
   simp
   exact int₁₁
 
-
 -- Integral of log ‖circleMap 0 1 x - a‖, for ‖a‖ = 1
-
--- integrability
-lemma int'₂
-  {a : ℂ}
-  (ha : ‖a‖ = 1) :
-  IntervalIntegrable (fun x ↦ log ‖circleMap 0 1 x - a‖) volume 0 (2 * π) := by
-
-  simp_rw [l₂]
-  have {x : ℝ} : log ‖1 - circleMap 0 1 (-x) * a‖ = (fun w ↦ log ‖1 - circleMap 0 1 (w) * a‖) (-x) := by rfl
-  conv =>
-    arg 1
-    intro x
-    rw [this]
-  rw [IntervalIntegrable.iff_comp_neg]
-
-  let f₁ := fun w ↦ log ‖1 - circleMap 0 1 w * a‖
-  have {x : ℝ} : log ‖1 - circleMap 0 1 x * a‖ = f₁ (x + 2 * π) := by
-    dsimp [f₁]
-    congr 4
-    let A := periodic_circleMap 0 1 x
-    simp at A
-    exact id (Eq.symm A)
-  conv =>
-    arg 1
-    intro x
-    arg 0
-    intro w
-    rw [this]
-  simp
-  have : 0 = 2 * π - 2 * π := by ring
-  rw [this]
-  have : -(2 * π ) = 0 - 2 * π := by ring
-  rw [this]
-  apply IntervalIntegrable.comp_add_right _ (2 * π) --f₁ (2 * π)
-  dsimp [f₁]
-
-  have : ∃ ζ, a = circleMap 0 1 ζ := by
-    apply Set.exists_range_iff.mp
-    use a
-    simp
-    exact ha
-  obtain ⟨ζ, hζ⟩ := this
-  rw [hζ]
-  simp_rw [l₀]
-
-  have : 2 * π  = (2 * π + ζ) - ζ := by ring
-  rw [this]
-  have : 0 = ζ - ζ := by ring
-  rw [this]
-  have : (fun w => log (norm (1 - circleMap 0 1 (w + ζ)))) = fun x ↦ (fun w ↦ log (norm (1 - circleMap 0 1 (w)))) (x + ζ) := rfl
-  rw [this]
-  apply IntervalIntegrable.comp_add_right (f := (fun w ↦ log (norm (1 - circleMap 0 1 (w))))) _ ζ
-
-  have : Function.Periodic (fun x ↦ log (norm (1 - circleMap 0 1 x))) (2 * π) := by
-    have : (fun x ↦ log (norm (1 - circleMap 0 1 x))) = ( (fun x ↦ log (norm (1 - x))) ∘ (circleMap 0 1) ) := by rfl
-    rw [this]
-    apply Function.Periodic.comp
-    exact periodic_circleMap 0 1
-
-  let A := int''₁ (2 * π + ζ) ζ
-  have {x : ℝ} : ‖circleMap 0 1 x - 1‖ = norm (1 - circleMap 0 1 x) := by
-    exact norm_sub_rev (circleMap 0 1 x) 1
-  simp_rw [this] at A
-  exact A
 
 -- integral
 lemma int₂
@@ -467,7 +397,7 @@ lemma int₄
   apply intervalIntegral.intervalIntegrable_const
   --
   by_cases h₂a : ‖a / R‖ = 1
-  · exact int'₂ h₂a
+  · exact int'₁
   · exact int'₀ h₂a
 
 -- integral
@@ -486,59 +416,3 @@ lemma int₅
     apply int₄
     exact Left.neg_pos_iff.mpr h
     rwa [← abs_of_neg h]
-
-lemma intervalIntegrable_logAbs_circleMap_sub_const
-  {a : ℂ}
-  {r : ℝ}
-  (hr : r ≠ 0) :
-  IntervalIntegrable (fun x ↦ log ‖circleMap 0 r x - a‖) volume 0 (2 * π) := by
-
-  have {z : ℂ} : z ≠ a → log ‖z - a‖ = log ‖r⁻¹ * z - r⁻¹ * a‖ + log ‖r‖ := by
-    intro hz
-    rw [← mul_sub, norm_mul]
-    rw [log_mul (by simp [hr]) (by apply norm_ne_zero_iff.mpr; exact sub_ne_zero_of_ne hz)]
-    simp
-
-  have : (fun z ↦ log ‖z - a‖) =ᶠ[Filter.codiscreteWithin ⊤] (fun z ↦ log ‖r⁻¹ * z - r⁻¹ * a‖ + log ‖r‖) := by
-    apply eventuallyEq_iff_exists_mem.mpr
-    use {a}ᶜ
-    constructor
-    · simp_rw [mem_codiscreteWithin, Filter.disjoint_principal_right]
-      simp
-      intro y
-      by_cases hy : y = a
-      · rw [← hy]
-        exact self_mem_nhdsWithin
-      · refine mem_nhdsWithin.mpr ?_
-        simp
-        use {a}ᶜ
-        constructor
-        · exact isOpen_compl_singleton
-        · constructor
-          · tauto
-          · tauto
-    · intro x hx
-      simp at hx
-      apply this hx
-
-  have hU : Metric.sphere (0 : ℂ) |r| ⊆ ⊤ := by
-    exact fun ⦃a⦄ a => trivial
-  let A := integrability_congr_changeDiscrete hU hr this
-
-  have : (fun z => log ‖z - a‖) ∘ circleMap 0 r = (fun z => log ‖circleMap 0 r z - a‖) := by
-    exact rfl
-  rw [this] at A
-  have : (fun z => log ‖r⁻¹ * z - r⁻¹ * a‖ + log ‖r‖) ∘ circleMap 0 r = (fun z => log ‖r⁻¹ * circleMap 0 r z - r⁻¹ * a‖ + log ‖r‖) := by
-    exact rfl
-  rw [this] at A
-  rw [A]
-
-  apply IntervalIntegrable.add _ intervalIntegral.intervalIntegrable_const
-  have {x : ℝ} : r⁻¹ * circleMap 0 r x = circleMap 0 1 x := by
-    unfold circleMap
-    simp [hr]
-  simp_rw [this]
-
-  by_cases ha : ‖r⁻¹ * a‖ = 1
-  · exact int'₂ ha
-  · apply int'₀ ha
