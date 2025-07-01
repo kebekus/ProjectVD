@@ -5,7 +5,6 @@ import Mathlib.Analysis.SpecialFunctions.Integrals.LogTrigonometric
 import Mathlib.Analysis.SpecialFunctions.Integrability.LogMeromorphic
 import VD.harmonicAt_examples
 import VD.harmonicAt_meanValue
-import VD.intervalIntegrability
 
 
 open scoped Interval Topology
@@ -266,10 +265,10 @@ lemma int₂
   exact int₁
 
 -- integral
-lemma int₃
-  {a : ℂ}
-  (ha : a ∈ Metric.closedBall 0 1) :
-  ∫ x in (0)..(2 * π), log ‖circleMap 0 1 x - a‖ = 0 := by
+lemma int₃ {a : ℂ} (ha : a ∈ Metric.closedBall 0 1) :
+    circleAverage (log ‖· - a‖) 0 1 = 0 := by
+  unfold circleAverage
+  simp [pi_ne_zero]
   by_cases h₁a : a ∈ Metric.ball 0 1
   · exact int₀ h₁a
   · apply int₂
@@ -278,13 +277,8 @@ lemma int₃
     linarith
 
 -- integral
-lemma int₄
-  {a : ℂ}
-  {R : ℝ}
-  (hR : 0 < R)
-  (ha : a ∈ Metric.closedBall 0 R) :
-  ∫ x in (0)..(2 * π), log ‖circleMap 0 R x - a‖ = (2 * π) * log R := by
-
+lemma int₄ {a : ℂ} {R : ℝ} (hR : 0 < R) (ha : a ∈ Metric.closedBall 0 R) :
+    circleAverage (log ‖· - a‖) 0 R = log R := by
   have h₁a : a / R ∈ Metric.closedBall 0 1 := by
     simp
     simp at ha
@@ -350,31 +344,30 @@ lemma int₄
       exact hR.ne.symm
     exact Set.Countable.mono s₀ s₁
 
-  rw [this]
-  rw [intervalIntegral.integral_add]
-  rw [int₃]
-  rw [intervalIntegral.integral_const]
-  simp
-  --
-  exact h₁a
-  --
-  apply intervalIntegral.intervalIntegrable_const
-  --
-  exact int''₁
+  have aga : circleAverage (log ‖· - a‖) 0 R = log R + circleAverage (log ‖· - (a / R)‖) 0 1 := by
+    unfold circleAverage
+    rw [this]
+    rw [intervalIntegral.integral_add]
+    rw [intervalIntegral.integral_const]
+    rw [smul_add]
+    congr
+    simp only [sub_zero, smul_eq_mul]
+    ring_nf
+    simp [pi_ne_zero]
+    apply intervalIntegral.intervalIntegrable_const
+    exact int''₁
+  simp [aga, int₃ h₁a]
 
 -- integral
 lemma int₅ {a : ℂ} {R : ℝ} (ha : a ∈ Metric.closedBall 0 |R|) :
     circleAverage (log ‖· - a‖) 0 R = log R := by
-  unfold circleAverage
   rcases lt_trichotomy 0 R with h | h | h
-  · rw [int₄ h, smul_eq_mul]
+  · rw [int₄ h]
     ring_nf
-    simp [pi_ne_zero]
-    rwa [← abs_of_pos h]
+    simp_all only [abs_of_pos h, Metric.mem_closedBall, dist_zero_right]
   · rw [eq_comm] at h
     simp_all
-  · rw [integrabl_congr_negRadius (f := fun z ↦ log ‖z - a‖), ← log_neg_eq_log]
-    rw [int₄ (Left.neg_pos_iff.mpr h), smul_eq_mul]
+  · rw [← circleAverage_neg_radius, int₄ (Left.neg_pos_iff.mpr h)]
     ring_nf
-    simp [pi_ne_zero]
+    simp_all only [Metric.mem_closedBall, dist_zero_right, log_neg_eq_log]
     rwa [← abs_of_neg h]
