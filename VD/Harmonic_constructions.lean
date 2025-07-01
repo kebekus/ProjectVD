@@ -6,6 +6,7 @@ Authors: Stefan Kebekus
 import VD.Harmonic
 import VD.ToMathlib.restrictScalars
 import Mathlib.Analysis.Complex.CauchyIntegral
+import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
 
 /-!
 # Construction of Harmonic Functions
@@ -15,7 +16,7 @@ This file constructs examples of harmonic functions.
 - If `f` is holomorphic on the complex plane, then `f` is holomorphic, and so is
   its real part, imaginary part, and complex conjugate.
 
-- If `f` is holomorphic without zero, then `log ‖f · ‖` is harmonic.
+- If `f` is holomorphic without zero, then `log ‖f ·‖` is harmonic.
 -/
 
 open Complex Topology
@@ -23,6 +24,10 @@ open Complex Topology
 variable
   {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ F]
   {f : ℂ → F} {x : ℂ}
+
+/-!
+## Harmonicity of Analytic Functions
+-/
 
 /--
 Continuously complex-differentiable functions on ℂ are harmonic.
@@ -61,6 +66,10 @@ If `f : ℂ → ℂ` is complex-analytic, then its complex conjugate is harmonic
 -/
 theorem ContDiffAt.harmonicAt_conjugate {f : ℂ → ℂ} (h : AnalyticAt ℂ f x) :
   HarmonicAt (conjCLE ∘ f) x := harmonicAt_iff_harmonicAt_comp_CLE.1 h.harmonicAt
+
+/-!
+## Harmonicity of `log ‖analytic‖`
+-/
 
 /- Helper lemma for -/
 private lemma slitPlaneLemma {z : ℂ} (hz : z ≠ 0) : z ∈ slitPlane ∨ -z ∈ slitPlane := by
@@ -103,7 +112,7 @@ private lemma lem₁ {z : ℂ} {g : ℂ → ℂ} (h₁g : AnalyticAt ℂ g z) (h
 
   -- Locally around z, rewrite Complex.log (g * gc) as Complex.log g + Complex.log.gc
   -- This uses the assumption that g z is in Complex.slitPlane
-  have : (Complex.log ∘ (Complex.conjCLE ∘ g * g)) =ᶠ[nhds z] (Complex.conjCLE ∘ Complex.log ∘ g + Complex.log ∘ g) := by
+  have : (log ∘ (conjCLE ∘ g * g)) =ᶠ[𝓝 z] (conjCLE ∘ log ∘ g + log ∘ g) := by
     apply Filter.eventuallyEq_iff_exists_mem.2
     use g⁻¹' (Complex.slitPlane ∩ {0}ᶜ), t₀
     · intro x hx
@@ -119,24 +128,22 @@ private lemma lem₁ {z : ℂ} {g : ℂ → ℂ} (h₁g : AnalyticAt ℂ g z) (h
       apply hx.2
       apply Complex.slitPlane_arg_ne_pi hx.1
 
-  rw [HarmonicAt_eventuallyEq this]
-  apply harmonicAt_add_harmonicAt_is_harmonicAt
-  · rw [← harmonicAt_iff_comp_CLE_is_harmonicAt]
-    apply holomorphicAt_is_harmonicAt
-    apply HolomorphicAt_comp
-    use Complex.slitPlane, Complex.isOpen_slitPlane.mem_nhds h₃g,
-      fun _ a ↦ Complex.differentiableAt_log a
-    exact h₁g
-  · apply holomorphicAt_is_harmonicAt
-    apply HolomorphicAt_comp
-    use Complex.slitPlane, Complex.isOpen_slitPlane.mem_nhds h₃g,
-      fun _ a ↦ Complex.differentiableAt_log a
-    exact h₁g
+  rw [harmonicAt_congr_nhds this]
+  apply HarmonicAt.add
+  · rw [← harmonicAt_iff_harmonicAt_comp_CLE]
+    apply AnalyticAt.harmonicAt
+    apply AnalyticAt.comp
+    · apply analyticAt_clog h₃g
+    · exact h₁g
+  · apply AnalyticAt.harmonicAt
+    apply AnalyticAt.comp
+    · apply analyticAt_clog h₃g
+    · exact h₁g
 
 theorem log_normSq_of_holomorphicAt_is_harmonicAt
   {f : ℂ → ℂ}
   {z : ℂ}
-  (h₁f : HolomorphicAt f z)
+  (h₁f : AnalyticAt ℂ f z)
   (h₂f : f z ≠ 0) :
   HarmonicAt (Real.log ∘ Complex.normSq ∘ f) z := by
 
@@ -144,11 +151,10 @@ theorem log_normSq_of_holomorphicAt_is_harmonicAt
   -- First prove the theorem for functions with image in the slitPlane
 
   by_cases h₃f : f z ∈ Complex.slitPlane
-  · exact lem₁ f h₁f h₂f h₃f
+  · exact lem₁ h₁f h₂f h₃f
   · have : Complex.normSq ∘ f = Complex.normSq ∘ (-f) := by funext; simp
     rw [this]
-    apply lem₁ (-f)
-    · exact HolomorphicAt_neg h₁f
+    apply lem₁ h₁f.neg
     · simpa
     · exact (slitPlaneLemma h₂f).resolve_left h₃f
 
@@ -156,7 +162,7 @@ theorem log_normSq_of_holomorphicAt_is_harmonicAt
 theorem logabs_of_holomorphicAt_is_harmonic
   {f : ℂ → ℂ}
   {z : ℂ}
-  (h₁f : HolomorphicAt f z)
+  (h₁f : AnalyticAt ℂ f z)
   (h₂f : f z ≠ 0) :
   HarmonicAt (fun w ↦ Real.log ‖f w‖) z := by
 
