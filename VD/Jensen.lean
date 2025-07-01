@@ -48,10 +48,7 @@ lemma circleAverage_logAbs_affine {R : ℝ} {c u : ℂ} (hu : u ∈ closedBall c
     ext z
     congr 2
     ring
-  rw [this]
-  unfold circleAverage
-  rw [int₅ (by aesop), smul_eq_mul, ← mul_assoc, inv_mul_cancel₀ (mul_ne_zero two_ne_zero pi_ne_zero)]
-  ring
+  rw [this, int₅ (by aesop)]
 
 @[simp]
 lemma circleAverage_logAbs_factorizedRational {R : ℝ} {c : ℂ}

@@ -26,7 +26,7 @@ variable
   {f : ℂ → F} {x : ℂ}
 
 /-!
-## Harmonicity of Analytic Functions
+## Harmonicity of Analytic Functions on the Complex Plane
 -/
 
 /--
@@ -71,7 +71,7 @@ theorem ContDiffAt.harmonicAt_conjugate {f : ℂ → ℂ} (h : AnalyticAt ℂ f 
 ## Harmonicity of `log ‖analytic‖`
 -/
 
-/- Helper lemma for -/
+/- Helper lemma for AnalyticAt.harmonicAt_log_norm -/
 private lemma slitPlaneLemma {z : ℂ} (hz : z ≠ 0) : z ∈ slitPlane ∨ -z ∈ slitPlane := by
   rw [mem_slitPlane_iff, mem_slitPlane_iff]
   rw [ne_eq, Complex.ext_iff] at hz
@@ -81,101 +81,55 @@ private lemma slitPlaneLemma {z : ℂ} (hz : z ≠ 0) : z ∈ slitPlane ∨ -z �
   push_neg at contra
   exact hz (le_antisymm contra.1.1 contra.2.1) contra.1.2
 
-private lemma lem₁ {z : ℂ} {g : ℂ → ℂ} (h₁g : AnalyticAt ℂ g z) (h₂g : g z ≠ 0) (h₃g : g z ∈ slitPlane) :
+/- Helper lemma for AnalyticAt.harmonicAt_log_norm -/
+private lemma analyticAt_harmonicAt_log_normSq {z : ℂ} {g : ℂ → ℂ} (h₁g : AnalyticAt ℂ g z)
+    (h₂g : g z ≠ 0) (h₃g : g z ∈ slitPlane) :
     HarmonicAt (Real.log ∘ normSq ∘ g) z := by
-
-  -- Rewrite the log |g|² as Complex.log (g * gc)
-  suffices hyp : HarmonicAt (log ∘ ((conjCLE ∘ g) * g)) z from by
-    have : Real.log ∘ normSq ∘ g = reCLM ∘ ofRealCLM ∘ Real.log ∘ normSq ∘ g := by aesop
-    rw [this]
-    have : ofRealCLM ∘ Real.log ∘ normSq ∘ g = log ∘ ((conjCLE ∘ g) * g) := by
-      funext x
+  rw [harmonicAt_congr_nhds (f₂ := reCLM ∘ (conjCLE ∘ log ∘ g + log ∘ g))]
+  · exact ((harmonicAt_iff_harmonicAt_comp_CLE.1 ((analyticAt_clog h₃g).comp h₁g).harmonicAt).add
+      ((analyticAt_clog h₃g).comp h₁g).harmonicAt).comp_CLM
+  · have t₀ := h₁g.differentiableAt.continuousAt.preimage_mem_nhds
+      ((isOpen_slitPlane.inter isOpen_ne).mem_nhds ⟨h₃g, h₂g⟩)
+    calc Real.log ∘ normSq ∘ g
+    _ =ᶠ[𝓝 z] reCLM ∘ ofRealCLM ∘ Real.log ∘ normSq ∘ g:= by
+      aesop
+    _ =ᶠ[𝓝 z] reCLM ∘ log ∘ ((conjCLE ∘ g) * g) := by
+      filter_upwards with x
       simp only [Function.comp_apply, ofRealCLM_apply, Pi.mul_apply, conjCLE_apply]
       rw [ofReal_log, normSq_eq_conj_mul_self]
       exact normSq_nonneg (g x)
-    rw [← this] at hyp
-    apply hyp.comp_CLM
+    _ =ᶠ[𝓝 z] reCLM ∘ (log ∘ conjCLE ∘ g + log ∘ g) := by
+      filter_upwards [t₀] with x hx
+      simp only [Function.comp_apply, Pi.mul_apply, conjCLE_apply, Pi.add_apply]
+      congr
+      rw [Complex.log_mul_eq_add_log_iff _ hx.2, Complex.arg_conj]
+      simp only [Complex.slitPlane_arg_ne_pi hx.1, ↓reduceIte, neg_add_cancel, Set.mem_Ioc,
+        Left.neg_neg_iff, Real.pi_pos, Real.pi_nonneg, and_self]
+      simpa [ne_eq, map_eq_zero] using hx.2
+    _ =ᶠ[𝓝 z] ⇑reCLM ∘ (⇑conjCLE ∘ log ∘ g + log ∘ g) := by
+      apply Filter.eventuallyEq_iff_exists_mem.2
+      use g⁻¹' (Complex.slitPlane ∩ {0}ᶜ), t₀
+      · intro x hx
+        simp only [Function.comp_apply, Pi.add_apply, conjCLE_apply, add_re, conj_re,
+          add_left_inj]
+        congr 1
+        rw [← Complex.log_conj]
+        simp [Complex.slitPlane_arg_ne_pi hx.1]
 
-  have t₀ : g ⁻¹' (slitPlane ∩ {0}ᶜ) ∈ 𝓝 z := by
-    apply h₁g.differentiableAt.continuousAt.preimage_mem_nhds
-    exact (isOpen_slitPlane.inter isOpen_ne).mem_nhds ⟨h₃g, h₂g⟩
-
-  -- Locally around z, rewrite Complex.log (g * gc) as Complex.log g + Complex.log.gc
-  -- This uses the assumption that g z is in Complex.slitPlane
-  have : (log ∘ (conjCLE ∘ g * g)) =ᶠ[𝓝 z] (log ∘ conjCLE ∘ g + log ∘ g) := by
-    filter_upwards [t₀] with x hx
-    simp only [Function.comp_apply, Pi.mul_apply, conjCLE_apply, Pi.add_apply]
-    rw [Complex.log_mul_eq_add_log_iff _ hx.2, Complex.arg_conj]
-    simp only [Complex.slitPlane_arg_ne_pi hx.1, ↓reduceIte, neg_add_cancel, Set.mem_Ioc,
-      Left.neg_neg_iff, Real.pi_pos, Real.pi_nonneg, and_self]
-    simpa [ne_eq, map_eq_zero] using hx.2
-
-  -- Locally around z, rewrite Complex.log (g * gc) as Complex.log g + Complex.log.gc
-  -- This uses the assumption that g z is in Complex.slitPlane
-  have : (log ∘ (conjCLE ∘ g * g)) =ᶠ[𝓝 z] (conjCLE ∘ log ∘ g + log ∘ g) := by
-    apply Filter.eventuallyEq_iff_exists_mem.2
-    use g⁻¹' (Complex.slitPlane ∩ {0}ᶜ), t₀
-    · intro x hx
-      simp
-      rw [← Complex.log_conj]
-      rw [Complex.log_mul_eq_add_log_iff _ hx.2]
-      rw [Complex.arg_conj]
-      simp [Complex.slitPlane_arg_ne_pi hx.1]
-      constructor
-      · exact Real.pi_pos
-      · exact Real.pi_nonneg
-      simp
-      apply hx.2
-      apply Complex.slitPlane_arg_ne_pi hx.1
-
-  rw [harmonicAt_congr_nhds this]
-  apply HarmonicAt.add
-  · rw [← harmonicAt_iff_harmonicAt_comp_CLE]
-    apply AnalyticAt.harmonicAt
-    apply AnalyticAt.comp
-    · apply analyticAt_clog h₃g
-    · exact h₁g
-  · apply AnalyticAt.harmonicAt
-    apply AnalyticAt.comp
-    · apply analyticAt_clog h₃g
-    · exact h₁g
-
-theorem log_normSq_of_holomorphicAt_is_harmonicAt
-  {f : ℂ → ℂ}
-  {z : ℂ}
-  (h₁f : AnalyticAt ℂ f z)
-  (h₂f : f z ≠ 0) :
-  HarmonicAt (Real.log ∘ Complex.normSq ∘ f) z := by
-
-
-  -- First prove the theorem for functions with image in the slitPlane
-
-  by_cases h₃f : f z ∈ Complex.slitPlane
-  · exact lem₁ h₁f h₂f h₃f
-  · have : Complex.normSq ∘ f = Complex.normSq ∘ (-f) := by funext; simp
-    rw [this]
-    apply lem₁ h₁f.neg
-    · simpa
-    · exact (slitPlaneLemma h₂f).resolve_left h₃f
-
-
-theorem logabs_of_holomorphicAt_is_harmonic
-  {f : ℂ → ℂ}
-  {z : ℂ}
-  (h₁f : AnalyticAt ℂ f z)
-  (h₂f : f z ≠ 0) :
-  HarmonicAt (fun w ↦ Real.log ‖f w‖) z := by
-
-  -- Suffices: Harmonic (2⁻¹ • Real.log ∘ ⇑Complex.normSq ∘ f)
-  have : (fun z ↦ Real.log ‖f z‖) = (2 : ℝ)⁻¹ • (Real.log ∘ Complex.normSq ∘ f) := by
+/--
+If `f : ℂ → ℂ` is complex-analytic without zero, then `log ‖f‖` is harmonic.
+-/
+theorem AnalyticAt.harmonicAt_log_norm {f : ℂ → ℂ} {z : ℂ} (h₁f : AnalyticAt ℂ f z) (h₂f : f z ≠ 0) :
+    HarmonicAt (Real.log ‖f ·‖) z := by
+  have : (Real.log ‖f ·‖) = (2 : ℝ)⁻¹ • (Real.log ∘ Complex.normSq ∘ f) := by
     funext z
-    simp
-    rw [Complex.norm_def]
-    rw [Real.log_sqrt]
+    simp only [Pi.smul_apply, Function.comp_apply, smul_eq_mul]
+    rw [Complex.norm_def, Real.log_sqrt]
     linarith
-    exact Complex.normSq_nonneg (f z)
+    exact (f z).normSq_nonneg
   rw [this]
-
-  -- Suffices: Harmonic (Real.log ∘ ⇑Complex.normSq ∘ f)
-  apply (harmonicAt_iff_smul_const_is_harmonicAt (inv_ne_zero two_ne_zero)).1
-  exact log_normSq_of_holomorphicAt_is_harmonicAt h₁f h₂f
+  apply HarmonicAt.const_smul
+  by_cases h₃f : f z ∈ Complex.slitPlane
+  · exact analyticAt_harmonicAt_log_normSq h₁f h₂f h₃f
+  · rw [(by aesop : Complex.normSq ∘ f = Complex.normSq ∘ (-f))]
+    exact analyticAt_harmonicAt_log_normSq h₁f.neg (by simpa) ((slitPlaneLemma h₂f).resolve_left h₃f)

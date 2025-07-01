@@ -364,17 +364,6 @@ lemma int₄
 
 -- integral
 lemma int₅ {a : ℂ} {R : ℝ} (ha : a ∈ Metric.closedBall 0 |R|) :
-    ∫ x in (0)..(2 * π), log ‖circleMap 0 R x - a‖ = (2 * π) * log R := by
-  rcases lt_trichotomy 0 R with h | h | h
-  · apply int₄ h
-    rwa [← abs_of_pos h]
-  · rw [eq_comm] at h
-    simp_all
-  · rw [integrabl_congr_negRadius (f := fun z ↦ log ‖z - a‖), ← log_neg_eq_log]
-    apply int₄ (Left.neg_pos_iff.mpr h)
-    rwa [← abs_of_neg h]
-
-lemma int₅yy {a : ℂ} {R : ℝ} (ha : a ∈ Metric.closedBall 0 |R|) :
     circleAverage (log ‖· - a‖) 0 R = log R := by
   unfold circleAverage
   rcases lt_trichotomy 0 R with h | h | h
