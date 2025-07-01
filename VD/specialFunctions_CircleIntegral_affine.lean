@@ -124,37 +124,25 @@ lemma int₁₁ : ∫ (x : ℝ) in (0)..π, log (4 * sin x ^ 2) = 0 := by
       intro x hx
       fun_prop
     have s₁ := s₀.preimage_zero_mem_codiscrete (x := π / 2)
-    have s₂ : ¬(4 : ℝ) = -(1 : ℝ) := by norm_num
-    simp_all
+    simp only [sin_pi_div_two, one_pow, mul_one, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true,
+      Set.preimage_compl, forall_const] at s₁
     filter_upwards [s₁] with a ha
-    simp_all
-    rw [log_mul]
-    congr
-    rw [log_pow]
-    rfl
-    norm_num
-    norm_num
-    exact ha
+    simp only [Set.mem_compl_iff, Set.mem_preimage, Set.mem_singleton_iff, mul_eq_zero,
+      OfNat.ofNat_ne_zero, ne_eq, not_false_eq_true, pow_eq_zero_iff, false_or] at ha
+    rw [log_mul (by norm_num) (by simp_all), log_pow, Nat.cast_ofNat]
 
   rw [intervalIntegral.integral_congr_codiscreteWithin t₀]
-  rw [intervalIntegral.integral_add]
+  rw [intervalIntegral.integral_add _root_.intervalIntegrable_const _ ]
   rw [intervalIntegral.integral_const_mul]
   simp
   rw [integral_log_sin_zero_pi]
-  have : (4 : ℝ) = 2 * 2 := by norm_num
-  rw [this, log_mul]
+  rw [(by norm_num : (4 : ℝ) = 2 * 2), log_mul two_ne_zero two_ne_zero]
   ring
-  norm_num
-  norm_num
-  -- IntervalIntegrable (fun x => log 4) volume 0 π
-  simp
   -- IntervalIntegrable (fun x => 2 * log (sin x)) volume 0 π
-  apply IntervalIntegrable.const_mul
-  exact intervalIntegrable_log_sin
+  apply intervalIntegrable_log_sin.const_mul 2
 
 lemma logAffineHelper {x : ℝ} : log ‖circleMap 0 1 x - 1‖ = log (4 * sin (x / 2) ^ 2) / 2 := by
-  rw [Complex.norm_def]
-  rw [log_sqrt (Complex.normSq_nonneg (circleMap 0 1 x - 1))]
+  rw [Complex.norm_def, log_sqrt (circleMap 0 1 x - 1).normSq_nonneg]
   congr
   calc Complex.normSq (circleMap 0 1 x - 1)
   _ = (cos x - 1) * (cos x - 1) + sin x * sin x := by
@@ -168,7 +156,8 @@ lemma logAffineHelper {x : ℝ} : log ‖circleMap 0 1 x - 1‖ = log (4 * sin (
     norm_num
   _ = 2 - 2 * cos (2 * (x / 2)) := by
     rw [← mul_div_assoc]
-    congr; norm_num
+    congr
+    norm_num
   _ = 4 - 4 * cos (x / 2) ^ 2 := by
     rw [cos_two_mul]
     ring
@@ -275,6 +264,8 @@ lemma int₃ {a : ℂ} (ha : a ∈ Metric.closedBall 0 1) :
     simp at ha
     simp at h₁a
     linarith
+
+
 
 -- integral
 lemma int₄ {a : ℂ} {R : ℝ} (hR : 0 < R) (ha : a ∈ Metric.closedBall 0 R) :
