@@ -6,12 +6,10 @@ import Mathlib.Analysis.SpecialFunctions.Integrability.LogMeromorphic
 import VD.harmonicAt_examples
 import VD.harmonicAt_meanValue
 
-
 open scoped Interval Topology
 open Real Filter MeasureTheory intervalIntegral
 
 -- Maximal 550 Zeilen
-
 
 -- Lemmas for the circleMap
 
@@ -45,10 +43,12 @@ lemma int''₁ {a : ℂ} {t₁ t₂ : ℝ} :
 lemma int₀
   {a : ℂ}
   (ha : a ∈ Metric.ball 0 1) :
-  ∫ (x : ℝ) in (0)..2 * π, log ‖circleMap 0 1 x - a‖ = 0 := by
+  circleAverage (log ‖· - a‖) 0 1 = 0 := by
+  unfold circleAverage
+  simp [pi_ne_zero]
 
   by_cases h₁a : a = 0
-  · simp_all
+  · simp_all [circleAverage]
 
   -- case: a ≠ 0
   simp_rw [l₂]
@@ -196,7 +196,9 @@ lemma int₁ :
 lemma int₂
   {a : ℂ}
   (ha : ‖a‖ = 1) :
-  ∫ x in (0)..(2 * π), log ‖circleMap 0 1 x - a‖ = 0 := by
+  circleAverage (log ‖· - a‖) 0 1 = 0 := by
+  unfold circleAverage
+  simp [pi_ne_zero]
 
   simp_rw [l₂]
   have {x : ℝ} : log ‖1 - circleMap 0 1 (-x) * a‖ = (fun w ↦ log ‖1 - circleMap 0 1 (w) * a‖) (-x) := by rfl
@@ -253,19 +255,17 @@ lemma int₂
   simp_rw [this]
   exact int₁
 
+
+
 -- integral
 lemma int₃ {a : ℂ} (ha : a ∈ Metric.closedBall 0 1) :
     circleAverage (log ‖· - a‖) 0 1 = 0 := by
-  unfold circleAverage
-  simp [pi_ne_zero]
   by_cases h₁a : a ∈ Metric.ball 0 1
   · exact int₀ h₁a
   · apply int₂
     simp at ha
     simp at h₁a
     linarith
-
-
 
 -- integral
 lemma int₄ {a : ℂ} {R : ℝ} (hR : 0 < R) (ha : a ∈ Metric.closedBall 0 R) :
