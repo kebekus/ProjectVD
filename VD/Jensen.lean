@@ -24,12 +24,10 @@ theorem CircleIntegrable.const_smul_fun {c : ℂ} {a R : ℝ} {f : ℂ → ℝ} 
     CircleIntegrable (fun z ↦ a * f z) c R := by
   apply CircleIntegrable.const_smul h
 
-theorem circleIntegrable_logAbs_factorizedRational {R : ℝ} {c : ℂ} (D : ℂ → ℤ) :
-    CircleIntegrable (∑ᶠ u, ((D u) * log ‖· - u‖)) c R := by
-  apply CircleIntegrable.finsum
-  intro u
-  apply CircleIntegrable.const_smul
-  apply circleIntegrable_log_norm_meromorphicOn (analyticOnNhd_id.sub analyticOnNhd_const).meromorphicOn
+theorem circleIntegrable_log_norm_factorizedRational {R : ℝ} {c : ℂ} (D : ℂ → ℤ) :
+    CircleIntegrable (∑ᶠ u, ((D u) * log ‖· - u‖)) c R :=
+  CircleIntegrable.finsum (fun _ ↦ (circleIntegrable_log_norm_meromorphicOn
+    (analyticOnNhd_id.sub analyticOnNhd_const).meromorphicOn).const_smul)
 
 /-!
 ## Circle Averages
@@ -110,7 +108,7 @@ theorem MeromorphicOn.JensenFormula {R : ℝ} {f : ℂ → ℂ} (hR : R ≠ 0) (
       rw [circleAverage_congr_codiscreteWithin (codiscreteWithin.mono sphere_subset_closedBall h₄g) hR]
     _ = circleAverage (∑ᶠ u, (divisor f CB u * log ‖· - u‖)) 0 R + circleAverage (log ‖g ·‖) 0 R := by
       apply circleAverage_add
-      exact circleIntegrable_logAbs_factorizedRational (divisor f CB)
+      exact circleIntegrable_log_norm_factorizedRational (divisor f CB)
       exact circleIntegrable_log_norm_meromorphicOn (h₁g.mono sphere_subset_closedBall).meromorphicOn
     _ = ∑ᶠ u, divisor f CB u * log R + log ‖g 0‖ := by simp [h₁g, h₂g]
     _ = ∑ᶠ u, divisor f CB u * log R + (log ‖meromorphicTrailingCoeffAt f 0‖ - ∑ᶠ u, divisor f CB u * log ‖u‖) := by
