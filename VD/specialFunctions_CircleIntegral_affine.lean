@@ -48,7 +48,7 @@ lemma int₀
   simp [pi_ne_zero]
 
   by_cases h₁a : a = 0
-  · simp_all [circleAverage]
+  · simp_all
 
   -- case: a ≠ 0
   simp_rw [l₂]

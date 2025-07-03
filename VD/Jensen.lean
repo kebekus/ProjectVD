@@ -6,7 +6,6 @@ import Mathlib.MeasureTheory.Integral.CircleAverage
 import Mathlib.Analysis.SpecialFunctions.Integrability.LogMeromorphic
 import VD.specialFunctions_CircleIntegral_affine
 import VD.ToMathlib.TrailingCoefficientFactorizedRational
-import VD.ToMathlib.circleIntegrability
 
 open Filter MeromorphicAt MeromorphicOn Metric Real
 

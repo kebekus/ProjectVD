@@ -49,7 +49,7 @@ theorem meromorphicTrailingCoeffAt_prod {ι : Type*} {s : Finset ι} {f : ι →
   classical
   apply Finset.induction
     (motive := fun b' ↦ (meromorphicTrailingCoeffAt (∏ n ∈ b' , f n) x = ∏ n ∈ b', meromorphicTrailingCoeffAt (f n) x))
-  · simp only [Finset.univ_eq_empty, Finset.prod_empty, forall_const]
+  · simp only [Finset.prod_empty]
     apply meromorphicTrailingCoeffAt_const
   · intro σ s₁ hσ hind
     rw [Finset.prod_insert hσ, Finset.prod_insert hσ, meromorphicTrailingCoeffAt_mul (h σ) (MeromorphicAt.prod h),
@@ -129,7 +129,7 @@ theorem log_norm_leadCoefficient {d : 𝕜 → ℤ} {x : 𝕜} (h : d.support.Fi
     by_cases h : x = y
     · rw [h]
       simp_all
-    · simp_all [update_of_ne (by tauto), zpow_ne_zero, sub_ne_zero]
+    · simp_all [zpow_ne_zero, sub_ne_zero]
   rw [norm_prod, log_prod _ _ this]
   have : (fun u ↦ (d u) * log ‖x - u‖).support ⊆ h.toFinset := by
     intro u
