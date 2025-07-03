@@ -9,7 +9,9 @@ import VD.harmonicAt_meanValue
 open scoped Interval Topology
 open Real Filter MeasureTheory intervalIntegral
 
-lemma circleAverage_log_norm_sub_id_const_eq_posLog {a : ℂ} :
+variable {a : ℂ}
+
+lemma circleAverage_log_norm_sub_id_const_eq_posLog :
     circleAverage (log ‖· - a‖) 0 1 = log⁺ ‖a‖ := by
   rcases lt_trichotomy ‖a‖ 1 with h | h | h
   · -- ‖a‖ < 1
