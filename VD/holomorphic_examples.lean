@@ -42,7 +42,7 @@ theorem CauchyRiemann₆
         have : m = m.re + m.im • Complex.I := by simp
         rw [this, add_smul, add_smul, ContinuousLinearMap.map_add]
         congr
-        simp
+        simp only [Complex.coe_smul, map_smul]
         rw [smul_assoc, smul_assoc, ContinuousLinearMap.map_smul (fderiv ℝ f z) m.2]
         congr
         exact h₂ x
