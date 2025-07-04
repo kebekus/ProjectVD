@@ -5,7 +5,6 @@ import Mathlib.Analysis.Meromorphic.NormalForm
 import Mathlib.MeasureTheory.Integral.CircleAverage
 import Mathlib.Analysis.SpecialFunctions.Integrability.LogMeromorphic
 import VD.specialFunctions_CircleIntegral_affine
-import VD.ToMathlib.TrailingCoefficientFactorizedRational
 
 open Filter MeromorphicAt MeromorphicOn Metric Real
 
@@ -102,7 +101,7 @@ theorem MeromorphicOn.JensenFormula {R : ℝ} {f : ℂ → ℂ} (hR : R ≠ 0) (
         apply mem_nhdsWithin.mpr
         use ball 0 |R|
         simpa [hR] using fun _ ⟨h, _⟩ ↦ ball_subset_closedBall h
-      simp [MeromorphicOn.meromorphicTrailingCoeffAt_extract_zeros_poles_log h₃f t₀ t₁ (h₁f 0 t₀) (h₁g 0 t₀) (h₂g ⟨0, t₀⟩) h₃g]
+      simp [MeromorphicOn.log_norm_meromorphicTrailingCoeffAt_extract_zeros_poles h₃f t₀ t₁ (h₁f 0 t₀) (h₁g 0 t₀) (h₂g ⟨0, t₀⟩) h₃g]
     _ = ∑ᶠ u, divisor f CB u * log R - ∑ᶠ u, divisor f CB u * log ‖u‖ + log ‖meromorphicTrailingCoeffAt f 0‖ := by
       ring
     _ = (∑ᶠ u, divisor f CB u * (log R - log ‖u‖)) + log ‖meromorphicTrailingCoeffAt f 0‖ := by
@@ -118,7 +117,7 @@ theorem MeromorphicOn.JensenFormula {R : ℝ} {f : ℂ → ℂ} (hR : R ≠ 0) (
     have : divisor f CB = 0 := by
       ext x
       by_cases h : x ∈ CB
-      <;> simp_all [CB, divisor_def]
+      <;> simp_all [CB]
     simp only [CB, this, Function.locallyFinsuppWithin.coe_zero, Pi.zero_apply, Int.cast_zero, zero_mul,
       finsum_zero, add_zero, zero_add]
     rw [MeromorphicAt.meromorphicTrailingCoeffAt_of_order_eq_top (by aesop), norm_zero, log_zero]
