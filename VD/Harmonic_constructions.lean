@@ -3,7 +3,7 @@ Copyright (c) 2025 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import VD.Harmonic
+import VD.ToMathlib.Harmonic
 import VD.ToMathlib.restrictScalars
 import Mathlib.Analysis.Complex.CauchyIntegral
 import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
@@ -19,7 +19,7 @@ This file constructs examples of harmonic functions.
 - If `f` is holomorphic without zero, then `log ‖f ·‖` is harmonic.
 -/
 
-open Complex Topology
+open Complex InnerProductSpace Topology
 
 variable
   {F : Type*} [NormedAddCommGroup F] [NormedSpace ℂ F]
@@ -39,7 +39,7 @@ theorem ContDiffAt.harmonicAt (h : ContDiffAt ℂ 2 f x) : HarmonicAt f x := by
     have : (iteratedFDeriv ℂ 2 f a) (I • ![1, 1])
         = (∏ i, I) • ((iteratedFDeriv ℂ 2 f a) ![1, 1]) :=
       (iteratedFDeriv ℂ 2 f a).map_smul_univ (fun _ ↦ I) ![1, 1]
-    simp_all [laplace_eq_iteratedFDeriv_complexPlane f, ← ha,
+    simp_all [laplacian_eq_iteratedFDeriv_complexPlane f, ← ha,
       ContinuousMultilinearMap.restrictScalarsLinear_apply,
       ContinuousMultilinearMap.coe_restrictScalars]
 
@@ -110,8 +110,7 @@ private lemma analyticAt_harmonicAt_log_normSq {z : ℂ} {g : ℂ → ℂ} (h₁
       apply Filter.eventuallyEq_iff_exists_mem.2
       use g⁻¹' (Complex.slitPlane ∩ {0}ᶜ), t₀
       · intro x hx
-        simp only [Function.comp_apply, Pi.add_apply, conjCLE_apply, add_re, conj_re,
-          add_left_inj]
+        simp only [Function.comp_apply, Pi.add_apply, conjCLE_apply]
         congr 1
         rw [← Complex.log_conj]
         simp [Complex.slitPlane_arg_ne_pi hx.1]

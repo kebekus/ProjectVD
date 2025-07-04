@@ -3,7 +3,7 @@ Copyright (c) 2025 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import VD.ToMathlib.Laplace
+import Mathlib.Analysis.InnerProductSpace.Laplacian
 
 /-!
 # Harmonic Functions
@@ -19,7 +19,7 @@ variable
   {f f₁ f₂ : E → F}
   {x : E} {s t : Set E} {c : ℝ}
 
-open Topology
+open InnerProductSpace Topology
 
 /-!
 ## Missing theorems on the Laplace operator
@@ -27,12 +27,12 @@ open Topology
 theorem laplace_smul_nhds {x : E} {f : E → F} (v : ℝ) (h : ContDiffAt ℝ 2 f x) :
     Δ (v • f) =ᶠ[𝓝 x] v • (Δ f) := by
   filter_upwards [h.eventually (not_eq_of_beq_eq_false rfl)] with a ha
-  simp [laplace_smul v ha]
+  simp [laplacian_smul v ha]
 
 theorem ContDiffAt.laplace_CLM_comp_nhds {l : F →L[ℝ] G} (h : ContDiffAt ℝ 2 f x) :
     Δ (l ∘ f) =ᶠ[𝓝 x] l ∘ (Δ f) := by
   filter_upwards [h.eventually (not_eq_of_beq_eq_false rfl)] with a ha
-  rw [ha.laplace_CLM_comp]
+  rw [ha.laplacian_CLM_comp_left]
 
 /-!
 ## Definition
@@ -65,8 +65,8 @@ so is the other.
 theorem harmonicAt_congr_nhds {f₁ f₂ : E → F} {x : E} (h : f₁ =ᶠ[𝓝 x] f₂) :
     HarmonicAt f₁ x ↔ HarmonicAt f₂ x := by
   constructor <;> intro hf
-  · exact ⟨hf.1.congr_of_eventuallyEq h.symm, (laplace_congr_nhds h.symm).trans hf.2⟩
-  · exact ⟨hf.1.congr_of_eventuallyEq h, (laplace_congr_nhds h).trans hf.2⟩
+  · exact ⟨hf.1.congr_of_eventuallyEq h.symm, (laplacian_congr_nhds h.symm).trans hf.2⟩
+  · exact ⟨hf.1.congr_of_eventuallyEq h, (laplacian_congr_nhds h).trans hf.2⟩
 
 /--
 If `f` is harmonic at `x`, then it is harmonic at all points in a neighborhood of `x`.
@@ -101,7 +101,7 @@ theorem HarmonicAt.add (h₁ : HarmonicAt f₁ x) (h₂ : HarmonicAt f₂ x) :
     HarmonicAt (f₁ + f₂) x := by
   constructor
   · exact h₁.1.add h₂.1
-  · filter_upwards [h₁.1.laplace_add_nhd h₂.1, h₁.2, h₂.2] with a h₁a h₂a h₃a
+  · filter_upwards [h₁.1.laplacian_add_nhds h₂.1, h₁.2, h₂.2] with a h₁a h₂a h₃a
     simp_all
 
 /--
