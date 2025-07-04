@@ -52,12 +52,15 @@ theorem CauchyRiemann₇  {G : Type*} [NormedAddCommGroup G] [NormedSpace ℂ G]
           repeat rw [← coe_smul]
           rw [← smul_assoc]
           congr 1
-          simp
-          congr 1
-
-
-
+          · rw [smul_eq_mul]
+            rw [smul_eq_mul]
+            rw [smul_eq_mul]
+            rw [smul_eq_mul]
+            rw [ofReal_mul]
+            ring
+        ·
           sorry
+
     }
     rfl
 
