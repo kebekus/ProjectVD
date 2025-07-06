@@ -54,6 +54,7 @@ theorem characteristic_sub_characteristic_inv_at_zero (hf : MeromorphicOn f ⊤)
 Complement to the first part of the First Main Theorem: At 0, the difference
 between the characteristic functions of `f`  and `f⁻¹` equals `log ‖f 0‖`.
 -/
+@[simp]
 theorem characteristic_sub_characteristic_inv_off_zero (h : MeromorphicOn f ⊤) :
     characteristic f ⊤ 0 - characteristic f⁻¹ ⊤ 0 = log ‖f 0‖ := by
   calc characteristic f ⊤ 0 - characteristic f⁻¹ ⊤ 0

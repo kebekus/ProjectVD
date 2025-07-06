@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import VD.ToMathlib.Harmonic
-import VD.ToMathlib.restrictScalars
+import Mathlib.Analysis.Calculus.ContDiff.RestrictScalars
 import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
 
 /-!
@@ -12,10 +12,10 @@ import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
 
 This file constructs examples of harmonic functions.
 
-- If `f` is holomorphic on the complex plane, then `f` is harmonic and so is its
-  real part, imaginary part, and complex conjugate.
+- If `f` is complex-differentiable on the complex plane, then `f` is harmonic
+  and so is its real part, imaginary part, and complex conjugate.
 
-- If `f` is holomorphic without zero, then `log ‖f ·‖` is harmonic.
+- If `f` is complex-differentiable without zero, then `log ‖f‖` is harmonic.
 -/
 
 open Complex InnerProductSpace Topology
@@ -34,12 +34,11 @@ Continuously complex-differentiable functions on ℂ are harmonic.
 theorem ContDiffAt.harmonicAt (h : ContDiffAt ℂ 2 f x) : HarmonicAt f x := by
   constructor
   · exact h.restrict_scalars ℝ
-  · filter_upwards [h.iteratedFDeriv_restrictScalars_eventuallyEq (𝕜 := ℝ)] with a ha
+  · filter_upwards [h.restrictScalars_iteratedFDeriv_eventuallyEq (𝕜 := ℝ)] with a ha
     have : (iteratedFDeriv ℂ 2 f a) (I • ![1, 1])
         = (∏ i, I) • ((iteratedFDeriv ℂ 2 f a) ![1, 1]) :=
       (iteratedFDeriv ℂ 2 f a).map_smul_univ (fun _ ↦ I) ![1, 1]
     simp_all [laplacian_eq_iteratedFDeriv_complexPlane f, ← ha,
-      ContinuousMultilinearMap.restrictScalarsLinear_apply,
       ContinuousMultilinearMap.coe_restrictScalars]
 
 /--
