@@ -94,9 +94,6 @@ theorem CauchyRiemann₇
       rw [this, partialDeriv_smul₁ ℝ]
       simp
 
-
-
-
 /-
 
 A harmonic, real-valued function on ℂ is the real part of a suitable holomorphic

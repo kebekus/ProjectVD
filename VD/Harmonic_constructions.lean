@@ -5,7 +5,6 @@ Authors: Stefan Kebekus
 -/
 import VD.ToMathlib.Harmonic
 import VD.ToMathlib.restrictScalars
-import Mathlib.Analysis.Complex.CauchyIntegral
 import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
 
 /-!
@@ -13,8 +12,8 @@ import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
 
 This file constructs examples of harmonic functions.
 
-- If `f` is holomorphic on the complex plane, then `f` is holomorphic, and so is
-  its real part, imaginary part, and complex conjugate.
+- If `f` is holomorphic on the complex plane, then `f` is harmonic and so is its
+  real part, imaginary part, and complex conjugate.
 
 - If `f` is holomorphic without zero, then `log ‖f ·‖` is harmonic.
 -/
