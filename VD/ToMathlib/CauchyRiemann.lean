@@ -7,6 +7,43 @@ import Mathlib.Analysis.Complex.Conformal
 
 open Complex
 
+variable
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
+
+theorem aa {ℓ : ℂ →ₗ[ℝ] E} {a : ℝ} {b : ℂ} :
+    ℓ ((a : ℂ) • b) = a • ℓ b := by
+  rw [coe_smul, ℓ.map_smul]
+
+theorem bb {ℓ : ℂ →ₗ[ℝ] E} {a : ℝ}  :
+    ℓ (a : ℂ) = a • ℓ (1 : ℂ) := by
+  rw [← ℓ.map_smul]
+  congr
+  simp
+
+theorem real_linearMap_map_smul_complex' {ℓ : ℂ →ₗ[ℝ] E} (h : ℓ I = I • ℓ 1) :
+    ∀ (a b : ℂ), ℓ (a • b) = a • ℓ b := by
+  intro a b
+  rw [(by simp  : a = (a.re : ℂ) + (a.im : ℂ) • I), (by simp : b = (b.re : ℂ) + (b.im : ℂ) • I)]
+  repeat rw [add_smul]
+  repeat rw [smul_add]
+  repeat rw [ℓ.map_add]
+  have t₀ : ((a.im : ℂ) • I) • (b.re : ℂ) = (↑(a.im * b.re) : ℂ) • I := by
+    simp only [smul_eq_mul, ofReal_mul]
+    ring
+  have t₁ : ((a.im : ℂ) • I) • (b.im : ℂ) • I = (↑(- a.im * b.im) : ℂ) • (1 : ℂ) := by
+    simp only [smul_eq_mul, neg_mul, ofReal_neg, ofReal_mul, mul_one]
+    ring_nf
+    simp
+  rw [t₀, t₁]
+  repeat rw [aa]
+  repeat rw [bb]
+  repeat rw [h]
+  match_scalars
+  simp only [coe_algebraMap, mul_one, neg_mul, smul_eq_mul]
+  ring_nf
+  simp
+  ring
+
 /--
 Helper lemma for `differentiableAt_complex_iff_differentiableAt_real`: A real
 linear map `ℓ : ℂ →ₗ[ℝ] ℂ` respects complex scalar multiplication if it maps `I`
