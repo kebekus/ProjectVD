@@ -12,10 +12,11 @@ import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
 
 This file constructs examples of harmonic functions.
 
-- If `f` is complex-differentiable on the complex plane, then `f` is harmonic
-  and so is its real part, imaginary part, and complex conjugate.
+- If `f : ℂ → ℂ` is complex-differentiable, then `f` is harmonic and so is its
+  real part, imaginary part, and complex conjugate.
 
-- If `f` is complex-differentiable without zero, then `log ‖f‖` is harmonic.
+- If `f : ℂ → ℂ` is complex-differentiable without zero, then `log ‖f‖` is
+  harmonic.
 -/
 
 open Complex InnerProductSpace Topology
@@ -107,11 +108,11 @@ private lemma analyticAt_harmonicAt_log_normSq {z : ℂ} {g : ℂ → ℂ} (h₁
     _ =ᶠ[𝓝 z] ⇑reCLM ∘ (⇑conjCLE ∘ log ∘ g + log ∘ g) := by
       apply Filter.eventuallyEq_iff_exists_mem.2
       use g⁻¹' (Complex.slitPlane ∩ {0}ᶜ), t₀
-      · intro x hx
-        simp only [Function.comp_apply, Pi.add_apply, conjCLE_apply]
-        congr 1
-        rw [← Complex.log_conj]
-        simp [Complex.slitPlane_arg_ne_pi hx.1]
+      intro x hx
+      simp only [Function.comp_apply, Pi.add_apply, conjCLE_apply]
+      congr 1
+      rw [← Complex.log_conj]
+      simp [Complex.slitPlane_arg_ne_pi hx.1]
 
 /--
 If `f : ℂ → ℂ` is complex-analytic without zero, then `log ‖f‖` is harmonic.
