@@ -3,7 +3,7 @@ Copyright (c) 2025 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import VD.ToMathlib.Harmonic
+import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
 import Mathlib.Analysis.Calculus.ContDiff.RestrictScalars
 import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
 
@@ -52,19 +52,19 @@ theorem AnalyticAt.harmonicAt [CompleteSpace F] (h : AnalyticAt ℂ f x) :
 If `f : ℂ → ℂ` is complex-analytic, then its real part is harmonic.
 -/
 theorem ContDiffAt.harmonicAt_realPart {f : ℂ → ℂ} (h : AnalyticAt ℂ f x) :
-    HarmonicAt (reCLM ∘ f) x := h.harmonicAt.comp_CLM
+    HarmonicAt (reCLM ∘ f) x := h.harmonicAt.comp_CLM reCLM
 
 /--
 If `f : ℂ → ℂ` is complex-analytic, then its imaginary part is harmonic.
 -/
 theorem ContDiffAt.harmonicAt_imaginaryPart {f : ℂ → ℂ} (h : AnalyticAt ℂ f x) :
-  HarmonicAt (imCLM ∘ f) x := h.harmonicAt.comp_CLM
+  HarmonicAt (imCLM ∘ f) x := h.harmonicAt.comp_CLM imCLM
 
 /--
 If `f : ℂ → ℂ` is complex-analytic, then its complex conjugate is harmonic.
 -/
 theorem ContDiffAt.harmonicAt_conjugate {f : ℂ → ℂ} (h : AnalyticAt ℂ f x) :
-  HarmonicAt (conjCLE ∘ f) x := harmonicAt_iff_harmonicAt_comp_CLE.1 h.harmonicAt
+  HarmonicAt (conjCLE ∘ f) x := (harmonicAt_comp_CLE_iff conjCLE).2 h.harmonicAt
 
 /-!
 ## Harmonicity of `log ‖analytic‖`
@@ -85,8 +85,8 @@ private lemma analyticAt_harmonicAt_log_normSq {z : ℂ} {g : ℂ → ℂ} (h₁
     (h₂g : g z ≠ 0) (h₃g : g z ∈ slitPlane) :
     HarmonicAt (Real.log ∘ normSq ∘ g) z := by
   rw [harmonicAt_congr_nhds (f₂ := reCLM ∘ (conjCLE ∘ log ∘ g + log ∘ g))]
-  · exact ((harmonicAt_iff_harmonicAt_comp_CLE.1 ((analyticAt_clog h₃g).comp h₁g).harmonicAt).add
-      ((analyticAt_clog h₃g).comp h₁g).harmonicAt).comp_CLM
+  · exact (((harmonicAt_comp_CLE_iff conjCLE).2 ((analyticAt_clog h₃g).comp h₁g).harmonicAt).add
+      ((analyticAt_clog h₃g).comp h₁g).harmonicAt).comp_CLM reCLM
   · have t₀ := h₁g.differentiableAt.continuousAt.preimage_mem_nhds
       ((isOpen_slitPlane.inter isOpen_ne).mem_nhds ⟨h₃g, h₂g⟩)
     calc Real.log ∘ normSq ∘ g
