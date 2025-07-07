@@ -12,8 +12,8 @@ import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
 
 This file constructs examples of harmonic functions.
 
-- If `f : ℂ → ℂ` is complex-differentiable, then `f` is harmonic and so is its
-  real part, imaginary part, and complex conjugate.
+- If `f : ℂ → F` is complex-differentiable, then `f` is harmonic. If `F = ℂ`,
+  then so is its real part, imaginary part, and complex conjugate.
 
 - If `f : ℂ → ℂ` is complex-differentiable without zero, then `log ‖f‖` is
   harmonic.
