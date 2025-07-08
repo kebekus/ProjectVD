@@ -48,7 +48,11 @@ theorem HarmonicAt.differentiableAt_complex (hf : HarmonicAt f x) :
     rw [sub_eq_add_neg]
     congr 1
     · simp
+      have : (fderiv ℝ (fun x ↦ (fderiv ℝ f x) 1) x) I = ((fderiv ℝ (fderiv ℝ f) x) 1) I := by
+        congr
 
+
+        sorry
       have := iteratedFDeriv_two_apply (𝕜 := ℝ) f x ![1, I]
       simp at this
       have t₀ : (fun x ↦ (fderiv ℝ f x) 1) = (fderiv ℝ (fderiv ℝ f) x) 1 := by
