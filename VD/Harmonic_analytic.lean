@@ -24,7 +24,8 @@ theorem HarmonicAt.xx (hf : HarmonicAt f x) :
   apply differentiableAt_complex_iff_differentiableAt_real.2
   constructor
   · fun_prop
-  · repeat rw [fderiv_add]
+  ·
+    repeat rw [fderiv_add]
     repeat rw [fderiv_sub]
     repeat rw [fderiv_const_smul]
     repeat rw [fderiv_comp]
@@ -36,11 +37,16 @@ theorem HarmonicAt.xx (hf : HarmonicAt f x) :
     rw [add_comm]
     rw [sub_eq_add_neg]
     congr 1
-    · sorry
+    · simp
+
+      have := iteratedFDeriv_two_apply (𝕜 := ℝ) f x ![1, I]
+      simp at this
+      have t₀ : (fun x ↦ (fderiv ℝ f x) 1) = (fderiv ℝ (fderiv ℝ f) x) 1 := by
+        sorry
+      rw [← this]
+      rw [← iteratedFDeriv_two_apply (𝕜 := ℝ) f x ![1, I] ]
+      sorry
     · have := hf.2
       sorry
     simp
-    fun_prop
-    repeat rw [fderiv_add]
-    sorry
-    sorry
+    all_goals fun_prop
