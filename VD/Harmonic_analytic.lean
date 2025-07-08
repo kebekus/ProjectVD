@@ -8,24 +8,34 @@ import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
 import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
 import VD.ToMathlib.CauchyRiemann
 
+/-!
+# Analyticity of Harmonic Functions
+
+If `f : ℂ → ℝ` is harmonic at `x`, we show that `∂f/∂1 - I • ∂f/∂I` is
+complex-analytic at `x`.
+
+TODO: As soon as PR #9598 (feat(Analysis/Complex): HasPrimitives on disc) is
+merged, extend this to show that `f` itself is locally the real part of a
+holomorphic function, and hence real-analytic.
+-/
+
 open Complex InnerProductSpace Topology
 
 variable
-  {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {f : ℂ → ℝ} {x : ℂ}
 
 /--
 If `f : ℂ → ℝ` is harmonic at `x`, then `∂f/∂1 - I • ∂f/∂I` is complex
 differentiable at `x`.
 -/
-theorem HarmonicAt.xx (hf : HarmonicAt f x) :
+theorem HarmonicAt.differentiableAt_complex (hf : HarmonicAt f x) :
     DifferentiableAt ℂ (ofRealCLM ∘ (fderiv ℝ f · 1) - I • ofRealCLM ∘ (fderiv ℝ f · I)) x := by
   have := hf.1
   apply differentiableAt_complex_iff_differentiableAt_real.2
   constructor
   · fun_prop
-  ·
-    repeat rw [fderiv_add]
+  · repeat rw [fderiv_add]
     repeat rw [fderiv_sub]
     repeat rw [fderiv_const_smul]
     repeat rw [fderiv_comp]
