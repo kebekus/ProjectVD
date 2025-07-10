@@ -364,7 +364,6 @@ theorem primitive_translation
   simp [g]
 
 
-
 theorem primitive_hasDerivAtBasepoint
   {E : Type u} [NormedAddCommGroup E] [NormedSpace ℂ E] [CompleteSpace E]
   {f : ℂ  → E}
@@ -408,7 +407,6 @@ theorem primitive_hasDerivAtBasepoint
     simp
   rw [this]
   exact hasDerivAt_id z₀
-
 
 
 theorem primitive_additivity
