@@ -9,7 +9,7 @@ variable {E F G : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   [NormedAddCommGroup F] [NormedSpace 𝕜 F] [NormedAddCommGroup G] [NormedSpace 𝕜 G]
 
 noncomputable def partialDeriv : E → (E → F) → (E → F) :=
-  fun v ↦ (fun f ↦ (fun w ↦ fderiv 𝕜 f w v))
+  fun v ↦ (fun f ↦ (fderiv 𝕜 f · v))
 
 theorem partialDeriv_eventuallyEq' {f₁ f₂ : E → F} {x : E} (h : f₁ =ᶠ[nhds x] f₂) :
     ∀ v : E, partialDeriv 𝕜 v f₁ =ᶠ[nhds x] partialDeriv 𝕜 v f₂ := by
@@ -332,7 +332,7 @@ theorem partialDeriv_comm
   funext z
 
   have derivSymm :
-    (fderiv ℝ (fun w => fderiv ℝ f w) z) v₁ v₂ = (fderiv ℝ (fun w => fderiv ℝ f w) z) v₂ v₁ := by
+    (fderiv ℝ (fderiv ℝ f ·) z) v₁ v₂ = (fderiv ℝ (fderiv ℝ f ·) z) v₂ v₁ := by
 
     let f' := fderiv ℝ f
     have h₀ : ∀ y, HasFDerivAt f (f' y) y := by

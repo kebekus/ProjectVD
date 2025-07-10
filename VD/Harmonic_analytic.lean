@@ -3,9 +3,9 @@ Copyright (c) 2025 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
+import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 import Mathlib.Analysis.Complex.CauchyIntegral
 import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
-import Mathlib.Analysis.SpecialFunctions.Complex.Analytic
 import VD.ToMathlib.CauchyRiemann
 
 /-!
@@ -22,45 +22,49 @@ holomorphic function, and hence real-analytic.
 open Complex InnerProductSpace Topology
 
 variable
-  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {f : ℂ → ℝ} {x : ℂ}
 
 /--
 If `f : ℂ → ℝ` is harmonic at `x`, then `∂f/∂1 - I • ∂f/∂I` is complex
 differentiable at `x`.
 -/
-theorem HarmonicAt.differentiableAt_complex (hf : HarmonicAt f x) :
+theorem HarmonicAt.differentiableAt_complex_partial (hf : HarmonicAt f x) :
     DifferentiableAt ℂ (ofRealCLM ∘ (fderiv ℝ f · 1) - I • ofRealCLM ∘ (fderiv ℝ f · I)) x := by
-  have := hf.1
+  have h₁f := hf.1
   apply differentiableAt_complex_iff_differentiableAt_real.2
   constructor
   · fun_prop
-  · repeat rw [fderiv_add]
-    repeat rw [fderiv_sub]
+  · repeat rw [fderiv_sub]
     repeat rw [fderiv_const_smul]
     repeat rw [fderiv_comp]
-    simp
-    repeat rw [mul_add]
+    simp only [ContinuousLinearMap.fderiv, ContinuousLinearMap.coe_sub',
+      ContinuousLinearMap.coe_comp', ContinuousLinearMap.coe_smul', Pi.sub_apply,
+      Function.comp_apply, ofRealCLM_apply, Pi.smul_apply, smul_eq_mul]
     repeat rw [mul_sub]
     ring_nf
-    simp
-    rw [add_comm]
-    rw [sub_eq_add_neg]
+    repeat rw [fderiv_clm_apply]
+    all_goals
+      try fun_prop
+    simp only [fderiv_fun_const, Pi.zero_apply, ContinuousLinearMap.comp_zero, zero_add,
+      ContinuousLinearMap.flip_apply, I_sq, neg_mul, one_mul, sub_neg_eq_add]
+    rw [add_comm, sub_eq_add_neg]
     congr 1
-    · simp
-      have : (fderiv ℝ (fun x ↦ (fderiv ℝ f x) 1) x) I = ((fderiv ℝ (fderiv ℝ f) x) 1) I := by
-        congr
+    · rw [ofReal_inj]
+      apply h₁f.isSymmSndFDerivAt (by simp)
+    · have h₂f := hf.2.eq_of_nhds
+      simp [laplacian_eq_iteratedFDeriv_complexPlane, iteratedFDeriv_two_apply,
+        add_eq_zero_iff_eq_neg] at h₂f
+      simp [h₂f]
 
-
-        sorry
-      have := iteratedFDeriv_two_apply (𝕜 := ℝ) f x ![1, I]
-      simp at this
-      have t₀ : (fun x ↦ (fderiv ℝ f x) 1) = (fderiv ℝ (fderiv ℝ f) x) 1 := by
-        sorry
-      rw [← this]
-      rw [← iteratedFDeriv_two_apply (𝕜 := ℝ) f x ![1, I] ]
-      sorry
-    · have := hf.2
-      sorry
-    simp
-    all_goals fun_prop
+/--
+If `f : ℂ → ℝ` is harmonic at `x`, then `∂f/∂1 - I • ∂f/∂I` is complex analytic
+at `x`.
+-/
+theorem HarmonicAt.analyticAt_complex_partial (hf : HarmonicAt f x) :
+    AnalyticAt ℂ (ofRealCLM ∘ (fderiv ℝ f · 1) - I • ofRealCLM ∘ (fderiv ℝ f · I)) x := by
+  apply DifferentiableOn.analyticAt (s := { x | HarmonicAt f x })
+  · intro y hy
+    apply DifferentiableAt.differentiableWithinAt
+    apply HarmonicAt.differentiableAt_complex_partial
+    exact hy
+  · exact (isOpen_setOf_harmonicAt f).mem_nhds hf
