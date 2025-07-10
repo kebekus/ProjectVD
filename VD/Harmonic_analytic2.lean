@@ -11,6 +11,13 @@ open Complex InnerProductSpace Topology
 variable
   {f : ℂ → ℝ} {x : ℂ}
 
+theorem xx {F : ℂ → ℂ} {s : Set ℂ} (hs : IsOpen s) :
+    AnalyticOn ℂ F s ↔ AnalyticOnNhd ℂ F s := by
+  constructor
+  · intro h
+    exact (IsOpen.analyticOn_iff_analyticOnNhd hs).mp h
+  · exact AnalyticOnNhd.analyticOn
+
 theorem harmonic_is_realOfHolomorphic {z : ℂ} {R : ℝ} (hR : 0 < R)
     (hf : HarmonicOnNhd f (Metric.ball z R)) :
     ∃ F, (AnalyticOnNhd ℂ F (Metric.ball z R)) ∧ (Set.EqOn (Complex.reCLM ∘ F) f (Metric.ball z R)) := by
@@ -20,10 +27,18 @@ theorem harmonic_is_realOfHolomorphic {z : ℂ} {R : ℝ} (hR : 0 < R)
 
   use F
   constructor
-  ·
+  · apply (IsOpen.analyticOn_iff_analyticOnNhd Metric.isOpen_ball).1
     apply DifferentiableOn.analyticOn
+    unfold F
+    apply DifferentiableOn.add
+    · apply primitive_differentiableOn
+      unfold g
+      intro y hy
 
-    apply primitive_differentiableOn
+      have := hf.1
+      fun_prop
+
+    · sorry
 
 intro x hx
 
