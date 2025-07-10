@@ -107,7 +107,7 @@ theorem harmonic_is_realOfHolomorphic
   {R : ℝ}
   (hR : 0 < R)
   (hf : ∀ x ∈ Metric.ball z R, HarmonicAt f x) :
-  ∃ F : ℂ → ℂ, (∀ x ∈ Metric.ball z R, HolomorphicAt F x) ∧ (Set.EqOn (Complex.reCLM ∘ F) f (Metric.ball z R)) := by
+  ∃ F, (∀ x ∈ Metric.ball z R, HolomorphicAt F x) ∧ (Set.EqOn (Complex.reCLM ∘ F) f (Metric.ball z R)) := by
 
   let f_1 : ℂ → ℂ := Complex.ofRealCLM ∘ (partialDeriv ℝ 1 f)
   let f_I : ℂ → ℂ := Complex.ofRealCLM ∘ (partialDeriv ℝ Complex.I f)
