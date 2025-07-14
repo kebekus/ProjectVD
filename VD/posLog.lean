@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2025 Stefan Kebekus. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Stefan Kebekus
+-/
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Periodic
 import Mathlib.MeasureTheory.Integral.CircleIntegral
@@ -5,6 +10,19 @@ import Mathlib.Analysis.SpecialFunctions.Integrals.LogTrigonometric
 import Mathlib.Analysis.SpecialFunctions.Integrability.LogMeromorphic
 import VD.harmonicAt_examples
 import VD.harmonicAt_meanValue
+
+/-!
+# Representation of `log⁺` as a Circle Average
+
+If `a` is any complex number of norm one, establish that the circle average
+`circleAverage (log ‖· - a‖) 0 1` vanishes.
+
+TODO: As soon as the mean value theorem for harmonic functions becomes
+available, extend this result to arbitrary complex numbers `a`, showing that the
+circle average equals the positive part of the logarithm, `circleAverage (log ‖·
+- a‖) 0 1 = = log⁺ ‖a‖`. This result, in turn, is a major ingredient in the
+  proof of Jensen's formula in complex analysis.
+-/
 
 open scoped Interval Topology
 open Real Filter MeasureTheory intervalIntegral
@@ -19,16 +37,18 @@ lemma circleMap_zero_one_add {x₁ x₂ : ℝ} :
     (circleMap 0 1 x₁) * (circleMap 0 1 x₂) = circleMap 0 1 (x₁+x₂) := by
   simp [circleMap, add_mul, Complex.exp_add]
 
-
+/-!
+## Preparatory Lemmas
+-/
 private lemma norm_circleMap_sub_const_eq_norm_one_sub_circleMapNeg_mul_const {x : ℝ} :
     ‖(circleMap 0 1 x) - a‖ = ‖1 - (circleMap 0 1 (-x)) * a‖ := by
   calc ‖(circleMap 0 1 x) - a‖
-  _ = 1 * ‖(circleMap 0 1 x) - a‖ := by
-    exact Eq.symm (one_mul ‖circleMap 0 1 x - a‖)
+  _ = 1 * ‖(circleMap 0 1 x) - a‖ :=
+    (one_mul ‖circleMap 0 1 x - a‖).symm
   _ = ‖(circleMap 0 1 (-x))‖ * ‖(circleMap 0 1 x) - a‖ := by
     simp [norm_circleMap_zero]
   _ = ‖(circleMap 0 1 (-x)) * ((circleMap 0 1 x) - a)‖ := by
-    exact Eq.symm (Complex.norm_mul (circleMap 0 1 (-x)) (circleMap 0 1 x - a))
+    exact (Complex.norm_mul (circleMap 0 1 (-x)) (circleMap 0 1 x - a)).symm
   _ = ‖(circleMap 0 1 (-x)) * (circleMap 0 1 x) - (circleMap 0 1 (-x)) * a‖ := by
     rw [mul_sub]
   _ = ‖(circleMap 0 1 0) - (circleMap 0 1 (-x)) * a‖ := by
@@ -38,12 +58,16 @@ private lemma norm_circleMap_sub_const_eq_norm_one_sub_circleMapNeg_mul_const {x
     congr
     simp [circleMap]
 
+lemma circleAverage_log_norm_id_sub_const_eq_circleAverage_log_norm_one_sub_id_mul_norm_const {a : ℂ} :
+    circleAverage (log ‖· - a‖) 0 1 = circleAverage (log ‖1 - · * ‖a‖‖) 0 1 := by
+  sorry
+
 /-!
 ## Computing `circleAverage (log ‖· - a‖) 0 1` in case where `‖a‖ = 1`.
 -/
 
 lemma circleAverage_log_norm_id_sub_one_eq_zero :
-  ∫ x in (0)..(2 * π), log ‖circleMap 0 1 x - 1‖ = 0 := by
+    ∫ x in (0)..(2 * π), log ‖circleMap 0 1 x - 1‖ = 0 := by
   calc ∫ x in (0)..(2 * π), log ‖circleMap 0 1 x - 1‖
   _ = ∫ x in (0)..(2 * π), log (4 * sin (x / 2) ^ 2) / 2 := by
     apply intervalIntegral.integral_congr
@@ -101,6 +125,17 @@ lemma circleAverage_log_norm_id_sub_one_eq_zero :
 If `‖a‖ = 1`, then `circleAverage (log ‖· - a‖) 0 1 = 0`.
 -/
 @[simp]
+theorem circleAverage_log_norm_sub_id_const_eq_zero'₂ (h : ‖a‖ = 1) :
+    circleAverage (log ‖· - a‖) 0 1 = 0 := by
+  simp_all only [circleAverage_log_norm_id_sub_const_eq_circleAverage_log_norm_one_sub_id_mul_norm_const]
+  unfold circleAverage
+  simp only [mul_inv_rev, Complex.ofReal_one, mul_one, smul_eq_mul, mul_eq_zero, inv_eq_zero,
+    pi_ne_zero, OfNat.ofNat_ne_zero, or_self, false_or]
+  convert circleAverage_log_norm_id_sub_one_eq_zero using 4 with x
+  rw [← norm_neg]
+  congr
+  simp
+
 theorem circleAverage_log_norm_sub_id_const_eq_zero₂ (ha : ‖a‖ = 1) :
   circleAverage (log ‖· - a‖) 0 1 = 0 := by
 
@@ -169,244 +204,3 @@ lemma circleAverage_log_norm_sub_id_const_eq_posLog :
     simp_all
   · -- 1 < ‖a‖
     sorry
-
--- Maximal 550 Zeilen
-
-
-/-!
-## Computing `circleAverage (log ‖· - a‖) 0 1` in case where `‖a‖ < 1`.
--/
-
-lemma xxx {a : ℂ} :
-    circleAverage (log ‖· - a‖) 0 1 = circleAverage (log ‖1 - · * a‖) 0 1 := by
-  sorry
-
-lemma yy {a : ℂ} (ha : a ∈ Metric.ball 0 1) :
-    HarmonicOn (log ‖1 - · * a‖) (Metric.closedBall 0 1) := by
-  sorry
-
-lemma int₀' {a : ℂ} (ha : a ∈ Metric.ball 0 1) :
-    circleAverage (log ‖· - a‖) 0 1 = 0 := by
-  rw [xxx]
-  sorry
-
-lemma int₀
-  {a : ℂ}
-  (ha : a ∈ Metric.ball 0 1) :
-  circleAverage (log ‖· - a‖) 0 1 = 0 := by
-  unfold circleAverage
-  simp [pi_ne_zero]
-
-  by_cases h₁a : a = 0
-  · simp_all [circleAverage]
-
-  -- case: a ≠ 0
-  simp_rw [norm_circleMap_sub_const_eq_norm_one_sub_circleMapNeg_mul_const]
-  have {x : ℝ} : log ‖1 - circleMap 0 1 (-x) * a‖ = (fun w ↦ log ‖1 - circleMap 0 1 (w) * a‖) (-x) := by rfl
-  conv =>
-    left
-    arg 1
-    intro x
-    rw [this]
-  rw [intervalIntegral.integral_comp_neg ((fun w ↦ log ‖1 - circleMap 0 1 (w) * a‖))]
-
-  let f₁ := fun w ↦ log ‖1 - circleMap 0 1 w * a‖
-  have {x : ℝ} : log ‖1 - circleMap 0 1 x * a‖ = f₁ (x + 2 * π) := by
-    dsimp [f₁]
-    congr 4
-    let A := periodic_circleMap 0 1 x
-    simp at A
-    exact id (Eq.symm A)
-  conv =>
-    left
-    arg 1
-    intro x
-    rw [this]
-  rw [intervalIntegral.integral_comp_add_right f₁ (2 * π)]
-  simp
-  dsimp [f₁]
-
-  let ρ := ‖a‖⁻¹
-  have hρ : 1 < ρ := by
-    apply one_lt_inv_iff₀.mpr
-    constructor
-    · exact norm_pos_iff.mpr h₁a
-    · exact mem_ball_zero_iff.mp ha
-
-  let F := fun z ↦ log ‖1 - z * a‖
-
-  have hf : ∀ x ∈ Metric.ball 0 ρ, HarmonicAt F x := by
-    intro x hx
-    apply logabs_of_holomorphicAt_is_harmonic
-    apply Differentiable.holomorphicAt
-    fun_prop
-    apply sub_ne_zero_of_ne
-    by_contra h
-    have : ‖x * a‖ < 1 := by
-      calc ‖x * a‖
-      _ = ‖x‖ * ‖a‖ := by exact Complex.norm_mul x a
-      _ < ρ * ‖a‖ := by
-        apply (mul_lt_mul_right _).2
-        exact mem_ball_zero_iff.mp hx
-        exact norm_pos_iff.mpr h₁a
-      _ = 1 := by
-        dsimp [ρ]
-        apply inv_mul_cancel₀
-        exact norm_ne_zero_iff.mpr h₁a
-    rw [← h] at this
-    simp at this
-
-  let A := harmonic_meanValue ρ 1 zero_lt_one hρ hf
-  dsimp [F] at A
-  simp at A
-  exact A
-
-
-lemma int''₁ {a : ℂ} {t₁ t₂ : ℝ} :
-    IntervalIntegrable (log ‖circleMap 0 1 · - a‖) volume t₁ t₂ := by
-  apply Function.Periodic.intervalIntegrable₀ _ two_pi_pos
-  · apply circleIntegrable_log_norm_meromorphicOn (f := (· - a)) (fun _ _ ↦ by fun_prop)
-  · rw [(by rfl : (log ‖circleMap 0 1 · - a‖) = (log ‖· - a‖) ∘ (circleMap 0 1))]
-    apply (periodic_circleMap 0 1).comp
-
--- Integral of log ‖circleMap 0 1 x - 1‖
-
--- integral
-
-
-lemma int₁ :
-  ∫ x in (0)..(2 * π), log ‖circleMap 0 1 x - 1‖ = 0 := by
-
-  simp_rw [logAffineHelper]
-  simp
-
-  have : ∫ (x : ℝ) in (0)..2 * π, log (4 * sin (x / 2) ^ 2) =  2 * ∫ (x : ℝ) in (0)..π, log (4 * sin x ^ 2) := by
-    have : 1 = 2 * (2 : ℝ)⁻¹ := by exact Eq.symm (mul_inv_cancel_of_invertible 2)
-    nth_rw 1 [← one_mul (∫ (x : ℝ) in (0)..2 * π, log (4 * sin (x / 2) ^ 2))]
-    rw [← mul_inv_cancel_of_invertible 2, mul_assoc]
-    let f := fun y ↦ log (4 * sin y ^ 2)
-    have {x : ℝ} : log (4 * sin (x / 2) ^ 2) = f (x / 2) := by simp [f]
-    conv =>
-      left
-      right
-      right
-      arg 1
-      intro x
-      rw [this]
-    rw [intervalIntegral.inv_mul_integral_comp_div]
-    simp [f]
-  rw [this]
-  simp
-  exact int₁₁
-
--- Integral of log ‖circleMap 0 1 x - a‖, for ‖a‖ = 1
-
--- integral
-
-
-
--- integral
-lemma int₃ {a : ℂ} (ha : a ∈ Metric.closedBall 0 1) :
-    circleAverage (log ‖· - a‖) 0 1 = 0 := by
-  by_cases h₁a : a ∈ Metric.ball 0 1
-  · exact int₀ h₁a
-  · apply int₂
-    simp at ha
-    simp at h₁a
-    linarith
-
--- integral
-lemma int₄ {a : ℂ} {R : ℝ} (hR : 0 < R) (ha : a ∈ Metric.closedBall 0 R) :
-    circleAverage (log ‖· - a‖) 0 R = log R := by
-  have h₁a : a / R ∈ Metric.closedBall 0 1 := by
-    simp
-    simp at ha
-    rw [div_le_comm₀]
-    simp
-    have : R = |R| := by
-      exact Eq.symm (abs_of_pos hR)
-    rwa [this] at ha
-    rwa [abs_of_pos hR]
-    simp
-
-  have t₀ {x : ℝ} : circleMap 0 R x = R * circleMap 0 1 x := by
-    unfold circleMap
-    simp
-
-  have {x : ℝ} : circleMap 0 R x - a = R * (circleMap 0 1 x - (a / R)) := by
-    rw [t₀, mul_sub, mul_div_cancel₀]
-    rw [ne_eq, Complex.ofReal_eq_zero]
-    exact hR.ne.symm
-
-  have {x : ℝ} : circleMap 0 R x ≠ a → log ‖circleMap 0 R x - a‖ = log R + log ‖circleMap 0 1 x - (a / R)‖ := by
-    intro hx
-    rw [this]
-    rw [norm_mul]
-    rw [log_mul]
-    congr
-    --
-    simpa using hR.le
-    --
-    simp
-    exact hR.ne.symm
-    --
-    simp
-    rw [t₀] at hx
-    by_contra hCon
-    rw [sub_eq_zero] at hCon
-    rw [hCon] at hx
-    simp at hx
-    rw [mul_div_cancel₀] at hx
-    tauto
-    simp
-    exact hR.ne.symm
-
-  have : ∫ x in (0)..(2 * π), log ‖circleMap 0 R x - a‖ = ∫ x in (0)..(2 * π), log R + log ‖circleMap 0 1 x - (a / R)‖ := by
-    rw [intervalIntegral.integral_congr_ae]
-    rw [MeasureTheory.ae_iff]
-    apply Set.Countable.measure_zero
-    let A := (circleMap 0 R)⁻¹' { a }
-    have s₀ : {a_1 | ¬(a_1 ∈ Ι 0 (2 * π) → log ‖circleMap 0 R a_1 - a‖ = log R + log ‖circleMap 0 1 a_1 - a / ↑R‖)} ⊆ A := by
-      intro x
-      contrapose
-      intro hx
-      unfold A at hx
-      simp at hx
-      simp
-      intro h₂x
-      let B := this hx
-      simp at B
-      rw [B]
-    have s₁ : A.Countable := by
-      apply Set.Countable.preimage_circleMap
-      exact Set.countable_singleton a
-      exact hR.ne.symm
-    exact Set.Countable.mono s₀ s₁
-
-  have aga : circleAverage (log ‖· - a‖) 0 R = log R + circleAverage (log ‖· - (a / R)‖) 0 1 := by
-    unfold circleAverage
-    rw [this]
-    rw [intervalIntegral.integral_add]
-    rw [intervalIntegral.integral_const]
-    rw [smul_add]
-    congr
-    simp only [sub_zero, smul_eq_mul]
-    ring_nf
-    simp [pi_ne_zero]
-    apply intervalIntegral.intervalIntegrable_const
-    exact int''₁
-  simp [aga, int₃ h₁a]
-
--- integral
-lemma int₅ {a : ℂ} {R : ℝ} (ha : a ∈ Metric.closedBall 0 |R|) :
-    circleAverage (log ‖· - a‖) 0 R = log R := by
-  rcases lt_trichotomy 0 R with h | h | h
-  · rw [int₄ h]
-    ring_nf
-    simp_all only [abs_of_pos h, Metric.mem_closedBall, dist_zero_right]
-  · rw [eq_comm] at h
-    simp_all
-  · rw [← circleAverage_neg_radius, int₄ (Left.neg_pos_iff.mpr h)]
-    ring_nf
-    simp_all only [Metric.mem_closedBall, dist_zero_right, log_neg_eq_log]
-    rwa [← abs_of_neg h]
