@@ -33,6 +33,7 @@ variable {a : ℂ}
 ## Lemmas for the circleMap
 -/
 
+@[simp]
 lemma circleMap_zero_one_add {x₁ x₂ : ℝ} :
     (circleMap 0 1 x₁) * (circleMap 0 1 x₂) = circleMap 0 1 (x₁ + x₂) := by
   simp [circleMap, add_mul, Complex.exp_add]
@@ -78,9 +79,21 @@ lemma circleAverage_log_norm_id_sub_const_eq_circleAverage_log_norm_one_sub_id_m
 ## Computing `circleAverage (log ‖· - a‖) 0 1` in case where `‖a‖ = 1`.
 -/
 
-lemma circleAverage_log_norm_id_sub_one_eq_zero :
-    ∫ x in (0)..(2 * π), log ‖circleMap 0 1 x - 1‖ = 0 := by
-  calc ∫ x in (0)..(2 * π), log ‖circleMap 0 1 x - 1‖
+lemma circleAverage_log_norm_id_sub_one_eq_zero (h : ‖a‖ = 1) :
+    ∫ x in (0)..(2 * π), log ‖circleMap 0 1 x - a‖ = 0 := by
+  obtain ⟨ζ, hζ⟩ := (by simp [Set.exists_range_iff.mp, h] : ∃ ζ, a⁻¹ = circleMap 0 1 ζ)
+  calc ∫ x in (0)..(2 * π), log ‖circleMap 0 1 x - a‖
+  _ = ∫ x in (0)..(2 * π), log ‖(circleMap 0 1 ζ) * (circleMap 0 1 x - a)‖ := by
+    simp
+  _ = ∫ x in (0)..(2 * π), log ‖circleMap 0 1 (ζ + x) - (circleMap 0 1 ζ) * a‖ := by
+    simp [mul_sub]
+  _ = ∫ x in (0)..(2 * π), log ‖circleMap 0 1 (ζ + x) - 1‖ := by
+    simp [← hζ, inv_mul_cancel₀ (by aesop : a ≠ 0)]
+  _ = ∫ x in (0)..(2 * π), log ‖circleMap 0 1 x - 1‖ := by
+    have : Function.Periodic (log ‖circleMap 0 1 · - 1‖) (2 * π) :=
+      fun x ↦ by simp [periodic_circleMap 0 1 x]
+    have := this.intervalIntegral_add_eq (t := 0) (s := ζ)
+    simp_all [intervalIntegral.integral_comp_add_left (log ‖circleMap 0 1 · - 1‖)]
   _ = ∫ x in (0)..(2 * π), log (4 * sin (x / 2) ^ 2) / 2 := by
     apply intervalIntegral.integral_congr
     intro x hx
@@ -132,6 +145,22 @@ lemma circleAverage_log_norm_id_sub_one_eq_zero :
     simp only [intervalIntegral.integral_const, sub_zero, smul_eq_mul, integral_log_sin_zero_pi,
       (by norm_num : (4 : ℝ) = 2 * 2), log_mul two_ne_zero two_ne_zero]
     ring
+
+theorem xxx (h : ‖a‖ = 1) :
+    ∫ x in (0)..(2 * π), log ‖circleMap 0 1 x - a‖ = ∫ x in (0)..(2 * π), log ‖circleMap 0 1 x - 1‖ := by
+  obtain ⟨ζ, hζ⟩ := (by simp [Set.exists_range_iff.mp, h] : ∃ ζ, a⁻¹ = circleMap 0 1 ζ)
+  calc ∫ x in (0)..(2 * π), log ‖circleMap 0 1 x - a‖
+  _ = ∫ x in (0)..(2 * π), log ‖(circleMap 0 1 ζ) * (circleMap 0 1 x - a)‖ := by
+    simp
+  _ = ∫ x in (0)..(2 * π), log ‖circleMap 0 1 (ζ + x) - (circleMap 0 1 ζ) * a‖ := by
+    simp [mul_sub]
+  _ = ∫ x in (0)..(2 * π), log ‖circleMap 0 1 (ζ + x) - 1‖ := by
+    simp [← hζ, inv_mul_cancel₀ (by aesop : a ≠ 0)]
+  _ = ∫ x in (0)..(2 * π), log ‖circleMap 0 1 x - 1‖ := by
+    have : Function.Periodic (log ‖circleMap 0 1 · - 1‖) (2 * π) :=
+      fun x ↦ by simp [periodic_circleMap 0 1 x]
+    have := this.intervalIntegral_add_eq (t := 0) (s := ζ)
+    simp_all [intervalIntegral.integral_comp_add_left (log ‖circleMap 0 1 · - 1‖)]
 
 /--
 If `‖a‖ = 1`, then `circleAverage (log ‖· - a‖) 0 1 = 0`.
