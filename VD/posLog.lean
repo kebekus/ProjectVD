@@ -21,7 +21,7 @@ TODO: As soon as the mean value theorem for harmonic functions becomes
 available, extend this result to arbitrary complex numbers `a`, showing that the
 circle average equals the positive part of the logarithm, `circleAverage (log ‖·
 - a‖) 0 1 = = log⁺ ‖a‖`. This result, in turn, is a major ingredient in the
-  proof of Jensen's formula in complex analysis.
+proof of Jensen's formula in complex analysis.
 -/
 
 open scoped Interval Topology
@@ -34,8 +34,16 @@ variable {a : ℂ}
 -/
 
 lemma circleMap_zero_one_add {x₁ x₂ : ℝ} :
-    (circleMap 0 1 x₁) * (circleMap 0 1 x₂) = circleMap 0 1 (x₁+x₂) := by
+    (circleMap 0 1 x₁) * (circleMap 0 1 x₂) = circleMap 0 1 (x₁ + x₂) := by
   simp [circleMap, add_mul, Complex.exp_add]
+
+lemma circleMap_neg_eq {x : ℝ} :
+    (circleMap 0 1 (-x)) = circleMap 0 1 (x + π) := by
+  unfold circleMap
+  rw [Complex.exp_mul_I, Complex.exp_mul_I]
+
+  simp
+  sorry
 
 /-!
 ## Preparatory Lemmas
@@ -60,6 +68,11 @@ private lemma norm_circleMap_sub_const_eq_norm_one_sub_circleMapNeg_mul_const {x
 
 lemma circleAverage_log_norm_id_sub_const_eq_circleAverage_log_norm_one_sub_id_mul_norm_const {a : ℂ} :
     circleAverage (log ‖· - a‖) 0 1 = circleAverage (log ‖1 - · * ‖a‖‖) 0 1 := by
+  unfold circleAverage
+  congr 1
+  simp
+  simp_rw [norm_circleMap_sub_const_eq_norm_one_sub_circleMapNeg_mul_const]
+
   sorry
 
 /-!
@@ -193,14 +206,3 @@ theorem circleAverage_log_norm_sub_id_const_eq_zero₂ (ha : ‖a‖ = 1) :
 
   simp_rw [this]
   exact circleAverage_log_norm_id_sub_one_eq_zero
-
-
-lemma circleAverage_log_norm_sub_id_const_eq_posLog :
-    circleAverage (log ‖· - a‖) 0 1 = log⁺ ‖a‖ := by
-  rcases lt_trichotomy ‖a‖ 1 with h | h | h
-  · -- ‖a‖ < 1
-    sorry
-  · unfold posLog
-    simp_all
-  · -- 1 < ‖a‖
-    sorry
