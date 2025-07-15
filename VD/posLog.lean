@@ -41,8 +41,7 @@ lemma circleMap_neg_eq {x : ℝ} :
     (circleMap 0 1 (-x)) = circleMap 0 1 (x + π) := by
   unfold circleMap
   rw [Complex.exp_mul_I, Complex.exp_mul_I]
-
-  simp
+  simp [Complex.cos_add_pi, Complex.sin_add_pi]
   sorry
 
 /-!
