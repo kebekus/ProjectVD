@@ -61,10 +61,7 @@ If `f : ℂ → ℝ` is harmonic at `x`, then `∂f/∂1 - I • ∂f/∂I` is c
 at `x`.
 -/
 theorem HarmonicAt.analyticAt_complex_partial (hf : HarmonicAt f x) :
-    AnalyticAt ℂ (ofRealCLM ∘ (fderiv ℝ f · 1) - I • ofRealCLM ∘ (fderiv ℝ f · I)) x := by
-  apply DifferentiableOn.analyticAt (s := { x | HarmonicAt f x })
-  · intro y hy
-    apply DifferentiableAt.differentiableWithinAt
-    apply HarmonicAt.differentiableAt_complex_partial
-    exact hy
-  · exact (isOpen_setOf_harmonicAt f).mem_nhds hf
+    AnalyticAt ℂ (ofRealCLM ∘ (fderiv ℝ f · 1) - I • ofRealCLM ∘ (fderiv ℝ f · I)) x :=
+  DifferentiableOn.analyticAt (s := { x | HarmonicAt f x })
+    (fun _ hy ↦ (HarmonicAt.differentiableAt_complex_partial hy).differentiableWithinAt)
+    ((isOpen_setOf_harmonicAt f).mem_nhds hf)
