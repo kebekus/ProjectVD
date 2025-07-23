@@ -25,8 +25,36 @@ variable
 lemma continuousAt_circleAverage (h : ContDiffOn ℝ 0 f (Metric.sphere 0 r)) :
     ContinuousAt (circleAverage f 0) r := by
   unfold circleAverage
+  have ε : ℝ := by
+    sorry
+  have h₁ε : 0 < ε := by
+    sorry
+  have a : Set ℂ := Metric.closedBall 0 (r + ε) \ Metric.ball 0 (r - ε)
+  have h₁a : IsCompact a := by
+    sorry
+  have n : Set ℝ := Metric.ball 0 (r + ε) \ Metric.closedBall 0 (r - ε)
+  have hn : n ∈ 𝓝 r := by
+    sorry
+  have h₂n : ∀ ρ : ℝ, dist ρ r < ε → ∀ t : ℝ, circleMap 0 ρ t ∈ a := by
+    sorry
+  have h₂f : ContinuousOn f a := by
+    sorry
   apply ContinuousAt.mul (by fun_prop)
-  sorry
+  apply intervalIntegral.continuousAt_of_dominated_interval
+  · apply Metric.eventually_nhds_iff.mpr
+    use ε, h₁ε
+    intro ρ hρ
+    apply ContinuousOn.aestronglyMeasurable
+    · intro t ht
+      apply ContinuousAt.continuousWithinAt
+      apply ContinuousAt.comp'
+      · sorry
+      · sorry
+    · exact measurableSet_uIoc
+  · sorry
+  · sorry
+  · sorry
+  · sorry
 
 lemma xx {r : ℝ} :
     DifferentiableAt ℝ (circleAverage f 0) r := by
