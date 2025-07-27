@@ -5,8 +5,8 @@ Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 import Mathlib.Analysis.Complex.CauchyIntegral
+import Mathlib.Analysis.Complex.Conformal
 import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
-import VD.ToMathlib.CauchyRiemann
 
 /-!
 # Analyticity of Harmonic Functions
