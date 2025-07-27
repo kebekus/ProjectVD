@@ -5,9 +5,9 @@ Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 import Mathlib.Analysis.Complex.CauchyIntegral
+import Mathlib.Analysis.Complex.Conformal
 import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
 import Mathlib.MeasureTheory.Integral.CircleAverage
-import VD.ToMathlib.CauchyRiemann
 
 /-!
 # Mean Value Property of Harmonic Functions
