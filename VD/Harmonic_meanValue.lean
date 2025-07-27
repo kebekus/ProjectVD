@@ -32,6 +32,8 @@ lemma continuousAt_circleAverage (h : ContDiffOn ℝ 0 f (Metric.sphere 0 r)) :
   have a : Set ℂ := Metric.closedBall 0 (r + ε) \ Metric.ball 0 (r - ε)
   have h₁a : IsCompact a := by
     sorry
+  have h₂a : ∀ ρ t, a ∈ 𝓝 (circleMap 0 ρ t) := by
+    sorry
   have n : Set ℝ := Metric.ball 0 (r + ε) \ Metric.closedBall 0 (r - ε)
   have hn : n ∈ 𝓝 r := by
     sorry
@@ -47,11 +49,11 @@ lemma continuousAt_circleAverage (h : ContDiffOn ℝ 0 f (Metric.sphere 0 r)) :
     apply ContinuousOn.aestronglyMeasurable
     · intro t ht
       apply ContinuousAt.continuousWithinAt
-      apply ContinuousAt.comp'
-      · sorry
-      · sorry
+      apply ContinuousAt.comp' _ (by fun_prop)
+      exact (continuousWithinAt_iff_continuousAt (h₂a ρ t)).1 (h₂f (circleMap 0 ρ t) (h₂n ρ hρ t))
     · exact measurableSet_uIoc
-  · sorry
+  ·
+    sorry
   · sorry
   · sorry
   · sorry
