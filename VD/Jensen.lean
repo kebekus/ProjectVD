@@ -22,6 +22,25 @@ open Filter MeromorphicAt MeromorphicOn Metric Real
 variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
 
+lemma Function.locallyFinsuppWithin.countingFunction_finsum_eq_finsum_add' {c : ℂ} {R : ℝ} {D : ℂ → ℤ} (hR : R ≠ 0)
+    (hD : D.support.Finite) :
+    ∑ᶠ u, D u * (log R - log ‖c - u‖) = ∑ᶠ u, D u * log (R * ‖c - u‖⁻¹) + D c * log R := by
+  by_cases h : c ∈ D.support
+  · have {g : ℂ → ℝ} : (fun u ↦ D u * g u).support ⊆ hD.toFinset := fun x ↦ by
+      simp +contextual
+    simp [finsum_eq_sum_of_support_subset _ this,
+      Finset.sum_eq_sum_diff_singleton_add ((Set.Finite.mem_toFinset hD).mpr h), norm_zero,
+      log_zero, sub_zero, inv_zero, mul_zero, add_zero, add_left_inj]
+    refine Finset.sum_congr rfl fun x hx ↦ ?_
+    simp only [Finset.mem_sdiff, Finset.notMem_singleton] at hx
+    simp [log_mul hR (inv_ne_zero (norm_ne_zero_iff.mpr hx.2)), sub_eq_add_neg]
+  · simp_all only [mem_support, Decidable.not_not, Int.cast_zero, zero_mul, add_zero]
+    refine finsum_congr fun x ↦ ?_
+    by_cases h₁ : x = c
+    · simp_all
+    · simp [log_mul hR (inv_ne_zero (norm_ne_zero_iff.mpr h₁)), sub_eq_add_neg]
+
+
 /-!
 ## Circle Averages
 
@@ -102,45 +121,47 @@ center `c` and radius `R`, then the `circleAverage (log ‖f ·‖) 0 R` equals 
 `‖meromorphicTrailingCoeffAt f 0‖` plus a correction term that accounts for the
 zeros of poles of `f` within the ball.
 -/
-theorem MeromorphicOn.JensenFormula {R : ℝ} {f : ℂ → ℂ} (hR : R ≠ 0) (h₁f : MeromorphicOn f (closedBall 0 |R|)) :
-    circleAverage (log ‖f ·‖) 0 R
-      = ∑ᶠ u, divisor f (closedBall 0 |R|) u * log (R * ‖u‖⁻¹)
-        + divisor f (closedBall 0 |R|) 0 * log R + log ‖meromorphicTrailingCoeffAt f 0‖ := by
+theorem MeromorphicOn.JensenFormula {c : ℂ} {R : ℝ} {f : ℂ → ℂ} (hR : R ≠ 0)
+    (h₁f : MeromorphicOn f (closedBall c |R|)) :
+    circleAverage (log ‖f ·‖) c R
+      = ∑ᶠ u, divisor f (closedBall c |R|) u * log (R * ‖c - u‖⁻¹)
+        + divisor f (closedBall c |R|) c * log R + log ‖meromorphicTrailingCoeffAt f c‖ := by
   -- Shorthand notation to keep line size in check
-  let CB := closedBall (0 : ℂ) |R|
+  let CB := closedBall c |R|
   by_cases h₂f : ∀ u : CB, meromorphicOrderAt f u ≠ ⊤
-  · have h₃f := (divisor f CB).finiteSupport (isCompact_closedBall 0 |R|)
+  · have h₃f := (divisor f CB).finiteSupport (isCompact_closedBall c |R|)
     -- Extract zeros & poles and compute
     obtain ⟨g, h₁g, h₂g, h₃g⟩ := h₁f.extract_zeros_poles h₂f h₃f
-    calc circleAverage (log ‖f ·‖) 0 R
-    _ = circleAverage ((∑ᶠ u, (divisor f CB u * log ‖· - u‖)) + (log ‖g ·‖)) 0 R := by
+    calc circleAverage (log ‖f ·‖) c R
+    _ = circleAverage ((∑ᶠ u, (divisor f CB u * log ‖· - u‖)) + (log ‖g ·‖)) c R := by
       have h₄g := extract_zeros_poles_log h₂g h₃g
       rw [circleAverage_congr_codiscreteWithin (codiscreteWithin.mono sphere_subset_closedBall h₄g) hR]
-    _ = circleAverage (∑ᶠ u, (divisor f CB u * log ‖· - u‖)) 0 R + circleAverage (log ‖g ·‖) 0 R := by
+    _ = circleAverage (∑ᶠ u, (divisor f CB u * log ‖· - u‖)) c R + circleAverage (log ‖g ·‖) c R := by
       apply circleAverage_add
       exact circleIntegrable_log_norm_factorizedRational (divisor f CB)
       exact circleIntegrable_log_norm_meromorphicOn (h₁g.mono sphere_subset_closedBall).meromorphicOn
-    _ = ∑ᶠ u, divisor f CB u * log R + log ‖g 0‖ := by simp [h₁g, h₂g]
-    _ = ∑ᶠ u, divisor f CB u * log R + (log ‖meromorphicTrailingCoeffAt f 0‖ - ∑ᶠ u, divisor f CB u * log ‖u‖) := by
-      have t₀ : 0 ∈ CB := by simp [CB]
-      have t₁ : AccPt 0 (𝓟 CB) := by
+    _ = ∑ᶠ u, divisor f CB u * log R + log ‖g c‖ := by simp [h₁g, h₂g]
+    _ = ∑ᶠ u, divisor f CB u * log R + (log ‖meromorphicTrailingCoeffAt f c‖ - ∑ᶠ u, divisor f CB u * log ‖c - u‖) := by
+      have t₀ : c ∈ CB := by simp [CB]
+      have t₁ : AccPt c (𝓟 CB) := by
         apply accPt_iff_frequently_nhdsNE.mpr
         apply compl_notMem
         apply mem_nhdsWithin.mpr
-        use ball 0 |R|
+        use ball c |R|
         simpa [hR] using fun _ ⟨h, _⟩ ↦ ball_subset_closedBall h
-      simp [MeromorphicOn.log_norm_meromorphicTrailingCoeffAt_extract_zeros_poles h₃f t₀ t₁ (h₁f 0 t₀) (h₁g 0 t₀) (h₂g ⟨0, t₀⟩) h₃g]
-    _ = ∑ᶠ u, divisor f CB u * log R - ∑ᶠ u, divisor f CB u * log ‖u‖ + log ‖meromorphicTrailingCoeffAt f 0‖ := by
+      simp [MeromorphicOn.log_norm_meromorphicTrailingCoeffAt_extract_zeros_poles h₃f t₀ t₁ (h₁f c t₀) (h₁g c t₀) (h₂g ⟨c, t₀⟩) h₃g]
+    _ = ∑ᶠ u, divisor f CB u * log R - ∑ᶠ u, divisor f CB u * log ‖c - u‖ + log ‖meromorphicTrailingCoeffAt f c‖ := by
       ring
-    _ = (∑ᶠ u, divisor f CB u * (log R - log ‖u‖)) + log ‖meromorphicTrailingCoeffAt f 0‖ := by
+    _ = (∑ᶠ u, divisor f CB u * (log R - log ‖c - u‖)) + log ‖meromorphicTrailingCoeffAt f c‖ := by
       rw [← finsum_sub_distrib]
       simp_rw [← mul_sub]
       repeat apply h₃f.subset (fun _ ↦ (by simp_all))
-    _ = ∑ᶠ u, divisor f CB u * log (R * ‖u‖⁻¹) + divisor f CB 0 * log R + log ‖meromorphicTrailingCoeffAt f 0‖ := by
+    _ = ∑ᶠ u, divisor f CB u * log (R * ‖c - u‖⁻¹) + divisor f CB c * log R + log ‖meromorphicTrailingCoeffAt f c‖ := by
       rw [Function.locallyFinsuppWithin.countingFunction_finsum_eq_finsum_add hR h₃f]
+      sorry
   · -- Trivial case: `f` vanishes on a codiscrete set
     rw [← h₁f.exists_meromorphicOrderAt_ne_top_iff_forall
-      ⟨nonempty_closedBall.mpr (abs_nonneg R), (convex_closedBall 0 |R|).isPreconnected⟩] at h₂f
+      ⟨nonempty_closedBall.mpr (abs_nonneg R), (convex_closedBall c |R|).isPreconnected⟩] at h₂f
     push_neg at h₂f
     have : divisor f CB = 0 := by
       ext x
