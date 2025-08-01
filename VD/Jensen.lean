@@ -1,10 +1,21 @@
-import Mathlib.Analysis.Complex.Basic
 import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
-import Mathlib.Analysis.Meromorphic.FactorizedRational
-import Mathlib.Analysis.Meromorphic.NormalForm
-import Mathlib.MeasureTheory.Integral.CircleAverage
-import Mathlib.Analysis.SpecialFunctions.Integrability.LogMeromorphic
 import VD.specialFunctions_CircleIntegral_affine
+
+/-!
+# Jensen's Formula of Complex Analysis
+
+If a function `g : ℂ → ℂ` is analytic without zero on the closed ball with
+center `c` and radius `R`, then `log ‖g ·‖` is harmonic, and the mean value
+theorem of harmonic functions asserts that the circle average `circleAverage
+(log ‖g ·‖) c R` equals `log ‖g c‖`.  Note that `g c` equals
+`meromorphicTrailingCoeffAt f c` and see `circleAverage_nonVanishAnalytic` for
+the precise statement.
+
+Jensen's Formula generalizes this to the setting where `g` is merely
+meromorphic. In that case, the `circleAverage (log ‖g ·‖) 0 R` equals `log
+`‖meromorphicTrailingCoeffAt g 0‖` plus a correction term that accounts for the
+zeros of poles of `g` within the ball.
+-/
 
 open Filter MeromorphicAt MeromorphicOn Metric Real
 
@@ -15,10 +26,12 @@ variable
 ## Circle Averages
 
 In preparation to the proof of Jensen's formula, compute several circle
-integrals.
+averages.
 -/
 
 /--
+If `u : ℂ` lies within the closed ball with center `c` and radius `R`, then the
+circle average `circleAverage (log ‖· - u‖) c R` equals `log R`.
 -/
 @[simp]
 lemma circleAverage_logAbs_affine {R : ℝ} {c u : ℂ} (hu : u ∈ closedBall c |R|) :
@@ -30,6 +43,12 @@ lemma circleAverage_logAbs_affine {R : ℝ} {c u : ℂ} (hu : u ∈ closedBall c
     ring
   rw [this, int₅ (by aesop)]
 
+/--
+Let `D : ℂ → ℤ` be a function with locally finite support within the closed ball
+with center `c` and radius `R`, such as the zero- and pole divisor of a
+meromorphic function.  Then, the circle average of the associated factorized
+rational function over the boundary of the ball equals `∑ᶠ u, (D u) * log R`.
+-/
 @[simp]
 lemma circleAverage_logAbs_factorizedRational {R : ℝ} {c : ℂ}
     (D : Function.locallyFinsuppWithin (closedBall c |R|) ℤ) :
@@ -60,7 +79,11 @@ lemma circleAverage_logAbs_factorizedRational {R : ℝ} {c : ℂ}
     intro u
     aesop
 
--- WARNING: Want that for function to E
+/--
+If  `g : ℂ → ℂ` is analytic without zero on the closed ball with center `c` and
+radius `R`, then the circle average `circleAverage (log ‖g ·‖) c R` equals `log
+‖g c‖`.
+-/
 @[simp]
 lemma circleAverage_nonVanishAnalytic {R : ℝ} {c : ℂ} {g : ℂ → ℂ}
     (h₁g : AnalyticOnNhd ℂ g (closedBall c |R|))
@@ -73,7 +96,12 @@ lemma circleAverage_nonVanishAnalytic {R : ℝ} {c : ℂ} {g : ℂ → ℂ}
 ## Jensen's Formula
 -/
 
--- WARNING: Want that for function to E
+/-!
+**Jensen's Formula**: If `f : ℂ → ℂ` is meromorphic on the closed ball with
+center `c` and radius `R`, then the `circleAverage (log ‖f ·‖) 0 R` equals `log
+`‖meromorphicTrailingCoeffAt f 0‖` plus a correction term that accounts for the
+zeros of poles of `f` within the ball.
+-/
 theorem MeromorphicOn.JensenFormula {R : ℝ} {f : ℂ → ℂ} (hR : R ≠ 0) (h₁f : MeromorphicOn f (closedBall 0 |R|)) :
     circleAverage (log ‖f ·‖) 0 R
       = ∑ᶠ u, divisor f (closedBall 0 |R|) u * log (R * ‖u‖⁻¹)
