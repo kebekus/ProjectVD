@@ -3,62 +3,59 @@ Copyright (c) 2025 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Analysis.Calculus.FDeriv.Symmetric
-import Mathlib.Analysis.Complex.CauchyIntegral
-import Mathlib.Analysis.Complex.Conformal
 import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
 import Mathlib.MeasureTheory.Integral.CircleAverage
+import VD.Harmonic_analytic2
+import VD.ToMathlib.Analytic_meanValue
 
 /-!
-# Mean Value Property of Harmonic Functions
+# The Mean Value Property of Complex Differentiable Functions
 -/
 
-open Complex InnerProductSpace Real Topology
+open InnerProductSpace Metric Real
 
 variable
-  {f : ℂ → ℝ} {r : ℝ}
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
+  {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
+  {f : ℂ → ℝ} {c : ℂ} {R : ℝ}
 
-/-!
-## Circle Averages as a Function of the Radius
+theorem ContinuousLinearMap.circleAverage_comp_comm {ℓ : E →L[ℝ] F} {f : ℂ → E}
+    (hf : CircleIntegrable f c R) :
+    circleAverage (ℓ ∘ f) c R = ℓ (circleAverage f c R) := by
+  unfold circleAverage
+  rw [map_smul]
+  congr
+  apply ℓ.intervalIntegral_comp_comm hf
+
+
+/--
+The **Mean Value Property** of harmonic functions: If `f : ℂ → E` is harmonic in
+a neighborhood of a closed disc of radius `R` and center `c`, then the circle
+average `circleAverage f c R` equals `f c`.
 -/
+theorem circleAverage_of_harmonic
+    (hf : HarmonicOnNhd f (closedBall c |R|)) (hR : 0 < R) :
+    circleAverage f c R = f c := by
 
-lemma continuousAt_circleAverage (h : ContDiffOn ℝ 0 f (Metric.sphere 0 r)) :
-    ContinuousAt (circleAverage f 0) r := by
-  unfold circleAverage
-  have ε : ℝ := by
+  obtain ⟨e, h₁e, h₂e⟩ := IsCompact.exists_thickening_subset_open (isCompact_closedBall c |R|)
+    (isOpen_setOf_harmonicAt f) hf
+  rw [thickening_closedBall h₁e (abs_nonneg R)] at h₂e
+  obtain ⟨F, h₁F, h₂F⟩ := harmonic_is_realOfHolomorphic (add_pos_of_pos_of_nonneg h₁e (abs_nonneg R)) h₂e
+  have h₃F : ∀ z ∈ closedBall c |R|, DifferentiableAt ℂ F z := by
+    intro x hx
+    have : x ∈ ball c (e + |R|) := by
+      simp_all [lt_add_of_pos_of_le h₁e hx]
+    have := h₁F x this
+    fun_prop
+  have := circleAverage_of_differentiable_on h₃F
+  have t₀ : f = Complex.reCLM ∘ F := by
     sorry
-  have h₁ε : 0 < ε := by
-    sorry
-  have a : Set ℂ := Metric.closedBall 0 (r + ε) \ Metric.ball 0 (r - ε)
-  have h₁a : IsCompact a := by
-    sorry
-  have h₂a : ∀ ρ t, a ∈ 𝓝 (circleMap 0 ρ t) := by
-    sorry
-  have n : Set ℝ := Metric.ball 0 (r + ε) \ Metric.closedBall 0 (r - ε)
-  have hn : n ∈ 𝓝 r := by
-    sorry
-  have h₂n : ∀ ρ : ℝ, dist ρ r < ε → ∀ t : ℝ, circleMap 0 ρ t ∈ a := by
-    sorry
-  have h₂f : ContinuousOn f a := by
-    sorry
-  apply ContinuousAt.mul (by fun_prop)
-  apply intervalIntegral.continuousAt_of_dominated_interval
-  · apply Metric.eventually_nhds_iff.mpr
-    use ε, h₁ε
-    intro ρ hρ
-    apply ContinuousOn.aestronglyMeasurable
-    · intro t ht
-      apply ContinuousAt.continuousWithinAt
-      apply ContinuousAt.comp' _ (by fun_prop)
-      exact (continuousWithinAt_iff_continuousAt (h₂a ρ t)).1 (h₂f (circleMap 0 ρ t) (h₂n ρ hρ t))
-    · exact measurableSet_uIoc
-  ·
-    sorry
-  · sorry
-  · sorry
-  · sorry
-
-lemma xx {r : ℝ} :
-    DifferentiableAt ℝ (circleAverage f 0) r := by
-  unfold circleAverage
-  sorry
+  rw [t₀]
+  rw [ContinuousLinearMap.circleAverage_comp_comm]
+  simp_all
+  refine ContinuousOn.circleIntegrable' ?_
+  refine continuousOn_of_forall_continuousAt ?_
+  intro x hx
+  have : x ∈ closedBall c |R| := by sorry
+  have := h₃F x this
+  fun_prop
