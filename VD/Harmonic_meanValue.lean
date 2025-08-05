@@ -8,7 +8,6 @@ import Mathlib.MeasureTheory.Integral.CircleAverage
 import VD.Harmonic_analytic2
 import VD.ToMathlib.Analytic_meanValue
 
-
 /-!
 # The Mean Value Property of Harmonic Functions
 -/
@@ -16,7 +15,7 @@ import VD.ToMathlib.Analytic_meanValue
 open InnerProductSpace Metric Real
 
 variable
-  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] --[CompleteSpace E]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {f : ℂ → ℝ} {c : ℂ} {R : ℝ}
 
 /-- If two functions agree on the circle, then their circle averages agree. -/
@@ -25,11 +24,11 @@ theorem circleAverage_congr_sphere {f₁ f₂ : ℂ → E} (hf : Set.EqOn f₁ f
   unfold circleAverage
   congr 1
   apply intervalIntegral.integral_congr
-  intro x hx
+  intro x
   simp [hf (circleMap_mem_sphere' c R x)]
 
 /--
-The **Mean Value Property** of harmonic functions: If `f : ℂ → E` is harmonic in
+The **Mean Value Property** of harmonic functions: If `f : ℂ → ℝ` is harmonic in
 a neighborhood of a closed disc of radius `R` and center `c`, then the circle
 average `circleAverage f c R` equals `f c`.
 -/
