@@ -153,9 +153,6 @@ vanishes.
 @[simp]
 theorem circleAverage_log_norm_sub_const₀ (h : ‖a‖ < 1) :
     circleAverage (log ‖· - a‖) 0 1 = 0 := by
-  by_cases h₁a : a = 0
-  · simp_all [circleAverage]
-
   calc circleAverage (log ‖· - a‖) 0 1
   _ = circleAverage (log ‖1 - ·⁻¹ * a‖) 0 1 := by
     apply circleAverage_congr_sphere
@@ -181,9 +178,23 @@ theorem circleAverage_log_norm_sub_const₀ (h : ‖a‖ < 1) :
     have : ‖x * a‖ < 1 := by
       calc ‖x * a‖
       _ = ‖x‖ * ‖a‖ := by simp
-      _ ≤ ‖a‖ := by aesop
+      _ ≤ ‖a‖ := by
+        by_cases ‖a‖ = 0
+        <;> aesop
       _ < 1 := h
     apply AnalyticAt.harmonicAt_log_norm (by fun_prop)
     rw [sub_ne_zero]
     by_contra! hCon
     rwa [← hCon, CStarRing.norm_of_mem_unitary (unitary ℂ).one_mem, lt_self_iff_false] at this
+
+@[simp]
+theorem circleAverage_log_norm_sub_const_eq_posLog :
+    circleAverage (log ‖· - a‖) 0 1 = log⁺ ‖a‖ := by
+  rcases lt_trichotomy 1 ‖a‖ with h | h | h
+  · rw [circleAverage_log_norm_sub_const₂ h]
+    apply (posLog_eq_log _).symm
+    simp_all [le_of_lt h]
+  · rw [eq_comm, circleAverage_log_norm_sub_const₁ h.symm, posLog_eq_zero_iff]
+    simp_all
+  · rw [eq_comm, circleAverage_log_norm_sub_const₀ h, posLog_eq_zero_iff]
+    simp_all [le_of_lt h]
