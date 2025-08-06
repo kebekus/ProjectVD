@@ -156,4 +156,34 @@ theorem circleAverage_log_norm_sub_const₀ (h : ‖a‖ < 1) :
   by_cases h₁a : a = 0
   · simp_all [circleAverage]
 
-  sorry
+  calc circleAverage (log ‖· - a‖) 0 1
+  _ = circleAverage (log ‖1 - ·⁻¹ * a‖) 0 1 := by
+    apply circleAverage_congr_sphere
+    intro z hz
+    simp_all only [abs_one, mem_sphere_iff_norm, sub_zero]
+    congr 1
+    calc ‖z - a‖
+    _ = 1 * ‖z - a‖ :=
+      (one_mul ‖z - a‖).symm
+    _ = ‖z⁻¹‖ * ‖z - a‖ := by
+      simp_all
+    _ = ‖z⁻¹ * (z - a)‖ :=
+      (Complex.norm_mul z⁻¹ (z - a)).symm
+    _ = ‖z⁻¹ * z - z⁻¹ * a‖ := by
+      rw [mul_sub]
+    _ = ‖1 - z⁻¹ * a‖ := by
+      rw [inv_mul_cancel₀]
+      aesop
+  _ = 0 := by
+    rw [circleAverage_zero_one_congr_inv (f := fun x ↦ log ‖1 - x * a‖), circleAverage_of_harmonic,
+      zero_mul, sub_zero, CStarRing.norm_of_mem_unitary (unitary ℂ).one_mem, log_one]
+    intro x hx
+    have : ‖x * a‖ < 1 := by
+      calc ‖x * a‖
+      _ = ‖x‖ * ‖a‖ := by simp
+      _ ≤ ‖a‖ := by aesop
+      _ < 1 := h
+    apply AnalyticAt.harmonicAt_log_norm (by fun_prop)
+    rw [sub_ne_zero]
+    by_contra! hCon
+    rwa [← hCon, CStarRing.norm_of_mem_unitary (unitary ℂ).one_mem, lt_self_iff_false] at this

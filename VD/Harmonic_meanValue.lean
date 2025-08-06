@@ -28,6 +28,26 @@ theorem circleAverage_congr_sphere {f₁ f₂ : ℂ → E} (hf : Set.EqOn f₁ f
   simp [hf (circleMap_mem_sphere' c R x)]
 
 /--
+The circle average of a function `f` on the unit sphere equals the circle
+average of the function `z ↦ f z⁻¹`.
+-/
+@[simp]
+theorem circleAverage_zero_one_congr_inv {f : ℂ → E} :
+    circleAverage (f ·⁻¹) 0 1 = circleAverage f 0 1 := by
+  unfold circleAverage
+  congr 1
+  simp only []
+  calc ∫ (θ : ℝ) in 0..2 * π, f (circleMap 0 1 θ)⁻¹
+  _ = ∫ (θ : ℝ) in 0..2 * π, f (circleMap 0 1 (-θ)) := by
+    simp [circleMap_zero_inv]
+  _ = ∫ (θ : ℝ) in 0..2 * π, f (circleMap 0 1 θ) := by
+    rw [intervalIntegral.integral_comp_neg (fun w ↦ f (circleMap 0 1 w))]
+    have t₀ : Function.Periodic (fun w ↦ f (circleMap 0 1 w)) (2 * π) := by
+      intro x
+      simp [periodic_circleMap 0 1 x]
+    simpa using (t₀.intervalIntegral_add_eq_of_pos two_pi_pos (-(2 * π)) 0)
+
+/--
 The **Mean Value Property** of harmonic functions: If `f : ℂ → ℝ` is harmonic in
 a neighborhood of a closed disc of radius `R` and center `c`, then the circle
 average `circleAverage f c R` equals `f c`.
