@@ -26,20 +26,21 @@ lemma Function.locallyFinsuppWithin.countingFunction_finsum_eq_finsum_add' {c : 
     (hD : D.support.Finite) :
     ∑ᶠ u, D u * (log R - log ‖c - u‖) = ∑ᶠ u, D u * log (R * ‖c - u‖⁻¹) + D c * log R := by
   by_cases h : c ∈ D.support
-  · have {g : ℂ → ℝ} : (fun u ↦ D u * g u).support ⊆ hD.toFinset := fun x ↦ by
-      simp +contextual
-    simp [finsum_eq_sum_of_support_subset _ this,
-      Finset.sum_eq_sum_diff_singleton_add ((Set.Finite.mem_toFinset hD).mpr h), norm_zero,
-      log_zero, sub_zero, inv_zero, mul_zero, add_zero, add_left_inj]
+  · have {g : ℂ → ℝ} : (fun u ↦ D u * g u).support ⊆ hD.toFinset :=
+      fun x ↦ by simp +contextual
+    simp only [finsum_eq_sum_of_support_subset _ this,
+      Finset.sum_eq_sum_diff_singleton_add ((Set.Finite.mem_toFinset hD).mpr h), sub_self,
+      norm_zero, log_zero, sub_zero, inv_zero, mul_zero, add_zero, add_left_inj]
     refine Finset.sum_congr rfl fun x hx ↦ ?_
     simp only [Finset.mem_sdiff, Finset.notMem_singleton] at hx
-    simp [log_mul hR (inv_ne_zero (norm_ne_zero_iff.mpr hx.2)), sub_eq_add_neg]
+    rw [log_mul hR (inv_ne_zero (norm_ne_zero_iff.mpr (sub_eq_zero.not.2 hx.2.symm))), log_inv]
+    ring
   · simp_all only [mem_support, Decidable.not_not, Int.cast_zero, zero_mul, add_zero]
     refine finsum_congr fun x ↦ ?_
-    by_cases h₁ : x = c
+    by_cases h₁ : c = x
     · simp_all
-    · simp [log_mul hR (inv_ne_zero (norm_ne_zero_iff.mpr h₁)), sub_eq_add_neg]
-
+    · rw [log_mul hR (inv_ne_zero (norm_ne_zero_iff.mpr (sub_eq_zero.not.2 h₁))), log_inv]
+      ring
 
 /-!
 ## Circle Averages
