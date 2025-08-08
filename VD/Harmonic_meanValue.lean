@@ -3,10 +3,10 @@ Copyright (c) 2025 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
+import Mathlib.Analysis.Complex.MeanValue
 import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
 import Mathlib.MeasureTheory.Integral.CircleAverage
 import VD.Harmonic_analytic2
-import Mathlib.Analysis.Complex.MeanValue
 
 /-!
 # The Mean Value Property of Harmonic Functions

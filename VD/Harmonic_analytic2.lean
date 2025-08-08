@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.InnerProductSpace.Harmonic.Analytic
-import VD.holomorphic_primitive
+import VD.leftovers.holomorphic_primitive
 
 open Complex InnerProductSpace Topology
 
