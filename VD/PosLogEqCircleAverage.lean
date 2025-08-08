@@ -42,6 +42,51 @@ lemma circleIntegrable_log_norm_sub_const {c : ℂ} (r : ℝ) :
   circleIntegrable_log_norm_meromorphicOn (fun z hz ↦ by fun_prop)
 
 /-!
+## Computing `circleAverage (log ‖· - a‖) 0 1` in case where `‖a‖ < 1`.
+-/
+
+/--
+If `a : ℂ` has norm smaller than one, then `circleAverage (log ‖· - a‖) 0 1`
+vanishes.
+-/
+@[simp]
+theorem circleAverage_log_norm_sub_const₀ (h : ‖a‖ < 1) :
+    circleAverage (log ‖· - a‖) 0 1 = 0 := by
+  calc circleAverage (log ‖· - a‖) 0 1
+  _ = circleAverage (log ‖1 - ·⁻¹ * a‖) 0 1 := by
+    apply circleAverage_congr_sphere
+    intro z hz
+    simp_all only [abs_one, mem_sphere_iff_norm, sub_zero]
+    congr 1
+    calc ‖z - a‖
+    _ = 1 * ‖z - a‖ :=
+      (one_mul ‖z - a‖).symm
+    _ = ‖z⁻¹‖ * ‖z - a‖ := by
+      simp_all
+    _ = ‖z⁻¹ * (z - a)‖ :=
+      (Complex.norm_mul z⁻¹ (z - a)).symm
+    _ = ‖z⁻¹ * z - z⁻¹ * a‖ := by
+      rw [mul_sub]
+    _ = ‖1 - z⁻¹ * a‖ := by
+      rw [inv_mul_cancel₀]
+      aesop
+  _ = 0 := by
+    rw [circleAverage_zero_one_congr_inv (f := fun x ↦ log ‖1 - x * a‖), circleAverage_of_harmonic,
+      zero_mul, sub_zero, CStarRing.norm_of_mem_unitary (unitary ℂ).one_mem, log_one]
+    intro x hx
+    have : ‖x * a‖ < 1 := by
+      calc ‖x * a‖
+      _ = ‖x‖ * ‖a‖ := by simp
+      _ ≤ ‖a‖ := by
+        by_cases ‖a‖ = 0
+        <;> aesop
+      _ < 1 := h
+    apply AnalyticAt.harmonicAt_log_norm (by fun_prop)
+    rw [sub_ne_zero]
+    by_contra! hCon
+    rwa [← hCon, CStarRing.norm_of_mem_unitary (unitary ℂ).one_mem, lt_self_iff_false] at this
+
+/-!
 ## Computing `circleAverage (log ‖· - a‖) 0 1` in case where `‖a‖ = 1`.
 -/
 
@@ -143,50 +188,12 @@ theorem circleAverage_log_norm_sub_const₂ (h : 1 < ‖a‖) :
   linarith
 
 /-!
-## Computing `circleAverage (log ‖· - a‖) 0 1` in case where `‖a‖ < 1`.
+## Presentation of `log⁺` in Terms of Circle Averages
 -/
 
 /--
-If `a : ℂ` has norm smaller than one, then `circleAverage (log ‖· - a‖) 0 1`
-vanishes.
+The `circleAverage (log ‖· - a‖) 0 1` equals `log⁺ ‖a‖`.
 -/
-@[simp]
-theorem circleAverage_log_norm_sub_const₀ (h : ‖a‖ < 1) :
-    circleAverage (log ‖· - a‖) 0 1 = 0 := by
-  calc circleAverage (log ‖· - a‖) 0 1
-  _ = circleAverage (log ‖1 - ·⁻¹ * a‖) 0 1 := by
-    apply circleAverage_congr_sphere
-    intro z hz
-    simp_all only [abs_one, mem_sphere_iff_norm, sub_zero]
-    congr 1
-    calc ‖z - a‖
-    _ = 1 * ‖z - a‖ :=
-      (one_mul ‖z - a‖).symm
-    _ = ‖z⁻¹‖ * ‖z - a‖ := by
-      simp_all
-    _ = ‖z⁻¹ * (z - a)‖ :=
-      (Complex.norm_mul z⁻¹ (z - a)).symm
-    _ = ‖z⁻¹ * z - z⁻¹ * a‖ := by
-      rw [mul_sub]
-    _ = ‖1 - z⁻¹ * a‖ := by
-      rw [inv_mul_cancel₀]
-      aesop
-  _ = 0 := by
-    rw [circleAverage_zero_one_congr_inv (f := fun x ↦ log ‖1 - x * a‖), circleAverage_of_harmonic,
-      zero_mul, sub_zero, CStarRing.norm_of_mem_unitary (unitary ℂ).one_mem, log_one]
-    intro x hx
-    have : ‖x * a‖ < 1 := by
-      calc ‖x * a‖
-      _ = ‖x‖ * ‖a‖ := by simp
-      _ ≤ ‖a‖ := by
-        by_cases ‖a‖ = 0
-        <;> aesop
-      _ < 1 := h
-    apply AnalyticAt.harmonicAt_log_norm (by fun_prop)
-    rw [sub_ne_zero]
-    by_contra! hCon
-    rwa [← hCon, CStarRing.norm_of_mem_unitary (unitary ℂ).one_mem, lt_self_iff_false] at this
-
 @[simp]
 theorem circleAverage_log_norm_sub_const_eq_posLog :
     circleAverage (log ‖· - a‖) 0 1 = log⁺ ‖a‖ := by
@@ -198,3 +205,57 @@ theorem circleAverage_log_norm_sub_const_eq_posLog :
     simp_all
   · rw [eq_comm, circleAverage_log_norm_sub_const₀ h, posLog_eq_zero_iff]
     simp_all [le_of_lt h]
+
+/--
+The `circleAverage (log ‖· + a‖) 0 1` equals `log⁺ ‖a‖`.
+-/
+@[simp]
+theorem circleAverage_log_norm_add_const_eq_posLog :
+    circleAverage (log ‖· + a‖) 0 1 = log⁺ ‖a‖ := by
+  have : (log ‖· + a‖) = (log ‖· - -a‖) := by simp
+  simp [this]
+
+lemma circleAverage_eq_circleAverage_zero_one {c : ℂ} {R : ℝ} {f : ℂ → ℝ}:
+    circleAverage f c R = (circleAverage (fun z ↦ f (R * z + c)) 0 1) := by
+  unfold circleAverage
+  congr
+  ext θ
+  unfold circleMap
+  congr 1
+  ring_nf
+  simp
+
+theorem circleAverage_log_norm_sub_const_eq_log_radius_add_posLog {c : ℂ} {R : ℝ} (hR : R ≠ 0) :
+    circleAverage (log ‖· - a‖) c R = log R + log⁺ (|R|⁻¹ * ‖c - a‖) := by
+  calc circleAverage (log ‖· - a‖) c R
+  _ = circleAverage (fun z ↦ log ‖R * (z + R⁻¹ * (c - a))‖) 0 1 := by
+    rw [circleAverage_eq_circleAverage_zero_one]
+    congr
+    ext z
+    congr
+    field_simp [hR]
+    ring
+  _ = circleAverage (fun z ↦ log ‖R‖ + log ‖z + R⁻¹ * (c - a)‖) 0 1 := by
+    apply circleAverage_congr_codiscreteWithin _ (zero_ne_one' ℝ).symm
+    have : {z | ‖z + ↑R⁻¹ * (c - a)‖ ≠ 0} ∈ codiscreteWithin (Metric.sphere (0 : ℂ) |1|) := by
+      apply codiscreteWithin_iff_locallyFiniteComplementWithin.2
+      intro z hz
+      use Set.univ
+      simp only [univ_mem, abs_one, Complex.ofReal_inv, ne_eq, norm_eq_zero, Set.univ_inter,
+        true_and]
+      apply Set.Subsingleton.finite
+      intro z₁ hz₁ z₂ hz₂
+      simp_all only [ne_eq, abs_one, mem_sphere_iff_norm, sub_zero, Set.mem_diff, Set.mem_setOf_eq,
+        Decidable.not_not]
+      rw [add_eq_zero_iff_eq_neg.1 hz₁.2, add_eq_zero_iff_eq_neg.1 hz₂.2]
+    filter_upwards [this] with z hz
+    rw [norm_mul, log_mul (norm_ne_zero_iff.2 (Complex.ofReal_ne_zero.mpr hR)) hz]
+    simp
+  _ = log R + log⁺ (|R|⁻¹ * ‖c - a‖) := by
+    have : (fun z ↦ log ‖R‖ + log ‖z + ↑R⁻¹ * (c - a)‖) =
+        (fun z ↦ log ‖R‖) + (fun z ↦ log ‖z + ↑R⁻¹ * (c - a)‖) := by
+      rfl
+    rw [this, circleAverage_add, circleAverage_const]
+    simp
+    · apply circleIntegrable_const
+    · apply circleIntegrable_log_norm_meromorphicOn (fun _ _ ↦ by fun_prop)

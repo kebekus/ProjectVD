@@ -6,7 +6,7 @@ Authors: Stefan Kebekus
 import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
 import Mathlib.MeasureTheory.Integral.CircleAverage
 import VD.Harmonic_analytic2
-import VD.ToMathlib.Analytic_meanValue
+import Mathlib.Analysis.Complex.MeanValue
 
 /-!
 # The Mean Value Property of Harmonic Functions
