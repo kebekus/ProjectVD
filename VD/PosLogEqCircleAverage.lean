@@ -215,17 +215,6 @@ theorem circleAverage_log_norm_add_const_eq_posLog :
   have : (log ‖· + a‖) = (log ‖· - -a‖) := by simp
   simp [this]
 
--- PR #28028
-lemma circleAverage_eq_circleAverage_zero_one {c : ℂ} {R : ℝ} {f : ℂ → ℝ}:
-    circleAverage f c R = (circleAverage (fun z ↦ f (R * z + c)) 0 1) := by
-  unfold circleAverage
-  congr
-  ext θ
-  unfold circleMap
-  congr 1
-  ring_nf
-  simp
-
 /--
 Generalization of `circleAverage_log_norm_sub_const_eq_posLog`: The
 `circleAverage (log ‖· - a‖) c R` equals `log R + log⁺ (|R|⁻¹ * ‖c - a‖)`.
