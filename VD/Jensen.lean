@@ -1,5 +1,5 @@
 import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
-import VD.specialFunctions_CircleIntegral_affine
+import VD.PosLogEqCircleAverage
 
 /-!
 # Jensen's Formula of Complex Analysis
@@ -50,20 +50,6 @@ averages.
 -/
 
 /--
-If `u : ℂ` lies within the closed ball with center `c` and radius `R`, then the
-circle average `circleAverage (log ‖· - u‖) c R` equals `log R`.
--/
-@[simp]
-lemma circleAverage_logAbs_affine {R : ℝ} {c u : ℂ} (hu : u ∈ closedBall c |R|) :
-    circleAverage (log ‖· - u‖) c R = log R := by
-  rw [← circleAverage_fun_add]
-  have : (fun z ↦ log ‖z + c - u‖) = (log ‖· - (u - c)‖) := by
-    ext z
-    congr 2
-    ring
-  rw [this, int₅ (by aesop)]
-
-/--
 Let `D : ℂ → ℤ` be a function with locally finite support within the closed ball
 with center `c` and radius `R`, such as the zero- and pole divisor of a
 meromorphic function.  Then, the circle average of the associated factorized
@@ -108,9 +94,8 @@ radius `R`, then the circle average `circleAverage (log ‖g ·‖) c R` equals 
 lemma circleAverage_nonVanishAnalytic {R : ℝ} {c : ℂ} {g : ℂ → ℂ}
     (h₁g : AnalyticOnNhd ℂ g (closedBall c |R|))
     (h₂g : ∀ u : closedBall c |R|, g u ≠ 0) :
-    circleAverage (log ‖g ·‖) c R = log ‖g c‖ := by
-  apply harmonic_meanValue₂
-    (fun x hx ↦ logabs_of_holomorphicAt_is_harmonic (h₁g x hx).holomorphicAt (h₂g ⟨x, hx⟩))
+    circleAverage (log ‖g ·‖) c R = log ‖g c‖ :=
+  circleAverage_of_harmonic (fun x hx ↦ (h₁g x hx).harmonicAt_log_norm (h₂g ⟨x, hx⟩))
 
 /-!
 ## Jensen's Formula

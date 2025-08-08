@@ -26,9 +26,9 @@ logarithm, `circleAverage (log ‖· - a‖) 0 1 = = log⁺ ‖a‖`. This resul
 ingredient in the proof of Jensen's formula in complex analysis.
 -/
 
-open Filter Interval intervalIntegral MeasureTheory Real
+open Filter Interval intervalIntegral MeasureTheory Metric Real
 
-variable {a : ℂ}
+variable {a c : ℂ} {R : ℝ}
 
 /-!
 ## Circle Integrability
@@ -37,7 +37,7 @@ variable {a : ℂ}
 /--
 If `a` is any complex number, the function `(log ‖· - a‖)` is circle integrable over every circle.
 -/
-lemma circleIntegrable_log_norm_sub_const {c : ℂ} (r : ℝ) :
+lemma circleIntegrable_log_norm_sub_const (r : ℝ) :
     CircleIntegrable (log ‖· - a‖) c r :=
   circleIntegrable_log_norm_meromorphicOn (fun z hz ↦ by fun_prop)
 
@@ -215,6 +215,7 @@ theorem circleAverage_log_norm_add_const_eq_posLog :
   have : (log ‖· + a‖) = (log ‖· - -a‖) := by simp
   simp [this]
 
+-- PR #28028
 lemma circleAverage_eq_circleAverage_zero_one {c : ℂ} {R : ℝ} {f : ℂ → ℝ}:
     circleAverage f c R = (circleAverage (fun z ↦ f (R * z + c)) 0 1) := by
   unfold circleAverage
@@ -225,8 +226,12 @@ lemma circleAverage_eq_circleAverage_zero_one {c : ℂ} {R : ℝ} {f : ℂ → �
   ring_nf
   simp
 
-theorem circleAverage_log_norm_sub_const_eq_log_radius_add_posLog {c : ℂ} {R : ℝ} (hR : R ≠ 0) :
-    circleAverage (log ‖· - a‖) c R = log R + log⁺ (|R|⁻¹ * ‖c - a‖) := by
+/--
+Generalization of `circleAverage_log_norm_sub_const_eq_posLog`: The
+`circleAverage (log ‖· - a‖) c R` equals `log R + log⁺ (|R|⁻¹ * ‖c - a‖)`.
+-/
+theorem circleAverage_log_norm_sub_const_eq_log_radius_add_posLog (hR : R ≠ 0) :
+    circleAverage (log ‖· - a‖) c R = log R + log⁺ (R⁻¹ * ‖c - a‖) := by
   calc circleAverage (log ‖· - a‖) c R
   _ = circleAverage (fun z ↦ log ‖R * (z + R⁻¹ * (c - a))‖) 0 1 := by
     rw [circleAverage_eq_circleAverage_zero_one]
@@ -259,3 +264,25 @@ theorem circleAverage_log_norm_sub_const_eq_log_radius_add_posLog {c : ℂ} {R :
     simp
     · apply circleIntegrable_const
     · apply circleIntegrable_log_norm_meromorphicOn (fun _ _ ↦ by fun_prop)
+  _ = log R + log⁺ (R⁻¹ * ‖c - a‖) := by
+    congr 1
+    rcases lt_trichotomy 0 R with h | h | h
+    · rw [abs_of_pos h]
+    · tauto
+    · simp [abs_of_neg h]
+
+/--
+Trivial corollary of
+`circleAverage_log_norm_sub_const_eq_log_radius_add_posLog`: If `u : ℂ` lies
+within the closed ball with center `c` and radius `R`, then the circle average
+`circleAverage (log ‖· - u‖) c R` equals `log R`.
+-/
+@[simp]
+lemma circleAverage_logAbs_affine (hu : a ∈ closedBall c |R|) :
+    circleAverage (log ‖· - a‖) c R = log R := by
+  by_cases hR : R = 0
+  · simp_all
+  rw [circleAverage_log_norm_sub_const_eq_log_radius_add_posLog hR, add_eq_left,
+    posLog_eq_zero_iff, abs_mul, abs_inv, abs_of_nonneg (norm_nonneg (c - a))]
+  rw [mem_closedBall, dist_eq_norm'] at hu
+  apply inv_mul_le_one_of_le₀ hu (abs_nonneg R)
