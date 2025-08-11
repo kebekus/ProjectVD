@@ -143,8 +143,7 @@ theorem MeromorphicOn.JensenFormula {c : ℂ} {R : ℝ} {f : ℂ → ℂ} (hR : 
       simp_rw [← mul_sub]
       repeat apply h₃f.subset (fun _ ↦ (by simp_all))
     _ = ∑ᶠ u, divisor f CB u * log (R * ‖c - u‖⁻¹) + divisor f CB c * log R + log ‖meromorphicTrailingCoeffAt f c‖ := by
-      rw [Function.locallyFinsuppWithin.countingFunction_finsum_eq_finsum_add hR h₃f]
-      sorry
+      rw [Function.locallyFinsuppWithin.countingFunction_finsum_eq_finsum_add' hR h₃f]
   · -- Trivial case: `f` vanishes on a codiscrete set
     rw [← h₁f.exists_meromorphicOrderAt_ne_top_iff_forall
       ⟨nonempty_closedBall.mpr (abs_nonneg R), (convex_closedBall c |R|).isPreconnected⟩] at h₂f
