@@ -26,7 +26,7 @@ theorem xx {f : ℂ → ℂ} (hf : DifferentiableOn ℂ f (Metric.closedBall (0 
     have := CPS (n - 1) (fun _ ↦ 1)
     apply ContinuousMultilinearMap.mkPiRing ℂ (Fin n) (this / n)
 
-  have := IPS.derivSeries
+  have := IPS.power
 
 
 
