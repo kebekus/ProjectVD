@@ -227,7 +227,8 @@ theorem circleAverage_log_norm_sub_const_eq_log_radius_add_posLog (hR : R ≠ 0)
     congr
     ext z
     congr
-    field_simp [hR]
+    rw [Complex.ofReal_inv R]
+    field_simp [Complex.ofReal_ne_zero.mpr hR]
     ring
   _ = circleAverage (fun z ↦ log ‖R‖ + log ‖z + R⁻¹ * (c - a)‖) 0 1 := by
     apply circleAverage_congr_codiscreteWithin _ (zero_ne_one' ℝ).symm
