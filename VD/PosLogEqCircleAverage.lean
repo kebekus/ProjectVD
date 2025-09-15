@@ -12,18 +12,9 @@ import VD.Harmonic_meanValue
 /-!
 # Representation of `log⁺` as a Circle Average
 
-If `a` is any complex number of norm one, then `log ‖· - a‖` is circle integrable over every circle
-in the complex plane, and the circle average `circleAverage (log ‖· - a‖) 0 1` vanishes.
-
-- Integrability is recalled in `circleIntegrability_log_norm_id_sub_const`, as a consequence of the
-  general fact that functions of the form `log ‖meromorphic‖` are circle integrable.
-
-- The value of the integral is computed in `circleAverage_log_norm_id_sub_const₁`.
-
-TODO: As soon as the mean value theorem for harmonic functions becomes available, extend this result
-to arbitrary complex numbers `a`, showing that the circle average equals the positive part of the
-logarithm, `circleAverage (log ‖· - a‖) 0 1 = = log⁺ ‖a‖`. This result, in turn, is a major
-ingredient in the proof of Jensen's formula in complex analysis.
+If `a` is any complex number, the circle average of `log ‖· - a‖` over the unit
+circle equals the positive part of the logarithm,
+`circleAverage (log ‖· - a‖) 0 1 = log⁺ ‖a‖`.
 -/
 
 open Filter Interval intervalIntegral MeasureTheory Metric Real
