@@ -14,8 +14,8 @@ namespace ValueDistribution
 
 /--
 Helper lemma for the first part of the First Main Theorem: Given a meromorphic
-function `f`, compute difference between the characteristic functions of `f`
-and its inverse.
+function `f`, compute difference between the characteristic functions of `f` and
+of its inverse.
 -/
 lemma characteristic_sub_characteristic_inv (h : MeromorphicOn f ⊤) :
     characteristic f ⊤ - characteristic f⁻¹ ⊤ =
