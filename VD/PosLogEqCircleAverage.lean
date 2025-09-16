@@ -3,11 +3,11 @@ Copyright (c) 2025 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
+import Mathlib.Analysis.Complex.Harmonic.MeanValue
 import Mathlib.Analysis.InnerProductSpace.Harmonic.Constructions
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.Analysis.SpecialFunctions.Integrals.LogTrigonometric
 import Mathlib.MeasureTheory.Integral.CircleAverage
-import VD.Harmonic_meanValue
 
 /-!
 # Representation of `log⁺` as a Circle Average
@@ -62,7 +62,7 @@ theorem circleAverage_log_norm_sub_const₀ (h : ‖a‖ < 1) :
       rw [inv_mul_cancel₀]
       aesop
   _ = 0 := by
-    rw [circleAverage_zero_one_congr_inv (f := fun x ↦ log ‖1 - x * a‖), circleAverage_of_harmonic,
+    rw [circleAverage_zero_one_congr_inv (f := fun x ↦ log ‖1 - x * a‖), HarmonicOnNhd.circleAverage_eq,
       zero_mul, sub_zero, CStarRing.norm_of_mem_unitary (unitary ℂ).one_mem, log_one]
     intro x hx
     have : ‖x * a‖ < 1 := by
@@ -170,7 +170,7 @@ equals `log ‖a‖`.
 @[simp]
 theorem circleAverage_log_norm_sub_const₂ (h : 1 < ‖a‖) :
     circleAverage (log ‖· - a‖) 0 1 = log ‖a‖ := by
-  rw [circleAverage_of_harmonic, zero_sub, norm_neg]
+  rw [HarmonicOnNhd.circleAverage_eq, zero_sub, norm_neg]
   intro x hx
   apply AnalyticAt.harmonicAt_log_norm (by fun_prop)
   rw [sub_ne_zero]

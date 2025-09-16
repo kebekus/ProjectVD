@@ -100,7 +100,7 @@ lemma circleAverage_nonVanishAnalytic {R : ℝ} {c : ℂ} {g : ℂ → ℂ}
     (h₁g : AnalyticOnNhd ℂ g (closedBall c |R|))
     (h₂g : ∀ u : closedBall c |R|, g u ≠ 0) :
     circleAverage (log ‖g ·‖) c R = log ‖g c‖ :=
-  circleAverage_of_harmonic (fun x hx ↦ (h₁g x hx).harmonicAt_log_norm (h₂g ⟨x, hx⟩))
+  HarmonicOnNhd.circleAverage_eq (fun x hx ↦ (h₁g x hx).harmonicAt_log_norm (h₂g ⟨x, hx⟩))
 
 /-!
 ## Jensen's Formula
