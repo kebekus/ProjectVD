@@ -3,10 +3,10 @@ Copyright (c) 2025 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
+import Mathlib.Analysis.InnerProductSpace.Harmonic.Constructions
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.Analysis.SpecialFunctions.Integrals.LogTrigonometric
 import Mathlib.MeasureTheory.Integral.CircleAverage
-import Mathlib.Analysis.InnerProductSpace.Harmonic.Constructions
 import VD.Harmonic_meanValue
 
 /-!
@@ -241,10 +241,9 @@ theorem circleAverage_log_norm_sub_const_eq_log_radius_add_posLog (hR : R ≠ 0)
     have : (fun z ↦ log ‖R‖ + log ‖z + ↑R⁻¹ * (c - a)‖) =
         (fun z ↦ log ‖R‖) + (fun z ↦ log ‖z + ↑R⁻¹ * (c - a)‖) := by
       rfl
-    rw [this, circleAverage_add, circleAverage_const]
+    rw [this, circleAverage_add (circleIntegrable_const (log ‖R‖) 0 1)
+      (circleIntegrable_log_norm_meromorphicOn (fun _ _ ↦ by fun_prop)), circleAverage_const]
     simp
-    · apply circleIntegrable_const
-    · apply circleIntegrable_log_norm_meromorphicOn (fun _ _ ↦ by fun_prop)
   _ = log R + log⁺ (R⁻¹ * ‖c - a‖) := by
     congr 1
     rcases lt_trichotomy 0 R with h | h | h
