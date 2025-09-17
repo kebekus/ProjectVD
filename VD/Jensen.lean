@@ -27,6 +27,7 @@ open Filter MeromorphicAt MeromorphicOn Metric Real
 variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
 
+-- Should go to Mathlib.Analysis.Complex.ValueDistribution.CountingFunction
 lemma Function.locallyFinsuppWithin.countingFunction_finsum_eq_finsum_add' {c : ℂ} {R : ℝ} {D : ℂ → ℤ} (hR : R ≠ 0)
     (hD : D.support.Finite) :
     ∑ᶠ u, D u * (log R - log ‖c - u‖) = ∑ᶠ u, D u * log (R * ‖c - u‖⁻¹) + D c * log R := by
