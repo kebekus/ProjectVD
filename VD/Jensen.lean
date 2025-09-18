@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
-import VD.PosLogEqCircleAverage
+import VD.ToMathlib.PosLogEqCircleAverage
 
 /-!
 # Jensen's Formula of Complex Analysis
