@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
-import VD.ToMathlib.PosLogEqCircleAverage
+import Mathlib.Analysis.SpecialFunctions.Integrals.PosLogEqCircleAverage
 
 /-!
 # Jensen's Formula of Complex Analysis
@@ -83,7 +83,7 @@ lemma circleAverage_logAbs_factorizedRational {R : ℝ} {c : ℂ}
     intro u hu
     simp_rw [← smul_eq_mul, circleAverage_fun_smul]
     congr
-    apply circleAverage_logAbs_affine
+    rw [circleAverage_log_norm_sub_const_of_mem_closedBall]
     apply D.supportWithinDomain
     simp_all
   _ = ∑ᶠ u, (D u) * log R := by
@@ -111,7 +111,7 @@ lemma circleAverage_nonVanishAnalytic {R : ℝ} {c : ℂ} {g : ℂ → ℂ}
 **Jensen's Formula**: If `f : ℂ → ℂ` is meromorphic on the closed ball with
 center `c` and radius `R`, then the `circleAverage (log ‖f ·‖) 0 R` equals `log
 `‖meromorphicTrailingCoeffAt f 0‖` plus a correction term that accounts for the
-zeros of poles of `f` within the ball.
+zeros and poles of `f` within the ball.
 -/
 theorem MeromorphicOn.JensenFormula {c : ℂ} {R : ℝ} {f : ℂ → ℂ} (hR : R ≠ 0)
     (h₁f : MeromorphicOn f (closedBall c |R|)) :
