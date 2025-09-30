@@ -31,7 +31,7 @@ theorem MeromorphicAt.order_nonneg_if_exists_continuous_extension (hf : Meromorp
   have h₃ : (fun z ↦ ‖(z - z₀) ^ n • h z‖) =
       ((fun x ↦ ‖x⁻¹‖) ∘ (fun z ↦ (z - z₀) ^ a.succ)) * (fun z ↦ ‖h z‖) := by
     funext z
-    simp [norm_pow, norm_smul, ← zpow_natCast, ← ha]
+    simp [norm_smul, ← zpow_natCast, ← ha]
   rw [h₃]
   have h₄ : Tendsto ((fun x ↦ ‖x⁻¹‖) ∘ (fun z ↦ (z - z₀) ^ a.succ)) (𝓝[≠] z₀) atTop := by
     apply NormedField.tendsto_norm_inv_nhdsNE_zero_atTop.comp (y := 𝓝[≠] 0)

@@ -6,8 +6,7 @@ open Interval
 noncomputable def primitive
   {E : Type u} [NormedAddCommGroup E] [NormedSpace ℂ E] [CompleteSpace E] :
   ℂ  → (ℂ → E) → (ℂ → E) := by
-  intro z₀
-  intro f
+  intro z₀ f
   exact fun z ↦ (∫ (x : ℝ) in z₀.re..z.re, f ⟨x, z₀.im⟩) + Complex.I • ∫ (x : ℝ) in z₀.im..z.im, f ⟨z.re, x⟩
 
 
