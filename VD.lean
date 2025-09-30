@@ -1,6 +1,4 @@
 import VD.Jensen
-import VD.ToMathlib.HarmonicAnalytic
-import VD.ToMathlib.PosLogEqCircleAverage
 import VD.firstMain1
 import VD.leftovers.cauchyRiemann
 import VD.leftovers.diffOp
