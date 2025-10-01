@@ -1,5 +1,5 @@
+import Mathlib.Analysis.Complex.JensenFormula
 import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
-import VD.Jensen
 
 open Function.locallyFinsuppWithin MeromorphicAt MeromorphicOn Metric Real
 
@@ -44,7 +44,7 @@ theorem characteristic_sub_characteristic_inv_at_zero (hf : MeromorphicOn f ⊤)
     rw [characteristic_sub_characteristic_inv hf]
     rfl
   _ = log ‖meromorphicTrailingCoeffAt f 0‖ := by
-    rw [JensenFormula hR (hf.mono_set (by tauto))]
+    rw [MeromorphicOn.circleAverage_log_norm hR (hf.mono_set (by tauto))]
     unfold Function.locallyFinsuppWithin.logCounting
     have : (divisor f (closedBall 0 |R|)) = (divisor f Set.univ).toClosedBall R :=
       (divisor_restrict hf (by tauto)).symm
