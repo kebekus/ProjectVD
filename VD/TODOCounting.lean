@@ -40,6 +40,16 @@ lemma xx (a : 𝕜) (n : ℕ) :
       ring_nf
       simp
 
+lemma zz (n : ℕ) :
+    (n : 𝕜) = 0 ↔ n = 0 := by
+  constructor
+  · intro hn
+    by_contra hCon
+    have : ‖(n : 𝕜)‖ \
+    sorry
+  · simp_all
+
+
 theorem mul_finsum'
     {α : Type u_1} {R : Type u_7} [NonUnitalNonAssocSemiring R] [NoZeroDivisors R]
     (f : α → R) (r : R) :
