@@ -7,49 +7,6 @@ variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   {U : Set 𝕜} {f g : 𝕜 → E} {a : WithTop E} {a₀ : E}
 
-lemma test (a : 𝕜) (n : ℕ) :
-    ‖n * a + a‖ ≤ ‖n * a‖ + ‖a‖ := by
-  calc ‖n * a + a‖
-  _ = dist (n * a + a) 0 := by
-    rw [NormedField.dist_eq]
-    simp
-  _ ≤ dist (n * a + a) a + dist a 0 := by
-    apply dist_triangle
-  _ ≤ ‖n * a‖ + ‖a‖ := by
-    rw [NormedField.dist_eq]
-    rw [NormedField.dist_eq]
-    simp
-
-lemma xx (a : 𝕜) (n : ℕ) :
-    ‖n * a‖ ≤ n * ‖a‖ := by
-  induction n with
-  | zero =>
-    simp
-  | succ m hm =>
-    rw [Nat.cast_add_one m]
-    rw [Nat.cast_add_one m]
-    calc ‖(m + 1) * a‖
-    _ = ‖m * a + a‖ := by
-      congr
-      ring
-    _ ≤ ‖m * a‖ + ‖a‖ := by
-      exact test a m
-    _ ≤ m * ‖a‖ + ‖a‖ := by
-      exact add_le_add_right hm ‖a‖
-    _ ≤ (m + 1) * ‖a‖ := by
-      ring_nf
-      simp
-
-lemma zz (n : ℕ) :
-    (n : 𝕜) = 0 ↔ n = 0 := by
-  constructor
-  · intro hn
-    by_contra hCon
-    have : ‖(n : 𝕜)‖ \
-    sorry
-  · simp_all
-
-
 theorem mul_finsum'
     {α : Type u_1} {R : Type u_7} [NonUnitalNonAssocSemiring R] [NoZeroDivisors R]
     (f : α → R) (r : R) :
@@ -62,6 +19,9 @@ theorem mul_finsum'
 
 namespace MeromorphicOn
 
+/--
+The order of a constant function is `⊤` is the the constant is zero and `0` otherwise.
+-/
 theorem meromorphicOrderAt_const (z₀ : 𝕜) (e : E) :
     meromorphicOrderAt (fun _ ↦ e) z₀ = if e = 0 then ⊤ else (0 : WithTop ℤ) := by
   by_cases he : e = 0
@@ -72,54 +32,63 @@ theorem meromorphicOrderAt_const (z₀ : 𝕜) (e : E) :
   simp [he]
   fun_prop
 
+/--
+Variant of `meromorphicOrderAt_const`, for constant functions defined by
+coercion from natural numbers.
+-/
 theorem meromorphicOrderAt_const_ofNat (z₀ : 𝕜) (n : ℤ) :
     meromorphicOrderAt (n : 𝕜 → 𝕜) z₀ = if (n : 𝕜) = 0 then ⊤ else (0 : WithTop ℤ) := by
   apply meromorphicOrderAt_const
 
+/--
+If `f` is meromorphic, then the divisor of `f ^ n` is `n` times the divisor of `f`.
+-/
 theorem divisor_pow {f : 𝕜 → 𝕜} (hf : MeromorphicOn f U) (n : ℕ) :
     divisor (f ^ n) U = n • divisor f U := by
   ext z
   by_cases hn : n = 0
-  · simp [hn, divisor_def]
-    intro h₂f hz
+  · simp only [hn, pow_zero, divisor_def, zero_nsmul, Function.locallyFinsuppWithin.coe_zero,
+      Pi.zero_apply, ite_eq_right_iff, WithTop.untop₀_eq_zero, and_imp]
+    intro _ _
     have := meromorphicOrderAt_const_ofNat z 1
     simp_all
   by_cases hz : ¬z ∈ U
   · simp [hz]
-  simp_all [hf.pow n]
-  rw [meromorphicOrderAt_pow]
+  simp_all only [Decidable.not_not, hf.pow n, divisor_apply,
+    Function.locallyFinsuppWithin.coe_nsmul, Pi.smul_apply, Int.nsmul_eq_mul]
+  rw [meromorphicOrderAt_pow (hf z hz)]
   aesop
-  exact hf z hz
 
-theorem divisor_pow' {f : 𝕜 → 𝕜} (hf : MeromorphicOn f U) (n : ℕ) :
-    divisor (fun z ↦ f z ^ n) U = n • divisor f U := by
-  apply divisor_pow hf
+/--
+If `f` is meromorphic, then the divisor of `f ^ n` is `n` times the divisor of `f`.
+-/
+theorem divisor_fun_pow {f : 𝕜 → 𝕜} (hf : MeromorphicOn f U) (n : ℕ) :
+    divisor (fun z ↦ f z ^ n) U = n • divisor f U := divisor_pow hf n
 
+/--
+If `f` is meromorphic, then the divisor of `f ^ n` is `n` times the divisor of `f`.
+-/
 theorem divisor_zpow {f : 𝕜 → 𝕜} (hf : MeromorphicOn f U) (n : ℤ) :
     divisor (f ^ n) U = n • divisor f U := by
   ext z
   by_cases hn : n = 0
-  · simp [hn, divisor_def]
-    intro h₂f hz
-    left
-    -- should be automatic from here
-    have XX := meromorphicOrderAt_eq_int_iff (h₂f z hz) (n := 0)
-    have YY : (0 : WithTop ℤ) = (0 : ℤ) := by
-      rfl
-    rw [YY, XX]
-    use 1
-    simp
-    apply analyticAt_const -- should work with fun_prop, but doesn't
+  · simp only [hn, zpow_zero, divisor_def, zero_smul, Function.locallyFinsuppWithin.coe_zero,
+      Pi.zero_apply, ite_eq_right_iff, WithTop.untop₀_eq_zero, and_imp]
+    intro _ _
+    have := meromorphicOrderAt_const_ofNat z 1
+    simp_all
   by_cases hz : ¬z ∈ U
   · simp [hz]
-  simp_all [hf.zpow n]
-  rw [meromorphicOrderAt_zpow]
+  simp_all only [Decidable.not_not, hf.zpow n, divisor_apply,
+    Function.locallyFinsuppWithin.coe_zsmul, Pi.smul_apply, Int.zsmul_eq_mul]
+  rw [meromorphicOrderAt_zpow (hf z hz)]
   aesop
-  exact hf z hz
 
-theorem divisor_zpow' {f : 𝕜 → 𝕜} (hf : MeromorphicOn f U) (n : ℤ) :
-    divisor (fun z ↦ f z ^ n) U = n • divisor f U := by
-  apply divisor_zpow hf
+/--
+If `f` is meromorphic, then the divisor of `f ^ n` is `n` times the divisor of `f`.
+-/
+theorem divisor_fun_zpow {f : 𝕜 → 𝕜} (hf : MeromorphicOn f U) (n : ℤ) :
+    divisor (fun z ↦ f z ^ n) U = n • divisor f U := divisor_zpow hf n
 
 end MeromorphicOn
 
@@ -174,7 +143,7 @@ noncomputable def logCounting' : ℝ → ℝ := by
 
   unfold logCounting'
   simp only [WithTop.zero_ne_top, ↓reduceDIte, Pi.pow_apply, WithTop.untop₀_zero, sub_zero]
-  rw [divisor_pow' hf n]
+  rw [divisor_fun_pow hf n]
   have : (n • divisor f univ)⁺ = n • (divisor f univ)⁺ := by
     unfold posPart
     unfold instPosPart
