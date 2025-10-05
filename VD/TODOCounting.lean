@@ -116,15 +116,16 @@ noncomputable def logCounting' {E : Type*} [NormedAddCommGroup E] [ProperSpace E
         simp_all
     · ring
   map_smul' n D := by
-    simp
+    simp only [map_zsmul, coe_zsmul, Pi.smul_apply, eq_intCast, Int.cast_eq]
     ext r
-    simp
-    rw [mul_add, mul_finsum']
+    rw [Pi.smul_apply, smul_add, smul_finsum]
     congr 1
     · congr 1
       ext z
+      rw [smul_eq_mul, Int.cast_mul]
       ring
-    · ring
+    · rw [smul_eq_mul, Int.cast_mul]
+      ring
 
 end Function.locallyFinsuppWithin
 
