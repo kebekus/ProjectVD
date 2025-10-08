@@ -18,16 +18,19 @@ the fun!
 
 ## Current State and Future Plans
 
-With the formalization of Nevanlinna's [First Main
-Theorem](https://en.wikipedia.org/wiki/Nevanlinna_theory#First_fundamental_theorem),
-the project has recently reached its first milestone. The current code has
-"proof of concept" quality: It compiles fine but needs refactoring and
-documentation. Next goals:
+### Milestones reached
 
-- Clean up the existing codebase and feed intermediate results into mathlib
+- Formalized Nevanlinna's [First Main
+  Theorem](https://en.wikipedia.org/wiki/Nevanlinna_theory#First_fundamental_theorem).
+
+- Merged the formalization of first main theorem into Lean's mathlib.
+
+### Next Milestones 
+
 - Formalize the Theorem on Logarithmic Differentials
 - Formalize the [Second Main
   Theorem](https://en.wikipedia.org/wiki/Nevanlinna_theory#Second_fundamental_theorem)
+- Merge formalizations into mathlib
 - Establish some of the more immediate applications
 
 These plans might change, depending on feedback from the community and specific
@@ -44,9 +47,6 @@ The following concepts have been formalized so far.
     - Real and imaginary parts of holomorphic functions as examples of harmonic
       functions
 - Holomorphic functions in the complex plane
-    - Existence of primitives [duplication of work [already under
-      review](https://github.com/leanprover-community/mathlib4/pull/9598) at
-      mathlib]
     - Existence of holomorphic functions with given real part
 - Meromorphic Functions in the complex plane
     - API for continuous extension of meromorphic functions, normal form of
