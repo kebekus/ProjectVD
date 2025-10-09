@@ -141,16 +141,11 @@ noncomputable def logCounting' : ℝ → ℝ := by
 
 @[simp] theorem logCounting_pow_zero {f : 𝕜 → 𝕜} {n : ℕ} (hf : MeromorphicOn f Set.univ) :
     logCounting' (f ^ n) 0 = n • logCounting' f 0 := by
-
   unfold logCounting'
   simp only [WithTop.zero_ne_top, ↓reduceDIte, Pi.pow_apply, WithTop.untop₀_zero, sub_zero]
   rw [divisor_fun_pow hf n]
   have : (n • divisor f univ)⁺ = n • (divisor f univ)⁺ := by
-    unfold posPart
-    unfold instPosPart
-    simp
     ext z
-    simp
     have {a : ℤ} {b : ℕ} : max (n * a) 0 = n * (max a 0) := by
       by_cases h : 0 < a
       · simp [h]
