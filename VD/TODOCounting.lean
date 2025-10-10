@@ -139,35 +139,55 @@ noncomputable def logCounting' : ℝ → ℝ := by
   · exact (divisor f univ)⁻.logCounting'
   · exact (divisor (fun z ↦ f z - a.untop₀) univ)⁺.logCounting'
 
+/--
+Taking the positive part of a function with locally finite support commutes with
+scalar multiplication by a natural number.
+-/
+theorem nsmul_posPart
+    {X : Type*} [TopologicalSpace X] {U : Set X}
+    {Y : Type*} [AddCommGroup Y] [LinearOrder Y] [IsOrderedAddMonoid Y]
+    (f : Function.locallyFinsuppWithin U Y) (n : ℕ) :
+    n • f⁺ = (n • f)⁺ := by
+  unfold instPosPart
+  ext x
+  simp only [Function.locallyFinsuppWithin.coe_nsmul, Pi.smul_apply,
+    Function.locallyFinsuppWithin.max_apply, Function.locallyFinsuppWithin.coe_zero, Pi.zero_apply]
+  by_cases h : f x < 0
+  · simpa [max_eq_right_of_lt h] using nsmul_le_nsmul_right h.le n
+  · simpa [not_lt.1 h] using nsmul_nonneg (not_lt.1 h) n
+
+/--
+Taking the negative part of a function with locally finite support commutes with
+scalar multiplication by a natural number.
+-/
+theorem nsmul_negPart
+    {X : Type*} [TopologicalSpace X] {U : Set X}
+    {Y : Type*} [AddCommGroup Y] [LinearOrder Y] [IsOrderedAddMonoid Y]
+    (f : Function.locallyFinsuppWithin U Y) (n : ℕ) :
+    n • f⁻ = (n • f)⁻ := by
+  unfold instNegPart
+  ext x
+  simp only [Function.locallyFinsuppWithin.coe_nsmul, Pi.smul_apply,
+    Function.locallyFinsuppWithin.max_apply, Function.locallyFinsuppWithin.coe_neg, Pi.neg_apply,
+    Function.locallyFinsuppWithin.coe_zero, Pi.zero_apply]
+  by_cases h : -f x < 0
+  · simpa [max_eq_right_of_lt h] using nsmul_le_nsmul_right h.le n
+  · simpa [not_lt.1 h] using nsmul_nonneg (not_lt.1 h) n
+
+/--
+For natural numbers `n`, the counting function counting zeros of `f ^ n` equals
+`n` times the counting function counting zeros of `f`.
+-/
 @[simp] theorem logCounting_pow_zero {f : 𝕜 → 𝕜} {n : ℕ} (hf : MeromorphicOn f Set.univ) :
     logCounting' (f ^ n) 0 = n • logCounting' f 0 := by
-  unfold logCounting'
-  simp only [WithTop.zero_ne_top, ↓reduceDIte, Pi.pow_apply, WithTop.untop₀_zero, sub_zero]
-  rw [divisor_fun_pow hf n]
-  have : (n • divisor f univ)⁺ = n • (divisor f univ)⁺ := by
-    ext z
-    have {a : ℤ} {b : ℕ} : max (n * a) 0 = n * (max a 0) := by
-      by_cases h : 0 < a
-      · simp [h]
-        left
-        exact Int.le_of_lt h
-      · simp at h
-        simp [h]
-        apply Int.mul_nonpos_of_nonneg_of_nonpos
-        exact Int.natCast_nonneg n
-        exact h
-    apply this
-    exact 1
-  rw [this]
-  have : (n • (divisor f univ)⁺) = ((n : ℤ) • (divisor f univ)⁺) := rfl
-  rw [this]
-  rw [Function.locallyFinsuppWithin.logCounting'.map_smul n (divisor f univ)⁺]
-  simp
+  simp [logCounting', divisor_fun_pow hf n, ← nsmul_posPart]
 
-/-
+/--
+For natural numbers `n`, the counting function counting poles of `f ^ n` equals
+`n` times the counting function counting poles of `f`.
+-/
 @[simp] theorem logCounting_pow_top {f : 𝕜 → 𝕜} {n : ℕ} (hf : MeromorphicOn f Set.univ) :
     logCounting' (f ^ n) ⊤ = n • logCounting' f ⊤ := by
-  sorry
--/
+  simp [logCounting', divisor_pow hf n, ← nsmul_negPart]
 
 end ValueDistribution
