@@ -139,6 +139,36 @@ noncomputable def logCounting' : ℝ → ℝ := by
   · exact (divisor f univ)⁻.logCounting'
   · exact (divisor (fun z ↦ f z - a.untop₀) univ)⁺.logCounting'
 
+
+theorem posPart_add
+    {X : Type*} [TopologicalSpace X] {U : Set X}
+    {Y : Type*} [AddCommGroup Y] [LinearOrder Y] [IsOrderedAddMonoid Y]
+    (f₁ f₂ : Function.locallyFinsuppWithin U Y) :
+    (f₁ + f₂)⁺ ≤ f₁⁺ + f₂⁺ := by
+  unfold instPosPart
+  rw [Function.locallyFinsuppWithin.le_def]
+  intro x
+  simp only [Function.locallyFinsuppWithin.max_apply, Function.locallyFinsuppWithin.coe_add,
+    Pi.add_apply, Function.locallyFinsuppWithin.coe_zero, Pi.zero_apply, sup_le_iff]
+  constructor
+  · simp [add_le_add]
+  · simp [add_nonneg]
+
+theorem negPart_add
+    {X : Type*} [TopologicalSpace X] {U : Set X}
+    {Y : Type*} [AddCommGroup Y] [LinearOrder Y] [IsOrderedAddMonoid Y]
+    (f₁ f₂ : Function.locallyFinsuppWithin U Y) :
+    (f₁ + f₂)⁻ ≤ f₁⁻ + f₂⁻ := by
+  unfold instNegPart
+  rw [Function.locallyFinsuppWithin.le_def]
+  intro x
+  simp only [neg_add_rev, Function.locallyFinsuppWithin.max_apply,
+    Function.locallyFinsuppWithin.coe_add, Function.locallyFinsuppWithin.coe_neg, Pi.add_apply,
+    Pi.neg_apply, Function.locallyFinsuppWithin.coe_zero, Pi.zero_apply, sup_le_iff]
+  constructor
+  · simp [add_comm, add_le_add]
+  · simp [add_nonneg]
+
 /--
 Taking the positive part of a function with locally finite support commutes with
 scalar multiplication by a natural number.
