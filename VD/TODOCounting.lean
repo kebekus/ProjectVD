@@ -220,4 +220,18 @@ For natural numbers `n`, the counting function counting poles of `f ^ n` equals
     logCounting' (f ^ n) ⊤ = n • logCounting' f ⊤ := by
   simp [logCounting', divisor_pow hf n, ← nsmul_negPart]
 
+/--
+For natural numbers `n`, the counting function counting zeros of `f ^ n` equals
+`n` times the counting function counting zeros of `f`.
+-/
+@[simp] theorem logCounting_mul {f₁ f₂ : 𝕜 → 𝕜} (hf₁ : MeromorphicOn f₁ Set.univ) (hf₂ : MeromorphicOn f₂ Set.univ) :
+    logCounting' (f₁ * f₂) 0 ≤ logCounting' f₁ 0 + logCounting' f₂ 0 := by
+  unfold logCounting'
+  simp only [WithTop.zero_ne_top, ↓reduceDIte, WithTop.untop₀_zero, sub_zero]
+  rw [divisor_mul hf₁ hf₂]
+  rw [← Function.locallyFinsuppWithin.logCounting'.map_add]
+  simp
+  sorry
+
+
 end ValueDistribution
