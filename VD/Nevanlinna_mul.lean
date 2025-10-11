@@ -15,11 +15,6 @@ theorem finsum_le_finsum
   rw [finsum_eq_sum_of_support_subset f₂ (by simp : f₂.support ⊆ (hf₁.toFinset ∪ hf₂.toFinset : Finset α))]
   exact Finset.sum_le_sum fun a _ ↦ hf a
 
-namespace MeromorphicOn
-
-
-end MeromorphicOn
-
 /-!
 Statements about functions with locally finite support
 -/
@@ -30,6 +25,9 @@ variable
   {X : Type*} [TopologicalSpace X] {U : Set X}
   {Y : Type*} [AddCommGroup Y] [LinearOrder Y]
 
+instance x [IsOrderedAddMonoid Y] : IsOrderedAddMonoid (locallyFinsuppWithin U Y) where
+  add_le_add_left _ _ h _ x := by simp [h x]
+
 theorem posPart_le
     (f₁ f₂ : Function.locallyFinsuppWithin U Y) (h : f₁ ≤ f₂):
     f₁⁺ ≤ f₂⁺ := by
@@ -38,15 +36,16 @@ theorem posPart_le
   · simp [instPosPart, hf]
   · simp [instPosPart, h x, (lt_of_lt_of_le (not_le.1 hf) (h x)).le]
 
-theorem negPart_le
+theorem negPart_le [IsOrderedAddMonoid Y]
     (f₁ f₂ : Function.locallyFinsuppWithin U Y) (h : f₁ ≤ f₂):
-    f₁⁻ ≤ f₂⁻ := by
+    f₂⁻ ≤ f₁⁻ := by
   intro x
-  by_cases hf : 0 ≤ f₁ x
-  · simp [instNegPart]
-    sorry
-  · simp [instNegPart]
-    sorry
+  by_cases hf : -f₁ x ≤ 0
+  · simp_all only [Left.neg_nonpos_iff, instNegPart, max_apply, coe_neg, Pi.neg_apply, coe_zero,
+      Pi.zero_apply, sup_of_le_right, sup_le_iff, le_refl, and_true]
+    exact Std.IsPreorder.le_trans 0 (f₁ x) (f₂ x) hf (h x)
+  · rw [Left.neg_nonpos_iff, not_le] at hf
+    simp_all [instNegPart, h x, hf.le]
 
 variable [IsOrderedAddMonoid Y]
 
@@ -73,20 +72,36 @@ theorem negPart_add
   · simp [add_comm, add_le_add]
   · simp [add_nonneg]
 
-theorem logCounting_le (f₁ f₂ : locallyFinsuppWithin (univ : Set E) ℤ) (h : f₁ ≤ f₂) :
+theorem logCounting_le (f₁ f₂ : locallyFinsuppWithin (univ : Set E) ℤ) (h : f₁ ≤ f₂)  [MulLeftMono ℝ] :
     logCounting f₁⁺ ≤ logCounting f₂⁺ := by
   intro r
-  have hr : 1 < r := sorry
+  have hr : 1 < r :=
+    sorry
   simp [logCounting]
   apply add_le_add
   · apply finsum_le_finsum
     · intro a
-      simp
-      apply mul_le_mul
-      · sorry
-      · sorry
-      · sorry
-      · sorry
+      by_cases h₁a : a = 0
+      · simp_all
+      by_cases h₂a : ‖a‖ ≤ r
+      · have : a ∈ closedBall 0 |r| := by
+          sorry
+        apply mul_le_mul
+        · rw [toClosedBall]
+
+          sorry
+        · rfl
+        · rw [log_nonneg_iff]
+          · rw [← inv_le_iff_one_le_mul₀]
+            · rwa [inv_inv]
+            · rw [inv_pos, norm_pos_iff]
+              exact h₁a
+          · simp_all
+            linarith
+        · sorry
+      · have : a ∉ closedBall 0 |r| := by
+          sorry
+        simp [apply_eq_zero_of_notMem ((toClosedBall r) _) this]
     · sorry
     · sorry
   · apply mul_le_mul
