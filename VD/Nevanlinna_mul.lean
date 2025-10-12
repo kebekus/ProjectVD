@@ -1,3 +1,4 @@
+import Mathlib.Algebra.Group.EvenFunction
 import Mathlib.Analysis.Complex.ValueDistribution.CountingFunction
 
 open MeromorphicOn Metric Real Set Classical
@@ -29,7 +30,7 @@ instance x [IsOrderedAddMonoid Y] : IsOrderedAddMonoid (locallyFinsuppWithin U Y
   add_le_add_left _ _ h _ x := by simp [h x]
 
 theorem posPart_le
-    (f₁ f₂ : Function.locallyFinsuppWithin U Y) (h : f₁ ≤ f₂):
+    {f₁ f₂ : Function.locallyFinsuppWithin U Y} (h : f₁ ≤ f₂):
     f₁⁺ ≤ f₂⁺ := by
   intro x
   by_cases hf : f₁ x ≤ 0
@@ -37,7 +38,7 @@ theorem posPart_le
   · simp [instPosPart, h x, (lt_of_lt_of_le (not_le.1 hf) (h x)).le]
 
 theorem negPart_le [IsOrderedAddMonoid Y]
-    (f₁ f₂ : Function.locallyFinsuppWithin U Y) (h : f₁ ≤ f₂):
+    {f₁ f₂ : Function.locallyFinsuppWithin U Y} (h : f₁ ≤ f₂):
     f₂⁻ ≤ f₁⁻ := by
   intro x
   by_cases hf : -f₁ x ≤ 0
@@ -72,40 +73,47 @@ theorem negPart_add
   · simp [add_comm, add_le_add]
   · simp [add_nonneg]
 
-theorem logCounting_le (f₁ f₂ : locallyFinsuppWithin (univ : Set E) ℤ) (h : f₁ ≤ f₂)  [MulLeftMono ℝ] :
-    logCounting f₁⁺ ≤ logCounting f₂⁺ := by
+theorem evenlogCounting (f : locallyFinsuppWithin (univ : Set E) ℤ) :
+    (logCounting f).Even := by
   intro r
-  have hr : 1 < r :=
-    sorry
+  simp [logCounting, toClosedBall]
+  rw [abs_neg r]
+
+theorem logCounting_le {f₁ f₂ : locallyFinsuppWithin (univ : Set E) ℤ} {r : ℝ} (h : f₁ ≤ f₂) (hr : 0 ≤ r) :
+    logCounting f₁⁺ r ≤ logCounting f₂⁺ r := by
+  by_cases h₂r : r = 0
+  · rw [h₂r, logCounting_eval_zero, logCounting_eval_zero]
   simp [logCounting]
   apply add_le_add
   · apply finsum_le_finsum
     · intro a
       by_cases h₁a : a = 0
       · simp_all
-      by_cases h₂a : ‖a‖ ≤ r
-      · have : a ∈ closedBall 0 |r| := by
-          sorry
-        apply mul_le_mul
-        · rw [toClosedBall]
-
-          sorry
+      by_cases h₂a : a ∈ closedBall 0 |r|
+      · apply mul_le_mul
+        · simp [toClosedBall, restrictMonoidHom_apply, restrict_apply, h₂a, posPart_le h a]
         · rfl
         · rw [log_nonneg_iff]
           · rw [← inv_le_iff_one_le_mul₀]
-            · rwa [inv_inv]
+            · rw [inv_inv]
+              rw [← abs_of_nonneg hr]
+              simp_all
             · rw [inv_pos, norm_pos_iff]
               exact h₁a
-          · simp_all
-            linarith
-        · sorry
-      · have : a ∉ closedBall 0 |r| := by
-          sorry
-        simp [apply_eq_zero_of_notMem ((toClosedBall r) _) this]
-    · sorry
-    · sorry
+          · simp_all [lt_of_le_of_ne hr (fun a ↦ h₂r (a.symm))]
+        · simp [toClosedBall, restrictMonoidHom_apply, restrict_apply, h₂a]
+          apply posPart_nonneg
+      · simp [apply_eq_zero_of_notMem ((toClosedBall r) _) h₂a]
+    · rw [support_mul]
+      apply Finite.inter_of_left
+      rw [(by aesop : (fun a ↦ (((toClosedBall r) f₁⁺) a) : E → ℝ).support = (toClosedBall r f₁⁺).support)]
+      apply finiteSupport _ (isCompact_closedBall 0 |r|)
+    · rw [support_mul]
+      apply Finite.inter_of_left
+      rw [(by aesop : (fun a ↦ (((toClosedBall r) f₂⁺) a) : E → ℝ).support = (toClosedBall r f₂⁺).support)]
+      apply finiteSupport _ (isCompact_closedBall 0 |r|)
   · apply mul_le_mul
-    · simpa using posPart_le f₁ f₂ h 0
+    · simpa using posPart_le h 0
     · rfl
     · exact (log_pos hr).le
     · simpa using posPart_nonneg f₂ 0
