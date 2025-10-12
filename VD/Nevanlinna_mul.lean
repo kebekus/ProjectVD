@@ -1,5 +1,7 @@
 import Mathlib.Algebra.Group.EvenFunction
+import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
 import Mathlib.Analysis.Complex.ValueDistribution.CountingFunction
+import Mathlib.Analysis.Complex.ValueDistribution.ProximityFunction
 
 open MeromorphicOn Metric Real Set Classical
 
@@ -15,6 +17,13 @@ theorem finsum_le_finsum
   rw [finsum_eq_sum_of_support_subset f₁ (by simp : f₁.support ⊆ (hf₁.toFinset ∪ hf₂.toFinset : Finset α))]
   rw [finsum_eq_sum_of_support_subset f₂ (by simp : f₂.support ⊆ (hf₁.toFinset ∪ hf₂.toFinset : Finset α))]
   exact Finset.sum_le_sum fun a _ ↦ hf a
+
+theorem circleAverage_mono {c : ℂ} {R : ℝ} {f₁ f₂ : ℂ → ℝ} (hf₁ : CircleIntegrable f₁ c R)
+    (hf₂ : CircleIntegrable f₂ c R) (h : ∀ x ∈ Metric.sphere c |R|, f₁ x ≤ f₂ x) :
+    circleAverage f₁ c R ≤ circleAverage f₂ c R := by
+  apply (mul_le_mul_iff_of_pos_left (by simp [pi_pos])).2
+  apply intervalIntegral.integral_mono_on_of_le_Ioo (le_of_lt two_pi_pos) hf₁ hf₂
+  exact fun x _ ↦ by simp [h (circleMap c R x)]
 
 /-!
 Statements about functions with locally finite support
@@ -130,7 +139,19 @@ theorem logCounting_zero_mul_le {f₁ f₂ : 𝕜 → 𝕜} {r : ℝ} (hr : 1 �
   apply Function.locallyFinsuppWithin.posPart_add
 
 /--
-Asymptotically, the counting function counting poles of `f * g` is less than or
+Asymptotically, the counting function counting zeros of `f * g` is less than or
+equal to the sum of the counting functions counting zeros of `f` and `g`,
+respectively.
+-/
+theorem logCounting_zero_mul_eventually_le {f₁ f₂ : 𝕜 → 𝕜}
+    (h₁f₁ : MeromorphicOn f₁ Set.univ) (h₂f₁ : ∀ z ∈ univ, meromorphicOrderAt f₁ z ≠ ⊤)
+    (h₁f₂ : MeromorphicOn f₂ Set.univ) (h₂f₂ : ∀ z ∈ univ, meromorphicOrderAt f₂ z ≠ ⊤) :
+    logCounting (f₁ * f₂) 0 ≤ᶠ[Filter.atTop] logCounting f₁ 0 + logCounting f₂ 0 := by
+  filter_upwards [Filter.eventually_ge_atTop 1]
+  exact fun _ hr ↦ logCounting_zero_mul_le hr h₁f₁ h₂f₁ h₁f₂ h₂f₂
+
+/--
+For `1 ≤ r`, the counting function counting poles of `f * g` is less than or
 equal to the sum of the counting functions counting poles of `f` and `g`,
 respectively.
 -/
@@ -144,18 +165,6 @@ theorem logCounting_top_mul_le {f₁ f₂ : 𝕜 → 𝕜} {r : ℝ} (hr : 1 ≤
   apply Function.locallyFinsuppWithin.negPart_add
 
 /--
-For `1 ≤ r`, the counting function counting zeros of `f * g` is less than or
-equal to the sum of the counting functions counting zeros of `f` and `g`,
-respectively.
--/
-theorem logCounting_zero_mul_eventually_le {f₁ f₂ : 𝕜 → 𝕜}
-    (h₁f₁ : MeromorphicOn f₁ Set.univ) (h₂f₁ : ∀ z ∈ univ, meromorphicOrderAt f₁ z ≠ ⊤)
-    (h₁f₂ : MeromorphicOn f₂ Set.univ) (h₂f₂ : ∀ z ∈ univ, meromorphicOrderAt f₂ z ≠ ⊤) :
-    logCounting (f₁ * f₂) 0 ≤ᶠ[Filter.atTop] logCounting f₁ 0 + logCounting f₂ 0 := by
-  filter_upwards [Filter.eventually_ge_atTop 1]
-  exact fun _ hr ↦ logCounting_zero_mul_le hr h₁f₁ h₂f₁ h₁f₂ h₂f₂
-
-/--
 Asymptotically, the counting function counting zeros of `f * g` is less than or
 equal to the sum of the counting functions counting zeros of `f` and `g`,
 respectively.
@@ -166,5 +175,95 @@ theorem logCounting_top_mul_eventually_le {f₁ f₂ : 𝕜 → 𝕜}
     logCounting (f₁ * f₂) ⊤ ≤ᶠ[Filter.atTop] logCounting f₁ ⊤ + logCounting f₂ ⊤ := by
   filter_upwards [Filter.eventually_ge_atTop 1]
   exact fun _ hr ↦ logCounting_top_mul_le hr h₁f₁ h₂f₁ h₁f₂ h₂f₂
+
+/--
+The proximity function `f * g` at `⊤` is less than or equal to the sum of the
+proximity functions of `f` and `g`, respectively.
+-/
+theorem proximity_top_mul_le {f₁ f₂ : ℂ → ℂ} (h₁f₁ : MeromorphicOn f₁ Set.univ)
+    (h₁f₂ : MeromorphicOn f₂ Set.univ) :
+    proximity (f₁ * f₂) ⊤ ≤ (proximity f₁ ⊤) + (proximity f₂ ⊤) := by
+  calc proximity (f₁ * f₂) ⊤
+  _ = circleAverage (fun x ↦ log⁺ (‖f₁ x‖ * ‖f₂ x‖)) 0 := by
+    simp [proximity]
+  _ ≤ circleAverage (fun x ↦ log⁺ ‖f₁ x‖ + log⁺ ‖f₂ x‖) 0 := by
+    intro r
+    apply circleAverage_mono
+    · simp_rw [← norm_mul]
+      apply circleIntegrable_posLog_norm_meromorphicOn
+      exact fun_mul (fun x a ↦ h₁f₁ x trivial) fun x a ↦ h₁f₂ x trivial
+    · apply (circleIntegrable_posLog_norm_meromorphicOn (fun x a ↦ h₁f₁ x trivial)).add
+        (circleIntegrable_posLog_norm_meromorphicOn (fun x a ↦ h₁f₂ x trivial))
+    · exact fun _ _ ↦ posLog_mul
+  _ = circleAverage (log⁺ ‖f₁ ·‖) 0 + circleAverage (log⁺ ‖f₂ ·‖) 0:= by
+    ext r
+    apply circleAverage_add
+    · exact circleIntegrable_posLog_norm_meromorphicOn (fun x a ↦ h₁f₁ x trivial)
+    · exact circleIntegrable_posLog_norm_meromorphicOn (fun x a ↦ h₁f₂ x trivial)
+  _ = (proximity f₁ ⊤) + (proximity f₂ ⊤) := rfl
+
+/--
+The proximity function `f * g` at `0` is less than or equal to the sum of the
+proximity functions of `f` and `g`, respectively.
+-/
+theorem proximity_zero_mul_le {f₁ f₂ : ℂ → ℂ} (h₁f₁ : MeromorphicOn f₁ Set.univ)
+    (h₁f₂ : MeromorphicOn f₂ Set.univ) :
+    proximity (f₁ * f₂) 0 ≤ (proximity f₁ 0) + (proximity f₂ 0) := by
+  calc proximity (f₁ * f₂) 0
+  _ ≤ (proximity f₁⁻¹ ⊤) + (proximity f₂⁻¹ ⊤) := by
+    rw [← proximity_inv, mul_inv]
+    apply proximity_top_mul_le (inv_iff.mpr h₁f₁) (inv_iff.mpr h₁f₂)
+  _ = (proximity f₁ 0) + (proximity f₂ 0) := by
+    rw [proximity_inv, proximity_inv]
+
+/--
+For `1 ≤ r`, the characteristic function of `f * g` at zero is less than or
+equal to the sum of the characteristic functions of `f` and `g`, respectively.
+-/
+theorem characteristic_zero_mul_le {f₁ f₂ : ℂ → ℂ} {r : ℝ} (hr : 1 ≤ r)
+    (h₁f₁ : MeromorphicOn f₁ Set.univ) (h₂f₁ : ∀ z ∈ univ, meromorphicOrderAt f₁ z ≠ ⊤)
+    (h₁f₂ : MeromorphicOn f₂ Set.univ) (h₂f₂ : ∀ z ∈ univ, meromorphicOrderAt f₂ z ≠ ⊤) :
+    characteristic (f₁ * f₂) 0 r ≤ (characteristic f₁ 0 + characteristic f₂ 0) r := by
+  simp only [characteristic, Pi.add_apply]
+  have {A B C D : ℝ} : A + B + (C + D) = (A + C) + (B + D) := by ring
+  rw [this]
+  apply add_le_add (proximity_zero_mul_le h₁f₁ h₁f₂ r)
+    (logCounting_zero_mul_le hr h₁f₁ h₂f₁ h₁f₂ h₂f₂)
+
+/--
+Asymptotically, the characteristic function of `f * g` at zero is less than or
+equal to the sum of the characteristic functions of `f` and `g`, respectively.
+-/
+theorem characteristic_zero_mul_eventually_le {f₁ f₂ : ℂ → ℂ}
+    (h₁f₁ : MeromorphicOn f₁ Set.univ) (h₂f₁ : ∀ z ∈ univ, meromorphicOrderAt f₁ z ≠ ⊤)
+    (h₁f₂ : MeromorphicOn f₂ Set.univ) (h₂f₂ : ∀ z ∈ univ, meromorphicOrderAt f₂ z ≠ ⊤) :
+    characteristic (f₁ * f₂) 0 ≤ᶠ[Filter.atTop] characteristic f₁ 0 + characteristic f₂ 0 := by
+  filter_upwards [Filter.eventually_ge_atTop 1]
+  exact fun _ hr ↦ characteristic_zero_mul_le hr h₁f₁ h₂f₁ h₁f₂ h₂f₂
+
+/--
+For `1 ≤ r`, the characteristic function of `f * g` at `⊤` is less than or equal
+to the sum of the characteristic functions of `f` and `g`, respectively.
+-/
+theorem characteristic_top_mul_le {f₁ f₂ : ℂ → ℂ} {r : ℝ} (hr : 1 ≤ r)
+    (h₁f₁ : MeromorphicOn f₁ Set.univ) (h₂f₁ : ∀ z ∈ univ, meromorphicOrderAt f₁ z ≠ ⊤)
+    (h₁f₂ : MeromorphicOn f₂ Set.univ) (h₂f₂ : ∀ z ∈ univ, meromorphicOrderAt f₂ z ≠ ⊤) :
+    characteristic (f₁ * f₂) ⊤ r ≤ (characteristic f₁ ⊤ + characteristic f₂ ⊤) r := by
+  simp only [characteristic, Pi.add_apply]
+  have {A B C D : ℝ} : A + B + (C + D) = (A + C) + (B + D) := by ring
+  rw [this]
+  apply add_le_add (proximity_top_mul_le h₁f₁ h₁f₂ r)
+    (logCounting_top_mul_le hr h₁f₁ h₂f₁ h₁f₂ h₂f₂)
+
+/--
+Asymptotically, the characteristic function of `f * g` at `⊤` is less than or
+equal to the sum of the characteristic functions of `f` and `g`, respectively.
+-/
+theorem characteristic_top_mul_eventually_le {f₁ f₂ : ℂ → ℂ}
+    (h₁f₁ : MeromorphicOn f₁ Set.univ) (h₂f₁ : ∀ z ∈ univ, meromorphicOrderAt f₁ z ≠ ⊤)
+    (h₁f₂ : MeromorphicOn f₂ Set.univ) (h₂f₂ : ∀ z ∈ univ, meromorphicOrderAt f₂ z ≠ ⊤) :
+    characteristic (f₁ * f₂) ⊤ ≤ᶠ[Filter.atTop] characteristic f₁ ⊤ + characteristic f₂ ⊤ := by
+  filter_upwards [Filter.eventually_ge_atTop 1]
+  exact fun _ hr ↦ characteristic_top_mul_le hr h₁f₁ h₂f₁ h₁f₂ h₂f₂
 
 end ValueDistribution
