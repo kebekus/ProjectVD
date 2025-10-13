@@ -12,7 +12,7 @@ Variant of `posLog_sum` for norms of elements in normed additive commutative
 groups, using monotonicity of `log⁺` and the triangle inequality.
 -/
 lemma posLog_norm_sum_le {E : Type*} [NormedAddCommGroup E]
-    {α : Type*} (s : Finset α) (f : α → ℝ)(a b : E) :
+    {α : Type*} (s : Finset α) (f : α → ℝ) :
     log⁺ ‖∑ t ∈ s, f t‖ ≤ log s.card + ∑ t ∈ s, log⁺ ‖f t‖ := by
   calc log⁺ ‖∑ t ∈ s, f t‖
   _ ≤ log⁺ (∑ t ∈ s, ‖f t‖) := by
@@ -39,6 +39,10 @@ namespace ValueDistribution
 
 variable [ProperSpace 𝕜]
 
+/--
+The proximity function of `f + g` at `⊤` is less than or equal to the sum of the
+proximity functions of `f` and `g`, plus `log 2`.
+-/
 theorem proximity_top_add_le {f₁ f₂ : ℂ → ℂ} (h₁f₁ : MeromorphicOn f₁ Set.univ)
     (h₁f₂ : MeromorphicOn f₂ Set.univ) :
     proximity (f₁ + f₂) ⊤ ≤ (proximity f₁ ⊤) + (proximity f₂ ⊤) + (fun _ ↦ log 2) := by
