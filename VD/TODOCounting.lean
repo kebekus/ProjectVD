@@ -1,4 +1,7 @@
+import Mathlib.Algebra.Group.EvenFunction
+import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
 import Mathlib.Analysis.Complex.ValueDistribution.CountingFunction
+import Mathlib.Analysis.Complex.ValueDistribution.ProximityFunction
 
 open MeromorphicOn Metric Real Set Classical
 
@@ -6,6 +9,14 @@ variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   {U : Set 𝕜} {f g : 𝕜 → E} {a : WithTop E} {a₀ : E}
+
+theorem finsum_le_finsum
+    {α R : Type*} [AddCommMonoid R] [LinearOrder R] [AddLeftMono R]
+    (f₁ f₂ : α → R) (hf : f₁ ≤ f₂) (hf₁ : f₁.support.Finite) (hf₂ : f₂.support.Finite) :
+    ∑ᶠ (a : α), f₁ a ≤ ∑ᶠ (a : α), f₂ a := by
+  rw [finsum_eq_sum_of_support_subset f₁ (by simp : f₁.support ⊆ (hf₁.toFinset ∪ hf₂.toFinset : Finset α))]
+  rw [finsum_eq_sum_of_support_subset f₂ (by simp : f₂.support ⊆ (hf₁.toFinset ∪ hf₂.toFinset : Finset α))]
+  exact Finset.sum_le_sum fun a _ ↦ hf a
 
 theorem mul_finsum'
     {α : Type u_1} {R : Type u_7} [NonUnitalNonAssocSemiring R] [NoZeroDivisors R]
@@ -18,6 +29,43 @@ theorem mul_finsum'
   · simp [finsum_def, h, (by aesop : (r * f ·).support = f.support)]
 
 namespace MeromorphicOn
+
+namespace Function.locallyFinsuppWithin
+
+variable
+  {X : Type*} [TopologicalSpace X] {U : Set X}
+  {Y : Type*} [AddCommGroup Y] [LinearOrder Y]
+
+instance x [IsOrderedAddMonoid Y] : IsOrderedAddMonoid (Function.locallyFinsuppWithin U Y) where
+  add_le_add_left _ _ h _ x := by simp [h x]
+
+theorem posPart_le
+    {f₁ f₂ : Function.locallyFinsuppWithin U Y} (h : f₁ ≤ f₂):
+    f₁⁺ ≤ f₂⁺ := by
+  intro x
+  by_cases hf : f₁ x ≤ 0
+  · simp [instPosPart, hf]
+  · simp [instPosPart, h x, (lt_of_lt_of_le (not_le.1 hf) (h x)).le]
+
+theorem negPart_le [IsOrderedAddMonoid Y]
+    {f₁ f₂ : Function.locallyFinsuppWithin U Y} (h : f₁ ≤ f₂):
+    f₂⁻ ≤ f₁⁻ := by
+  intro x
+  by_cases hf : -f₁ x ≤ 0
+  · simp_all only [Left.neg_nonpos_iff, instNegPart, max_apply, coe_neg, Pi.neg_apply, coe_zero,
+      Pi.zero_apply, sup_of_le_right, sup_le_iff, le_refl, and_true]
+    exact Std.IsPreorder.le_trans 0 (f₁ x) (f₂ x) hf (h x)
+  · rw [Left.neg_nonpos_iff, not_le] at hf
+    simp_all [instNegPart, h x, hf.le]
+
+theorem evenlogCounting (f : locallyFinsuppWithin (univ : Set E) ℤ) :
+    (logCounting f).Even := by
+  intro r
+  simp [logCounting, toClosedBall]
+  rw [abs_neg r]
+
+end Function.locallyFinsuppWithin
+
 
 /--
 The order of a constant function is `⊤` is the the constant is zero and `0` otherwise.
