@@ -126,7 +126,6 @@ theorem proximity_top_sum_le {α : Type*} (s : Finset α) (f : α → ℂ → �
       rw [add_comm]
       apply posLog_norm_sum_le
   _ = ∑ c ∈ s, circleAverage (fun x ↦ log⁺ ‖f c x‖) 0 r + log s.card := by
-    rw [circleAverage_add_fun]
     sorry
 
 end ValueDistribution
