@@ -1,9 +1,10 @@
 import Mathlib.Algebra.Group.EvenFunction
+import Mathlib.Algebra.Order.Group.PosPart
 import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
 import Mathlib.Analysis.Complex.ValueDistribution.CountingFunction
 import Mathlib.Analysis.Complex.ValueDistribution.ProximityFunction
 
-open MeromorphicOn Metric Real Set Classical
+open MeromorphicOn Metric Real Set Classical Function.locallyFinsuppWithin
 
 variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜]
@@ -58,7 +59,7 @@ theorem negPart_le [IsOrderedAddMonoid Y]
   · rw [Left.neg_nonpos_iff, not_le] at hf
     simp_all [instNegPart, h x, hf.le]
 
-theorem evenlogCounting (f : locallyFinsuppWithin (univ : Set E) ℤ) :
+theorem evenlogCounting [ProperSpace E] (f : Function.locallyFinsuppWithin (univ : Set E) ℤ) :
     (logCounting f).Even := by
   intro r
   simp [logCounting, toClosedBall]
@@ -267,19 +268,5 @@ For natural numbers `n`, the counting function counting poles of `f ^ n` equals
 @[simp] theorem logCounting_pow_top {f : 𝕜 → 𝕜} {n : ℕ} (hf : MeromorphicOn f Set.univ) :
     logCounting' (f ^ n) ⊤ = n • logCounting' f ⊤ := by
   simp [logCounting', divisor_pow hf n, ← nsmul_negPart]
-
-/--
-For natural numbers `n`, the counting function counting zeros of `f ^ n` equals
-`n` times the counting function counting zeros of `f`.
--/
-@[simp] theorem logCounting_mul {f₁ f₂ : 𝕜 → 𝕜} (hf₁ : MeromorphicOn f₁ Set.univ) (hf₂ : MeromorphicOn f₂ Set.univ) :
-    logCounting' (f₁ * f₂) 0 ≤ logCounting' f₁ 0 + logCounting' f₂ 0 := by
-  unfold logCounting'
-  simp only [WithTop.zero_ne_top, ↓reduceDIte, WithTop.untop₀_zero, sub_zero]
-  rw [divisor_mul hf₁ hf₂]
-  rw [← Function.locallyFinsuppWithin.logCounting'.map_add]
-  simp
-  sorry
-
 
 end ValueDistribution
