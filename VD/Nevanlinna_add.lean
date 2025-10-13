@@ -7,6 +7,19 @@ variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [ProperSpace E]
   {U : Set 𝕜} {f g : 𝕜 → E} {a : WithTop E} {a₀ : E}
 
+/--
+Variant of `posLog_sum` for norms of elements in normed additive commutative
+groups, using monotonicity of `log⁺` and the triangle inequality.
+-/
+lemma posLog_norm_sum_le {E : Type*} [NormedAddCommGroup E]
+    {α : Type*} (s : Finset α) (f : α → ℝ)(a b : E) :
+    log⁺ ‖∑ t ∈ s, f t‖ ≤ log s.card + ∑ t ∈ s, log⁺ ‖f t‖ := by
+  calc log⁺ ‖∑ t ∈ s, f t‖
+  _ ≤ log⁺ (∑ t ∈ s, ‖f t‖) := by
+    apply monotoneOn_posLog (by simp) _ (norm_sum_le s f)
+    simp only [norm_eq_abs, mem_Ici, Finset.sum_nonneg fun i a ↦ abs_nonneg (f i)]
+  _ ≤ log s.card + ∑ t ∈ s, log⁺ ‖f t‖ :=
+    posLog_sum s fun t ↦ ‖f t‖
 
 /-- Circle averages commute with addition. -/
 theorem circleAverage_add_fun {c : ℂ} {R : ℝ} {f₁ f₂ : ℂ → ℂ} (hf₁ : CircleIntegrable f₁ c R)
