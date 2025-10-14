@@ -7,74 +7,73 @@ variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   {U : Set 𝕜} {f g : 𝕜 → E} {a : WithTop E} {a₀ : E}
 
-/-- Sums of circle integrable functions are circle integrable. -/
-theorem CircleIntegrable.fun_sum {c : ℂ} {R : ℝ} {ι : Type*} (s : Finset ι) {f : ι → ℂ → E}
-    (h : ∀ i ∈ s, CircleIntegrable (f i) c R) :
-    CircleIntegrable (fun z ↦ ∑ i ∈ s, f i z) c R := by
-  convert CircleIntegrable.sum s h
-  simp
 
-variable [ProperSpace E]
+@[simp]
+theorem WithTop.max_untop₀ {α : Type*} [AddCommGroup α] [LinearOrder α] {a b : WithTop α}
+    (ha : a ≠ ⊤) (hb : b ≠ ⊤) :
+    (max a b).untop₀ = max a.untop₀ b.untop₀ := by
+  lift a to α using ha
+  lift b to α using hb
+  simp only [untop₀_coe]
+  by_cases h : a ≤ b
+  · simp [max_eq_right h, max_eq_right (coe_le_coe.mpr h)]
+  rw [not_le] at h
+  simp [max_eq_left h.le, max_eq_left (coe_lt_coe.mpr h).le]
 
-/-- Finite sums of meromorphic functions are meromorphic. -/
-@[fun_prop]
-theorem MeromorphicAt.sum {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → 𝕜} {x : 𝕜}
-    (h : ∀ σ, MeromorphicAt (f σ) x) :
-    MeromorphicAt (∑ n ∈ s, f n) x := by
-  classical
-  induction s using Finset.induction with
-  | empty =>
-    rw [Finset.sum_empty]
-    exact analyticAt_const.meromorphicAt
-  | insert σ s hσ hind =>
-    rw [Finset.sum_insert hσ]
-    exact (h σ).add hind
+@[simp]
+theorem WithTop.min_untop₀ {α : Type*} [AddCommGroup α] [LinearOrder α] {a b : WithTop α}
+    (ha : a ≠ ⊤) (hb : b ≠ ⊤) :
+    (min a b).untop₀ = min a.untop₀ b.untop₀ := by
+  lift a to α using ha
+  lift b to α using hb
+  simp only [untop₀_coe]
+  by_cases h : a ≤ b
+  · simp [min_eq_left h, min_eq_left (coe_le_coe.mpr h)]
+  rw [not_le] at h
+  simp [min_eq_right h.le, min_eq_right (coe_lt_coe.mpr h).le]
 
-/-- Finite sums of meromorphic functions are meromorphic. -/
-@[fun_prop]
-theorem MeromorphicAt.fun_sum {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → 𝕜} {x : 𝕜}
-    (h : ∀ σ, MeromorphicAt (f σ) x) :
-    MeromorphicAt (fun z ↦ ∑ n ∈ s, f n z) x := by
-  convert sum h (s := s)
-  simp
+@[simp]
+theorem WithTop.le_of_untop₀_le_untop₀ {α : Type*} [AddCommGroup α] [LinearOrder α] {a b : WithTop α}
+    (ha : a ≠ ⊤) (h : a.untop₀ ≤ b.untop₀) :
+    a ≤ b := by
+  lift a to α using ha
+  by_cases hb : b = ⊤
+  · simp_all
+  lift b to α using hb
+  simp_all
 
-/-- Finite sums of meromorphic functions are meromorphic. -/
-lemma MeromorphicOn.sum {U : Set 𝕜} {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → 𝕜}
-    (h : ∀ σ, MeromorphicOn (f σ) U) :
-    MeromorphicOn (∑ n ∈ s, f n) U :=
-  fun z hz ↦ MeromorphicAt.sum (fun σ ↦ h σ z hz)
-
-/-- Finite sums of meromorphic functions are meromorphic. -/
-lemma MeromorphicOn.fun_sum {U : Set 𝕜} {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → 𝕜}
-    (h : ∀ σ, MeromorphicOn (f σ) U) :
-    MeromorphicOn (fun z ↦ ∑ n ∈ s, f n z) U :=
-  fun z hz ↦ MeromorphicAt.fun_sum (fun σ ↦ h σ z hz)
-
-/--
-Variant of `posLog_sum` for norms of elements in normed additive commutative
-groups, using monotonicity of `log⁺` and the triangle inequality.
--/
-lemma posLog_norm_sum_le {E : Type*} [NormedAddCommGroup E]
-    {α : Type*} (s : Finset α) (f : α → E) :
-    log⁺ ‖∑ t ∈ s, f t‖ ≤ log s.card + ∑ t ∈ s, log⁺ ‖f t‖ := by
-  calc log⁺ ‖∑ t ∈ s, f t‖
-  _ ≤ log⁺ (∑ t ∈ s, ‖f t‖) := by
-    apply monotoneOn_posLog (by simp) _ (norm_sum_le s f)
-    simp [Finset.sum_nonneg (fun  i hi ↦ norm_nonneg (f i))]
-  _ ≤ log s.card + ∑ t ∈ s, log⁺ ‖f t‖ :=
-    posLog_sum s fun t ↦ ‖f t‖
-
-/-- Circle averages commute with addition. -/
-theorem circleAverage_add_fun {c : ℂ} {R : ℝ} {f₁ f₂ : ℂ → ℂ} (hf₁ : CircleIntegrable f₁ c R)
-    (hf₂ : CircleIntegrable f₂ c R) :
-    circleAverage (fun z ↦ f₁ z + f₂ z) c R = circleAverage f₁ c R + circleAverage f₂ c R :=
-  circleAverage_add hf₁ hf₂
+@[simp]
+theorem WithTop.untop₀_le_untop₀_of_le {α : Type*} [AddCommGroup α] [LinearOrder α] {a b : WithTop α}
+    (hb : b ≠ ⊤) (h : a ≤ b) :
+    a.untop₀ ≤ b.untop₀ := by
+  lift b to α using hb
+  by_cases ha : a = ⊤
+  · simp_all
+  lift a to α using ha
+  simp_all
 
 namespace Function.locallyFinsuppWithin
 
 variable
   {X : Type*} [TopologicalSpace X] {U : Set X}
-  {Y : Type*} [AddCommGroup Y] [LinearOrder Y] [IsOrderedAddMonoid Y]
+  {Y : Type*} [AddCommGroup Y] [LinearOrder Y]
+
+lemma posPart_apply (a : locallyFinsuppWithin U Y) (x : X) :
+    a⁺ x = (a x)⁺ := by rfl
+
+lemma negPart_apply (a : locallyFinsuppWithin U Y) (x : X) :
+    a⁻ x = (a x)⁻ := by rfl
+
+variable [IsOrderedAddMonoid Y]
+
+theorem neg_min (a b : locallyFinsuppWithin U Y) :
+    (min a b)⁻ = max a⁻ b⁻ := by
+  ext x
+  rw [max_apply, negPart_apply, negPart_apply, negPart_apply, min_apply]
+  rcases lt_trichotomy (a x) (b x) with h | h | h
+  · rw [min_eq_left h.le, max_comm, max_eq_right ((le_iff_posPart_negPart (a x) (b x)).1 h.le).2]
+  · simp_all
+  · rw [min_comm, min_eq_left h.le, max_eq_right ((le_iff_posPart_negPart (b x) (a x)).1 h.le).2]
 
 end Function.locallyFinsuppWithin
 
@@ -82,93 +81,32 @@ namespace ValueDistribution
 
 variable [ProperSpace 𝕜]
 
-/--
-The proximity function of `f + g` at `⊤` is less than or equal to the sum of the
-proximity functions of `f` and `g`, plus `log 2`.
--/
-theorem proximity_top_add_le {f₁ f₂ : ℂ → ℂ} (h₁f₁ : MeromorphicOn f₁ Set.univ)
-    (h₁f₂ : MeromorphicOn f₂ Set.univ) :
-    proximity (f₁ + f₂) ⊤ ≤ (proximity f₁ ⊤) + (proximity f₂ ⊤) + (fun _ ↦ log 2) := by
-  simp only [proximity, reduceDIte, Pi.add_apply]
-  intro r
-  have h₂f₁ : MeromorphicOn f₁ (sphere 0 |r|) := fun x _ ↦ h₁f₁ x trivial
-  have h₂f₂ : MeromorphicOn f₂ (sphere 0 |r|) := fun x _ ↦ h₁f₂ x trivial
-  have h₃f₁ := circleIntegrable_posLog_norm_meromorphicOn h₂f₁
-  have h₃f₂ := circleIntegrable_posLog_norm_meromorphicOn h₂f₂
-  calc circleAverage (fun x ↦ log⁺ ‖f₁ x + f₂ x‖) 0 r
-  _ ≤ circleAverage (fun x ↦ log⁺ ‖f₁ x‖ + log⁺ ‖f₂ x‖ + log 2) 0 r :=
-    circleAverage_mono (circleIntegrable_posLog_norm_meromorphicOn (fun_add h₂f₁ h₂f₂))
-      ((h₃f₁.add h₃f₂).add (circleIntegrable_const (log 2) 0 r))
-      fun x _ ↦ posLog_norm_add_le (f₁ x) (f₂ x)
-  _ = circleAverage (log⁺ ‖f₁ ·‖) 0 r + circleAverage (log⁺ ‖f₂ ·‖) 0 r + log 2 := by
-    rw [← circleAverage_add h₃f₁ h₃f₂, ← circleAverage_const (log 2),
-      ← circleAverage_add (h₃f₁.add h₃f₂) (circleIntegrable_const (log 2) 0 r)]
-    congr 1
-    ext
-    simp [circleAverage_const]
 
-/--
-The proximity function of a sum of functions at `⊤` is less than or equal to the
-sum of the proximity functions of the summand, plus `log` of the number of
-summands.
--/
-theorem proximity_top_sum_le {α : Type*} (s : Finset α) (f : α → ℂ → ℂ)
-    (hf : ∀ a, MeromorphicOn (f a) Set.univ) :
-    proximity (∑ a ∈ s, f a) ⊤ ≤ ∑ a ∈ s, (proximity (f a) ⊤) + (fun _ ↦ log s.card):= by
-  simp only [proximity, reduceDIte, Finset.sum_apply]
-  intro r
-  have h₂f : ∀ i ∈ s, CircleIntegrable (log⁺ ‖f i ·‖) 0 r :=
-    fun i _ ↦ circleIntegrable_posLog_norm_meromorphicOn (fun x _ ↦ hf i x trivial)
-  simp only [Pi.add_apply, Finset.sum_apply]
-  calc circleAverage (log⁺ ‖∑ c ∈ s, f c ·‖) 0 r
-  _ ≤ circleAverage (∑ c ∈ s, log⁺ ‖f c ·‖ + log s.card) 0 r := by
-    apply circleAverage_mono
-    · apply circleIntegrable_posLog_norm_meromorphicOn
-      apply MeromorphicOn.mono_set (MeromorphicOn.fun_sum (hf ·)) (by tauto)
-    · apply CircleIntegrable.add (CircleIntegrable.fun_sum s h₂f)
-        (circleIntegrable_const (log s.card) 0 r)
-    · intro x hx
-      rw [add_comm]
-      apply posLog_norm_sum_le
-  _ = ∑ c ∈ s, circleAverage (log⁺ ‖f c ·‖) 0 r + log s.card := by
-    nth_rw 2 [← circleAverage_const (log s.card) 0 r]
-    rw [← circleAverage_sum h₂f, ← circleAverage_add (CircleIntegrable.sum s h₂f)
-      (circleIntegrable_const (log s.card) 0 r)]
-    congr 1
-    ext x
-    simp
-
-theorem xx {f₁ f₂ : ℂ → ℂ} {U : Set ℂ} (hf₁ : MeromorphicOn f₁ U)  (hf₂ : MeromorphicOn f₂ U) :
+theorem xx₁ {f₁ f₂ : ℂ → ℂ} {U : Set ℂ} (hf₁ : MeromorphicOn f₁ U)  (hf₂ : MeromorphicOn f₂ U)
+    (h₃ : ∀ z ∈ U, meromorphicOrderAt (f₁ + f₂) z ≠ ⊤) :
     min (divisor f₁ U) (divisor f₂ U) ≤ divisor (f₁ + f₂) U := by
   intro z
   rw [Function.locallyFinsuppWithin.min_apply]
   by_cases hz : z ∉ U
   · simp_all
-  simp at hz
-  rw [divisor_apply hf₁ hz]
-  rw [divisor_apply hf₂ hz]
-  rw [divisor_apply (hf₁.add hf₂) hz]
+  simp only [Decidable.not_not] at hz
+  rw [divisor_apply hf₁ hz, divisor_apply hf₂ hz, divisor_apply (hf₁.add hf₂) hz]
+  by_cases h₁ : meromorphicOrderAt f₁ z = ⊤
+  · sorry
+  have h₂ : meromorphicOrderAt f₂ z ≠ ⊤ := by sorry
+  rw [← WithTop.min_untop₀ h₁ h₂]
+  apply WithTop.untop₀_le_untop₀_of_le (h₃ z hz)
+  exact meromorphicOrderAt_add (hf₁ z hz) (hf₂ z hz)
 
-  have : meromorphicOrderAt (f₁ + f₂) z ≠ ⊤ := by
-    sorry
 
-  by_cases h₁ : meromorphicOrderAt (f₁ + f₂) z = ⊤
-  · simp
-
-  simp [this]
-
-  simp [divisor, hf₁, hf₂, hz]
-  simp
-  rw [negPart]
-  --rw [instNegPart]
-  simp [instNegPart]
-  rw [Function.locallyFinsuppWithin.min_apply]
-
-  rw [Function.locallyFinsuppWithin.instNegPart]
-  sorry
-
-theorem xx {f₁ f₂ : ℂ → ℂ} {U : Set ℂ} (hf₁ : MeromorphicOn f₁ U)  (hf₂ : MeromorphicOn f₂ U) :
+theorem xx₂ {f₁ f₂ : ℂ → ℂ} {U : Set ℂ} (hf₁ : MeromorphicOn f₁ U)  (hf₂ : MeromorphicOn f₂ U) :
     (divisor (f₁ + f₂) U)⁻ ≤ (divisor f₁ U)⁻ + (divisor f₂ U)⁻ := by
+  have := xx₁ hf₁ hf₂
+
+  have A := ((le_iff_posPart_negPart (min (divisor f₁ U) (divisor f₂ U)) (divisor (f₁ + f₂) U)).1 this).2
+  rw [Function.locallyFinsuppWithin.neg_min] at A
+  intro z
+
   intro z
   simp
   rw [negPart]
@@ -187,7 +125,6 @@ theorem counting_top_add_le {f₁ f₂ : ℂ → ℂ} (h₁f₁ : MeromorphicOn 
     (h₁f₂ : MeromorphicOn f₂ Set.univ) :
     logCounting (f₁ + f₂) ⊤ ≤ (logCounting f₁ ⊤) + (logCounting f₂ ⊤) := by
   simp [logCounting]
-  have := divisor_add
   sorry
 
 end ValueDistribution
