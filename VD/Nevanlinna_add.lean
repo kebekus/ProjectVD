@@ -126,6 +126,15 @@ theorem proximity_top_sum_le {α : Type*} (s : Finset α) (f : α → ℂ → �
       rw [add_comm]
       apply posLog_norm_sum_le
   _ = ∑ c ∈ s, circleAverage (fun x ↦ log⁺ ‖f c x‖) 0 r + log s.card := by
+    nth_rw 2 [← circleAverage_const (log s.card) 0 r]
+    rw [← circleAverage_sum, ← circleAverage_add _ (circleIntegrable_const (log s.card) 0 r)]
+    congr 1
+    ext x
+    simp
+    --
     sorry
+    --
+    intro i hi
+    exact circleIntegrable_posLog_norm_meromorphicOn (fun x _ ↦ hf i x trivial)
 
 end ValueDistribution
