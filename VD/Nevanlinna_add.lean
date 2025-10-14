@@ -121,7 +121,7 @@ theorem proximity_top_sum_le {α : Type*} (s : Finset α) (f : α → ℂ → �
     · apply CircleIntegrable.add _ (circleIntegrable_const (log s.card) 0 r)
       apply CircleIntegrable.fun_sum
       intro i hi
-      exact circleIntegrable_posLog_norm_meromorphicOn (fun x a ↦ hf i x trivial)
+      exact circleIntegrable_posLog_norm_meromorphicOn (fun x _ ↦ hf i x trivial)
     · intro x hx
       rw [add_comm]
       apply posLog_norm_sum_le
