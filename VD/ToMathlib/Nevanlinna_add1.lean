@@ -14,11 +14,9 @@ theorem CircleIntegrable.fun_sum {c : ℂ} {R : ℝ} {ι : Type*} (s : Finset ι
   convert CircleIntegrable.sum s h
   simp
 
-variable [ProperSpace E]
-
 /-- Finite sums of meromorphic functions are meromorphic. -/
 @[fun_prop]
-theorem MeromorphicAt.sum {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → 𝕜} {x : 𝕜}
+theorem MeromorphicAt.sum {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → E} {x : 𝕜}
     (h : ∀ σ, MeromorphicAt (f σ) x) :
     MeromorphicAt (∑ n ∈ s, f n) x := by
   classical
@@ -32,20 +30,20 @@ theorem MeromorphicAt.sum {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → 𝕜
 
 /-- Finite sums of meromorphic functions are meromorphic. -/
 @[fun_prop]
-theorem MeromorphicAt.fun_sum {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → 𝕜} {x : 𝕜}
+theorem MeromorphicAt.fun_sum {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → E} {x : 𝕜}
     (h : ∀ σ, MeromorphicAt (f σ) x) :
     MeromorphicAt (fun z ↦ ∑ n ∈ s, f n z) x := by
   convert sum h (s := s)
   simp
 
 /-- Finite sums of meromorphic functions are meromorphic. -/
-lemma MeromorphicOn.sum {U : Set 𝕜} {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → 𝕜}
+lemma MeromorphicOn.sum {U : Set 𝕜} {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → E}
     (h : ∀ σ, MeromorphicOn (f σ) U) :
     MeromorphicOn (∑ n ∈ s, f n) U :=
   fun z hz ↦ MeromorphicAt.sum (fun σ ↦ h σ z hz)
 
 /-- Finite sums of meromorphic functions are meromorphic. -/
-lemma MeromorphicOn.fun_sum {U : Set 𝕜} {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → 𝕜}
+lemma MeromorphicOn.fun_sum {U : Set 𝕜} {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → E}
     (h : ∀ σ, MeromorphicOn (f σ) U) :
     MeromorphicOn (fun z ↦ ∑ n ∈ s, f n z) U :=
   fun z hz ↦ MeromorphicAt.fun_sum (fun σ ↦ h σ z hz)
@@ -70,23 +68,15 @@ theorem circleAverage_add_fun {c : ℂ} {R : ℝ} {f₁ f₂ : ℂ → ℂ} (hf�
     circleAverage (fun z ↦ f₁ z + f₂ z) c R = circleAverage f₁ c R + circleAverage f₂ c R :=
   circleAverage_add hf₁ hf₂
 
-namespace Function.locallyFinsuppWithin
-
-variable
-  {X : Type*} [TopologicalSpace X] {U : Set X}
-  {Y : Type*} [AddCommGroup Y] [LinearOrder Y] [IsOrderedAddMonoid Y]
-
-end Function.locallyFinsuppWithin
-
 namespace ValueDistribution
 
-variable [ProperSpace 𝕜]
+variable [ProperSpace 𝕜] [NormedSpace ℂ E]
 
 /--
 The proximity function of `f + g` at `⊤` is less than or equal to the sum of the
 proximity functions of `f` and `g`, plus `log 2`.
 -/
-theorem proximity_top_add_le {f₁ f₂ : ℂ → ℂ} (h₁f₁ : MeromorphicOn f₁ Set.univ)
+theorem proximity_top_add_le {f₁ f₂ : ℂ → E} (h₁f₁ : MeromorphicOn f₁ Set.univ)
     (h₁f₂ : MeromorphicOn f₂ Set.univ) :
     proximity (f₁ + f₂) ⊤ ≤ (proximity f₁ ⊤) + (proximity f₂ ⊤) + (fun _ ↦ log 2) := by
   simp only [proximity, reduceDIte, Pi.add_apply]
@@ -112,7 +102,7 @@ The proximity function of a sum of functions at `⊤` is less than or equal to t
 sum of the proximity functions of the summand, plus `log` of the number of
 summands.
 -/
-theorem proximity_top_sum_le {α : Type*} (s : Finset α) (f : α → ℂ → ℂ)
+theorem proximity_top_sum_le {α : Type*} (s : Finset α) (f : α → ℂ → E)
     (hf : ∀ a, MeromorphicOn (f a) Set.univ) :
     proximity (∑ a ∈ s, f a) ⊤ ≤ ∑ a ∈ s, (proximity (f a) ⊤) + (fun _ ↦ log s.card):= by
   simp only [proximity, reduceDIte, Finset.sum_apply]
@@ -137,57 +127,5 @@ theorem proximity_top_sum_le {α : Type*} (s : Finset α) (f : α → ℂ → �
     congr 1
     ext x
     simp
-
-theorem xx {f₁ f₂ : ℂ → ℂ} {U : Set ℂ} (hf₁ : MeromorphicOn f₁ U)  (hf₂ : MeromorphicOn f₂ U) :
-    min (divisor f₁ U) (divisor f₂ U) ≤ divisor (f₁ + f₂) U := by
-  intro z
-  rw [Function.locallyFinsuppWithin.min_apply]
-  by_cases hz : z ∉ U
-  · simp_all
-  simp at hz
-  rw [divisor_apply hf₁ hz]
-  rw [divisor_apply hf₂ hz]
-  rw [divisor_apply (hf₁.add hf₂) hz]
-
-  have : meromorphicOrderAt (f₁ + f₂) z ≠ ⊤ := by
-    sorry
-
-  by_cases h₁ : meromorphicOrderAt (f₁ + f₂) z = ⊤
-  · simp
-
-  simp [this]
-
-  simp [divisor, hf₁, hf₂, hz]
-  simp
-  rw [negPart]
-  --rw [instNegPart]
-  simp [instNegPart]
-  rw [Function.locallyFinsuppWithin.min_apply]
-
-  rw [Function.locallyFinsuppWithin.instNegPart]
-  sorry
-
-theorem xx {f₁ f₂ : ℂ → ℂ} {U : Set ℂ} (hf₁ : MeromorphicOn f₁ U)  (hf₂ : MeromorphicOn f₂ U) :
-    (divisor (f₁ + f₂) U)⁻ ≤ (divisor f₁ U)⁻ + (divisor f₂ U)⁻ := by
-  intro z
-  simp
-  rw [negPart]
-  --rw [instNegPart]
-  simp [instNegPart]
-  rw [Function.locallyFinsuppWithin.min_apply]
-
-  rw [Function.locallyFinsuppWithin.instNegPart]
-  sorry
-
-/--
-The counting function of `f + g` at `⊤` is less than or equal to the sum of the
-counting functions of `f` and `g`.
--/
-theorem counting_top_add_le {f₁ f₂ : ℂ → ℂ} (h₁f₁ : MeromorphicOn f₁ Set.univ)
-    (h₁f₂ : MeromorphicOn f₂ Set.univ) :
-    logCounting (f₁ + f₂) ⊤ ≤ (logCounting f₁ ⊤) + (logCounting f₂ ⊤) := by
-  simp [logCounting]
-  have := divisor_add
-  sorry
 
 end ValueDistribution
