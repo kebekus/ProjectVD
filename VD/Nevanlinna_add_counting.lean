@@ -1,4 +1,4 @@
-import VD.Nevanlinna_add1
+import VD.Nevanlinna_add_proximity
 
 open MeromorphicOn Metric Real Set Classical
 
@@ -6,6 +6,45 @@ variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜]
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   {U : Set 𝕜} {f g : 𝕜 → E} {a : WithTop E} {a₀ : E}
+
+-- DUPLICATE!
+theorem meromorphicOrderAt_const (z₀ : 𝕜) (e : E) :
+    meromorphicOrderAt (fun _ ↦ e) z₀ = if e = 0 then ⊤ else (0 : WithTop ℤ) := by
+  by_cases he : e = 0
+  · simp [he, meromorphicOrderAt_eq_top_iff]
+  simp [he]
+  rw [(by rfl : (0 : WithTop ℤ) = (0 : ℤ)), meromorphicOrderAt_eq_int_iff (MeromorphicAt.const e z₀)]
+  use fun _ ↦ e
+  simp [he]
+  fun_prop
+
+-- DUPLICATE!
+@[simp]
+theorem divisor_const (e : E) :
+    divisor (fun _ ↦ e) U = 0 := by
+  classical
+  ext x
+  simp only [divisor_def, meromorphicOrderAt_const, Function.locallyFinsuppWithin.coe_zero,
+    Pi.zero_apply, ite_eq_right_iff, WithTop.untop₀_eq_zero,
+    LinearOrderedAddCommGroupWithTop.top_ne_zero, imp_false, ite_eq_left_iff, WithTop.zero_ne_top,
+    Decidable.not_not, and_imp]
+  tauto
+
+-- DUPLICATE!
+@[simp]
+theorem divisor_intCast (n : ℤ) :
+    divisor (n : 𝕜 → 𝕜) U = 0 := divisor_const (n : 𝕜)
+
+-- DUPLICATE!
+@[simp]
+theorem divisor_natCast (n : ℕ) :
+    divisor (n : 𝕜 → 𝕜) U = 0 := divisor_const (n : 𝕜)
+
+-- DUPLICATE!
+@[simp] theorem divisor_ofNat (n : ℕ) :
+    divisor (ofNat(n) : 𝕜 → 𝕜) U = 0 := by
+  convert divisor_const (n : 𝕜)
+  simp [Semiring.toGrindSemiring_ofNat 𝕜 n]
 
 theorem meromorphicOrderAt_add_top
     {f₁ f₂ : 𝕜 → E} {x : 𝕜} (hf₁ : meromorphicOrderAt f₁ x = ⊤) :
@@ -81,6 +120,9 @@ theorem neg_min (a b : locallyFinsuppWithin U Y) :
   · simp_all
   · rw [min_comm, min_eq_left h.le, max_eq_right ((le_iff_posPart_negPart (b x) (a x)).1 h.le).2]
 
+theorem logCounting_zero [NormedSpace ℂ E] [ProperSpace E] :
+    logCounting (0 : locallyFinsuppWithin (univ : Set E) ℤ) = 0 := by simp
+
 end Function.locallyFinsuppWithin
 
 theorem neg_min {Y : Type*} [AddCommGroup Y] [LinearOrder Y] [AddLeftMono Y] (a b : Y) :
@@ -94,6 +136,15 @@ namespace ValueDistribution
 
 variable [ProperSpace 𝕜]
 
+@[simp]
+theorem logCounting_const
+    {𝕜 : Type*} [NontriviallyNormedField 𝕜] [ProperSpace 𝕜]
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] {c : E} {e : WithTop E} :
+    logCounting (fun _ ↦ c : 𝕜 → E) e = 0 := by
+  simp [logCounting]
+
+@[simp] theorem logCounting_const_zero {e : WithTop E} :
+    logCounting (0 : 𝕜 → E) e = 0 := logCounting_const
 
 theorem min_divisor_le_divisor_add [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {z : ℂ} {U : Set ℂ} (hf₁ : MeromorphicOn f₁ U)
     (hf₂ : MeromorphicOn f₂ U) (h₁z : z ∈ U) (h₃ : meromorphicOrderAt (f₁ + f₂) z ≠ ⊤) :
@@ -148,13 +199,18 @@ theorem counting_top_add_le [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {r : ℝ
   rw [← Function.locallyFinsuppWithin.logCounting.map_add]
   exact Function.locallyFinsuppWithin.logCounting_le (negPart_divisor_add_le_add h₁f₁ h₁f₂) hr
 
+theorem counting_top_add_eventually_le [NormedSpace ℂ E] {f₁ f₂ : ℂ → E}
+    (h₁f₁ : MeromorphicOn f₁ Set.univ) (h₁f₂ : MeromorphicOn f₂ Set.univ) :
+    logCounting (f₁ + f₂) ⊤ ≤ᶠ[Filter.atTop] (logCounting f₁ ⊤) + (logCounting f₂ ⊤) := by
+  filter_upwards [Filter.eventually_ge_atTop 1]
+  exact fun _ hr ↦ counting_top_add_le h₁f₁ h₁f₂ hr
+
 theorem counting_top_sum_le [NormedSpace ℂ E] {α : Type*} (s : Finset α) (f : α → ℂ → E)
     {r : ℝ} (h₁f : ∀ a, MeromorphicOn (f a) Set.univ) (hr : 1 ≤ r) :
     logCounting (∑ a ∈ s, f a) ⊤ r ≤ (∑ a ∈ s, (logCounting (f a) ⊤)) r := by
   induction s using Finset.induction with
   | empty =>
-    simp_all
-    sorry
+    simp
   | insert a s ha hs =>
     rw [Finset.sum_insert ha, Finset.sum_insert ha]
     calc logCounting (f a + ∑ x ∈ s, f x) ⊤ r
@@ -163,5 +219,10 @@ theorem counting_top_sum_le [NormedSpace ℂ E] {α : Type*} (s : Finset α) (f 
     _ ≤ (logCounting (f a) ⊤ + ∑ x ∈ s, logCounting (f x) ⊤) r :=
       add_le_add (by trivial) hs
 
+theorem counting_top_sum_eventually_le [NormedSpace ℂ E] {α : Type*} (s : Finset α) (f : α → ℂ → E)
+    (h₁f : ∀ a, MeromorphicOn (f a) Set.univ) :
+    logCounting (∑ a ∈ s, f a) ⊤ ≤ᶠ[Filter.atTop] ∑ a ∈ s, (logCounting (f a) ⊤) := by
+  filter_upwards [Filter.eventually_ge_atTop 1]
+  exact fun _ hr ↦ counting_top_sum_le s f h₁f hr
 
 end ValueDistribution
