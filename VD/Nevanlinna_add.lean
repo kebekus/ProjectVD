@@ -82,11 +82,9 @@ namespace ValueDistribution
 variable [ProperSpace 𝕜]
 
 
-theorem xx₁ {f₁ f₂ : ℂ → ℂ} {U : Set ℂ} (hf₁ : MeromorphicOn f₁ U)  (hf₂ : MeromorphicOn f₂ U)
-    (h₃ : ∀ z ∈ U, meromorphicOrderAt (f₁ + f₂) z ≠ ⊤) :
-    min (divisor f₁ U) (divisor f₂ U) ≤ divisor (f₁ + f₂) U := by
-  intro z
-  rw [Function.locallyFinsuppWithin.min_apply]
+theorem xx₁ {f₁ f₂ : ℂ → ℂ} {z : ℂ} {U : Set ℂ} (hf₁ : MeromorphicOn f₁ U)  (hf₂ : MeromorphicOn f₂ U)
+    (h₁z : z ∈ U) (h₃ : meromorphicOrderAt (f₁ + f₂) z ≠ ⊤) :
+    min (divisor f₁ U z) (divisor f₂ U z) ≤ divisor (f₁ + f₂) U z := by
   by_cases hz : z ∉ U
   · simp_all
   simp only [Decidable.not_not] at hz
@@ -101,9 +99,17 @@ theorem xx₁ {f₁ f₂ : ℂ → ℂ} {U : Set ℂ} (hf₁ : MeromorphicOn f�
 
 theorem xx₂ {f₁ f₂ : ℂ → ℂ} {U : Set ℂ} (hf₁ : MeromorphicOn f₁ U)  (hf₂ : MeromorphicOn f₂ U) :
     (divisor (f₁ + f₂) U)⁻ ≤ (divisor f₁ U)⁻ + (divisor f₂ U)⁻ := by
-  have := xx₁ hf₁ hf₂
+  intro z
+  by_cases hz : z ∉ U
+  · simp [hz]
+  simp at hz
+  simp [Function.locallyFinsuppWithin.negPart_apply]
+  by_cases hf₁₂ : meromorphicOrderAt (f₁ + f₂) z = ⊤
+  · sorry
 
-  have A := ((le_iff_posPart_negPart (min (divisor f₁ U) (divisor f₂ U)) (divisor (f₁ + f₂) U)).1 this).2
+  have := xx₁ hf₁ hf₂ hz hf₁₂
+
+  have A := ((le_iff_posPart_negPart (min (divisor f₁ U z) (divisor f₂ U z)) (divisor (f₁ + f₂) U z)).1 this).2
   rw [Function.locallyFinsuppWithin.neg_min] at A
   intro z
 
