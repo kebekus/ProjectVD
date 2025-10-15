@@ -19,16 +19,6 @@ theorem finsum_le_finsum
   rw [finsum_eq_sum_of_support_subset f₂ (by simp : f₂.support ⊆ (hf₁.toFinset ∪ hf₂.toFinset : Finset α))]
   exact Finset.sum_le_sum fun a _ ↦ hf a
 
-theorem mul_finsum'
-    {α : Type u_1} {R : Type u_7} [NonUnitalNonAssocSemiring R] [NoZeroDivisors R]
-    (f : α → R) (r : R) :
-    r * ∑ᶠ (a : α), f a = ∑ᶠ (a : α), r * f a := by
-  by_cases hr : r = 0
-  · simp_all
-  by_cases h : f.support.Finite
-  · exact mul_finsum f r h
-  · simp [finsum_def, h, (by aesop : (r * f ·).support = f.support)]
-
 namespace MeromorphicOn
 
 namespace Function.locallyFinsuppWithin
@@ -88,6 +78,43 @@ coercion from natural numbers.
 theorem meromorphicOrderAt_const_ofNat (z₀ : 𝕜) (n : ℤ) :
     meromorphicOrderAt (n : 𝕜 → 𝕜) z₀ = if (n : 𝕜) = 0 then ⊤ else (0 : WithTop ℤ) := by
   apply meromorphicOrderAt_const
+
+
+/--
+The divisor of a constant function is `0`.
+-/
+@[simp]
+theorem divisor_const (e : E) :
+    divisor (fun _ ↦ e) U = 0 := by
+  classical
+  ext x
+  simp only [divisor_def, meromorphicOrderAt_const, Function.locallyFinsuppWithin.coe_zero,
+    Pi.zero_apply, ite_eq_right_iff, WithTop.untop₀_eq_zero,
+    LinearOrderedAddCommGroupWithTop.top_ne_zero, imp_false, ite_eq_left_iff, WithTop.zero_ne_top,
+    Decidable.not_not, and_imp]
+  tauto
+
+/--
+The divisor of a constant function is `0`.
+-/
+@[simp]
+theorem divisor_intCast (n : ℤ) :
+    divisor (n : 𝕜 → 𝕜) U = 0 := divisor_const (n : 𝕜)
+
+/--
+The divisor of a constant function is `0`.
+-/
+@[simp]
+theorem divisor_natCast (n : ℕ) :
+    divisor (n : 𝕜 → 𝕜) U = 0 := divisor_const (n : 𝕜)
+
+/--
+The divisor of a constant function is `0`.
+-/
+@[simp] theorem divisor_ofNat (n : ℕ) :
+    divisor (ofNat(n) : 𝕜 → 𝕜) U = 0 := by
+  convert divisor_const (n : 𝕜)
+  simp [Semiring.toGrindSemiring_ofNat 𝕜 n]
 
 /--
 If `f` is meromorphic, then the divisor of `f ^ n` is `n` times the divisor of `f`.

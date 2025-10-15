@@ -97,6 +97,13 @@ theorem WithTop.untop₀_le_untop₀_of_le {α : Type*} [AddCommGroup α] [Linea
   lift a to α using ha
   simp_all
 
+theorem neg_min {Y : Type*} [AddCommGroup Y] [LinearOrder Y] [AddLeftMono Y] (a b : Y) :
+    (min a b)⁻ = max a⁻ b⁻ := by
+  rcases lt_trichotomy a b with h | h | h
+  · rw [min_eq_left h.le, max_comm, max_eq_right ((le_iff_posPart_negPart a b).1 h.le).2]
+  · simp_all
+  · rw [min_comm, min_eq_left h.le, max_eq_right ((le_iff_posPart_negPart b a).1 h.le).2]
+
 namespace Function.locallyFinsuppWithin
 
 variable
@@ -114,23 +121,12 @@ variable [IsOrderedAddMonoid Y]
 theorem neg_min (a b : locallyFinsuppWithin U Y) :
     (min a b)⁻ = max a⁻ b⁻ := by
   ext x
-  rw [max_apply, negPart_apply, negPart_apply, negPart_apply, min_apply]
-  rcases lt_trichotomy (a x) (b x) with h | h | h
-  · rw [min_eq_left h.le, max_comm, max_eq_right ((le_iff_posPart_negPart (a x) (b x)).1 h.le).2]
-  · simp_all
-  · rw [min_comm, min_eq_left h.le, max_eq_right ((le_iff_posPart_negPart (b x) (a x)).1 h.le).2]
+  apply _root_.neg_min
 
 theorem logCounting_zero [NormedSpace ℂ E] [ProperSpace E] :
     logCounting (0 : locallyFinsuppWithin (univ : Set E) ℤ) = 0 := by simp
 
 end Function.locallyFinsuppWithin
-
-theorem neg_min {Y : Type*} [AddCommGroup Y] [LinearOrder Y] [AddLeftMono Y] (a b : Y) :
-    (min a b)⁻ = max a⁻ b⁻ := by
-  rcases lt_trichotomy a b with h | h | h
-  · rw [min_eq_left h.le, max_comm, max_eq_right ((le_iff_posPart_negPart a b).1 h.le).2]
-  · simp_all
-  · rw [min_comm, min_eq_left h.le, max_eq_right ((le_iff_posPart_negPart b a).1 h.le).2]
 
 namespace ValueDistribution
 
