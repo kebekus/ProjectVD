@@ -46,6 +46,9 @@ theorem divisor_natCast (n : ℕ) :
   convert divisor_const (n : 𝕜)
   simp [Semiring.toGrindSemiring_ofNat 𝕜 n]
 
+/--
+Adding a locally vanishing function does not change the order.
+-/
 theorem meromorphicOrderAt_add_top
     {f₁ f₂ : 𝕜 → E} {x : 𝕜} (hf₁ : meromorphicOrderAt f₁ x = ⊤) :
     meromorphicOrderAt (f₁ + f₂) x = meromorphicOrderAt f₂ x := by
@@ -54,7 +57,7 @@ theorem meromorphicOrderAt_add_top
   simp_all
 
 @[simp]
-theorem WithTop.max_untop₀ {α : Type*} [AddCommGroup α] [LinearOrder α] {a b : WithTop α}
+theorem WithTop.untop₀_max {α : Type*} [AddCommGroup α] [LinearOrder α] {a b : WithTop α}
     (ha : a ≠ ⊤) (hb : b ≠ ⊤) :
     (max a b).untop₀ = max a.untop₀ b.untop₀ := by
   lift a to α using ha
@@ -66,7 +69,7 @@ theorem WithTop.max_untop₀ {α : Type*} [AddCommGroup α] [LinearOrder α] {a 
   simp [max_eq_left h.le, max_eq_left (coe_lt_coe.mpr h).le]
 
 @[simp]
-theorem WithTop.min_untop₀ {α : Type*} [AddCommGroup α] [LinearOrder α] {a b : WithTop α}
+theorem WithTop.untop₀_min {α : Type*} [AddCommGroup α] [LinearOrder α] {a b : WithTop α}
     (ha : a ≠ ⊤) (hb : b ≠ ⊤) :
     (min a b).untop₀ = min a.untop₀ b.untop₀ := by
   lift a to α using ha
@@ -97,12 +100,25 @@ theorem WithTop.untop₀_le_untop₀_of_le {α : Type*} [AddCommGroup α] [Linea
   lift a to α using ha
   simp_all
 
-theorem neg_min {Y : Type*} [AddCommGroup Y] [LinearOrder Y] [AddLeftMono Y] (a b : Y) :
+/--
+The negative part of a minimum is the maximum of the negative parts.
+-/
+theorem negPart_min {Y : Type*} [AddCommGroup Y] [LinearOrder Y] [AddLeftMono Y] (a b : Y) :
     (min a b)⁻ = max a⁻ b⁻ := by
   rcases lt_trichotomy a b with h | h | h
   · rw [min_eq_left h.le, max_comm, max_eq_right ((le_iff_posPart_negPart a b).1 h.le).2]
   · simp_all
   · rw [min_comm, min_eq_left h.le, max_eq_right ((le_iff_posPart_negPart b a).1 h.le).2]
+
+/--
+The negative part of a maximum is the minimum of the negative parts.
+-/
+theorem negPart_max {Y : Type*} [AddCommGroup Y] [LinearOrder Y] [AddLeftMono Y] (a b : Y) :
+    (max a b)⁻ = min a⁻ b⁻ := by
+  rcases lt_trichotomy a b with h | h | h
+  · rw [max_eq_right h.le, min_comm, min_eq_left ((le_iff_posPart_negPart a b).1 h.le).2]
+  · simp_all
+  · rw [min_comm, max_eq_left h.le, min_eq_right ((le_iff_posPart_negPart b a).1 h.le).2]
 
 namespace Function.locallyFinsuppWithin
 
@@ -118,13 +134,21 @@ lemma negPart_apply (a : locallyFinsuppWithin U Y) (x : X) :
 
 variable [IsOrderedAddMonoid Y]
 
-theorem neg_min (a b : locallyFinsuppWithin U Y) :
+/--
+The negative part of a minimum is the maximum of the negative parts.
+-/
+theorem negPart_min (a b : locallyFinsuppWithin U Y) :
     (min a b)⁻ = max a⁻ b⁻ := by
   ext x
-  apply _root_.neg_min
+  apply _root_.negPart_min
 
-theorem logCounting_zero [NormedSpace ℂ E] [ProperSpace E] :
-    logCounting (0 : locallyFinsuppWithin (univ : Set E) ℤ) = 0 := by simp
+/--
+The negative part of a maximum is the minimum of the negative parts.
+-/
+theorem negPart_max (a b : locallyFinsuppWithin U Y) :
+    (max a b)⁻ = min a⁻ b⁻ := by
+  ext x
+  apply _root_.negPart_max
 
 end Function.locallyFinsuppWithin
 
@@ -132,16 +156,25 @@ namespace ValueDistribution
 
 variable [ProperSpace 𝕜]
 
-@[simp]
-theorem logCounting_const
+/--
+The counting function of a constant function is zero.
+-/
+@[simp] theorem logCounting_const
     {𝕜 : Type*} [NontriviallyNormedField 𝕜] [ProperSpace 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] {c : E} {e : WithTop E} :
     logCounting (fun _ ↦ c : 𝕜 → E) e = 0 := by
   simp [logCounting]
 
+/--
+The counting function of the constant function zero is zero.
+-/
 @[simp] theorem logCounting_const_zero {e : WithTop E} :
     logCounting (0 : 𝕜 → E) e = 0 := logCounting_const
 
+/--
+The divisor of `f₁ + f₂` is larger than or equal to the minimum of the divisors
+of `f₁` and `f₂`, respectively.
+-/
 theorem min_divisor_le_divisor_add [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {z : ℂ} {U : Set ℂ} (hf₁ : MeromorphicOn f₁ U)
     (hf₂ : MeromorphicOn f₂ U) (h₁z : z ∈ U) (h₃ : meromorphicOrderAt (f₁ + f₂) z ≠ ⊤) :
     min (divisor f₁ U z) (divisor f₂ U z) ≤ divisor (f₁ + f₂) U z := by
@@ -157,10 +190,14 @@ theorem min_divisor_le_divisor_add [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {
   · simp
     left
     rwa [add_comm, meromorphicOrderAt_add_top]
-  rw [← WithTop.min_untop₀ h₁ h₂]
+  rw [← WithTop.untop₀_min h₁ h₂]
   apply WithTop.untop₀_le_untop₀_of_le h₃
   exact meromorphicOrderAt_add (hf₁ z hz) (hf₂ z hz)
 
+/--
+The pole divisor of `f₁ + f₂` is smaller than or equal to the maximum of the
+pole divisors of `f₁` and `f₂`, respectively.
+-/
 theorem negPart_divisor_add_le_max [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {U : Set ℂ} (hf₁ : MeromorphicOn f₁ U)
     (hf₂ : MeromorphicOn f₂ U) :
     (divisor (f₁ + f₂) U)⁻ ≤ max (divisor f₁ U)⁻ (divisor f₂ U)⁻ := by
@@ -171,10 +208,15 @@ theorem negPart_divisor_add_le_max [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {
   simp only [Function.locallyFinsuppWithin.negPart_apply, Function.locallyFinsuppWithin.max_apply]
   by_cases hf₁₂ : meromorphicOrderAt (f₁ + f₂) z = ⊤
   · simp [divisor_apply (hf₁.add hf₂) hz, hf₁₂, negPart_nonneg]
-  rw [← neg_min]
+  rw [← negPart_min]
   apply ((le_iff_posPart_negPart _ _).1 (min_divisor_le_divisor_add hf₁ hf₂ hz hf₁₂)).2
 
-theorem negPart_divisor_add_le_add [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {U : Set ℂ} (hf₁ : MeromorphicOn f₁ U) (hf₂ : MeromorphicOn f₂ U) :
+/--
+The pole divisor of `f₁ + f₂` is smaller than or equal to the sum of the pole
+divisors of `f₁` and `f₂`, respectively.
+-/
+theorem negPart_divisor_add_le_add [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {U : Set ℂ} (hf₁ : MeromorphicOn f₁ U)
+    (hf₂ : MeromorphicOn f₂ U) :
     (divisor (f₁ + f₂) U)⁻ ≤ (divisor f₁ U)⁻ + (divisor f₂ U)⁻ := by
   calc (divisor (f₁ + f₂) U)⁻
   _ ≤ max (divisor f₁ U)⁻ (divisor f₂ U)⁻ :=
@@ -185,8 +227,8 @@ theorem negPart_divisor_add_le_add [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {
     simp_all [negPart_nonneg]
 
 /--
-The counting function of `f + g` at `⊤` is less than or equal to the sum of the
-counting functions of `f` and `g`.
+For `1 ≤ r`, the counting function of `f + g` at `⊤` is less than or equal to
+the sum of the counting functions of `f` and `g`, respectively.
 -/
 theorem counting_top_add_le [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {r : ℝ}
     (h₁f₁ : MeromorphicOn f₁ Set.univ) (h₁f₂ : MeromorphicOn f₂ Set.univ) (hr : 1 ≤ r) :
@@ -195,12 +237,20 @@ theorem counting_top_add_le [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {r : ℝ
   rw [← Function.locallyFinsuppWithin.logCounting.map_add]
   exact Function.locallyFinsuppWithin.logCounting_le (negPart_divisor_add_le_add h₁f₁ h₁f₂) hr
 
+/--
+Asymptotically, the counting function of `f + g` at `⊤` is less than or equal to
+the sum of the counting functions of `f` and `g`, respectively.
+-/
 theorem counting_top_add_eventually_le [NormedSpace ℂ E] {f₁ f₂ : ℂ → E}
     (h₁f₁ : MeromorphicOn f₁ Set.univ) (h₁f₂ : MeromorphicOn f₂ Set.univ) :
     logCounting (f₁ + f₂) ⊤ ≤ᶠ[Filter.atTop] (logCounting f₁ ⊤) + (logCounting f₂ ⊤) := by
   filter_upwards [Filter.eventually_ge_atTop 1]
   exact fun _ hr ↦ counting_top_add_le h₁f₁ h₁f₂ hr
 
+/--
+For `1 ≤ r`, the counting function of a sum `∑ a, f a` at `⊤` is less than or
+equal to the sum of the counting functions of `f ·`.
+-/
 theorem counting_top_sum_le [NormedSpace ℂ E] {α : Type*} (s : Finset α) (f : α → ℂ → E)
     {r : ℝ} (h₁f : ∀ a, MeromorphicOn (f a) Set.univ) (hr : 1 ≤ r) :
     logCounting (∑ a ∈ s, f a) ⊤ r ≤ (∑ a ∈ s, (logCounting (f a) ⊤)) r := by
@@ -215,6 +265,10 @@ theorem counting_top_sum_le [NormedSpace ℂ E] {α : Type*} (s : Finset α) (f 
     _ ≤ (logCounting (f a) ⊤ + ∑ x ∈ s, logCounting (f x) ⊤) r :=
       add_le_add (by trivial) hs
 
+/--
+Asymptotically, the counting function of a sum `∑ a, f a` at `⊤` is less than or
+equal to the sum of the counting functions of `f ·`.
+-/
 theorem counting_top_sum_eventually_le [NormedSpace ℂ E] {α : Type*} (s : Finset α) (f : α → ℂ → E)
     (h₁f : ∀ a, MeromorphicOn (f a) Set.univ) :
     logCounting (∑ a ∈ s, f a) ⊤ ≤ᶠ[Filter.atTop] ∑ a ∈ s, (logCounting (f a) ⊤) := by
