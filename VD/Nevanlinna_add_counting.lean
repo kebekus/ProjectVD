@@ -1,5 +1,6 @@
-import VD.Nevanlinna_add_proximity
 import VD.DivisorOrder
+import VD.MathlibSubmitted.MeromorphicSum
+import VD.MathlibSubmitted.Nevanlinna_mul
 
 open MeromorphicOn Metric Real Set Classical
 

@@ -1,8 +1,6 @@
-import Mathlib.Algebra.Group.EvenFunction
 import Mathlib.Algebra.Order.Group.PosPart
-import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
 import Mathlib.Analysis.Complex.ValueDistribution.CountingFunction
-import Mathlib.Analysis.Complex.ValueDistribution.ProximityFunction
+import Mathlib.RingTheory.LocalRing.Basic
 import VD.DivisorOrder
 
 open MeromorphicOn Metric Real Set Classical Function.locallyFinsuppWithin

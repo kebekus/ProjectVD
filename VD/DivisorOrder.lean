@@ -1,11 +1,8 @@
-import Mathlib
-
-open MeromorphicOn Metric Real Set Classical
-
-variable
-  {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-  {U : Set 𝕜} {f g : 𝕜 → E} {a : WithTop E} {a₀ : E}
+import Mathlib.Algebra.Module.NatInt
+import Mathlib.Algebra.Order.Monoid.Unbundled.Pow
+import Mathlib.Algebra.Order.Group.PosPart
+import Mathlib.Algebra.Order.WithTop.Untop0
+import Mathlib.Topology.LocallyFinsupp
 
 @[simp]
 theorem WithTop.untop₀_max {α : Type*} [AddCommGroup α] [LinearOrder α] {a b : WithTop α}
