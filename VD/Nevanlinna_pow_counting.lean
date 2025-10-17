@@ -1,7 +1,7 @@
 import Mathlib.Algebra.Order.Group.PosPart
 import Mathlib.Analysis.Complex.ValueDistribution.CountingFunction
 import Mathlib.RingTheory.LocalRing.Basic
-import VD.DivisorOrder
+import VD.MathlibSubmitted.DivisorOrder
 
 open MeromorphicOn Metric Real Set Classical Function.locallyFinsuppWithin
 

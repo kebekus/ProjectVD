@@ -1,4 +1,4 @@
-import VD.DivisorOrder
+import VD.MathlibSubmitted.DivisorOrder
 import VD.MathlibSubmitted.MeromorphicSum
 import VD.MathlibSubmitted.Nevanlinna_mul
 
