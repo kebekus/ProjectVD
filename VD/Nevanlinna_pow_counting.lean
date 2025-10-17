@@ -3,6 +3,7 @@ import Mathlib.Algebra.Order.Group.PosPart
 import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
 import Mathlib.Analysis.Complex.ValueDistribution.CountingFunction
 import Mathlib.Analysis.Complex.ValueDistribution.ProximityFunction
+import VD.DivisorOrder
 
 open MeromorphicOn Metric Real Set Classical Function.locallyFinsuppWithin
 
@@ -170,71 +171,6 @@ noncomputable def logCounting' : ℝ → ℝ := by
   by_cases h : a = ⊤
   · exact (divisor f univ)⁻.logCounting'
   · exact (divisor (fun z ↦ f z - a.untop₀) univ)⁺.logCounting'
-
-
-theorem posPart_add
-    {X : Type*} [TopologicalSpace X] {U : Set X}
-    {Y : Type*} [AddCommGroup Y] [LinearOrder Y] [IsOrderedAddMonoid Y]
-    (f₁ f₂ : Function.locallyFinsuppWithin U Y) :
-    (f₁ + f₂)⁺ ≤ f₁⁺ + f₂⁺ := by
-  unfold instPosPart
-  rw [Function.locallyFinsuppWithin.le_def]
-  intro x
-  simp only [Function.locallyFinsuppWithin.max_apply, Function.locallyFinsuppWithin.coe_add,
-    Pi.add_apply, Function.locallyFinsuppWithin.coe_zero, Pi.zero_apply, sup_le_iff]
-  constructor
-  · simp [add_le_add]
-  · simp [add_nonneg]
-
-theorem negPart_add
-    {X : Type*} [TopologicalSpace X] {U : Set X}
-    {Y : Type*} [AddCommGroup Y] [LinearOrder Y] [IsOrderedAddMonoid Y]
-    (f₁ f₂ : Function.locallyFinsuppWithin U Y) :
-    (f₁ + f₂)⁻ ≤ f₁⁻ + f₂⁻ := by
-  unfold instNegPart
-  rw [Function.locallyFinsuppWithin.le_def]
-  intro x
-  simp only [neg_add_rev, Function.locallyFinsuppWithin.max_apply,
-    Function.locallyFinsuppWithin.coe_add, Function.locallyFinsuppWithin.coe_neg, Pi.add_apply,
-    Pi.neg_apply, Function.locallyFinsuppWithin.coe_zero, Pi.zero_apply, sup_le_iff]
-  constructor
-  · simp [add_comm, add_le_add]
-  · simp [add_nonneg]
-
-/--
-Taking the positive part of a function with locally finite support commutes with
-scalar multiplication by a natural number.
--/
-theorem nsmul_posPart
-    {X : Type*} [TopologicalSpace X] {U : Set X}
-    {Y : Type*} [AddCommGroup Y] [LinearOrder Y] [IsOrderedAddMonoid Y]
-    (f : Function.locallyFinsuppWithin U Y) (n : ℕ) :
-    n • f⁺ = (n • f)⁺ := by
-  unfold instPosPart
-  ext x
-  simp only [Function.locallyFinsuppWithin.coe_nsmul, Pi.smul_apply,
-    Function.locallyFinsuppWithin.max_apply, Function.locallyFinsuppWithin.coe_zero, Pi.zero_apply]
-  by_cases h : f x < 0
-  · simpa [max_eq_right_of_lt h] using nsmul_le_nsmul_right h.le n
-  · simpa [not_lt.1 h] using nsmul_nonneg (not_lt.1 h) n
-
-/--
-Taking the negative part of a function with locally finite support commutes with
-scalar multiplication by a natural number.
--/
-theorem nsmul_negPart
-    {X : Type*} [TopologicalSpace X] {U : Set X}
-    {Y : Type*} [AddCommGroup Y] [LinearOrder Y] [IsOrderedAddMonoid Y]
-    (f : Function.locallyFinsuppWithin U Y) (n : ℕ) :
-    n • f⁻ = (n • f)⁻ := by
-  unfold instNegPart
-  ext x
-  simp only [Function.locallyFinsuppWithin.coe_nsmul, Pi.smul_apply,
-    Function.locallyFinsuppWithin.max_apply, Function.locallyFinsuppWithin.coe_neg, Pi.neg_apply,
-    Function.locallyFinsuppWithin.coe_zero, Pi.zero_apply]
-  by_cases h : -f x < 0
-  · simpa [max_eq_right_of_lt h] using nsmul_le_nsmul_right h.le n
-  · simpa [not_lt.1 h] using nsmul_nonneg (not_lt.1 h) n
 
 /--
 For natural numbers `n`, the counting function counting zeros of `f ^ n` equals

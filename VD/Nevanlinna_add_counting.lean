@@ -1,4 +1,5 @@
 import VD.Nevanlinna_add_proximity
+import VD.DivisorOrder
 
 open MeromorphicOn Metric Real Set Classical
 
@@ -55,102 +56,6 @@ theorem meromorphicOrderAt_add_top
   rw [meromorphicOrderAt_congr]
   filter_upwards [meromorphicOrderAt_eq_top_iff.1 hf₁] with z hz
   simp_all
-
-@[simp]
-theorem WithTop.untop₀_max {α : Type*} [AddCommGroup α] [LinearOrder α] {a b : WithTop α}
-    (ha : a ≠ ⊤) (hb : b ≠ ⊤) :
-    (max a b).untop₀ = max a.untop₀ b.untop₀ := by
-  lift a to α using ha
-  lift b to α using hb
-  simp only [untop₀_coe]
-  by_cases h : a ≤ b
-  · simp [max_eq_right h, max_eq_right (coe_le_coe.mpr h)]
-  rw [not_le] at h
-  simp [max_eq_left h.le, max_eq_left (coe_lt_coe.mpr h).le]
-
-@[simp]
-theorem WithTop.untop₀_min {α : Type*} [AddCommGroup α] [LinearOrder α] {a b : WithTop α}
-    (ha : a ≠ ⊤) (hb : b ≠ ⊤) :
-    (min a b).untop₀ = min a.untop₀ b.untop₀ := by
-  lift a to α using ha
-  lift b to α using hb
-  simp only [untop₀_coe]
-  by_cases h : a ≤ b
-  · simp [min_eq_left h, min_eq_left (coe_le_coe.mpr h)]
-  rw [not_le] at h
-  simp [min_eq_right h.le, min_eq_right (coe_lt_coe.mpr h).le]
-
-@[simp]
-theorem WithTop.le_of_untop₀_le_untop₀ {α : Type*} [AddCommGroup α] [LinearOrder α] {a b : WithTop α}
-    (ha : a ≠ ⊤) (h : a.untop₀ ≤ b.untop₀) :
-    a ≤ b := by
-  lift a to α using ha
-  by_cases hb : b = ⊤
-  · simp_all
-  lift b to α using hb
-  simp_all
-
-@[simp]
-theorem WithTop.untop₀_le_untop₀_of_le {α : Type*} [AddCommGroup α] [LinearOrder α] {a b : WithTop α}
-    (hb : b ≠ ⊤) (h : a ≤ b) :
-    a.untop₀ ≤ b.untop₀ := by
-  lift b to α using hb
-  by_cases ha : a = ⊤
-  · simp_all
-  lift a to α using ha
-  simp_all
-
-/--
-The negative part of a minimum is the maximum of the negative parts.
--/
-theorem negPart_min {Y : Type*} [AddCommGroup Y] [LinearOrder Y] [AddLeftMono Y] (a b : Y) :
-    (min a b)⁻ = max a⁻ b⁻ := by
-  rcases lt_trichotomy a b with h | h | h
-  · rw [min_eq_left h.le, max_comm, max_eq_right ((le_iff_posPart_negPart a b).1 h.le).2]
-  · simp_all
-  · rw [min_comm, min_eq_left h.le, max_eq_right ((le_iff_posPart_negPart b a).1 h.le).2]
-
-/--
-The negative part of a maximum is the minimum of the negative parts.
--/
-theorem negPart_max {Y : Type*} [AddCommGroup Y] [LinearOrder Y] [AddLeftMono Y] (a b : Y) :
-    (max a b)⁻ = min a⁻ b⁻ := by
-  rcases lt_trichotomy a b with h | h | h
-  · rw [max_eq_right h.le, min_comm, min_eq_left ((le_iff_posPart_negPart a b).1 h.le).2]
-  · simp_all
-  · rw [min_comm, max_eq_left h.le, min_eq_right ((le_iff_posPart_negPart b a).1 h.le).2]
-
-namespace Function.locallyFinsuppWithin
-
-variable
-  {X : Type*} [TopologicalSpace X] {U : Set X}
-  {Y : Type*} [AddCommGroup Y] [LinearOrder Y]
-
-lemma posPart_apply (a : locallyFinsuppWithin U Y) (x : X) :
-    a⁺ x = (a x)⁺ := rfl
-
-lemma negPart_apply (a : locallyFinsuppWithin U Y) (x : X) :
-    a⁻ x = (a x)⁻ := rfl
-
-variable [IsOrderedAddMonoid Y]
-
-/--
-The negative part of a minimum is the maximum of the negative parts.
--/
-theorem negPart_min (a b : locallyFinsuppWithin U Y) :
-    (min a b)⁻ = max a⁻ b⁻ := by
-  ext x
-  apply _root_.negPart_min
-
-/--
-The negative part of a maximum is the minimum of the negative parts.
--/
-theorem negPart_max (a b : locallyFinsuppWithin U Y) :
-    (max a b)⁻ = min a⁻ b⁻ := by
-  ext x
-  apply _root_.negPart_max
-
-end Function.locallyFinsuppWithin
 
 namespace ValueDistribution
 
