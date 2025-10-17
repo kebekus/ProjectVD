@@ -1,5 +1,5 @@
-import VD.ToMathlib.Nevanlinna_mul
-import VD.ToMathlib.MeromorphicSum
+import VD.MathlibSubmitted.Nevanlinna_mul
+import VD.MathlibSubmitted.MeromorphicSum
 
 open MeromorphicOn Metric Real Set Classical
 
