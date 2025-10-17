@@ -48,25 +48,21 @@ theorem WithTop.untop₀_le_untop₀_of_le {α : Type*} [AddCommGroup α] [Linea
   lift a to α using ha
   simp_all
 
-/--
-The negative part of a minimum is the maximum of the negative parts.
--/
-theorem negPart_min {Y : Type*} [AddCommGroup Y] [LinearOrder Y] [AddLeftMono Y] (a b : Y) :
-    (min a b)⁻ = max a⁻ b⁻ := by
+@[to_additive]
+theorem leOnePart_min {Y : Type*} [CommGroup Y] [LinearOrder Y] [MulLeftMono Y] (a b : Y) :
+    (min a b)⁻ᵐ = max a⁻ᵐ b⁻ᵐ := by
   rcases lt_trichotomy a b with h | h | h
-  · rw [min_eq_left h.le, max_comm, max_eq_right ((le_iff_posPart_negPart a b).1 h.le).2]
+  · rw [min_eq_left h.le, max_comm, max_eq_right ((le_iff_oneLePart_leOnePart a b).1 h.le).2]
   · simp_all
-  · rw [min_comm, min_eq_left h.le, max_eq_right ((le_iff_posPart_negPart b a).1 h.le).2]
+  · rw [min_comm, min_eq_left h.le, max_eq_right ((le_iff_oneLePart_leOnePart b a).1 h.le).2]
 
-/--
-The negative part of a maximum is the minimum of the negative parts.
--/
-theorem negPart_max {Y : Type*} [AddCommGroup Y] [LinearOrder Y] [AddLeftMono Y] (a b : Y) :
-    (max a b)⁻ = min a⁻ b⁻ := by
+@[to_additive]
+theorem leOnePart_max {Y : Type*} [CommGroup Y] [LinearOrder Y] [MulLeftMono Y] (a b : Y) :
+    (max a b)⁻ᵐ = min a⁻ᵐ b⁻ᵐ := by
   rcases lt_trichotomy a b with h | h | h
-  · rw [max_eq_right h.le, min_comm, min_eq_left ((le_iff_posPart_negPart a b).1 h.le).2]
+  · rw [max_eq_right h.le, min_comm, min_eq_left ((le_iff_oneLePart_leOnePart a b).1 h.le).2]
   · simp_all
-  · rw [min_comm, max_eq_left h.le, min_eq_right ((le_iff_posPart_negPart b a).1 h.le).2]
+  · rw [min_comm, max_eq_left h.le, min_eq_right ((le_iff_oneLePart_leOnePart b a).1 h.le).2]
 
 namespace Function.locallyFinsuppWithin
 
