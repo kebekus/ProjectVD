@@ -1,5 +1,7 @@
 import VD.MathlibSubmitted.Nevanlinna_mul
 import VD.MathlibSubmitted.MeromorphicSum
+import VD.MathlibSubmitted.PosLog
+
 
 open MeromorphicOn Metric Real Set Classical
 
@@ -14,20 +16,6 @@ theorem CircleIntegrable.fun_sum {c : ℂ} {R : ℝ} {ι : Type*} (s : Finset ι
     CircleIntegrable (fun z ↦ ∑ i ∈ s, f i z) c R := by
   convert CircleIntegrable.sum s h
   simp
-
-/--
-Variant of `posLog_sum` for norms of elements in normed additive commutative
-groups, using monotonicity of `log⁺` and the triangle inequality.
--/
-lemma posLog_norm_sum_le {E : Type*} [NormedAddCommGroup E]
-    {α : Type*} (s : Finset α) (f : α → E) :
-    log⁺ ‖∑ t ∈ s, f t‖ ≤ log s.card + ∑ t ∈ s, log⁺ ‖f t‖ := by
-  calc log⁺ ‖∑ t ∈ s, f t‖
-  _ ≤ log⁺ (∑ t ∈ s, ‖f t‖) := by
-    apply monotoneOn_posLog (by simp) _ (norm_sum_le s f)
-    simp [Finset.sum_nonneg (fun i _ ↦ norm_nonneg (f i))]
-  _ ≤ log s.card + ∑ t ∈ s, log⁺ ‖f t‖ :=
-    posLog_sum s (‖f ·‖)
 
 /-- Circle averages commute with addition. -/
 theorem circleAverage_add_fun {c : ℂ} {R : ℝ} {f₁ f₂ : ℂ → ℂ} (hf₁ : CircleIntegrable f₁ c R)

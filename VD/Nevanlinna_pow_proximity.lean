@@ -12,23 +12,15 @@ namespace ValueDistribution
 
 @[simp] lemma posLog_one : log⁺ 1 = 0 := by simp [posLog]
 
-lemma posLog_pow {n : ℕ} {a : ℝ} :
+@[simp] lemma posLog_pow {n : ℕ} {a : ℝ} :
     log⁺ (a ^ n) = n * log⁺ a := by
-  by_cases h₁a : a = 0
-  · by_cases hn : n = 0
-    <;> simp_all
   by_cases hn : n = 0
   · simp_all
-  · by_cases h₂a : |a| ≤ 1
-    · have : |a ^ n| ≤ 1 := by
-        rw [abs_pow]
-        apply pow_le_one₀ (abs_nonneg a) h₂a
-      simp_all [(posLog_eq_zero_iff a).2 h₂a, (posLog_eq_zero_iff (a ^ n)).2 this]
-    simp at h₂a
-    have : 1 < |a ^ n| := by
-      rw [abs_pow]
-      apply one_lt_pow₀ h₂a hn
-    simp [posLog_eq_log this.le, posLog_eq_log h₂a.le]
+  by_cases h₂a : |a| ≤ 1
+  · simp_all [pow_le_one₀, (posLog_eq_zero_iff _).2]
+  rw [not_le] at h₂a
+  have : 1 < |a ^ n| := by simp [one_lt_pow₀ h₂a hn]
+  simp [posLog_eq_log this.le, posLog_eq_log h₂a.le]
 
 @[simp] theorem proximity_pow_zero {f : ℂ → ℂ} {n : ℕ} (hf : MeromorphicOn f Set.univ) :
     proximity (f ^ n) 0 = n • (proximity (f ^ n) 0) := by
