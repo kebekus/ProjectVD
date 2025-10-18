@@ -1,7 +1,8 @@
+import VD.MathlibSubmitted.MeromorphicSum
+import VD.MathlibSubmitted.Nevanlinna_mul
 import VD.Nevanlinna_add_characteristic
 import VD.Nevanlinna_add_counting
 import VD.Nevanlinna_add_proximity
 import VD.Nevanlinna_pow_counting
-import VD.ToMathlib.MeromorphicSum
-import VD.ToMathlib.Nevanlinna_mul
+import VD.discussion
 import VD.leftovers.meromorphicAt_topology

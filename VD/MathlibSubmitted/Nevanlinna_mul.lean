@@ -1,4 +1,3 @@
-import Mathlib.Algebra.Group.EvenFunction
 import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
 import Mathlib.Analysis.Complex.ValueDistribution.CountingFunction
 import Mathlib.Analysis.Complex.ValueDistribution.ProximityFunction
