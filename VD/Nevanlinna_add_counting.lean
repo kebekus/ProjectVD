@@ -183,11 +183,11 @@ theorem min_divisor_le_divisor_add [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {
   simp only [Decidable.not_not] at hz
   rw [divisor_apply hf₁ hz, divisor_apply hf₂ hz, divisor_apply (hf₁.add hf₂) hz]
   by_cases h₁ : meromorphicOrderAt f₁ z = ⊤
-  · simp
+  · rw [inf_le_iff]
     right
     rwa [meromorphicOrderAt_add_top]
   by_cases h₂ : meromorphicOrderAt f₂ z = ⊤
-  · simp
+  · rw [inf_le_iff]
     left
     rwa [add_comm, meromorphicOrderAt_add_top]
   rw [← WithTop.untop₀_min h₁ h₂]
@@ -204,7 +204,7 @@ theorem negPart_divisor_add_le_max [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {
   intro z
   by_cases hz : z ∉ U
   · simp [hz]
-  simp at hz
+  rw [Decidable.not_not] at hz
   simp only [Function.locallyFinsuppWithin.negPart_apply, Function.locallyFinsuppWithin.max_apply]
   by_cases hf₁₂ : meromorphicOrderAt (f₁ + f₂) z = ⊤
   · simp [divisor_apply (hf₁.add hf₂) hz, hf₁₂, negPart_nonneg]
@@ -223,8 +223,7 @@ theorem negPart_divisor_add_le_add [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {
     negPart_divisor_add_le_max hf₁ hf₂
   _ ≤ (divisor f₁ U)⁻ + (divisor f₂ U)⁻ := by
     by_cases h : (divisor f₁ U)⁻ ≤ (divisor f₂ U)⁻
-    · simp_all [negPart_nonneg]
-    simp_all [negPart_nonneg]
+    <;> simp_all [negPart_nonneg]
 
 /--
 For `1 ≤ r`, the counting function of `f + g` at `⊤` is less than or equal to

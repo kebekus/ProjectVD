@@ -25,9 +25,9 @@ lemma posLog_norm_sum_le {E : Type*} [NormedAddCommGroup E]
   calc log⁺ ‖∑ t ∈ s, f t‖
   _ ≤ log⁺ (∑ t ∈ s, ‖f t‖) := by
     apply monotoneOn_posLog (by simp) _ (norm_sum_le s f)
-    simp [Finset.sum_nonneg (fun  i hi ↦ norm_nonneg (f i))]
+    simp [Finset.sum_nonneg (fun i _ ↦ norm_nonneg (f i))]
   _ ≤ log s.card + ∑ t ∈ s, log⁺ ‖f t‖ :=
-    posLog_sum s fun t ↦ ‖f t‖
+    posLog_sum s (‖f ·‖)
 
 /-- Circle averages commute with addition. -/
 theorem circleAverage_add_fun {c : ℂ} {R : ℝ} {f₁ f₂ : ℂ → ℂ} (hf₁ : CircleIntegrable f₁ c R)
@@ -81,9 +81,8 @@ theorem proximity_top_sum_le {α : Type*} (s : Finset α) (f : α → ℂ → E)
   _ ≤ circleAverage (∑ c ∈ s, log⁺ ‖f c ·‖ + log s.card) 0 r := by
     apply circleAverage_mono
     · apply circleIntegrable_posLog_norm_meromorphicOn
-      apply MeromorphicOn.mono_set (MeromorphicOn.fun_sum (hf ·)) (by tauto)
-    · apply CircleIntegrable.add (CircleIntegrable.fun_sum s h₂f)
-        (circleIntegrable_const (log s.card) 0 r)
+      apply (MeromorphicOn.fun_sum (hf ·)).mono_set (by tauto)
+    · apply (CircleIntegrable.fun_sum s h₂f).add (circleIntegrable_const _ _ _)
     · intro x hx
       rw [add_comm]
       apply posLog_norm_sum_le
