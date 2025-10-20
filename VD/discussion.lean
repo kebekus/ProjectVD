@@ -27,6 +27,8 @@ lemma ofNat (n : ℕ) (x : 𝕜) : MeromorphicAt (ofNat(n) : 𝕜 → 𝕜) x :=
 theorem test₂ : MeromorphicAt (∏ n ∈ ∅, F n) x := by
   simp
 
+
+
 @[to_additive]
 theorem leOnePart_min {α : Type*} [Lattice α] [Group α] [MulLeftMono α] [MulRightMono α] (a b : α) :
     (min a b)⁻ᵐ = max a⁻ᵐ b⁻ᵐ := by
@@ -40,18 +42,30 @@ theorem leOnePart_max {α : Type*} [DistribLattice α] [Group α] [MulLeftMono �
 
 variable
   {X : Type*} [TopologicalSpace X] {U : Set X}
-  {Y : Type*} [AddCommGroup Y] [LinearOrder Y]
+  {Y : Type*} [AddCommGroup Y] [LinearOrder Y] [AddRightMono Y] [AddLeftMono Y]
 
-@[to_additive]
-theorem leOnePart_min {Y : Type*} [CommGroup Y] [LinearOrder Y] [MulLeftMono Y] (a b : Y) :
-    (min a b)⁻ᵐ = max a⁻ᵐ b⁻ᵐ := by
-  rcases lt_trichotomy a b with h | h | h
-  · rw [min_eq_left h.le, max_comm, max_eq_right ((le_iff_oneLePart_leOnePart a b).1 h.le).2]
-  · simp_all
-  · rw [min_comm, min_eq_left h.le, max_eq_right ((le_iff_oneLePart_leOnePart b a).1 h.le).2]
+instance [AddGroup Y] [LinearOrder Y] [AddLeftMono Y] :
+    AddLeftMono (locallyFinsuppWithin U Y) where
+  elim a n₁ n₂ h₁ h₂ := by simp [h₁ h₂]
 
-theorem negPart_min' {α : Type*} [Lattice α] [AddGroup α] [AddLeftMono α] [AddRightMono α] (a b : α) :
+instance [AddGroup Y] [LinearOrder Y] [AddRightMono Y] :
+    AddRightMono (locallyFinsuppWithin U Y) where
+  elim a n₁ n₂ h₁ h₂ := by simp [h₁ h₂]
+
+/--
+The negative part of a minimum is the maximum of the negative parts.
+-/
+theorem negPart_min' (a b : locallyFinsuppWithin U Y) :
     (min a b)⁻ = max a⁻ b⁻ := by
-  simp [negPart, neg_inf, sup_sup_distrib_right]
+  apply negPart_min
+
+/--
+The negative part of a maximum is the minimum of the negative parts.
+-/
+theorem negPart_max' (a b : locallyFinsuppWithin U Y) :
+    (max a b)⁻ = min a⁻ b⁻ := by
+  ext x
+  apply negPart_max
+
 
 end MeromorphicAt
