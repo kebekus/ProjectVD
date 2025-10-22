@@ -10,7 +10,6 @@ variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   {U : Set 𝕜} {f g : 𝕜 → E} {a : WithTop E} {a₀ : E}
 
-
 namespace MeromorphicOn
 
 /--
@@ -33,7 +32,6 @@ coercion from natural numbers.
 theorem meromorphicOrderAt_const_ofNat (z₀ : 𝕜) (n : ℤ) :
     meromorphicOrderAt (n : 𝕜 → 𝕜) z₀ = if (n : 𝕜) = 0 then ⊤ else (0 : WithTop ℤ) := by
   apply meromorphicOrderAt_const
-
 
 /--
 The divisor of a constant function is `0`.
@@ -123,67 +121,24 @@ theorem divisor_fun_zpow {f : 𝕜 → 𝕜} (hf : MeromorphicOn f U) (n : ℤ) 
 
 end MeromorphicOn
 
-namespace Function.locallyFinsuppWithin
-
-noncomputable def logCounting' {E : Type*} [NormedAddCommGroup E] [ProperSpace E] :
-    locallyFinsuppWithin (univ : Set E) ℤ →ₗ[ℤ] (ℝ → ℝ) where
-  toFun D := fun r ↦ ∑ᶠ z, D.toClosedBall r z * log (r * ‖z‖⁻¹) + (D 0) * log r
-  map_add' D₁ D₂ := by
-    simp only [map_add, coe_add, Pi.add_apply, Int.cast_add]
-    ext r
-    have {A B C D : ℝ} : A + B + (C + D) = A + C + (B + D) := by ring
-    rw [Pi.add_apply, this]
-    congr 1
-    · have h₁s : ((D₁.toClosedBall r).support ∪ (D₂.toClosedBall r).support).Finite := by
-        apply Set.finite_union.2
-        constructor
-        <;> apply finiteSupport _ (isCompact_closedBall 0 |r|)
-      repeat
-        rw [finsum_eq_sum_of_support_subset (s := h₁s.toFinset)]
-        try simp_rw [← Finset.sum_add_distrib, ← add_mul]
-      repeat
-        intro x hx
-        by_contra
-        simp_all
-    · ring
-  map_smul' n D := by
-    simp only [map_zsmul, coe_zsmul, Pi.smul_apply, eq_intCast, Int.cast_eq]
-    ext r
-    rw [Pi.smul_apply, smul_add, smul_finsum]
-    congr 1
-    · congr 1
-      ext z
-      rw [smul_eq_mul, Int.cast_mul]
-      ring
-    · rw [smul_eq_mul, Int.cast_mul]
-      ring
-
-end Function.locallyFinsuppWithin
-
 namespace ValueDistribution
 
 variable [ProperSpace 𝕜]
-
-variable (f a) in
-noncomputable def logCounting' : ℝ → ℝ := by
-  by_cases h : a = ⊤
-  · exact (divisor f univ)⁻.logCounting'
-  · exact (divisor (fun z ↦ f z - a.untop₀) univ)⁺.logCounting'
 
 /--
 For natural numbers `n`, the counting function counting zeros of `f ^ n` equals
 `n` times the counting function counting zeros of `f`.
 -/
 @[simp] theorem logCounting_pow_zero {f : 𝕜 → 𝕜} {n : ℕ} (hf : MeromorphicOn f Set.univ) :
-    logCounting' (f ^ n) 0 = n • logCounting' f 0 := by
-  simp [logCounting', divisor_fun_pow hf n, ← nsmul_posPart]
+    logCounting (f ^ n) 0 = n • logCounting f 0 := by
+  simp [logCounting, divisor_fun_pow hf n, ← nsmul_posPart]
 
 /--
 For natural numbers `n`, the counting function counting poles of `f ^ n` equals
 `n` times the counting function counting poles of `f`.
 -/
 @[simp] theorem logCounting_pow_top {f : 𝕜 → 𝕜} {n : ℕ} (hf : MeromorphicOn f Set.univ) :
-    logCounting' (f ^ n) ⊤ = n • logCounting' f ⊤ := by
-  simp [logCounting', divisor_pow hf n, ← nsmul_negPart]
+    logCounting (f ^ n) ⊤ = n • logCounting f ⊤ := by
+  simp [logCounting, divisor_pow hf n, ← nsmul_negPart]
 
 end ValueDistribution
