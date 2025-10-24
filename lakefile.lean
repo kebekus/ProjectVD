@@ -9,7 +9,7 @@ package «VD» where
   -- add any additional package configuration options here
 
 require mathlib from git
-  "https://github.com/leanprover-community/mathlib4.git"
+  "https://github.com/leanprover-community/mathlib4.git" @ "d62eab0cc36ea522904895389c301cf8d844fd69"
 
 @[default_target]
 lean_lib «VD» where
