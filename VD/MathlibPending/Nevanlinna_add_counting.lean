@@ -97,7 +97,7 @@ theorem min_divisor_le_divisor_add [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {
     left
     rwa [add_comm, meromorphicOrderAt_add_top]
   rw [← WithTop.untop₀_min h₁ h₂]
-  apply WithTop.untop₀_le_untop₀_of_le h₃
+  apply WithTop.untop₀_le_untop₀ h₃
   exact meromorphicOrderAt_add (hf₁ z hz) (hf₂ z hz)
 
 /--

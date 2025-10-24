@@ -4,66 +4,6 @@ import Mathlib.Algebra.Order.Group.PosPart
 import Mathlib.Algebra.Order.WithTop.Untop0
 import Mathlib.Topology.LocallyFinsupp
 
-@[simp]
-theorem WithTop.untop₀_max {α : Type*} [AddCommGroup α] [LinearOrder α] {a b : WithTop α}
-    (ha : a ≠ ⊤) (hb : b ≠ ⊤) :
-    (max a b).untop₀ = max a.untop₀ b.untop₀ := by
-  lift a to α using ha
-  lift b to α using hb
-  simp only [untop₀_coe]
-  by_cases h : a ≤ b
-  · simp [max_eq_right h, max_eq_right (coe_le_coe.mpr h)]
-  rw [not_le] at h
-  simp [max_eq_left h.le, max_eq_left (coe_lt_coe.mpr h).le]
-
-@[simp]
-theorem WithTop.untop₀_min {α : Type*} [AddCommGroup α] [LinearOrder α] {a b : WithTop α}
-    (ha : a ≠ ⊤) (hb : b ≠ ⊤) :
-    (min a b).untop₀ = min a.untop₀ b.untop₀ := by
-  lift a to α using ha
-  lift b to α using hb
-  simp only [untop₀_coe]
-  by_cases h : a ≤ b
-  · simp [min_eq_left h, min_eq_left (coe_le_coe.mpr h)]
-  rw [not_le] at h
-  simp [min_eq_right h.le, min_eq_right (coe_lt_coe.mpr h).le]
-
-@[simp]
-theorem WithTop.le_of_untop₀_le_untop₀ {α : Type*} [AddCommGroup α] [LinearOrder α] {a b : WithTop α}
-    (ha : a ≠ ⊤) (h : a.untop₀ ≤ b.untop₀) :
-    a ≤ b := by
-  lift a to α using ha
-  by_cases hb : b = ⊤
-  · simp_all
-  lift b to α using hb
-  simp_all
-
-@[simp]
-theorem WithTop.untop₀_le_untop₀_of_le {α : Type*} [AddCommGroup α] [LinearOrder α] {a b : WithTop α}
-    (hb : b ≠ ⊤) (h : a ≤ b) :
-    a.untop₀ ≤ b.untop₀ := by
-  lift b to α using hb
-  by_cases ha : a = ⊤
-  · simp_all
-  lift a to α using ha
-  simp_all
-
-@[to_additive]
-theorem leOnePart_min {Y : Type*} [CommGroup Y] [LinearOrder Y] [MulLeftMono Y] (a b : Y) :
-    (min a b)⁻ᵐ = max a⁻ᵐ b⁻ᵐ := by
-  rcases lt_trichotomy a b with h | h | h
-  · rw [min_eq_left h.le, max_comm, max_eq_right ((le_iff_oneLePart_leOnePart a b).1 h.le).2]
-  · simp_all
-  · rw [min_comm, min_eq_left h.le, max_eq_right ((le_iff_oneLePart_leOnePart b a).1 h.le).2]
-
-@[to_additive]
-theorem leOnePart_max {Y : Type*} [CommGroup Y] [LinearOrder Y] [MulLeftMono Y] (a b : Y) :
-    (max a b)⁻ᵐ = min a⁻ᵐ b⁻ᵐ := by
-  rcases lt_trichotomy a b with h | h | h
-  · rw [max_eq_right h.le, min_comm, min_eq_left ((le_iff_oneLePart_leOnePart a b).1 h.le).2]
-  · simp_all
-  · rw [min_comm, max_eq_left h.le, min_eq_right ((le_iff_oneLePart_leOnePart b a).1 h.le).2]
-
 namespace Function.locallyFinsuppWithin
 
 variable
