@@ -12,7 +12,7 @@ variable
 lemma restrictPosPart {V : Set X} (D : locallyFinsuppWithin U ℤ) (h : V ⊆ U) :
     D⁺.restrict h = (D.restrict h)⁺ := by
   ext x
-  simp [locallyFinsuppWithin.restrict_apply, locallyFinsuppWithin.posPart_apply]
+  simp only [locallyFinsuppWithin.restrict_apply, locallyFinsuppWithin.posPart_apply]
   aesop
 
 end locallyFinsuppWithin
@@ -24,7 +24,6 @@ lemma characteristic_sub_characteristic_inv {a : ℂ} {f : ℂ → ℂ} (h : Mer
   have R : ℝ := by sorry
   have hR : R ≠ 0 := by sorry
   have h₁f : MeromorphicOn f (closedBall 0 |R|) := by tauto
-
 
   have jensen := MeromorphicOn.circleAverage_log_norm hR h₁f
   simp at jensen
@@ -68,11 +67,5 @@ lemma characteristic_sub_characteristic_inv {a : ℂ} {f : ℂ → ℂ} (h : Mer
     rw [this]
   clear this
 
-
-
-
-
-
-  simp_rw [this] at jensen
-
+  rw [finsum_sub_distrib] at jensen
   sorry
