@@ -1,7 +1,6 @@
 import Mathlib.Algebra.Order.Group.PosPart
 import Mathlib.Analysis.Complex.ValueDistribution.CountingFunction
 import Mathlib.RingTheory.LocalRing.Basic
-import VD.MathlibSubmitted.DivisorOrder
 
 open MeromorphicOn Metric Real Set Classical Function.locallyFinsuppWithin
 
@@ -131,7 +130,7 @@ For natural numbers `n`, the counting function counting zeros of `f ^ n` equals
 -/
 @[simp] theorem logCounting_pow_zero {f : 𝕜 → 𝕜} {n : ℕ} (hf : MeromorphicOn f Set.univ) :
     logCounting (f ^ n) 0 = n • logCounting f 0 := by
-  simp [logCounting, divisor_fun_pow hf n, ← nsmul_posPart]
+  simp [logCounting, divisor_fun_pow hf n]
 
 /--
 For natural numbers `n`, the counting function counting poles of `f ^ n` equals
@@ -139,6 +138,7 @@ For natural numbers `n`, the counting function counting poles of `f ^ n` equals
 -/
 @[simp] theorem logCounting_pow_top {f : 𝕜 → 𝕜} {n : ℕ} (hf : MeromorphicOn f Set.univ) :
     logCounting (f ^ n) ⊤ = n • logCounting f ⊤ := by
-  simp [logCounting, divisor_pow hf n, ← nsmul_negPart]
+  simp [logCounting, divisor_pow hf n]
+
 
 end ValueDistribution

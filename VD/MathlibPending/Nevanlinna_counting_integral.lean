@@ -1,5 +1,4 @@
 import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
-import VD.MathlibSubmitted.DivisorOrder
 
 open Function MeromorphicOn Metric Real Set Classical ValueDistribution
 
