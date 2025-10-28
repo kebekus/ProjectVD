@@ -1,4 +1,4 @@
-import Mathlib
+import Mathlib.Analysis.Meromorphic.Basic
 
 open Function MeromorphicOn Metric Real Set Classical
 

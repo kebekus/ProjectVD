@@ -1,3 +1,4 @@
+import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
 import VD.MathlibPending.Nevanlinna_counting_integral
 
 open Function MeromorphicOn Metric Real Set Classical ValueDistribution

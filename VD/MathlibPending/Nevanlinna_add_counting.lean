@@ -8,45 +8,6 @@ variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   {U : Set 𝕜} {f g : 𝕜 → E} {a : WithTop E} {a₀ : E}
 
--- DUPLICATE!
-theorem meromorphicOrderAt_const (z₀ : 𝕜) (e : E) :
-    meromorphicOrderAt (fun _ ↦ e) z₀ = if e = 0 then ⊤ else (0 : WithTop ℤ) := by
-  by_cases he : e = 0
-  · simp [he, meromorphicOrderAt_eq_top_iff]
-  simp [he]
-  rw [(by rfl : (0 : WithTop ℤ) = (0 : ℤ)), meromorphicOrderAt_eq_int_iff (MeromorphicAt.const e z₀)]
-  use fun _ ↦ e
-  simp [he]
-  fun_prop
-
--- DUPLICATE!
-@[simp]
-theorem divisor_const (e : E) :
-    divisor (fun _ ↦ e) U = 0 := by
-  classical
-  ext x
-  simp only [divisor_def, meromorphicOrderAt_const, Function.locallyFinsuppWithin.coe_zero,
-    Pi.zero_apply, ite_eq_right_iff, WithTop.untop₀_eq_zero,
-    LinearOrderedAddCommGroupWithTop.top_ne_zero, imp_false, ite_eq_left_iff, WithTop.zero_ne_top,
-    Decidable.not_not, and_imp]
-  tauto
-
--- DUPLICATE!
-@[simp]
-theorem divisor_intCast (n : ℤ) :
-    divisor (n : 𝕜 → 𝕜) U = 0 := divisor_const (n : 𝕜)
-
--- DUPLICATE!
-@[simp]
-theorem divisor_natCast (n : ℕ) :
-    divisor (n : 𝕜 → 𝕜) U = 0 := divisor_const (n : 𝕜)
-
--- DUPLICATE!
-@[simp] theorem divisor_ofNat (n : ℕ) :
-    divisor (ofNat(n) : 𝕜 → 𝕜) U = 0 := by
-  convert divisor_const (n : 𝕜)
-  simp [Semiring.toGrindSemiring_ofNat 𝕜 n]
-
 /--
 Adding a locally vanishing function does not change the order.
 -/

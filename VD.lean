@@ -3,10 +3,9 @@ import VD.MathlibPending.Nevanlinna_add_characteristic
 import VD.MathlibPending.Nevanlinna_add_counting
 import VD.MathlibPending.Nevanlinna_add_proximity
 import VD.MathlibPending.Nevanlinna_counting_integral
-import VD.MathlibPending.Nevanlinna_pow_proximity
+import VD.MathlibPending.Nevanlinna_pow
 import VD.MathlibSubmitted.MeromorphicSum
 import VD.MathlibSubmitted.Nevanlinna_mul
 import VD.MathlibSubmitted.PosLog
-import VD.Nevanlinna_pow_counting
 import VD.discussion
 import VD.leftovers.meromorphicAt_topology
