@@ -13,7 +13,14 @@ theorem cartan {r : ℝ} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
 
   have R : ℝ := by sorry
   have hR : R ≠ 0 := by sorry
-  have := logCounting_zero_sub_logCounting_top_eq_circleAverage_sub_const h₁ hR
+  have tmp := logCounting_zero_sub_logCounting_top_eq_circleAverage_sub_const h₁ hR
+
+  have : logCounting (fun z ↦ f z - a) ⊤ = logCounting f ⊤ := by
+    have : (fun z ↦ f z - a) = f - fun z ↦ a := by rfl
+    rw [this, logCounting_sub_const]
+    exact h
+  rw [this] at tmp
+  clear this
 
   sorry
 
