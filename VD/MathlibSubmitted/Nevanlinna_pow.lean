@@ -1,5 +1,4 @@
 import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
-import VD.MathlibSubmitted.PosLog
 
 open MeromorphicOn Real
 

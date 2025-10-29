@@ -1,7 +1,5 @@
 import VD.MathlibSubmitted.Nevanlinna_mul
 import VD.MathlibSubmitted.MeromorphicSum
-import VD.MathlibSubmitted.PosLog
-
 
 open MeromorphicOn Metric Real Set Classical
 
