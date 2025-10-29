@@ -25,10 +25,13 @@ theorem meromorphicTrailingCoeffAt_add_eq_left_of_lt
   rw [h₁g₁.meromorphicTrailingCoeffAt_of_ne_zero_of_eq_nhdsNE h₂g₁ h₃g₁]
 
   have : ∀ᶠ (z : 𝕜) in nhdsWithin x {x}ᶜ,
-      (f₁ + f₂) z = (z - x) ^ n₁ • ( (z - x) ^ (n₂ - n₁) • g₂) z := by
+      (f₁ + f₂) z = (z - x) ^ n₁ • ( g₁ + (z - x) ^ (n₂ - n₁) • g₂) z := by
     filter_upwards [h₃g₁, h₃g₂] with z h₁z h₂z
     simp [h₁z, h₂z]
     simp at h
+    rw [← smul_assoc]
+    congr 1
+    simp
     sorry
 
   sorry
