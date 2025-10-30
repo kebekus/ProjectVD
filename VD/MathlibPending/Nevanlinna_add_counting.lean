@@ -1,4 +1,3 @@
-import VD.MathlibSubmitted.MeromorphicSum
 import VD.MathlibSubmitted.Nevanlinna_mul
 
 open MeromorphicOn Metric Real Set Classical

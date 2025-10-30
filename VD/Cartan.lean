@@ -26,13 +26,16 @@ theorem meromorphicTrailingCoeffAt_add_eq_left_of_lt
 
   have : ∀ᶠ (z : 𝕜) in nhdsWithin x {x}ᶜ,
       (f₁ + f₂) z = (z - x) ^ n₁ • ( g₁ + (z - x) ^ (n₂ - n₁) • g₂) z := by
-    filter_upwards [h₃g₁, h₃g₂] with z h₁z h₂z
+    filter_upwards [h₃g₁, h₃g₂, self_mem_nhdsWithin] with z h₁z h₂z h₃z
     simp [h₁z, h₂z]
     simp at h
     rw [← smul_assoc]
     congr 1
     simp
-    sorry
+    rw [← zpow_add₀]
+    simp
+    rw [sub_ne_zero]
+    aesop
 
   sorry
 
