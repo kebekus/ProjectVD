@@ -1,46 +1,11 @@
 import VD.MathlibPending.Nevanlinna_counting_integral
 import VD.MathlibPending.Nevanlinna_add_proximity
+import VD.TrailingCoefficient
 
-open Function MeromorphicOn Metric Real Set Classical ValueDistribution
+open Filter Function MeromorphicOn Metric Real Set Classical Topology ValueDistribution
 
-theorem meromorphicTrailingCoeffAt_add_eq_left_of_lt
-  {𝕜 : Type u_1} [NontriviallyNormedField 𝕜]
-  {E : Type u_2} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-  {f₁ f₂ : 𝕜 → E} {x : 𝕜} (hf₂ : MeromorphicAt f₂ x)
-  (hf₁ : MeromorphicAt f₁ x) -- probably not needed, need to check
-  (h : meromorphicOrderAt f₁ x < meromorphicOrderAt f₂ x) :
-    meromorphicTrailingCoeffAt (f₁ + f₂) x = meromorphicTrailingCoeffAt f₁ x := by
-
-  have H₁ := meromorphicOrderAt_add_eq_left_of_lt hf₂ h
-
-  by_cases h₁₂ : meromorphicOrderAt f₂ x = ⊤
-  · sorry
-
-  lift meromorphicOrderAt f₂ x to ℤ using h₁₂ with n₂ hn₂
-  obtain ⟨g₂, h₁g₂, h₂g₂, h₃g₂⟩ := (meromorphicOrderAt_eq_int_iff hf₂).1 hn₂.symm
-
-  lift meromorphicOrderAt f₁ x to ℤ using (by aesop) with n₁ hn₁
-  obtain ⟨g₁, h₁g₁, h₂g₁, h₃g₁⟩ := (meromorphicOrderAt_eq_int_iff hf₁).1 hn₁.symm
-
-  rw [h₁g₁.meromorphicTrailingCoeffAt_of_ne_zero_of_eq_nhdsNE h₂g₁ h₃g₁]
-
-  have : ∀ᶠ (z : 𝕜) in nhdsWithin x {x}ᶜ,
-      (f₁ + f₂) z = (z - x) ^ n₁ • ( g₁ + (z - x) ^ (n₂ - n₁) • g₂) z := by
-    filter_upwards [h₃g₁, h₃g₂, self_mem_nhdsWithin] with z h₁z h₂z h₃z
-    simp [h₁z, h₂z]
-    simp at h
-    rw [← smul_assoc]
-    congr 1
-    simp
-    rw [← zpow_add₀]
-    simp
-    rw [sub_ne_zero]
-    aesop
-
-  sorry
 
 namespace ValueDistribution
-
 
 theorem cartan {r : ℝ} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
     characteristic f ⊤ r
@@ -83,6 +48,10 @@ theorem cartan {r : ℝ} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
 
   have : circleAverage (fun a ↦ log ‖meromorphicTrailingCoeffAt (fun x ↦ f x - a) 0‖) 0 1 = 0 := by
     sorry
+
+  unfold characteristic
+  unfold proximity
+  simp
 
   all_goals sorry
 

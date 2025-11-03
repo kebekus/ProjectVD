@@ -5,5 +5,6 @@ import VD.MathlibPending.Nevanlinna_add_proximity
 import VD.MathlibPending.Nevanlinna_counting_integral
 import VD.MathlibSubmitted.Nevanlinna_mul
 import VD.MathlibSubmitted.Nevanlinna_pow
+import VD.TrailingCoefficient
 import VD.discussion
 import VD.leftovers.meromorphicAt_topology
