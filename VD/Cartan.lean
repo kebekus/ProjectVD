@@ -1,6 +1,6 @@
 import VD.MathlibPending.Nevanlinna_counting_integral
 import VD.MathlibPending.Nevanlinna_add_proximity
-import VD.TrailingCoefficient
+import VD.MathlibSubmitted.TrailingCoefficient
 
 open Filter Function MeromorphicOn Metric Real Set Classical Topology ValueDistribution
 
@@ -46,8 +46,31 @@ theorem cartan {r : ℝ} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
   rw [circleAverage_add_fun (c := 0) (R := 1) (f₁ :=  fun a ↦ logCounting f a R)
     (f₂ := fun a ↦ log ‖meromorphicTrailingCoeffAt (fun x ↦ f x - a) 0‖)] at f2
 
-  have : circleAverage (fun a ↦ log ‖meromorphicTrailingCoeffAt (fun x ↦ f x - a) 0‖) 0 1 = 0 := by
+  have (h₁ : meromorphicOrderAt f 0 < 0) :
+      circleAverage (fun a ↦ log ‖meromorphicTrailingCoeffAt (fun x ↦ f x - a) 0‖) 0 1
+        = log ‖meromorphicTrailingCoeffAt f 0‖ := by
+    have {a : ℂ} : meromorphicTrailingCoeffAt (fun x ↦ f x - a) 0 = meromorphicTrailingCoeffAt f 0 := by
+      have : (fun x ↦ f x - a) = f + fun _ ↦ -a := rfl
+      rw [this]
+      clear this
+      apply MeromorphicAt.meromorphicTrailingCoeffAt_add_eq_left_of_lt
+      exact a -- ???
+      fun_prop
+      rw [meromorphicOrderAt_const]
+      simp_all
+      by_cases ha: a = 0
+      · simp [ha]
+        exact lt_top_of_lt h₁
+      simp [ha]
+      exact h₁
+    simp_rw [this]
+    rw [circleAverage_const]
+
+  have (h₂ : 0 < meromorphicOrderAt f 0) :
+      circleAverage (fun a ↦ log ‖meromorphicTrailingCoeffAt (fun x ↦ f x - a) 0‖) 0 1 = 0 := by
+
     sorry
+
 
   unfold characteristic
   unfold proximity
