@@ -1,6 +1,5 @@
 import VD.MathlibPending.Nevanlinna_counting_integral
 import VD.MathlibPending.Nevanlinna_add_proximity
-import VD.MathlibSubmitted.TrailingCoefficient
 
 open Filter Function MeromorphicOn Metric Real Set Classical Topology ValueDistribution
 
@@ -54,7 +53,6 @@ theorem cartan {r : ℝ} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
       rw [this]
       clear this
       apply MeromorphicAt.meromorphicTrailingCoeffAt_add_eq_left_of_lt
-      exact a -- ???
       fun_prop
       rw [meromorphicOrderAt_const]
       simp_all
