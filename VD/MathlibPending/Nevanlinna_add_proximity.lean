@@ -40,7 +40,7 @@ theorem proximity_top_add_le {f₁ f₂ : ℂ → E} (h₁f₁ : MeromorphicOn f
   have h₃f₂ := circleIntegrable_posLog_norm_meromorphicOn h₂f₂
   calc circleAverage (fun x ↦ log⁺ ‖f₁ x + f₂ x‖) 0 r
   _ ≤ circleAverage (fun x ↦ log⁺ ‖f₁ x‖ + log⁺ ‖f₂ x‖ + log 2) 0 r :=
-    circleAverage_mono (circleIntegrable_posLog_norm_meromorphicOn (fun_add h₂f₁ h₂f₂))
+    circleAverage_mono (circleIntegrable_posLog_norm_meromorphicOn (h₂f₁.fun_add h₂f₂))
       ((h₃f₁.add h₃f₂).add (circleIntegrable_const (log 2) 0 r))
       fun x _ ↦ posLog_norm_add_le (f₁ x) (f₂ x)
   _ = circleAverage (log⁺ ‖f₁ ·‖) 0 r + circleAverage (log⁺ ‖f₂ ·‖) 0 r + log 2 := by
