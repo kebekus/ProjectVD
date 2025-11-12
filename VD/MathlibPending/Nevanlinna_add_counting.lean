@@ -19,8 +19,6 @@ theorem meromorphicOrderAt_add_top
 
 namespace ValueDistribution
 
-variable [ProperSpace 𝕜]
-
 /--
 The counting function of a constant function is zero.
 -/
@@ -33,14 +31,14 @@ The counting function of a constant function is zero.
 /--
 The counting function of the constant function zero is zero.
 -/
-@[simp] theorem logCounting_const_zero {e : WithTop E} :
+@[simp] theorem logCounting_const_zero [ProperSpace 𝕜] {e : WithTop E} :
     logCounting (0 : 𝕜 → E) e = 0 := logCounting_const
 
 /--
 The divisor of `f₁ + f₂` is larger than or equal to the minimum of the divisors
 of `f₁` and `f₂`, respectively.
 -/
-theorem min_divisor_le_divisor_add [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {z : ℂ} {U : Set ℂ} (hf₁ : MeromorphicOn f₁ U)
+theorem min_divisor_le_divisor_add {f₁ f₂ : 𝕜 → E} {z : 𝕜} {U : Set 𝕜} (hf₁ : MeromorphicOn f₁ U)
     (hf₂ : MeromorphicOn f₂ U) (h₁z : z ∈ U) (h₃ : meromorphicOrderAt (f₁ + f₂) z ≠ ⊤) :
     min (divisor f₁ U z) (divisor f₂ U z) ≤ divisor (f₁ + f₂) U z := by
   by_cases hz : z ∉ U
@@ -63,7 +61,7 @@ theorem min_divisor_le_divisor_add [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {
 The pole divisor of `f₁ + f₂` is smaller than or equal to the maximum of the
 pole divisors of `f₁` and `f₂`, respectively.
 -/
-theorem negPart_divisor_add_le_max [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {U : Set ℂ} (hf₁ : MeromorphicOn f₁ U)
+theorem negPart_divisor_add_le_max {f₁ f₂ : 𝕜 → E} {U : Set 𝕜} (hf₁ : MeromorphicOn f₁ U)
     (hf₂ : MeromorphicOn f₂ U) :
     (divisor (f₁ + f₂) U)⁻ ≤ max (divisor f₁ U)⁻ (divisor f₂ U)⁻ := by
   intro z
@@ -80,7 +78,7 @@ theorem negPart_divisor_add_le_max [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {
 The pole divisor of `f₁ + f₂` is smaller than or equal to the sum of the pole
 divisors of `f₁` and `f₂`, respectively.
 -/
-theorem negPart_divisor_add_le_add [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {U : Set ℂ} (hf₁ : MeromorphicOn f₁ U)
+theorem negPart_divisor_add_le_add {f₁ f₂ : 𝕜 → E} {U : Set 𝕜} (hf₁ : MeromorphicOn f₁ U)
     (hf₂ : MeromorphicOn f₂ U) :
     (divisor (f₁ + f₂) U)⁻ ≤ (divisor f₁ U)⁻ + (divisor f₂ U)⁻ := by
   calc (divisor (f₁ + f₂) U)⁻
@@ -94,7 +92,7 @@ theorem negPart_divisor_add_le_add [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {
 For `1 ≤ r`, the counting function of `f + g` at `⊤` is less than or equal to
 the sum of the counting functions of `f` and `g`, respectively.
 -/
-theorem counting_top_add_le [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {r : ℝ}
+theorem counting_top_add_le [ProperSpace 𝕜] {f₁ f₂ : 𝕜 → E} {r : ℝ}
     (h₁f₁ : MeromorphicOn f₁ Set.univ) (h₁f₂ : MeromorphicOn f₂ Set.univ) (hr : 1 ≤ r) :
     logCounting (f₁ + f₂) ⊤ r ≤ ((logCounting f₁ ⊤) + (logCounting f₂ ⊤)) r := by
   simp only [logCounting, ↓reduceDIte]
@@ -105,7 +103,7 @@ theorem counting_top_add_le [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {r : ℝ
 Asymptotically, the counting function of `f + g` at `⊤` is less than or equal to
 the sum of the counting functions of `f` and `g`, respectively.
 -/
-theorem counting_top_add_eventually_le [NormedSpace ℂ E] {f₁ f₂ : ℂ → E}
+theorem counting_top_add_eventually_le [ProperSpace 𝕜] {f₁ f₂ : 𝕜 → E}
     (h₁f₁ : MeromorphicOn f₁ Set.univ) (h₁f₂ : MeromorphicOn f₂ Set.univ) :
     logCounting (f₁ + f₂) ⊤ ≤ᶠ[Filter.atTop] (logCounting f₁ ⊤) + (logCounting f₂ ⊤) := by
   filter_upwards [Filter.eventually_ge_atTop 1]
@@ -115,7 +113,7 @@ theorem counting_top_add_eventually_le [NormedSpace ℂ E] {f₁ f₂ : ℂ → 
 For `1 ≤ r`, the counting function of a sum `∑ a, f a` at `⊤` is less than or
 equal to the sum of the counting functions of `f ·`.
 -/
-theorem counting_top_sum_le [NormedSpace ℂ E] {α : Type*} (s : Finset α) (f : α → ℂ → E)
+theorem counting_top_sum_le [ProperSpace 𝕜] {α : Type*} (s : Finset α) (f : α → 𝕜 → E)
     {r : ℝ} (h₁f : ∀ a, MeromorphicOn (f a) Set.univ) (hr : 1 ≤ r) :
     logCounting (∑ a ∈ s, f a) ⊤ r ≤ (∑ a ∈ s, (logCounting (f a) ⊤)) r := by
   induction s using Finset.induction with
@@ -133,7 +131,7 @@ theorem counting_top_sum_le [NormedSpace ℂ E] {α : Type*} (s : Finset α) (f 
 Asymptotically, the counting function of a sum `∑ a, f a` at `⊤` is less than or
 equal to the sum of the counting functions of `f ·`.
 -/
-theorem counting_top_sum_eventually_le [NormedSpace ℂ E] {α : Type*} (s : Finset α) (f : α → ℂ → E)
+theorem counting_top_sum_eventually_le [ProperSpace 𝕜] {α : Type*} (s : Finset α) (f : α → 𝕜 → E)
     (h₁f : ∀ a, MeromorphicOn (f a) Set.univ) :
     logCounting (∑ a ∈ s, f a) ⊤ ≤ᶠ[Filter.atTop] ∑ a ∈ s, (logCounting (f a) ⊤) := by
   filter_upwards [Filter.eventually_ge_atTop 1]
