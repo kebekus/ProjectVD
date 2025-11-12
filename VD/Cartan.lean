@@ -45,7 +45,7 @@ theorem cartan {r : ℝ} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
   rw [circleAverage_add_fun (c := 0) (R := 1) (f₁ :=  fun a ↦ logCounting f a R)
     (f₂ := fun a ↦ log ‖meromorphicTrailingCoeffAt (fun x ↦ f x - a) 0‖)] at f2
 
-  have (h₁ : meromorphicOrderAt f 0 < 0) :
+  have σ₁ (h₁ : meromorphicOrderAt f 0 < 0) :
       circleAverage (fun a ↦ log ‖meromorphicTrailingCoeffAt (fun x ↦ f x - a) 0‖) 0 1
         = log ‖meromorphicTrailingCoeffAt f 0‖ := by
     have {a : ℂ} : meromorphicTrailingCoeffAt (fun x ↦ f x - a) 0 = meromorphicTrailingCoeffAt f 0 := by
@@ -64,10 +64,36 @@ theorem cartan {r : ℝ} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
     simp_rw [this]
     rw [circleAverage_const]
 
-  have (h₂ : 0 < meromorphicOrderAt f 0) :
+  have σ₂ (h₂ : 0 < meromorphicOrderAt f 0) :
       circleAverage (fun a ↦ log ‖meromorphicTrailingCoeffAt (fun x ↦ f x - a) 0‖) 0 1 = 0 := by
-
-    sorry
+    have τ₁ {a : ℂ} (ha : a ≠ 0) : meromorphicTrailingCoeffAt (fun x ↦ f x - a) 0 = -a := by
+      have : (fun x ↦ f x - a) = (fun _ ↦ -a) + f := by
+        ext x
+        simp
+        ring
+      rw [this]
+      have : meromorphicTrailingCoeffAt (fun _ ↦ - a : ℂ → ℂ) 0 = -a := by
+        exact meromorphicTrailingCoeffAt_const
+      nth_rw 2 [← this]
+      apply MeromorphicAt.meromorphicTrailingCoeffAt_add_eq_left_of_lt
+      · exact h 0 trivial
+      · have : meromorphicOrderAt (fun _ ↦ -a : ℂ → ℂ) 0 = 0 := by
+          refine (MeromorphicNFAt.meromorphicOrderAt_eq_zero_iff ?_).mpr ?_
+          refine meromorphicNFAt_iff_analyticAt_or.mpr ?_
+          left
+          fun_prop
+          simp_all
+        rw [this]
+        assumption
+    rw [circleAverage_congr_sphere (f₂ := fun a ↦ log ‖-a‖)]
+    simp_rw [norm_neg]
+    have := circleAverage_log_norm_sub_const_eq_posLog (a := 0)
+    simpa using this
+    intro a ha
+    simp
+    rw [τ₁]
+    simp
+    aesop
 
 
   unfold characteristic

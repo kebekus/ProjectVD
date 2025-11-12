@@ -1,5 +1,4 @@
 import Mathlib.Analysis.Complex.ValueDistribution.CountingFunction
-import VD.MathlibSubmitted.Nevanlinna_mul
 
 open Function MeromorphicOn Metric Real Set Classical
 
