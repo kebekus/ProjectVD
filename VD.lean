@@ -1,9 +1,8 @@
 import VD.Cartan
 import VD.MathlibPending.Nevanlinna_add_characteristic
-import VD.MathlibPending.Nevanlinna_add_counting
-import VD.MathlibPending.Nevanlinna_add_proximity
-import VD.MathlibPending.Nevanlinna_counting_integral
-import VD.MathlibSubmitted.Nevanlinna_pow
+import VD.MathlibSubmitted.Nevanlinna_add_counting
+import VD.MathlibSubmitted.Nevanlinna_add_proximity
+import VD.MathlibSubmitted.Nevanlinna_counting_integral
 import VD.countingExample
 import VD.discussion
 import VD.leftovers.meromorphicAt_topology

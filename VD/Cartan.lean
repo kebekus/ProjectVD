@@ -1,4 +1,4 @@
-import VD.MathlibPending.Nevanlinna_counting_integral
+import VD.MathlibSubmitted.Nevanlinna_counting_integral
 import VD.MathlibSubmitted.Nevanlinna_add_proximity
 
 open Filter Function MeromorphicOn Metric Real Set Classical Topology ValueDistribution
