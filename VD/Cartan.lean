@@ -1,4 +1,4 @@
-import VD.MathlibSubmitted.Nevanlinna_add_proximity
+import VD.MathlibPending.Nevanlinna_add_characteristic
 
 open Filter Function MeromorphicOn Metric Real Set Classical Topology ValueDistribution
 
@@ -41,7 +41,7 @@ theorem cartan {r : ℝ} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) (h₂ : 0 <
     simp [f1]
   clear f1
 
-  rw [circleAverage_add_fun (c := 0) (R := 1) (f₁ :=  fun a ↦ logCounting f a R)
+  rw [circleAverage_fun_add (c := 0) (R := 1) (f₁ :=  fun a ↦ logCounting f a R)
     (f₂ := fun a ↦ log ‖meromorphicTrailingCoeffAt (fun x ↦ f x - a) 0‖)] at f2
 
   have σ₁ (h₁ : meromorphicOrderAt f 0 < 0) :

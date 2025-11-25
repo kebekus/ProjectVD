@@ -1,5 +1,4 @@
 import VD.MathlibSubmitted.Nevanlinna_add_counting
-import VD.MathlibSubmitted.Nevanlinna_add_proximity
 
 open MeromorphicOn Metric Real Set Classical
 
@@ -23,7 +22,7 @@ theorem characteristic_top_add_le [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {r
   calc proximity (f₁ + f₂) ⊤ r + logCounting (f₁ + f₂) ⊤ r
   _ ≤ (proximity f₁ ⊤ r + proximity f₂ ⊤ r + log 2) + (logCounting f₁ ⊤ r + logCounting f₂ ⊤ r) := by
     apply add_le_add
-    · apply proximity_top_add_le h₁f₁ h₁f₂
+    · apply proximity_add_top_le h₁f₁ h₁f₂
     · exact counting_top_add_le h₁f₁ h₁f₂ hr
   _ = proximity f₁ ⊤ r + logCounting f₁ ⊤ r + (proximity f₂ ⊤ r + logCounting f₂ ⊤ r) + log 2 := by
     ring
@@ -49,7 +48,7 @@ theorem characteristic_top_sum_le [NormedSpace ℂ E] {α : Type*} (s : Finset �
   calc proximity (∑ a ∈ s, f a) ⊤ r + logCounting (∑ a ∈ s, f a) ⊤ r
   _ ≤ ((∑ a ∈ s, proximity (f a) ⊤) r) + log s.card + (∑ a ∈ s, (logCounting (f a) ⊤)) r := by
     apply add_le_add
-    · apply proximity_top_sum_le s f h₁f r
+    · apply proximity_sum_top_le s f h₁f r
     · apply counting_top_sum_le s f h₁f hr
   _ = ((∑ a ∈ s, proximity (f a) ⊤) r) + (∑ a ∈ s, (logCounting (f a) ⊤)) r + log s.card := by
     ring
