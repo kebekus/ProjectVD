@@ -1,4 +1,4 @@
-import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
+import Mathlib.Analysis.Complex.ValueDistribution.CountingFunction
 
 open MeromorphicOn Metric Real Set Classical
 
