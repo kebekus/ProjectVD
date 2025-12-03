@@ -34,7 +34,7 @@ theorem MeromorphicAt.order_nonneg_if_exists_continuous_extension (hf : Meromorp
     simp [norm_smul, ← zpow_natCast, ← ha]
   rw [h₃]
   have h₄ : Tendsto ((fun x ↦ ‖x⁻¹‖) ∘ (fun z ↦ (z - z₀) ^ a.succ)) (𝓝[≠] z₀) atTop := by
-    apply NormedField.tendsto_norm_inv_nhdsNE_zero_atTop.comp (y := 𝓝[≠] 0)
+    apply tendsto_norm_inv_nhdsNE_zero_atTop.comp (y := 𝓝[≠] 0)
     have hh₁ : ContinuousAt (fun z ↦ (z - z₀)) z₀ := by
       apply continuousAt_id.sub continuousAt_const
     have hh₂ : (z₀ - z₀) ^ a.succ = 0 := by simp
