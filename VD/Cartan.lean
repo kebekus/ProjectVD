@@ -139,7 +139,16 @@ theorem cartan {r : ℝ} {f : ℂ → ℂ} (hr : r ≠ 0) (h : MeromorphicOn f �
   · unfold uncurry
     simp
     refine (MeasureTheory.integrable_prod_iff ?_).mpr ?_
-    · sorry
+    · refine Measurable.aestronglyMeasurable ?_
+      refine Measurable.log ?_
+      refine Measurable.norm ?_
+      refine Measurable.sub ?_ ?_
+      · fun_prop
+      · apply Measurable.comp'
+        · exact Measurable.of_comap_le fun s a ↦ a
+        · apply Measurable.comp'
+          · exact Measurable.of_comap_le fun s a ↦ a
+          · sorry
     · sorry
   · sorry
   · sorry
