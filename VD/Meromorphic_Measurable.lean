@@ -8,7 +8,7 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 open Filter Function MeromorphicOn Metric Real Set Classical Topology ValueDistribution
 
 theorem MeromorphicOn.discreteTopology_not_analyticAt [CompleteSpace E] (h : MeromorphicOn f U) :
-    IsDiscrete ({z : 𝕜 | ¬AnalyticAt 𝕜 f z} ∩ U) := by
+    IsDiscrete ({z | ¬AnalyticAt 𝕜 f z} ∩ U) := by
   apply isDiscrete_of_codiscreteWithin
   simp only [compl_setOf, Decidable.not_not]
   apply eventually_codiscreteWithin_analyticAt f h
@@ -16,6 +16,8 @@ theorem MeromorphicOn.discreteTopology_not_analyticAt [CompleteSpace E] (h : Mer
 theorem MeromorphicOn.countable_not_analyticAt [SecondCountableTopology 𝕜] [CompleteSpace E]
     (h : MeromorphicOn f U) :
     ({z | ¬AnalyticAt 𝕜 f z} ∩ U).Countable := by
+  have : DiscreteTopology ↑({z | ¬AnalyticAt 𝕜 f z} ∩ U) := by
+    sorry
   have := h.discreteTopology_not_analyticAt
   rw [isDiscrete_iff_discreteTopology] at this
   apply countable_of_Lindelof_of_discrete
