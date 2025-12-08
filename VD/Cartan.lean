@@ -1,19 +1,10 @@
+import VD.Meromorphic_Measurable
 import VD.MathlibPending.Nevanlinna_add_characteristic
 import Mathlib.MeasureTheory.Integral.Prod
 
 open Filter Function MeromorphicOn Metric Real Set Classical Topology ValueDistribution
 
 namespace ValueDistribution
-
-lemma analytic_measurable {f : ℂ → ℂ} (h : AnalyticOnNhd ℂ f ⊤) :
-    Measurable f := by
-  refine Continuous.borel_measurable ?_
-  exact AnalyticOnNhd.continuous h
-
-lemma meromorphic_measurable {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
-    Measurable f := by
-  apply?
-  sorry
 
 /-
   have σ₁ (h₁ : meromorphicOrderAt f 0 < 0) :
@@ -106,7 +97,8 @@ theorem cartan {r : ℝ} {f : ℂ → ℂ} (hr : r ≠ 0) (h : MeromorphicOn f �
       = circleAverage (fun a ↦ circleAverage (fun x ↦ log ‖f x - a‖) 0 r) 0 1
         + circleAverage (fun a ↦ logCounting f ⊤ r) 0 1 := by
     apply circleAverage_fun_add
-    · sorry
+    ·
+      sorry
     · exact circleIntegrable_const (logCounting f ⊤ r) 0 1
   rw [σ₃] at f2
   clear σ₃
@@ -130,7 +122,6 @@ theorem cartan {r : ℝ} {f : ℂ → ℂ} (hr : r ≠ 0) (h : MeromorphicOn f �
   unfold circleAverage
   simp
 
-
   unfold intervalIntegral
   have : Ioc (2 * π) 0 = ∅ := by
     ext x
@@ -143,19 +134,34 @@ theorem cartan {r : ℝ} {f : ℂ → ℂ} (hr : r ≠ 0) (h : MeromorphicOn f �
   rw [MeasureTheory.integral_integral_swap]
 
   have {x y : ℝ} : ‖circleMap 0 1 y - f (circleMap 0 r x)‖ = ‖f (circleMap 0 r x) - circleMap 0 1 y‖ := by
-    sorry
+    exact norm_sub_rev (circleMap 0 1 y) (f (circleMap 0 r x))
   simp_rw [this]
 
-  have : Measurable f := by
-    sorry
+  have := meromorphic_measurable h
 
   · unfold uncurry
     simp
     refine (MeasureTheory.integrable_prod_iff ?_).mpr ?_
     · apply Measurable.aestronglyMeasurable (by fun_prop)
     · constructor
-      · sorry
-      · sorry
+      · simp
+        filter_upwards with a
+        have := intervalIntegrable_log_norm_meromorphicOn
+          (f := (fun y ↦ circleMap 0 1 y - f (circleMap 0 r a))) (a := 0) (b := 2 * Real.pi)
+        unfold IntervalIntegrable at this
+        have : MeromorphicOn (fun y ↦ circleMap 0 1 y - f (circleMap 0 r a)) (uIcc 0 (2 * π)) →
+            MeasureTheory.IntegrableOn (fun x ↦ log ‖circleMap 0 1 x - f (circleMap 0 r a)‖) (Ioc 0 (2 * π))
+            MeasureTheory.volume :=
+          fun a ↦ (this a).1
+        unfold MeasureTheory.IntegrableOn at this
+        apply this
+        refine fun_sub ?_ ?_
+        · refine AnalyticOnNhd.meromorphicOn ?_
+          refine ContDiff.analyticOnNhd ?_
+          exact contDiff_circleMap 0 1
+        · exact MeromorphicOn.const (f (circleMap 0 r a))
+      · simp
+        sorry
   · sorry
   · sorry
 
