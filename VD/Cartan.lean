@@ -5,6 +5,16 @@ open Filter Function MeromorphicOn Metric Real Set Classical Topology ValueDistr
 
 namespace ValueDistribution
 
+lemma analytic_measurable {f : ℂ → ℂ} (h : AnalyticOnNhd ℂ f ⊤) :
+    Measurable f := by
+  refine Continuous.borel_measurable ?_
+  exact AnalyticOnNhd.continuous h
+
+lemma meromorphic_measurable {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
+    Measurable f := by
+  apply?
+  sorry
+
 /-
   have σ₁ (h₁ : meromorphicOrderAt f 0 < 0) :
       circleAverage (fun a ↦ log ‖meromorphicTrailingCoeffAt (fun x ↦ f x - a) 0‖) 0 1
@@ -136,20 +146,16 @@ theorem cartan {r : ℝ} {f : ℂ → ℂ} (hr : r ≠ 0) (h : MeromorphicOn f �
     sorry
   simp_rw [this]
 
+  have : Measurable f := by
+    sorry
+
   · unfold uncurry
     simp
     refine (MeasureTheory.integrable_prod_iff ?_).mpr ?_
-    · refine Measurable.aestronglyMeasurable ?_
-      refine Measurable.log ?_
-      refine Measurable.norm ?_
-      refine Measurable.sub ?_ ?_
-      · fun_prop
-      · apply Measurable.comp'
-        · exact Measurable.of_comap_le fun s a ↦ a
-        · apply Measurable.comp'
-          · exact Measurable.of_comap_le fun s a ↦ a
-          · sorry
-    · sorry
+    · apply Measurable.aestronglyMeasurable (by fun_prop)
+    · constructor
+      · sorry
+      · sorry
   · sorry
   · sorry
 
