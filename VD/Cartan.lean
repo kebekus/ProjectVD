@@ -1,4 +1,4 @@
-import VD.Meromorphic_Measurable
+import VD.MathlibSubmitted.Meromorphic_Measurable
 import VD.MathlibPending.Nevanlinna_add_characteristic
 import Mathlib.MeasureTheory.Integral.Prod
 
@@ -137,7 +137,7 @@ theorem cartan {r : ℝ} {f : ℂ → ℂ} (hr : r ≠ 0) (h : MeromorphicOn f �
     exact norm_sub_rev (circleMap 0 1 y) (f (circleMap 0 r x))
   simp_rw [this]
 
-  have := meromorphic_measurable h
+  have : Measurable f := meromorphic_measurable h
 
   · unfold uncurry
     simp
