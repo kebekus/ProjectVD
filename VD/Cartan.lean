@@ -7,10 +7,39 @@ open Filter Function MeromorphicOn Metric Real Set Classical Topology ValueDistr
 
 namespace ValueDistribution
 
-lemma MeromorphicAt.comp {x : ℝ} {f : ℂ → ℂ} {g : ℝ → ℂ}
-    (hf : MeromorphicAt f (g x)) (hg : MeromorphicAt g x) : MeromorphicAt (f ∘ g) x := by
-  sorry
+variable
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
 
+
+lemma MeromorphicAt.comp {x : ℝ} {f : ℂ → E} {g : ℝ → ℂ}
+    (hf : MeromorphicAt f (g x)) (hg : AnalyticAt ℝ g x) : MeromorphicAt (f ∘ g) x := by
+  rw [ MeromorphicAt ] at *;
+  -- Since $g$ is analytic at $x$ and $(z - g(x))^n • f(z)$ is analytic at $g(x)$, their composition is analytic at $x$.
+  obtain ⟨n, hn⟩ := hf;
+  have h_comp : AnalyticAt ℝ (fun t => ((g t) - g x) ^ n • f (g t)) x := by
+    refine' hn.restrictScalars.comp hg;
+  by_cases h : Filter.EventuallyEq ( nhds x ) ( fun t => g t - g x ) 0 <;> simp_all +decide [ Filter.EventuallyEq ];
+  · have h_const : ∀ᶠ t in nhds x, g t = g x := by
+      simpa only [ sub_eq_zero ] using h;
+    refine' ⟨ 0, _ ⟩ ;
+    simp_all only [pow_zero, one_smul]
+    exact AnalyticAt.congr ( analyticAt_const ) ( by filter_upwards [ h_const ] with t ht; aesop );
+  · -- Since $g$ is analytic at $x$ and $g(x) \neq 0$, there exists $k \in ℕ$ and $\phi : ℝ → ℂ$ such that $\phi$ is analytic at $x$, $\phi(x) \neq 0$, and $g(t) - g(x) = (t - x)^k • \phi(t)$ near $x$.
+    obtain ⟨k, ϕ, hϕ⟩ : ∃ k : ℕ, ∃ ϕ : ℝ → ℂ, AnalyticAt ℝ ϕ x ∧ ϕ x ≠ 0 ∧ ∀ᶠ t in nhds x, g t - g x = (t - x) ^ k • ϕ t := by
+      -- Apply the lemma to find such a $k$ and $\phi$.
+      have := AnalyticAt.exists_eventuallyEq_pow_smul_nonzero_iff (hg.sub (analyticAt_const : AnalyticAt ℝ (fun _ => g x) x)) ; aesop;
+    -- Since $\phi$ is analytic at $x$ and $\phi(x) \neq 0$, we can write $(t - x)^{nk} • f(g(t))$ as $(\phi(t))^{-n} • ((g(t) - g(x))^n • f(g(t)))$.
+    have h_rewrite : ∀ᶠ t in nhds x, (t - x) ^ (n * k) • f (g t) = (ϕ t)⁻¹ ^ n • ((g t - g x) ^ n • f (g t)) := by
+      filter_upwards [ hϕ.2.2, hϕ.1.continuousAt.eventually_ne hϕ.2.1 ] with t ht₁ ht₂ ; simp_all +decide [ pow_mul', smul_smul ] ; ring;
+      simp_all only [inv_pow, ne_eq, pow_eq_zero_iff', false_and, not_false_eq_true, mul_inv_cancel₀, one_mul]
+      obtain ⟨left, right⟩ := hϕ
+      obtain ⟨left_1, right⟩ := right
+      norm_cast;
+    refine' ⟨ n * k, _ ⟩;
+    have h_rewrite : AnalyticAt ℝ (fun t => (ϕ t)⁻¹ ^ n • ((g t - g x) ^ n • f (g t))) x := by
+      apply_rules [ AnalyticAt.smul, AnalyticAt.pow, hϕ.1.inv ];
+      exact hϕ.2.1;
+    exact h_rewrite.congr ( by filter_upwards [ ‹∀ᶠ t in nhds x, ( t - x ) ^ ( n * k ) • f ( g t ) = ( ϕ t ) ⁻¹ ^ n • ( g t - g x ) ^ n • f ( g t ) › ] with t ht; rw [ ht ] )
 
 theorem intervalIntegrable_iff_intervalIntegrable_smul
     {E : Type*} [NormedAddCommGroup E]
