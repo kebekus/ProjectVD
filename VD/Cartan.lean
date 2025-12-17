@@ -1,4 +1,3 @@
-import VD.MathlibSubmitted.Meromorphic_Measurable
 import VD.MathlibPending.Nevanlinna_add_characteristic
 --import Mathlib.MeasureTheory.Integral.Prod
 import Mathlib
@@ -102,10 +101,8 @@ private lemma σ₂ {f : ℂ → ℂ} (h : 0 < meromorphicOrderAt f 0) :
   aesop
 
 lemma ρ₀ {f g : ℝ → ℂ} (hf : MeromorphicOn f Set.univ) (hg : MeromorphicOn g Set.univ) :
-    Measurable (fun x ↦ f x.1 - g x.2 : ℝ × ℝ → ℂ) := by
-  refine Measurable.sub ?_ ?_
-  · apply (meromorphic_measurable hf).comp measurable_fst
-  · apply (meromorphic_measurable hg).comp measurable_snd
+    Measurable (fun x ↦ f x.1 - g x.2 : ℝ × ℝ → ℂ) :=
+  (hf.measurable.comp measurable_fst).sub (hg.measurable.comp measurable_snd)
 
 lemma ρ₁ {f g : ℝ → ℂ} (hf : MeromorphicOn f Set.univ) (hg : MeromorphicOn g Set.univ) :
     Measurable (fun x ↦ Real.log ‖f x.1 - g x.2‖ : ℝ × ℝ → ℝ) := by
@@ -124,7 +121,18 @@ lemma ρ₂ {f g : ℝ → ℂ} (hf : MeromorphicOn f Set.univ) (hg : Meromorphi
       ((MeasureTheory.volume.restrict (Ioc 0 (2 * π))).prod (MeasureTheory.volume.restrict (Ioc 0 (2 * π)))) := by
   apply Measurable.aestronglyMeasurable (ρ₁ hf hg)
 
-lemma ρ₃ {r : ℝ} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
+lemma ρ₃ {f g : ℝ → ℂ}  (hf : MeromorphicOn f Set.univ) (hg : AnalyticOnNhd ℝ g Set.univ) :
+    MeasureTheory.Integrable
+      (fun x ↦ Real.log ‖f x.1 - g x.2‖ : ℝ × ℝ → ℝ)
+      ((MeasureTheory.volume.restrict (Ioc 0 (2 * π))).prod (MeasureTheory.volume.restrict (Ioc 0 (2 * π)))) := by
+  rw [MeasureTheory.integrable_prod_iff (ρ₂ hf hg.meromorphicOn)]
+  constructor
+  · filter_upwards with a
+    sorry
+  · simp
+    sorry
+
+lemma ρ₃' {r : ℝ} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
     MeasureTheory.AEStronglyMeasurable
       (fun x ↦ log ‖f (circleMap 0 r x.1) - circleMap 0 1 x.2‖ : ℝ × ℝ → ℝ)
       ((MeasureTheory.volume.restrict (Ioc 0 (2 * π))).prod (MeasureTheory.volume.restrict (Ioc 0 (2 * π)))) := by
@@ -140,6 +148,26 @@ lemma ρ₃ {r : ℝ} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
     refine AnalyticAt.meromorphicAt ?_
     have := analyticOnNhd_circleMap 0 1
     exact this x hx
+
+lemma ρ₃' {r : ℝ} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
+    MeasureTheory.Integrable
+      (fun x ↦ log ‖f (circleMap 0 r x.1) - circleMap 0 1 x.2‖ : ℝ × ℝ → ℝ)
+      ((MeasureTheory.volume.restrict (Ioc 0 (2 * π))).prod (MeasureTheory.volume.restrict (Ioc 0 (2 * π)))) := by
+  rw [MeasureTheory.integrable_prod_iff (ρ₃ h)]
+  constructor
+  · filter_upwards with a
+    have z₀ : MeromorphicOn (fun x ↦ f (circleMap 0 r a) - circleMap 0 1 x) (uIcc 0 (2 * π)) := by
+      sorry
+    have := intervalIntegrable_log_norm_meromorphicOn (a := 0) (b := 2 * π)
+        (f := fun x ↦ f (circleMap 0 r a) - circleMap 0 1 x) z₀
+    unfold IntervalIntegrable at this
+    simp at this
+    unfold MeasureTheory.IntegrableOn at this
+    exact this.1
+  · simp
+
+    sorry
+
 
 lemma ρ₄ {r : ℝ} {hr : r ≠ 0} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
     0 = 1 := by
