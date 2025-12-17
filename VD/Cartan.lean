@@ -30,7 +30,8 @@ lemma MeromorphicAt.comp {x : ℝ} {f : ℂ → E} {g : ℝ → ℂ}
       have := AnalyticAt.exists_eventuallyEq_pow_smul_nonzero_iff (hg.sub (analyticAt_const : AnalyticAt ℝ (fun _ => g x) x)) ; aesop;
     -- Since $\phi$ is analytic at $x$ and $\phi(x) \neq 0$, we can write $(t - x)^{nk} • f(g(t))$ as $(\phi(t))^{-n} • ((g(t) - g(x))^n • f(g(t)))$.
     have h_rewrite : ∀ᶠ t in nhds x, (t - x) ^ (n * k) • f (g t) = (ϕ t)⁻¹ ^ n • ((g t - g x) ^ n • f (g t)) := by
-      filter_upwards [ hϕ.2.2, hϕ.1.continuousAt.eventually_ne hϕ.2.1 ] with t ht₁ ht₂ ; simp_all +decide [ pow_mul', smul_smul ] ; ring;
+      filter_upwards [ hϕ.2.2, hϕ.1.continuousAt.eventually_ne hϕ.2.1 ] with t ht₁ ht₂ ; simp_all +decide [ pow_mul', smul_smul ]
+      ring_nf
       simp_all only [inv_pow, ne_eq, pow_eq_zero_iff', false_and, not_false_eq_true, mul_inv_cancel₀, one_mul]
       obtain ⟨left, right⟩ := hϕ
       obtain ⟨left_1, right⟩ := right
@@ -133,7 +134,6 @@ lemma ρ₃ {r : ℝ} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
       rfl
     rw [this]
     apply (h (circleMap 0 r x) hx).comp
-    refine AnalyticAt.meromorphicAt ?_
     have := analyticOnNhd_circleMap 0 r
     exact this x hx
   · intro x hx
