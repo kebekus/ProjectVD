@@ -149,11 +149,11 @@ lemma ρ₃' {r : ℝ} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
     have := analyticOnNhd_circleMap 0 1
     exact this x hx
 
-lemma ρ₃' {r : ℝ} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
+lemma ρ₃'' {r : ℝ} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
     MeasureTheory.Integrable
       (fun x ↦ log ‖f (circleMap 0 r x.1) - circleMap 0 1 x.2‖ : ℝ × ℝ → ℝ)
       ((MeasureTheory.volume.restrict (Ioc 0 (2 * π))).prod (MeasureTheory.volume.restrict (Ioc 0 (2 * π)))) := by
-  rw [MeasureTheory.integrable_prod_iff (ρ₃ h)]
+  rw [MeasureTheory.integrable_prod_iff (ρ₃' h)]
   constructor
   · filter_upwards with a
     have z₀ : MeromorphicOn (fun x ↦ f (circleMap 0 r a) - circleMap 0 1 x) (uIcc 0 (2 * π)) := by
@@ -171,7 +171,7 @@ lemma ρ₃' {r : ℝ} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
 
 lemma ρ₄ {r : ℝ} {hr : r ≠ 0} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
     0 = 1 := by
-  have := ρ₃ h (r := r)
+  have := ρ₃' h (r := r)
   have τ₁ := MeasureTheory.integrable_prod_iff this
   have τ₂ := MeasureTheory.integrable_prod_iff' this
   rw [τ₂] at τ₁
@@ -206,8 +206,6 @@ lemma ρ₄ {r : ℝ} {hr : r ≠ 0} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤)
     exact this.1
   simp_all
   clear this
-
-
   sorry
 
 
@@ -310,7 +308,7 @@ theorem cartan {r : ℝ} {f : ℂ → ℂ} (hr : r ≠ 0) (h : MeromorphicOn f �
     exact norm_sub_rev (circleMap 0 1 y) (f (circleMap 0 r x))
   simp_rw [this]
 
-  have : Measurable f := meromorphic_measurable h
+  have : Measurable f := h.measurable
 
   · unfold uncurry
     simp
