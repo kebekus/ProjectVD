@@ -1,4 +1,5 @@
 import VD.MathlibPending.Nevanlinna_add_characteristic
+import VD.MathlibPending.MeromorphicComp
 --import Mathlib.MeasureTheory.Integral.Prod
 import Mathlib
 
@@ -9,37 +10,6 @@ namespace ValueDistribution
 variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
 
-
-lemma MeromorphicAt.comp {x : ℝ} {f : ℂ → E} {g : ℝ → ℂ}
-    (hf : MeromorphicAt f (g x)) (hg : AnalyticAt ℝ g x) : MeromorphicAt (f ∘ g) x := by
-  rw [ MeromorphicAt ] at *;
-  -- Since $g$ is analytic at $x$ and $(z - g(x))^n • f(z)$ is analytic at $g(x)$, their composition is analytic at $x$.
-  obtain ⟨n, hn⟩ := hf;
-  have h_comp : AnalyticAt ℝ (fun t => ((g t) - g x) ^ n • f (g t)) x := by
-    refine' hn.restrictScalars.comp hg;
-  by_cases h : Filter.EventuallyEq ( nhds x ) ( fun t => g t - g x ) 0 <;> simp_all +decide [ Filter.EventuallyEq ];
-  · have h_const : ∀ᶠ t in nhds x, g t = g x := by
-      simpa only [ sub_eq_zero ] using h;
-    refine' ⟨ 0, _ ⟩ ;
-    simp_all only [pow_zero, one_smul]
-    exact AnalyticAt.congr ( analyticAt_const ) ( by filter_upwards [ h_const ] with t ht; aesop );
-  · -- Since $g$ is analytic at $x$ and $g(x) \neq 0$, there exists $k \in ℕ$ and $\phi : ℝ → ℂ$ such that $\phi$ is analytic at $x$, $\phi(x) \neq 0$, and $g(t) - g(x) = (t - x)^k • \phi(t)$ near $x$.
-    obtain ⟨k, ϕ, hϕ⟩ : ∃ k : ℕ, ∃ ϕ : ℝ → ℂ, AnalyticAt ℝ ϕ x ∧ ϕ x ≠ 0 ∧ ∀ᶠ t in nhds x, g t - g x = (t - x) ^ k • ϕ t := by
-      -- Apply the lemma to find such a $k$ and $\phi$.
-      have := AnalyticAt.exists_eventuallyEq_pow_smul_nonzero_iff (hg.sub (analyticAt_const : AnalyticAt ℝ (fun _ => g x) x)) ; aesop;
-    -- Since $\phi$ is analytic at $x$ and $\phi(x) \neq 0$, we can write $(t - x)^{nk} • f(g(t))$ as $(\phi(t))^{-n} • ((g(t) - g(x))^n • f(g(t)))$.
-    have h_rewrite : ∀ᶠ t in nhds x, (t - x) ^ (n * k) • f (g t) = (ϕ t)⁻¹ ^ n • ((g t - g x) ^ n • f (g t)) := by
-      filter_upwards [ hϕ.2.2, hϕ.1.continuousAt.eventually_ne hϕ.2.1 ] with t ht₁ ht₂ ; simp_all +decide [ pow_mul', smul_smul ]
-      ring_nf
-      simp_all only [inv_pow, ne_eq, pow_eq_zero_iff', false_and, not_false_eq_true, mul_inv_cancel₀, one_mul]
-      obtain ⟨left, right⟩ := hϕ
-      obtain ⟨left_1, right⟩ := right
-      norm_cast;
-    refine' ⟨ n * k, _ ⟩;
-    have h_rewrite : AnalyticAt ℝ (fun t => (ϕ t)⁻¹ ^ n • ((g t - g x) ^ n • f (g t))) x := by
-      apply_rules [ AnalyticAt.smul, AnalyticAt.pow, hϕ.1.inv ];
-      exact hϕ.2.1;
-    exact h_rewrite.congr ( by filter_upwards [ ‹∀ᶠ t in nhds x, ( t - x ) ^ ( n * k ) • f ( g t ) = ( ϕ t ) ⁻¹ ^ n • ( g t - g x ) ^ n • f ( g t ) › ] with t ht; rw [ ht ] )
 
 theorem intervalIntegrable_iff_intervalIntegrable_smul
     {E : Type*} [NormedAddCommGroup E]
@@ -100,11 +70,11 @@ private lemma σ₂ {f : ℂ → ℂ} (h : 0 < meromorphicOrderAt f 0) :
   simp
   aesop
 
-lemma ρ₀ {f g : ℝ → ℂ} (hf : MeromorphicOn f Set.univ) (hg : MeromorphicOn g Set.univ) :
+lemma ρ₀ {f g : ℝ → ℂ} (hf : Meromorphic f) (hg : Meromorphic g) :
     Measurable (fun x ↦ f x.1 - g x.2 : ℝ × ℝ → ℂ) :=
   (hf.measurable.comp measurable_fst).sub (hg.measurable.comp measurable_snd)
 
-lemma ρ₁ {f g : ℝ → ℂ} (hf : MeromorphicOn f Set.univ) (hg : MeromorphicOn g Set.univ) :
+lemma ρ₁ {f g : ℝ → ℂ} (hf : Meromorphic f) (hg : Meromorphic g) :
     Measurable (fun x ↦ Real.log ‖f x.1 - g x.2‖ : ℝ × ℝ → ℝ) := by
   have : (fun (x : ℝ × ℝ) ↦ Real.log ‖f x.1 - g x.2‖) = Real.log ∘ norm ∘ (fun x ↦ f x.1 - g x.2) := by
     rfl
@@ -115,39 +85,40 @@ lemma ρ₁ {f g : ℝ → ℂ} (hf : MeromorphicOn f Set.univ) (hg : Meromorphi
     · fun_prop
     · exact ρ₀ hf hg
 
-lemma ρ₂ {f g : ℝ → ℂ} (hf : MeromorphicOn f Set.univ) (hg : MeromorphicOn g Set.univ) :
+lemma ρ₂ {f g : ℝ → ℂ} (hf : Meromorphic f) (hg : Meromorphic g) :
     MeasureTheory.AEStronglyMeasurable
       (fun x ↦ Real.log ‖f x.1 - g x.2‖ : ℝ × ℝ → ℝ)
       ((MeasureTheory.volume.restrict (Ioc 0 (2 * π))).prod (MeasureTheory.volume.restrict (Ioc 0 (2 * π)))) := by
   apply Measurable.aestronglyMeasurable (ρ₁ hf hg)
 
-lemma ρ₃ {f g : ℝ → ℂ}  (hf : MeromorphicOn f Set.univ) (hg : AnalyticOnNhd ℝ g Set.univ) :
+lemma ρ₃ {f g : ℝ → ℂ}  (hf : Meromorphic f) (hg : AnalyticOnNhd ℝ g Set.univ) :
     MeasureTheory.Integrable
       (fun x ↦ Real.log ‖f x.1 - g x.2‖ : ℝ × ℝ → ℝ)
       ((MeasureTheory.volume.restrict (Ioc 0 (2 * π))).prod (MeasureTheory.volume.restrict (Ioc 0 (2 * π)))) := by
-  rw [MeasureTheory.integrable_prod_iff (ρ₂ hf hg.meromorphicOn)]
+  rw [MeasureTheory.integrable_prod_iff (ρ₂ hf _)]
   constructor
   · filter_upwards with a
     sorry
   · simp
     sorry
+  · exact fun x ↦ (hg x trivial).meromorphicAt
 
 lemma ρ₃' {r : ℝ} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
     MeasureTheory.AEStronglyMeasurable
       (fun x ↦ log ‖f (circleMap 0 r x.1) - circleMap 0 1 x.2‖ : ℝ × ℝ → ℝ)
       ((MeasureTheory.volume.restrict (Ioc 0 (2 * π))).prod (MeasureTheory.volume.restrict (Ioc 0 (2 * π)))) := by
   apply ρ₂ (f := fun x ↦ f (circleMap 0 r x))
-  · intro x hx
+  · intro x
     have : (fun x ↦ f (circleMap 0 r x)) = f ∘ (circleMap 0 r) := by
       rfl
     rw [this]
-    apply (h (circleMap 0 r x) hx).comp
+    apply (h (circleMap 0 r x) trivial).comp_analyticAt'
     have := analyticOnNhd_circleMap 0 r
-    exact this x hx
-  · intro x hx
+    exact this x trivial
+  · intro x
     refine AnalyticAt.meromorphicAt ?_
     have := analyticOnNhd_circleMap 0 1
-    exact this x hx
+    exact this x trivial
 
 lemma ρ₃'' {r : ℝ} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
     MeasureTheory.Integrable
@@ -308,7 +279,8 @@ theorem cartan {r : ℝ} {f : ℂ → ℂ} (hr : r ≠ 0) (h : MeromorphicOn f �
     exact norm_sub_rev (circleMap 0 1 y) (f (circleMap 0 r x))
   simp_rw [this]
 
-  have : Measurable f := h.measurable
+  have : Meromorphic f := fun z ↦ h z trivial
+  have : Measurable f := this.measurable
 
   · unfold uncurry
     simp
