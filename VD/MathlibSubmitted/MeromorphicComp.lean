@@ -1,6 +1,3 @@
-import Mathlib.Algebra.EuclideanDomain.Field
-import Mathlib.GroupTheory.MonoidLocalization.Basic
-import Mathlib.Analysis.Analytic.Order
 import Mathlib.Analysis.Meromorphic.Basic
 
 variable

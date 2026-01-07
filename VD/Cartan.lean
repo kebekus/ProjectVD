@@ -1,5 +1,5 @@
-import VD.MathlibPending.Nevanlinna_add_characteristic
-import VD.MathlibPending.MeromorphicComp
+import VD.MathlibSubmitted.Nevanlinna_add_characteristic
+import VD.MathlibSubmitted.MeromorphicComp
 --import Mathlib.MeasureTheory.Integral.Prod
 import Mathlib
 

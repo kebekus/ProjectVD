@@ -16,7 +16,7 @@ For `1 ≤ r`, the characteristic function of `f + g` at `⊤` is less than or e
 the sum of the characteristic functions of `f` and `g`, respectively.
 -/
 theorem characteristic_add_top_le [NormedSpace ℂ E] {f₁ f₂ : ℂ → E} {r : ℝ}
-    (h₁f₁ : MeromorphicOn f₁ Set.univ) (h₁f₂ : MeromorphicOn f₂ Set.univ) (hr : 1 ≤ r) :
+    (h₁f₁ : Meromorphic f₁) (h₁f₂ : Meromorphic f₂) (hr : 1 ≤ r) :
     characteristic (f₁ + f₂) ⊤ r ≤ characteristic f₁ ⊤ r + characteristic f₂ ⊤ r + log 2 := by
   simp [characteristic]
   calc proximity (f₁ + f₂) ⊤ r + logCounting (f₁ + f₂) ⊤ r
@@ -32,7 +32,7 @@ Asymptotically, the characteristic function of `f + g` at `⊤` is less than or 
 the sum of the characteristic functions of `f` and `g`, respectively.
 -/
 theorem characteristic_add_top_eventuallyLE [NormedSpace ℂ E] {f₁ f₂ : ℂ → E}
-    (h₁f₁ : MeromorphicOn f₁ Set.univ) (h₁f₂ : MeromorphicOn f₂ Set.univ) :
+    (h₁f₁ : Meromorphic f₁) (h₁f₂ : Meromorphic f₂) :
     characteristic (f₁ + f₂) ⊤ ≤ᶠ[Filter.atTop] characteristic f₁ ⊤ + characteristic f₂ ⊤ + fun _ ↦ log 2 := by
   filter_upwards [Filter.eventually_ge_atTop 1]
   exact fun _ hr ↦ characteristic_add_top_le h₁f₁ h₁f₂ hr
@@ -42,7 +42,7 @@ For `1 ≤ r`, the characteristic function of a sum `∑ a, f a` at `⊤` is les
 equal to the sum of the characteristic functions of `f ·`.
 -/
 theorem characteristic_sum_top_le [NormedSpace ℂ E] {α : Type*} (s : Finset α) (f : α → ℂ → E)
-    {r : ℝ} (hf : ∀ a, MeromorphicOn (f a) Set.univ) (hr : 1 ≤ r) :
+    {r : ℝ} (hf : ∀ a, Meromorphic (f a)) (hr : 1 ≤ r) :
     characteristic (∑ a ∈ s, f a) ⊤ r ≤ (∑ a ∈ s, (characteristic (f a) ⊤)) r + log s.card := by
   simp [characteristic]
   calc proximity (∑ a ∈ s, f a) ⊤ r + logCounting (∑ a ∈ s, f a) ⊤ r
@@ -60,7 +60,7 @@ Asymptotically, the characteristic function of a sum `∑ a, f a` at `⊤` is le
 equal to the sum of the characteristic functions of `f ·`.
 -/
 theorem characteristic_sum_top_eventuallyLE [NormedSpace ℂ E] {α : Type*} (s : Finset α) (f : α → ℂ → E)
-    (hf : ∀ a, MeromorphicOn (f a) Set.univ) :
+    (hf : ∀ a, Meromorphic (f a)) :
     characteristic (∑ a ∈ s, f a) ⊤
       ≤ᶠ[Filter.atTop] ∑ a ∈ s, (characteristic (f a) ⊤) + fun _ ↦ log s.card := by
   filter_upwards [Filter.eventually_ge_atTop 1]
