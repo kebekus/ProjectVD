@@ -1,5 +1,4 @@
 import VD.MathlibSubmitted.Nevanlinna_add_characteristic
-import VD.MathlibSubmitted.MeromorphicComp
 --import Mathlib.MeasureTheory.Integral.Prod
 import Mathlib
 
@@ -112,7 +111,7 @@ lemma ρ₃' {r : ℝ} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
     have : (fun x ↦ f (circleMap 0 r x)) = f ∘ (circleMap 0 r) := by
       rfl
     rw [this]
-    apply (h (circleMap 0 r x) trivial).comp_analyticAt'
+    apply (h (circleMap 0 r x) trivial).comp_analyticAt
     have := analyticOnNhd_circleMap 0 r
     exact this x trivial
   · intro x
