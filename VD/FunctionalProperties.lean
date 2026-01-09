@@ -1,8 +1,7 @@
 import VD.Cartan
---import Mathlib.MeasureTheory.Integral.Prod
 import Mathlib
 
-open Filter Function MeromorphicOn Metric NNReal Real Set Classical Topology ValueDistribution
+open Function Metric Real Set Classical Topology ValueDistribution
 
 /-
 Establish parity and monotonocity of the Nevanlinna functions.
@@ -22,11 +21,10 @@ lemma logCounting_even (D : locallyFinsuppWithin (univ : Set E) ℤ) :
 lemma toClosedBall_support_subset_closedBall {E : Type*} [NormedAddCommGroup E] {r : ℝ}
     (f : locallyFinsuppWithin (univ : Set E) ℤ) :
     (toClosedBall r f).support ⊆ closedBall 0 |r| := by
-  unfold toClosedBall
-  simp_all [restrict_apply]
+  simp_all [toClosedBall, restrict_apply]
 
 /--
-The logarithmic counting function is monotoneous.
+The logarithmic counting function is monotonous.
 -/
 lemma logCounting_mono {D : locallyFinsuppWithin (univ : Set E) ℤ} (hD : 0 ≤ D) :
     MonotoneOn (logCounting D) (Ioi 0) := by
@@ -94,7 +92,7 @@ theorem characteristic_even {f : ℂ → ℂ} {a : WithTop ℂ} :
   Function.Even.add proximity_even logCounting_even
 
 /--
-The logarithmic counting function is monotoneous.
+The logarithmic counting function is monotonous.
 -/
 theorem logCounting_monotoneOn {f : ℂ → ℂ} {a : WithTop ℂ} :
     MonotoneOn (logCounting f a) (Ioi 0) := by
@@ -106,7 +104,7 @@ theorem logCounting_monotoneOn {f : ℂ → ℂ} {a : WithTop ℂ} :
     apply locallyFinsuppWithin.logCounting_mono (posPart_nonneg _)
 
 /--
-The characteristic function is monotoneous.
+The characteristic function is monotonous.
 -/
 theorem characteristic_monotoneOn {f : ℂ → ℂ} (h : Meromorphic f) :
     MonotoneOn (characteristic f ⊤) (Ioi 0) := by
@@ -114,7 +112,10 @@ theorem characteristic_monotoneOn {f : ℂ → ℂ} (h : Meromorphic f) :
   intro a ha b hb hab
   rw [hc a, hc b]
   gcongr
-  
-  sorry
+  · apply logCounting_circleIntegrable h
+  · apply logCounting_circleIntegrable h
+  · apply logCounting_monotoneOn ha hb hab
+  · aesop
+  · aesop
 
 end ValueDistribution
