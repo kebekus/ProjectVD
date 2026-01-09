@@ -1,6 +1,5 @@
 import VD.Cartan
-import VD.MathlibPending.MeromorphicComp
-import VD.MathlibPending.Nevanlinna_add_characteristic
-import VD.countingExample
-import VD.discussion
+import VD.CartanExperimentation
+import VD.FunctionalProperties
+import VD.MathlibSubmitted.Nevanlinna_add_characteristic
 import VD.leftovers.meromorphicAt_topology
