@@ -33,8 +33,7 @@ lemma logCounting_mono {D : locallyFinsuppWithin (univ : Set E) ℤ} (hD : 0 ≤
   gcongr
   · let s := (toClosedBall b D).support
     have hs : s.Finite := (toClosedBall b D).finiteSupport (isCompact_closedBall 0 |b|)
-    rw [finsum_eq_sum_of_support_subset (s := hs.toFinset)]
-    rw [finsum_eq_sum_of_support_subset (s := hs.toFinset)]
+    repeat rw [finsum_eq_sum_of_support_subset (s := hs.toFinset)]
     · gcongr 1 with z hz
       by_cases h₂z : z = 0
       · simp [h₂z]
@@ -88,8 +87,7 @@ theorem proximity_even {f : ℂ → ℂ} {a : WithTop ℂ} :
 The characteristic function is even.
 -/
 theorem characteristic_even {f : ℂ → ℂ} {a : WithTop ℂ} :
-    Function.Even (characteristic f a) :=
-  Function.Even.add proximity_even logCounting_even
+    Function.Even (characteristic f a) := Function.Even.add proximity_even logCounting_even
 
 /--
 The logarithmic counting function is monotonous.
@@ -98,13 +96,17 @@ theorem logCounting_monotoneOn {f : ℂ → ℂ} {a : WithTop ℂ} :
     MonotoneOn (logCounting f a) (Ioi 0) := by
   unfold logCounting
   by_cases h : a = ⊤
-  · simp [h]
+  · simp only [h]
     apply locallyFinsuppWithin.logCounting_mono (negPart_nonneg _)
-  · simp [h]
+  · simp only [h]
     apply locallyFinsuppWithin.logCounting_mono (posPart_nonneg _)
 
 /--
 The characteristic function is monotonous.
+
+Note: Given that the proximity function is not monotonous in general, this is a
+surprisingly non-trivial consequence of Cartan's theorem,
+`characteristic_top_eq_circleAverage_logCounting_add_const`.
 -/
 theorem characteristic_monotoneOn {f : ℂ → ℂ} (h : Meromorphic f) :
     MonotoneOn (characteristic f ⊤) (Ioi 0) := by
