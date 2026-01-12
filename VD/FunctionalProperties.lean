@@ -5,7 +5,27 @@ open Function Metric Real Set Classical Topology ValueDistribution
 
 /-
 Establish parity and monotonocity of the Nevanlinna functions.
+
+TODO:
+
+- Positivity of counting function
+- Positivity of characteristic function
 -/
+
+theorem circleAverage.integral_undef {c : ℂ} {R : ℝ} {f : ℂ → ℝ} (hf : ¬CircleIntegrable f c R) :
+    circleAverage f c R = 0 := by
+  simp_all [circleAverage, CircleIntegrable, intervalIntegral.integral_undef]
+
+theorem circleAverage_nonneg_of_nonneg {c : ℂ} {R : ℝ} {f : ℂ → ℝ}
+    (h₂f : ∀ x ∈ Metric.sphere c |R|, 0 ≤ f x) :
+    0 ≤ circleAverage f c R := by
+  by_cases hf : CircleIntegrable f c R
+  · rw [← circleAverage_const 0 c |R|, circleAverage, circleAverage, smul_eq_mul, smul_eq_mul,
+      mul_le_mul_iff_of_pos_left (inv_pos.2 two_pi_pos)]
+    apply intervalIntegral.integral_mono_on_of_le_Ioo (le_of_lt two_pi_pos)
+      intervalIntegrable_const hf (fun θ _ ↦ h₂f (circleMap c R θ) (circleMap_mem_sphere' c R θ))
+  · rw [circleAverage.integral_undef hf]
+
 
 namespace Function.locallyFinsuppWithin
 
@@ -64,6 +84,17 @@ lemma logCounting_mono {D : locallyFinsuppWithin (univ : Set E) ℤ} (hD : 0 ≤
 end Function.locallyFinsuppWithin
 
 namespace ValueDistribution
+
+/--
+The proximity function is non-negative.
+-/
+theorem nonneg_proximity {f : ℂ → ℂ} {a : WithTop ℂ} :
+    0 ≤ proximity f a := by
+  by_cases h : a = ⊤
+  all_goals
+    intro r
+    simp only [Pi.zero_apply, proximity, h, ↓reduceDIte]
+    exact circleAverage_nonneg_of_nonneg (fun x _ ↦ posLog_nonneg)
 
 /--
 The logarithmic counting function is even.
