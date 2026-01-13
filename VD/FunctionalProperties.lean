@@ -1,5 +1,5 @@
 import VD.Cartan
-import VD.MathlibPending.FunctionalProperties
+import VD.MathlibSubmitted.FunctionalProperties
 import Mathlib
 
 open Function Metric Real Set Classical Topology ValueDistribution

@@ -137,7 +137,7 @@ theorem logCounting_nonneg {r : ℝ} {f : ℂ → ℂ} {a : WithTop ℂ} (hr : 1
       (posPart_nonneg (MeromorphicOn.divisor (f · - a.untop₀) univ)) hr]
 
 /--
-The proximity function is asymptotically non-negative.
+The logarithmic counting function is asymptotically non-negative.
 -/
 theorem logCounting_eventually_nonneg {f : ℂ → ℂ} {a : WithTop ℂ} :
     0 ≤ᶠ[Filter.atTop] logCounting f a  := by
@@ -152,7 +152,7 @@ theorem characteristic_nonneg {r : ℝ} {f : ℂ → ℂ} {a : WithTop ℂ} (hr 
   exact add_nonneg (proximity_nonneg r) (logCounting_nonneg hr)
 
 /--
-The proximity function is asymptotically non-negative.
+The characteristic function is asymptotically non-negative.
 -/
 theorem characteristic_eventually_nonneg {f : ℂ → ℂ} {a : WithTop ℂ} :
     0 ≤ᶠ[Filter.atTop] characteristic f a  := by
