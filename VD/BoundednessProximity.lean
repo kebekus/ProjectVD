@@ -3,7 +3,7 @@ import Mathlib
 
 open Function Metric Real Set Classical Topology ValueDistribution
 
-/--
+/-
 Prove that the proximity function of an analytic function `f` is bounded if and
 only if `f` is bounded and hence constant.
 -/

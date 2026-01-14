@@ -1,5 +1,4 @@
 import VD.Cartan
-import VD.MathlibSubmitted.FunctionalProperties
 import Mathlib
 
 open Function Metric Real Set Classical Topology ValueDistribution
@@ -16,8 +15,8 @@ surprisingly non-trivial consequence of Cartan's theorem,
 -/
 theorem characteristic_monotoneOn {f : ℂ → ℂ} (h : Meromorphic f) :
     MonotoneOn (characteristic f ⊤) (Ioi 0) := by
-  obtain ⟨c, hc⟩ := characteristic_top_eq_circleAverage_logCounting_add_const h
   intro a ha b hb hab
+  obtain ⟨c, hc⟩ := characteristic_top_eq_circleAverage_logCounting_add_const h
   rw [hc a, hc b]
   gcongr
   · apply logCounting_circleIntegrable h
