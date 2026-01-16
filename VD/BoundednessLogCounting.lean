@@ -62,7 +62,7 @@ lemma logCounting_single_zero [ProperSpace E] {r : ℝ} (hr : 0 ≤ r) :
   simp_all [single_eval]
   simpa
 
-lemma logCounting_single_nonzero [ProperSpace E] {e : E} {r : ℝ} (hr : ‖e‖ ≤ r) :
+lemma logCounting_single' [ProperSpace E] {e : E} {r : ℝ} (hr : ‖e‖ ≤ r) :
     logCounting (single e) r = log r - log ‖e‖ := by
   rw [logCounting_single]
   by_cases he : 0 = e
@@ -82,72 +82,24 @@ lemma logCounting_single_nonzero [ProperSpace E] {e : E} {r : ℝ} (hr : ‖e‖
     exact inv_ne_zero h₁
   · exact hr
 
-lemma logCounting_single_isBigO_log [ProperSpace E] {e : E} :
+lemma logCounting_single_isBigO_log' [ProperSpace E] {e : E} :
     logCounting (single e) =O[atTop] log := by
-  simp [logCounting]
   rw [isBigO_iff]
   use 2
   rw [eventually_atTop]
-  use Real.exp |log ‖e‖|
-  intro b hb
-  have h₁b : 0 < b := by
-    have := Real.exp_pos |log ‖e‖|
-    linarith
-  have h₂b : 1 ≤ b := by
-    trans Real.exp |log ‖e‖|
-    · apply Real.one_le_exp
-      exact abs_nonneg (log ‖e‖)
-    · exact hb
-  rw [finsum_eq_sum_of_support_subset _ (s := (finite_singleton e).toFinset)]
-  simp
-  rw [toClosedBall_eval_within]
-  rw [single_eval]
-  simp
-  by_cases h : e = 0
-  · simp [h, single_eval]
-    grind
-  · simp [single_eval]
-    rw [eq_comm] at h
-    simp [h]
-    rw [log_mul]
-    calc |log b + log ‖e‖⁻¹|
-      _ ≤ |log b| + |log ‖e‖⁻¹| := by
-        apply abs_add_le
-      _ ≤ |log b| + |log ‖e‖| := by
-        simp [log_inv]
-      _ ≤ |log b| + |log b| := by
-        gcongr 1
-        have := log_le_log (Real.exp_pos |log ‖e‖|) hb
-        simp at this
-        have : 0 ≤ log b := by
-          exact log_nonneg h₂b
-        have : log b = |log b| := by
-          exact Eq.symm (abs_of_nonneg this)
-        rwa [← this]
-      _ = 2 * |log b| := by
-        rw [two_mul]
-    · exact Ne.symm (ne_of_lt h₁b)
-    · aesop
-
-  · simp
-    have := log_le_log (Real.exp_pos |log ‖e‖|) hb
-    simp at this
-    by_cases he : e = 0
-    · simp [he]
-    rw [← log_le_log_iff]
-    simp_all only [ge_iff_le, log_abs]
-    by_cases he : 0 ≤ log ‖e‖
-    · rwa [abs_of_nonneg he] at this
-    · trans 0
-      · linarith
-      · exact log_nonneg h₂b
-    aesop
-    rwa [abs_of_pos h₁b]
-  intro y hy
-  simp_all
-  have h₁y := hy.left
-  simp [toClosedBall, restrict_apply, single_eval] at h₁y
-  tauto
+  use max ‖e‖ (exp |log ‖e‖|)
+  intro r hr
+  have h₁r : ‖e‖ ≤ r := le_of_max_le_left hr
+  have h₂r : exp |log ‖e‖| ≤ r := le_of_max_le_right hr
+  have h₃r : 1 ≤ r := by
+    linarith [h₂r, one_le_exp (abs_nonneg (log ‖e‖))]
+  rw [logCounting_single' h₁r]
+  calc ‖log r - log ‖e‖‖
+    _ ≤ ‖log r‖ + ‖log ‖e‖‖ := by
+      apply norm_sub_le
+    _ ≤ 2 * ‖log r‖ := by
+      simpa [two_mul, norm_of_nonneg (log_nonneg h₃r)] using
+        (log_le_log (exp_pos _) h₂r)
 
 lemma xx [ProperSpace E] {D : locallyFinsuppWithin (univ : Set E) ℤ}
     (h₁ : 0 ≤ D) (h₂ : D ≠ 0) :
