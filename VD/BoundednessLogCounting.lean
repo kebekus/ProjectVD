@@ -20,52 +20,57 @@ lemma elementIndicatorSupport {X : Type*} {e : X} :
 variable
   {E : Type*} [NormedAddCommGroup E] --[ProperSpace E]
 
-noncomputable def singleton (e : E) :
+noncomputable def single (e : E) :
     Function.locallyFinsuppWithin (Set.univ : Set E) ℤ where
-  toFun := fun z ↦ if z = e then 1 else 0
+  toFun := (if · = e then 1 else 0)
   supportWithinDomain' z hz := by tauto
   supportLocallyFiniteWithinDomain' := by
     intro _ _
     use ⊤
     simp [(by aesop : (if · = e then 1 else 0 : E → ℤ).support = {e})]
 
-lemma xx {e₁ e₂ : E} :
-    singleton e₁ e₂ = if e₂ = e₁ then 1 else 0 := by
-  have : singleton e₁ e₂ = (singleton e₁).toFun e₂ := rfl
+lemma single_eval {e₁ e₂ : E} :
+    single e₁ e₂ = if e₂ = e₁ then 1 else 0 := by
+  have : single e₁ e₂ = (single e₁).toFun e₂ := rfl
   rw [this]
-  unfold singleton
+  unfold single
   simp
 
-lemma xxy [ProperSpace E] {e : E} :
-    logCounting (singleton e) =O[atTop] log := by
+lemma logCounting_single_isBigO_log [ProperSpace E] {e : E} :
+    logCounting (single e) =O[atTop] log := by
   simp [logCounting]
   rw [isBigO_iff]
   use 2
   rw [eventually_atTop]
-  use ‖e‖
+  use exp |log ‖e‖|
   intro b hb
 
   rw [finsum_eq_sum_of_support_subset _ (s := (finite_singleton e).toFinset)]
   simp
   rw [toClosedBall_eval_within]
-  rw [xx]
+  rw [single_eval]
   simp
   by_cases h : e = 0
-  · simp [h, xx]
-    sorry
-  · simp [xx]
+  · simp [h, single_eval]
+    grind
+  · simp [single_eval]
     rw [eq_comm] at h
     simp [h]
     rw [log_mul]
+    calc |log b + log ‖e‖⁻¹|
+      _ ≤ |log b| + |log ‖e‖⁻¹| := by
+        apply abs_add_le
+      _ ≤ |log b| + |log ‖e‖| := by
+        simp [log_inv]
+      _ ≤ |log b| + |log b| := by
+        gcongr 1
 
+        sorry
+      _ = 2 * |log b| := by
+        rw [two_mul]
     sorry
-
-  simp [singleton]
-
-  rw [FunLike.coe_injective]
-  rw []
-
-
+    sorry
+  sorry
   sorry
 
 lemma zero_iff_logCounting_bounded {D : locallyFinsuppWithin (univ : Set E) ℤ} (h : 0 ≤ D) :
