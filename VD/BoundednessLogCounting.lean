@@ -8,7 +8,7 @@ Prove that the logarithmic counting function of a meromorphic function `f` is
 bounded if and only if `f` is constant.
 
 Investigate what happens if the logarithmic counting function grows
-symptotically like `log`.
+symptotically like `log`. f : ℂ → ℂ
 -/
 
 namespace Function.locallyFinsuppWithin
