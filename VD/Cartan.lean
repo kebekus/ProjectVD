@@ -23,5 +23,4 @@ theorem characteristic_top_eq_circleAverage_logCounting_add_const {f : ℂ → �
     ∃ const, ∀ r ≠ 0, characteristic f ⊤ r = circleAverage (logCounting f · r) 0 1 + const := by
   sorry
 
-
 end ValueDistribution

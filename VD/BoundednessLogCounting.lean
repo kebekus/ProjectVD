@@ -1,20 +1,16 @@
-import VD.Cartan
-import Mathlib
+import Mathlib.Analysis.Complex.ValueDistribution.CountingFunction
 
-open Asymptotics Filter Function Metric Real Set Classical Topology ValueDistribution
+open Asymptotics Filter Function Real Set Classical
 
 /-
 Prove that the logarithmic counting function of a meromorphic function `f` is
-bounded if and only if `f` is constant.
-
-Investigate what happens if the logarithmic counting function grows
-symptotically like `log`. f : ℂ → ℂ
+bounded if and only if `f` is analytic.
 -/
 
 namespace Function.locallyFinsuppWithin
 
 variable
-  {E : Type*} [NormedAddCommGroup E] --[ProperSpace E]
+  {E : Type*} [NormedAddCommGroup E]
 
 noncomputable def single (e : E) :
     Function.locallyFinsuppWithin (Set.univ : Set E) ℤ where
@@ -38,6 +34,10 @@ lemma single_pos {e : E} :
   · apply DFunLike.ne_iff.2
     use e
     simp [single_eval]
+
+@[simp] lemma logCounting_zero [ProperSpace E]  :
+    logCounting (0 : Function.locallyFinsuppWithin (Set.univ : Set E) ℤ) = 0 := by
+  exact map_zero logCounting
 
 lemma logCounting_single [ProperSpace E] {e : E} {r : ℝ} (hr : ‖e‖ ≤ r) :
     logCounting (single e) r = log r - log ‖e‖ := by
