@@ -52,7 +52,7 @@ The function `single e` is positive.
 
 /--
 Every positive function with locally finite supports dominates a singleton
-indicator function.
+indicator.
 -/
 lemma le_single [ProperSpace E] {D : locallyFinsuppWithin (univ : Set E) ℤ} (h : 0 < D) :
     ∃ e, single e ≤ D := by
@@ -96,8 +96,8 @@ asymptotically equal to `log · - log ‖e‖`.
 
 /--
 Qualitative consequence of `logCounting_single_eq_log_sub_const`. The constant
-function `1 : ℝ → ℝ` is little o of the logarithmic counting function of
-attached to `single e`.
+function `1 : ℝ → ℝ` is little o of the logarithmic counting function attached
+to `single e`.
 -/
 lemma one_isLittleO_logCounting_single [ProperSpace E] {e : E} :
     (1 : ℝ → ℝ) =o[atTop] logCounting (single e) := by
