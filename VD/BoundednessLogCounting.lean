@@ -111,7 +111,7 @@ lemma zero_iff_logCounting_bounded [ProperSpace E] {D : locallyFinsuppWithin (un
     simp [isBigO_of_le' (c := 0), h₂]
   · contrapose
     intro h₁
-    obtain ⟨e, he⟩ := le_single (lt_of_le_of_ne h (h₁ ·.symm))
+    obtain ⟨e, he⟩ := single_le_pos (lt_of_le_of_ne h (h₁ ·.symm))
     rw [isBigO_iff'']
     push_neg
     intro a ha

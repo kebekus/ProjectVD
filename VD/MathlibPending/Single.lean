@@ -59,7 +59,7 @@ The function `single e` is positive.
 Every positive function with locally finite supports dominates a singleton
 indicator.
 -/
-lemma le_single {D : locallyFinsuppWithin (Set.univ : Set X) ℤ} (h : 0 < D) :
+lemma exists_single_le_pos {D : locallyFinsuppWithin (Set.univ : Set X) ℤ} (h : 0 < D) :
     ∃ e, single e ≤ D := by
   obtain ⟨z, hz⟩ := (by simpa [D.ext_iff] using (ne_of_lt h).symm : ∃ z, D z ≠ 0)
   use z
