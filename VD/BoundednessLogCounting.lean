@@ -1,4 +1,4 @@
-import Mathlib.Analysis.Complex.ValueDistribution.CountingFunction
+import Mathlib.Analysis.Complex.ValueDistribution.LogCounting.Basic
 import VD.MathlibPending.Single
 
 open Asymptotics Filter Function Real Set Classical
