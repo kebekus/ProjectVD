@@ -1,4 +1,5 @@
 import Mathlib.Analysis.Complex.ValueDistribution.CountingFunction
+import VD.MathlibPending.Single
 
 open Asymptotics Filter Function Real Set Classical
 
@@ -16,65 +17,8 @@ variable
   {E : Type*} [NormedAddCommGroup E]
 
 /-!
-## Singleton Indicators as Functions with Locally Finite Support
--/
-
-/--
-Is analogy to `Finsupp.single`, this definition presents the indicator function
-of a single point as a function with locally finite support.
--/
-noncomputable def single (e : E) : locallyFinsuppWithin (Set.univ : Set E) ℤ where
-  toFun := (if · = e then 1 else 0)
-  supportWithinDomain' z hz := by tauto
-  supportLocallyFiniteWithinDomain' := by
-    intro _ _
-    use ⊤
-    simp [(by aesop : (if · = e then 1 else 0 : E → ℤ).support = {e})]
-
-/--
-Simplifier lemma: `single e` takes the value `1` at `e` and is zero otherwise.
--/
-@[simp] lemma single_eval {e₁ e₂ : E} :
-    single e₁ e₂ = if e₂ = e₁ then 1 else 0 := rfl
-
-/--
-The function `single e` is positive.
--/
-@[simp] lemma single_pos {e : E} : 0 < single e := by
-  apply lt_of_le_of_ne
-  · intro x
-    by_cases he : x = e
-    all_goals
-      simp_all [single_eval]
-  · apply DFunLike.ne_iff.2
-    use e
-    simp [single_eval]
-
-/--
-Every positive function with locally finite supports dominates a singleton
-indicator.
--/
-lemma le_single [ProperSpace E] {D : locallyFinsuppWithin (univ : Set E) ℤ} (h : 0 < D) :
-    ∃ e, single e ≤ D := by
-  obtain ⟨z, hz⟩ := (by simpa [D.ext_iff] using (ne_of_lt h).symm : ∃ z, D z ≠ 0)
-  use z
-  intro e
-  by_cases he : e = z
-  · subst he
-    simpa [single_eval] using Int.lt_iff_le_and_ne.mpr ⟨h.le e, hz.symm⟩
-  · simpa [he, single_eval] using h.le e
-
-/-!
 ## Logarithmic Counting Functions of Singleton Indicators
 -/
-
-/--
-The logarithmic counting function of attached to the zero divisor is the zero
-function.
--/
-@[simp] lemma logCounting_zero [ProperSpace E]  :
-    logCounting (0 : Function.locallyFinsuppWithin (Set.univ : Set E) ℤ) = 0 := by
-  exact map_zero logCounting
 
 /--
 The logarithmic counting function of attached to a singleton indicator is
@@ -143,7 +87,7 @@ lemma logCounting_strictMono [ProperSpace E] {D : locallyFinsuppWithin (univ : S
   apply StrictMonoOn.add_monotone
   · intro a ha b hb hab
     rw [mem_Ioi] at ha hb
-    rw [logCounting_single_eq_log_sub_const (e := e) ha.le, logCounting_single_eq_log_sub_const (e := e) hb.le]
+    rw [logCounting_single_eq_log_sub_const ha.le, logCounting_single_eq_log_sub_const hb.le]
     gcongr
     exact (norm_nonneg e).trans_lt ha
   · intro a ha b hb hab
