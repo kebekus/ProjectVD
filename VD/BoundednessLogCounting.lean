@@ -1,14 +1,35 @@
+/-
+Copyright (c) 2025 Stefan Kebekus. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Stefan Kebekus
+-/
+--module
+
 import Mathlib.Analysis.Complex.ValueDistribution.LogCounting.Basic
+import VD.MathlibPending.LogCounting
 import VD.MathlibPending.Single
 
 open Asymptotics Filter Function Real Set Classical
 
 /-!
-# Asymptotic Behaviour of Logarithmic Counting Functions
+# Asymptotic Behavior of the Logarithmic Counting Function
 
+If `f` is meromorphic over a field `𝕜`, we show that the logarithmic counting
+function for the poles of `f` is asymptotically bounded if and only if `f` has
+only removable singularities.  See Page 170f of [Lang, *Introduction to Complex
+Hyperbolic Spaces*][MR886677] for a detailed discussion.
 
-Prove that the logarithmic counting function of a meromorphic function `f` is
-bounded if and only if `f` is analytic.
+## Implementation Notes
+
+We establish the result first for the logarithmic counting function first for
+functions with locally finite support on `𝕜` and then specializes to the
+setting where the function with locally finite support is the pole or
+zero-divisor of a meromorphic function.
+
+## TODO
+
+Establish the analogous characterization of meromorphic functions with finite
+set of poles, as functions whose logarithmic counting function big-O of `log`.
 -/
 
 namespace Function.locallyFinsuppWithin
@@ -17,26 +38,8 @@ variable
   {E : Type*} [NormedAddCommGroup E]
 
 /-!
-## Logarithmic Counting Functions of Singleton Indicators
+## Logarithmic Counting Functions for Functions with Locally Finite Support
 -/
-
-/--
-The logarithmic counting function of attached to a singleton indicator is
-asymptotically equal to `log · - log ‖e‖`.
--/
-@[simp] lemma logCounting_single_eq_log_sub_const [ProperSpace E] {e : E} {r : ℝ} (hr : ‖e‖ ≤ r) :
-    logCounting (single e) r = log r - log ‖e‖ := by
-  simp only [logCounting, AddMonoidHom.coe_mk, ZeroHom.coe_mk]
-  rw [finsum_eq_sum_of_support_subset _ (s := (finite_singleton e).toFinset)
-    (by simp_all [toClosedBall, restrict_apply, single_eval])]
-  simp only [toFinite_toFinset, toFinset_singleton, Finset.sum_singleton]
-  rw [toClosedBall_eval_within _ (by simpa [abs_of_nonneg ((norm_nonneg e).trans hr)])]
-  by_cases he : 0 = e
-  · simp [← he, single_eval]
-  · simp only [single_eval, he, reduceIte, Int.cast_zero, zero_mul, add_zero,
-      log_mul (ne_of_lt (lt_of_lt_of_le (norm_pos_iff.mpr (he ·.symm)) hr)).symm
-      (inv_ne_zero (norm_ne_zero_iff.mpr (he ·.symm))), log_inv]
-    ring
 
 /--
 Qualitative consequence of `logCounting_single_eq_log_sub_const`. The constant
@@ -71,33 +74,6 @@ lemma one_isLittleO_logCounting_single [ProperSpace E] {e : E} :
     _ ≤ logCounting (single e) b := by
       apply logCounting_mono single_pos.le (mem_Ioi.2 (exp_pos _)) _ hb
       simpa [mem_Ioi] using one_pos.trans_le h₁b
-
-/-!
-## Monotonicity of Logarithmic Counting Functions
--/
-
-/--
-The logarithmic counting function of a positive function is locally finite
-support is asymptotically strictly monotonous.
--/
-lemma logCounting_strictMono [ProperSpace E] {D : locallyFinsuppWithin (univ : Set E) ℤ} {e : E}
-    (hD : single e ≤ D) :
-    StrictMonoOn (logCounting D) (Ioi ‖e‖) := by
-  rw [(by aesop : logCounting D = logCounting (single e) + logCounting (D - single e))]
-  apply StrictMonoOn.add_monotone
-  · intro a ha b hb hab
-    rw [mem_Ioi] at ha hb
-    rw [logCounting_single_eq_log_sub_const ha.le, logCounting_single_eq_log_sub_const hb.le]
-    gcongr
-    exact (norm_nonneg e).trans_lt ha
-  · intro a ha b hb hab
-    apply logCounting_mono _ _ ((norm_nonneg e).trans_lt hb) hab
-    · simp [hD]
-    · simpa [mem_Ioi] using (norm_nonneg e).trans_lt ha
-
-/-!
-## Asymptotic Behaviour of Logarithmic Counting Functions
--/
 
 /--
 A non-negative function with locally finite support is zero if and only if its
@@ -158,16 +134,20 @@ end Function.locallyFinsuppWithin
 
 namespace ValueDistribution
 
+variable
+  {𝕜 : Type*} [NontriviallyNormedField 𝕜] [ProperSpace 𝕜]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+
 /-!
-## Asymptotic Behaviour of Logarithmic Counting Functions
+## Logarithmic Counting Functions for the Poles of a Meromorphic Function
 -/
 
 /--
 A meromorphic function has only removable singularities if and only if the
 logarithmic counting function for its pole divisor is asymptotically bounded.
 -/
-theorem logCounting_isBigO_one_iff_analyticOnNhd {f : ℂ → ℂ} (h : Meromorphic f) :
-    logCounting f ⊤ =O[atTop] (1 : ℝ → ℝ) ↔ AnalyticOnNhd ℂ (toMeromorphicNFOn f ⊤) ⊤ := by
+theorem logCounting_isBigO_one_iff_analyticOnNhd {f : 𝕜 → E} (h : Meromorphic f) :
+    logCounting f ⊤ =O[atTop] (1 : ℝ → ℝ) ↔ AnalyticOnNhd 𝕜 (toMeromorphicNFOn f ⊤) ⊤ := by
   simp only [logCounting, reduceDIte, top_eq_univ]
   rw [← Function.locallyFinsuppWithin.zero_iff_logCounting_bounded (negPart_nonneg _)]
   constructor
