@@ -1,5 +1,4 @@
 import VD.Cartan
-import Mathlib
 
 open Function Metric Real Set Classical Topology ValueDistribution
 
@@ -7,9 +6,9 @@ open Function Metric Real Set Classical Topology ValueDistribution
 namespace ValueDistribution
 
 /--
-The characteristic function is monotonous.
+The characteristic function is monotone.
 
-Note: Given that the proximity function is not monotonous in general, this is a
+Note: Given that the proximity function is not monotone in general, this is a
 surprisingly non-trivial consequence of Cartan's theorem,
 `characteristic_top_eq_circleAverage_logCounting_add_const`.
 -/

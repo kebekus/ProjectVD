@@ -1,8 +1,11 @@
 import VD.BoundednessCharacteristic
-import VD.BoundednessLogCounting
 import VD.BoundednessProximity
 import VD.Cartan
 import VD.CartanExperimentation
+import VD.CharacteristicMonotone
 import VD.Experiment
-import VD.FunctionalProperties
+import VD.MathlibPending.BoundednessLogCounting
+import VD.MathlibPending.LogCounting
+import VD.MathlibPending.Single
+import VD.MathlibSubmitted.Congruence
 import VD.leftovers.meromorphicAt_topology
