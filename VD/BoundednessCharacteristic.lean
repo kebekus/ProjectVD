@@ -42,11 +42,9 @@ lemma characteristic_isBigO_iff {g : ℝ → ℝ} {a : WithTop E} :
     all_goals
     · use c
       filter_upwards [hc, (eventually_ge_atTop 1)] with r h₁r h₂
-      have σ₁ : 0 ≤ proximity f a r := proximity_nonneg r
-      have σ₂ : 0 ≤ logCounting f a r := logCounting_nonneg h₂
-      trans |proximity f a r + logCounting f a r|
-      · linarith [abs_of_nonneg σ₁, abs_of_nonneg σ₂, abs_of_nonneg (add_nonneg σ₁ σ₂)]
-      · exact h₁r
+      have : 0 ≤ proximity f a r := proximity_nonneg r
+      have : 0 ≤ logCounting f a r := logCounting_nonneg h₂
+      grind
   · exact fun h ↦ h.1.add h.2
 
 lemma proximity_eq_proximity_toMeromorphiNFOn {a : WithTop E} (h : MeromorphicOn f Set.univ) :
@@ -57,7 +55,7 @@ lemma proximity_eq_proximity_toMeromorphiNFOn {a : WithTop E} (h : MeromorphicOn
   rw [proximity_congr_codiscrete _ (by linarith)]
   exact toMeromorphicNFOn_eqOn_codiscrete h
 
-lemma characteristic_isBigO_one_iff_constant (h : MeromorphicOn f Set.univ) :
+theorem characteristic_isBigO_one_iff_constant (h : MeromorphicOn f Set.univ) :
     EventuallyConst f (codiscrete ℂ) ↔ characteristic f ⊤ =O[atTop] (1 : ℝ → ℝ) := by
   constructor
   · intro hf

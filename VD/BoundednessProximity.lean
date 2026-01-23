@@ -33,5 +33,4 @@ theorem proximity_bounded_if_eventuallyConstant {f : ℂ → E} (h : EventuallyC
   simp_rw [isBigO_iff, eventually_atTop]
   use log⁺ ‖c‖, 1, fun _ _ ↦ by simp [proximity_congr_codiscrete hc (by linarith), abs_of_nonneg]
 
-
 end ValueDistribution

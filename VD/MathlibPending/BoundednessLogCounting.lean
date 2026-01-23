@@ -97,26 +97,10 @@ lemma zero_iff_logCounting_bounded [ProperSpace E] {D : locallyFinsuppWithin (un
     obtain ⟨c, hc⟩ := eventually_atTop.1
       (isLittleO_iff.1 (one_isLittleO_logCounting_single (e := e)) ha)
     let ℓ := 1 + max ‖e‖ (max |b| |c|)
-    have h₁ℓ : b < ℓ := by
-      calc b
-        _ ≤ |b| := le_abs_self _
-        _ ≤ max |b| |c| := le_max_left _ _
-        _ ≤ max ‖e‖ (max |b| |c|) := le_max_right _ _
-        _ < 1 + max ‖e‖ (max |b| |c|) := lt_one_add _
-        _ = ℓ := rfl
-    have h₂ℓ : c < ℓ := by
-      calc c
-        _ ≤ |c| := le_abs_self _
-        _ ≤ max |b| |c| := le_max_right _ _
-        _ ≤ max ‖e‖ (max |b| |c|) := le_max_right _ _
-        _ < 1 + max ‖e‖ (max |b| |c|) := lt_one_add _
-        _ = ℓ := rfl
+    have h₁ℓ : b < ℓ := by grind
+    have h₂ℓ : c < ℓ := by grind
     have h₃ℓ : 1 ≤ ℓ := by simp [ℓ]
-    have h₄ℓ : ℓ > ‖e‖ := by
-      calc ‖e‖
-        _ ≤ max ‖e‖ (max |b| |c|) := le_max_left _ _
-        _ < 1 + max ‖e‖ (max |b| |c|) := lt_one_add _
-        _ = ℓ := rfl
+    have h₄ℓ : ℓ > ‖e‖ := by grind
     use 1 + ℓ, h₁ℓ.le.trans (lt_one_add ℓ).le
     calc 1
       _ ≤ (a * |logCounting (single e) ℓ|) := by simpa [h₂ℓ.le] using hc ℓ

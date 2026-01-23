@@ -28,7 +28,7 @@ equal to `log · - log ‖e‖`.
   · simp only [single_eval, he, reduceIte, Int.cast_zero, zero_mul, add_zero,
       log_mul (ne_of_lt (lt_of_lt_of_le (norm_pos_iff.mpr (he ·.symm)) hr)).symm
       (inv_ne_zero (norm_ne_zero_iff.mpr (he ·.symm))), log_inv]
-    ring
+    grind
 
 /-!
 ## Monotonicity of Logarithmic Counting Functions
