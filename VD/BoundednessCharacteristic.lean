@@ -6,9 +6,8 @@ Authors: Stefan Kebekus
 --module
 
 import VD.BoundednessProximity
-import VD.Cartan
 import VD.MathlibSubmitted.Congruence
-import Mathlib
+import VD.MathlibPending.BoundednessLogCounting
 
 open Filter Function Metric Real Set Classical Topology ValueDistribution
 
@@ -19,7 +18,6 @@ If `f` is complex-meromorphic, we show that the characteristic function for the
 poles of `f` is asymptotically bounded if and only if `f` is constant.  See Page
 170f of [Lang, *Introduction to Complex Hyperbolic Spaces*][MR886677] for a
 detailed discussion.
-
 
 ## TODO
 
@@ -33,6 +31,31 @@ variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
   {f : ℂ → E}
 
+lemma characteristic_isBigO_iff {g : ℝ → ℝ} {a : WithTop E} :
+    characteristic f a =O[atTop] g ↔ proximity f a =O[atTop] g ∧ logCounting f a =O[atTop] g := by
+  constructor
+  · intro hf
+    unfold characteristic at hf
+    simp only [Asymptotics.isBigO_iff, Pi.add_apply, norm_eq_abs] at *
+    obtain ⟨c, hc⟩ := hf
+    constructor
+    all_goals
+    · use c
+      filter_upwards [hc, (eventually_ge_atTop 1)] with r h₁r h₂
+      have σ₁ : 0 ≤ proximity f a r := proximity_nonneg r
+      have σ₂ : 0 ≤ logCounting f a r := logCounting_nonneg h₂
+      trans |proximity f a r + logCounting f a r|
+      · linarith [abs_of_nonneg σ₁, abs_of_nonneg σ₂, abs_of_nonneg (add_nonneg σ₁ σ₂)]
+      · exact h₁r
+  · exact fun h ↦ h.1.add h.2
+
+lemma proximity_eq_proximity_toMeromorphiNFOn {a : WithTop E} (h : MeromorphicOn f Set.univ) :
+    proximity f a =ᶠ[atTop] proximity (toMeromorphicNFOn f ⊤) a := by
+  rw [EventuallyEq, eventually_atTop]
+  use 1
+  intro _ _
+  rw [proximity_congr_codiscrete _ (by linarith)]
+  exact toMeromorphicNFOn_eqOn_codiscrete h
 
 lemma characteristic_isBigO_one_iff_constant (h : MeromorphicOn f Set.univ) :
     EventuallyConst f (codiscrete ℂ) ↔ characteristic f ⊤ =O[atTop] (1 : ℝ → ℝ) := by
@@ -42,16 +65,14 @@ lemma characteristic_isBigO_one_iff_constant (h : MeromorphicOn f Set.univ) :
     obtain ⟨c, hc⟩ := eventuallyConst_iff_exists_eventuallyEq.1 hf
     simp [logCounting_congr_codiscrete hc, Asymptotics.isBigO_of_le' (c := 0)]
   · intro hf
-    unfold characteristic at hf
-    have h₁f : proximity f ⊤ =O[atTop] (1 : ℝ → ℝ) := by
-      rw [Asymptotics.isBigO_iff] at *
-      obtain ⟨c, hc⟩ := hf
-      use c
-      filter_upwards [hc] with a ha
-      simp_all
-      sorry
-    have h₂f : logCounting f ⊤ =O[atTop] (1 : ℝ → ℝ) := by
-      sorry
-    sorry
+    have ⟨hf₁, hf₂⟩ := characteristic_isBigO_iff.1 hf
+    rw [logCounting_isBigO_one_iff_analyticOnNhd (meromorphicOn_univ.mp h)] at hf₂
+    have : proximity (toMeromorphicNFOn f ⊤) ⊤ =O[atTop] (1 : ℝ → ℝ) := by
+      rwa [Asymptotics.isBigO_congr (proximity_eq_proximity_toMeromorphiNFOn h).symm
+        (Eq.eventuallyEq rfl)]
+    rw [eventuallyConst_iff_exists_eventuallyEq]
+    obtain ⟨c, hc⟩ := (proximity_bounded_iff_constant hf₂).2 this
+    use c
+    filter_upwards [toMeromorphicNFOn_eqOn_codiscrete h] using by aesop
 
 end ValueDistribution

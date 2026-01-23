@@ -17,8 +17,8 @@ theorem _root_.meromorphicOn_congr_codiscreteWithin {f g : 𝕜 → E} (h₁ : f
 
 open MeromorphicOn in
 /--
-If `f₁` is meromorphic on an open set `U`, if `f₂` agrees with `f₁` on a codiscrete subset of `U`,
-then `f₁` and `f₂` induce the same divisors on `U`.
+If two functions differ only on a discrete set of an open, then they induce the
+same divisors.
 -/
 theorem divisor_congr_codiscreteWithin' {f₁ f₂ : 𝕜 → E}
     (h₁ : f₁ =ᶠ[Filter.codiscreteWithin U] f₂) (h₂ : IsOpen U) :
