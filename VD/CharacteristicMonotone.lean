@@ -2,7 +2,6 @@ import VD.Cartan
 
 open Function Metric Real Set Classical Topology ValueDistribution
 
-
 namespace ValueDistribution
 
 /--
