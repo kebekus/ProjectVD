@@ -2,9 +2,14 @@ import Mathlib.Analysis.Complex.MeanValue
 
 open Asymptotics Complex Filter Function Metric Real Set Classical Topology
 
+/-!
+# The Mean Value Property of Complex Differentiable Functions
 
-/-
-# Replacement of Mathlib.Analysis.Complex.MeanValue
+This file established the classic mean value properties of complex
+differentiable functions, computing the value of a function at the center of a
+circle as a circle average. It also provides generalized versions that computing
+the value of a function at arbitrary points of a circle as circle averages over
+suitable weighted functions.
 -/
 
 variable
@@ -29,7 +34,22 @@ private theorem circleAverage_of_differentiable_on_off_countable_posRadius' (hR 
     match_scalars
     simp [field]
 
-theorem circleAverage_of_differentiable_on_off_countable' (hs : s.Countable)
+/-!
+## Generalized Mean Value Properties
+
+For a complex differentiable function `f`, the theorems in this section compute
+values of `f` in the interior of a circle as circle averages of a weighted
+function.
+-/
+
+/--
+The **Generalized Mean Value Property** of complex differentiable functions: If
+`f : ℂ → E` is continuous on a closed disc of radius `R` and center `c`, and is
+complex differentiable at all but countably many points of its interior, then
+the circle average `circleAverage (fun z ↦ ((z - c) * (z - w)⁻¹) • f z) c R`
+equals `f w`.
+-/
+theorem circleAverage_of_differentiable_on_off_countable₁ (hs : s.Countable)
     (h₁f : ContinuousOn f (closedBall c |R|)) (h₂f : ∀ z ∈ ball c |R| \ s, DifferentiableAt ℂ f z)
     (hw : w ∈ ball c |R|) (hR : R ≠ 0) :
     circleAverage (fun z ↦ ((z - c) * (z - w)⁻¹) • f z) c R = f w := by
@@ -40,32 +60,56 @@ theorem circleAverage_of_differentiable_on_off_countable' (hs : s.Countable)
   · rw [← circleAverage_neg_radius, ← abs_of_neg h]
     exact circleAverage_of_differentiable_on_off_countable_posRadius' (abs_pos_of_neg h) hs h₁f h₂f hw
 
+/--
+The **Generalized Mean Value Property** of complex differentiable functions: If
+`f : ℂ → E` is complex differentiable at all points of a closed disc of radius
+`R` and center `c`, then the circle average `circleAverage (fun z ↦ ((z - c) *
+(z - w)⁻¹) • f z) c R` equals `f w`.
+-/
+theorem circleAverage_of_differentiable_on₁ (hf : ∀ z ∈ closedBall c |R|, DifferentiableAt ℂ f z)
+    (hw : w ∈ ball c |R|) (hR : R ≠ 0) :
+    circleAverage (fun z ↦ ((z - c) * (z - w)⁻¹) • f z) c R = f w :=
+  circleAverage_of_differentiable_on_off_countable₁ countable_empty
+    (fun x hx ↦ (hf x hx).continuousAt.continuousWithinAt)
+    (fun z hz ↦ hf z (by simp_all [le_of_lt])) hw hR
+
+/-!
+## Classic Mean Value Properties
+
+For a complex differentiable function `f`, the theorems in this section compute
+value of `f` at the center of a circle as a circle average of the function. This
+specializes the generalized mean value properties discussed in the previous
+section.
+-/
+
+/--
+The **Mean Value Property** of complex differentiable functions: If `f : ℂ → E`
+is continuous on a closed disc of radius `R` and center `c`, and is complex
+differentiable at all but countably many points of its interior, then the circle
+average `circleAverage f c R` equals `f c`.
+-/
 theorem circleAverage_of_differentiable_on_off_countable₀ (hs : s.Countable)
     (h₁f : ContinuousOn f (closedBall c |R|)) (h₂f : ∀ z ∈ ball c |R| \ s, DifferentiableAt ℂ f z) :
     circleAverage f c R = f c := by
   by_cases hR : R = 0
   · simp [hR]
-  · rw [← circleAverage_of_differentiable_on_off_countable' hs h₁f h₂f (by aesop) hR]
+  · rw [← circleAverage_of_differentiable_on_off_countable₁ hs h₁f h₂f (by aesop) hR]
     apply circleAverage_congr_sphere
     intro z hz
     have : z - c ≠ 0 := by grind only [ne_of_mem_sphere, = abs.eq_1, = max_def]
     simp_all
 
-theorem circleAverage_of_differentiable_on' (hf : ∀ z ∈ closedBall c |R|, DifferentiableAt ℂ f z)
-    (hw : w ∈ ball c |R|) (hR : R ≠ 0) :
-    circleAverage (fun z ↦ ((z - c) * (z - w)⁻¹) • f z) c R = f w :=
-  circleAverage_of_differentiable_on_off_countable' countable_empty
-    (fun x hx ↦ (hf x hx).continuousAt.continuousWithinAt)
-    (fun z hz ↦ hf z (by simp_all [le_of_lt])) hw hR
-
+/--
+The **Mean Value Property** of complex differentiable functions: If `f : ℂ → E`
+is complex differentiable at all points of a closed disc of radius `R` and
+center `c`, then the circle average `circleAverage f c R` equals `f c`.
+-/
 theorem circleAverage_of_differentiable_on₀ (hf : ∀ z ∈ closedBall c |R|, DifferentiableAt ℂ f z) :
     circleAverage f c R = f c := by
   by_cases hR : R = 0
   · simp [hR]
-  · rw [← circleAverage_of_differentiable_on' hf (by aesop) hR]
+  · rw [← circleAverage_of_differentiable_on₁ hf (by aesop) hR]
     apply circleAverage_congr_sphere
     intro z hz
     have : z - c ≠ 0 := by grind only [ne_of_mem_sphere, = abs.eq_1, = max_def]
     simp_all
-
---
