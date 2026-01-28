@@ -1,5 +1,4 @@
 import VD.Cartan
-import VD.MathlibSubmitted.Congruence
 import Mathlib
 
 open Asymptotics Filter Function Metric Real Set Classical Topology ValueDistribution

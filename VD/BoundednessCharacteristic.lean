@@ -6,7 +6,6 @@ Authors: Stefan Kebekus
 --module
 
 import VD.BoundednessProximity
-import VD.MathlibSubmitted.Congruence
 import VD.MathlibPending.BoundednessLogCounting
 
 open Filter Function Metric Real Set Classical Topology ValueDistribution

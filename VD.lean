@@ -8,6 +8,5 @@ import VD.MathlibPending.BoundednessLogCounting
 import VD.MathlibPending.LogCounting
 import VD.MathlibPending.Single
 import VD.MathlibSubmitted.ComplexMeanvalue
-import VD.MathlibSubmitted.Congruence
 import VD.MathlibSubmitted.Identity
 import VD.leftovers.meromorphicAt_topology
