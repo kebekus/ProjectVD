@@ -3,8 +3,9 @@ import VD.MathlibSubmitted.ComplexMeanvalue
 open Asymptotics Classical Complex ComplexConjugate Filter Function Metric Real Set Classical Topology
 
 variable
-  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E] [CompleteSpace E]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
   {f : ℂ → E} {R : ℝ} {w c : ℂ} {s : Set ℂ}
+
 
 
 theorem testCase₁ {φ θ : ℝ} {r R : ℝ} (h₁ : 0 < r) (h₂ : r < R) :
@@ -25,7 +26,32 @@ theorem testCase₁ {φ θ : ℝ} {r R : ℝ} (h₁ : 0 < r) (h₂ : r < R) :
     ring_nf
     norm_num
 
-theorem circleAverage_of_differentiable_on₂ (hf : ∀ z ∈ closedBall 0 |R|, DifferentiableAt ℂ f z)
+theorem circleIntegrable₁ (hf : ∀ z ∈ closedBall 0 |R|, DifferentiableAt ℂ f z)
+    (hw : w ∈ ball 0 |R|) (h₁w : w ≠ 0) (hR : 0 < R) :
+    CircleIntegrable (fun z ↦ (z / (z - w)) • f z) 0 R := by
+  refine ContinuousOn.circleIntegrable hR.le ?_
+  intro z hz
+  apply ContinuousAt.continuousWithinAt
+  apply ContinuousAt.smul
+  · have : (fun x ↦ x / (x - w)) = (fun x ↦ x) / (fun x ↦ x - w) := by
+      rfl
+    rw [this]
+    apply ContinuousAt.div
+    · fun_prop
+    · fun_prop
+    · simp at hw
+      simp at hz
+      by_contra h
+      rw [sub_eq_zero] at h
+      rw [h] at hz
+      rw [abs_of_pos hR] at hw
+      aesop
+  · apply DifferentiableAt.continuousAt (𝕜 := ℂ)
+    apply hf
+    apply sphere_subset_closedBall
+    rwa [abs_of_pos hR]
+
+theorem circleAverage_of_differentiable_on₂ [CompleteSpace E] (hf : ∀ z ∈ closedBall 0 |R|, DifferentiableAt ℂ f z)
     (hw : w ∈ ball 0 |R|) (h₁w : w ≠ 0) (hR : 0 < R) :
     circleAverage (fun z ↦ ((z + w) / (z - w)).re • f z) 0 R = f w := by
 
@@ -33,8 +59,15 @@ theorem circleAverage_of_differentiable_on₂ (hf : ∀ z ∈ closedBall 0 |R|, 
   let θ := w.arg
   let W := R * exp (θ * I)
   let q := r / R
-  have h₁q : 0 < q := by sorry
-  have h₂q : q < 1 := by sorry
+  have h₁q : 0 < q := by
+    apply div_pos
+    · exact norm_pos_iff.mpr h₁w
+    · exact hR
+  have h₂q : q < 1 := by
+    apply (div_lt_one hR).2
+    simp_all
+    rw [abs_of_pos hR] at *
+    aesop
 
   have :
       circleAverage (fun z ↦ (z / (z - w) - (q • z) / (q • z - W)) • f z) 0 R
@@ -57,7 +90,10 @@ theorem circleAverage_of_differentiable_on₂ (hf : ∀ z ∈ closedBall 0 |R|, 
     congr 1
     rw [← h₁φ]
     ring_nf
-    have : (r : ℂ) * (R : ℂ) * (R : ℂ)⁻¹ = r := by sorry
+    have : (r : ℂ) * (R : ℂ) * (R : ℂ)⁻¹ = r := by
+      rw [mul_assoc]
+      have : R ≠ 0 := by apply hR.ne.symm
+      simp_all
     rw [this]
     congr 3
     unfold W
@@ -89,7 +125,9 @@ theorem circleAverage_of_differentiable_on₂ (hf : ∀ z ∈ closedBall 0 |R|, 
       = ∮ (z : ℂ) in C(0, R), (q / (q * z - W)) • f z := by
     apply circleIntegral.integral_congr hR.le
     intro z hz
-    have : z ≠ 0 := by sorry
+    have : z ≠ 0 := by
+      simp at hz
+      aesop
     simp_all
     match_scalars
     field
@@ -121,6 +159,9 @@ theorem circleAverage_of_differentiable_on₂ (hf : ∀ z ∈ closedBall 0 |R|, 
               simp [W, abs_of_pos hR]
               exact hx.le
         grind
+    apply hf
+    apply ball_subset_closedBall
+    rwa [abs_of_pos hR]
   · intro x hx
     apply ContinuousAt.continuousWithinAt
     apply ContinuousAt.smul
@@ -148,14 +189,45 @@ theorem circleAverage_of_differentiable_on₂ (hf : ∀ z ∈ closedBall 0 |R|, 
         exact Ne.symm (ne_of_lt hR)
     · apply DifferentiableAt.continuousAt (𝕜 := ℂ)
       apply hf
+      rw [closure_ball] at hx
+      rwa [abs_of_pos hR]
+      exact hR.ne.symm
+  apply circleIntegrable₁ hf hw h₁w hR
+  -- CircleIntegrable (fun z ↦ (q • z / (q • z - W)) • f z) 0 R
+  refine ContinuousOn.circleIntegrable' ?_
+  intro z hz
+  apply ContinuousAt.continuousWithinAt
+  apply ContinuousAt.smul
+  · have : (fun x ↦ q • x / (q • x - W)) = (fun x ↦ q • x) / (fun x ↦ q • x - W) := by
+      rfl
+    rw [this]
+    apply ContinuousAt.div
+    · fun_prop
+    · fun_prop
+    · rw [sub_ne_zero]
+      --rw [closure_ball] at hx
+      --simp at hx
+      have : ‖q*z‖ < ‖W‖ := by
+        calc ‖q*z‖
+        _ = ‖q‖ * ‖z‖ := by
+          aesop
+        _ < ‖z‖ := by
+          simp [abs_of_pos h₁q]
+          refine (mul_lt_iff_lt_one_left ?_).mpr h₂q
+          aesop
+        _ ≤ ‖W‖ := by
+          simp [W, abs_of_pos hR]
+          simp at hz
+          rw [abs_of_pos hR] at hz
+          aesop
+      simp
+      grind
+  · apply DifferentiableAt.continuousAt (𝕜 := ℂ)
+    apply hf
+    aesop
 
-      apply hf x
-      sorry
-  sorry
-  sorry
 
-
-theorem testCase₀ {φ θ : ℝ} {r R : ℝ} (h₁ : 0 < r) (h₂ : r < R) :
+theorem testCase₀ {φ θ : ℝ} {r R : ℝ} :
     ((R * exp (θ * I)) / (R * exp (θ * I)  - r * exp (φ * I))
       - (r * exp (θ * I)) / (r * exp (θ * I) - R * exp (φ * I))).im = 0 := by
   simp_all +decide [Complex.div_im]
