@@ -6,8 +6,6 @@ variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
   {f : ℂ → E} {R : ℝ} {w c : ℂ} {s : Set ℂ}
 
-
-
 theorem testCase₁ {φ θ : ℝ} {r R : ℝ} (h₁ : 0 < r) (h₂ : r < R) :
     (R * exp (θ * I)) / (R * exp (θ * I)  - r * exp (φ * I))
       - (r * exp (θ * I)) / (r * exp (θ * I) - R * exp (φ * I))
@@ -36,179 +34,6 @@ theorem circleIntegrable₁ (hf : ∀ z ∈ closedBall 0 |R|, DifferentiableAt �
     grind
   apply ContinuousAt.continuousWithinAt (by fun_prop (disch := aesop))
 
-theorem circleAverage_of_differentiable_on₂ [CompleteSpace E] (hf : ∀ z ∈ closedBall 0 |R|, DifferentiableAt ℂ f z)
-    (hw : w ∈ ball 0 |R|) (h₁w : w ≠ 0) (hR : 0 < R) :
-    circleAverage (fun z ↦ ((z + w) / (z - w)).re • f z) 0 R = f w := by
-
-  let r := ‖w‖
-  let θ := w.arg
-  let W := R * exp (θ * I)
-  let q := r / R
-  have h₁q : 0 < q := by
-    apply div_pos
-    · exact norm_pos_iff.mpr h₁w
-    · exact hR
-  have h₂q : q < 1 := by
-    apply (div_lt_one hR).2
-    simp_all
-    rw [abs_of_pos hR] at *
-    simp_all only [norm_pos_iff, ne_eq, not_false_eq_true, div_pos_iff_of_pos_left, q, r]
-
-  have :
-      circleAverage (fun z ↦ (z / (z - w) - (q • z) / (q • z - W)) • f z) 0 R
-      = circleAverage (fun z ↦ ((z + w) / (z - w)).re • f z) 0 R := by
-    unfold q
-    apply circleAverage_congr_sphere
-    intro z hz
-    simp
-    match_scalars
-    simp
-
-    have h₁θ : r * exp (θ * I) = w := norm_mul_exp_arg_mul_I w
-    rw [← h₁θ]
-    let φ := z.arg
-    have h₁φ : R * exp (φ * I) = z := by
-      convert norm_mul_exp_arg_mul_I z
-      simp_all [abs_of_pos]
-    rw [← h₁φ, ← testCase₁]
-    rw [h₁φ, h₁θ]
-    congr 1
-    rw [← h₁φ]
-    ring_nf
-    have : (r : ℂ) * (R : ℂ) * (R : ℂ)⁻¹ = r := by
-      rw [mul_assoc]
-      have : R ≠ 0 := by apply hR.ne.symm
-      simp_all
-    rw [this]
-    congr 3
-    unfold W
-    congr 2
-    field
-    aesop
-    simp at hw
-    rw [abs_of_pos hR] at hw
-    exact hw
-
-  rw [← this]
-  simp_rw [sub_smul]
-  rw [circleAverage_fun_sub]
-
-  have :  circleAverage (fun z ↦ (z / (z - w)) • f z) 0 R = f w := by
-    rw [← circleAverage_of_differentiable_on₁ hf hw]
-    congr
-    ext z
-    aesop
-    exact Ne.symm (ne_of_lt hR)
-  simp [this]
-
-
-
-  rw [circleAverage_eq_circleIntegral (ne_of_lt hR).symm]
-  simp
-
-  have : ∮ (z : ℂ) in C(0, R), z⁻¹ • ((q * z) / (q * z - W)) • f z
-      = ∮ (z : ℂ) in C(0, R), (q / (q * z - W)) • f z := by
-    apply circleIntegral.integral_congr hR.le
-    intro z hz
-    have : z ≠ 0 := by
-      simp at hz
-      aesop
-    simp_all
-    match_scalars
-    field
-  rw [this]
-  clear this
-
-  have η {x : ℂ} (h : x ∈ ball 0 R) : q * x - W ≠ 0 := by
-    by_cases h₁ : x = 0
-    · aesop
-    · have : ‖q * x‖ < ‖W‖ := by
-        calc ‖q * x‖
-        _ = ‖q‖ * ‖x‖ := by rw [Complex.norm_mul, norm_real, norm_eq_abs]
-        _ < ‖x‖ := by
-          rw [norm_eq_abs, abs_of_pos h₁q]
-          apply (mul_lt_iff_lt_one_left _).2 h₂q
-          aesop
-        _ ≤ ‖W‖ := by
-          simp_all [W, abs_of_pos hR]
-          exact h.le
-      grind
-
-  apply DiffContOnCl.circleIntegral_eq_zero hR.le
-  constructor
-  · intro x hx
-    apply DifferentiableAt.differentiableWithinAt
-    have := η hx
-    have : ∀ z ∈ ball 0 R, DifferentiableAt ℂ f z := by
-      rw [abs_of_pos hR] at hf
-      intro x hx
-      apply hf x (ball_subset_closedBall hx)
-    fun_prop (disch := assumption)
-  · intro x hx
-    apply ContinuousAt.continuousWithinAt
-
-    apply ContinuousAt.smul
-    · apply ContinuousAt.div
-      · fun_prop
-      · fun_prop
-      · rw [sub_ne_zero]
-        rw [closure_ball] at hx
-        simp at hx
-        have : ‖q*x‖ < ‖W‖ := by
-          by_cases h : x = 0
-          · simp [h]
-            aesop
-          · calc ‖q*x‖
-            _ = ‖q‖ * ‖x‖ := by
-              aesop
-            _ < ‖x‖ := by
-              simp [abs_of_pos h₁q]
-              refine (mul_lt_iff_lt_one_left ?_).mpr h₂q
-              aesop
-            _ ≤ ‖W‖ := by
-              simp [W, abs_of_pos hR]
-              exact hx
-        grind
-        exact Ne.symm (ne_of_lt hR)
-    · apply DifferentiableAt.continuousAt (𝕜 := ℂ)
-      apply hf
-      rw [closure_ball] at hx
-      rwa [abs_of_pos hR]
-      exact hR.ne.symm
-  apply circleIntegrable₁ hf hw hR
-  -- CircleIntegrable (fun z ↦ (q • z / (q • z - W)) • f z) 0 R
-  refine ContinuousOn.circleIntegrable' ?_
-  intro z hz
-  apply ContinuousAt.continuousWithinAt
-  have : q • z - W ≠ 0 := by
-    rw [sub_ne_zero]
-    have : ‖q * z‖ < ‖W‖ := by
-      calc ‖q * z‖
-      _ = ‖q‖ * ‖z‖ := by
-        aesop
-      _ < ‖z‖ := by
-        simp [abs_of_pos h₁q]
-        refine (mul_lt_iff_lt_one_left ?_).mpr h₂q
-        aesop
-      _ ≤ ‖W‖ := by
-        simp [W, abs_of_pos hR]
-        simp at hz
-        rw [abs_of_pos hR] at hz
-        aesop
-    simp
-    grind
-  fun_prop (disch := aesop)
-
-
-theorem testCase₀ {φ θ : ℝ} {r R : ℝ} :
-    ((R * exp (θ * I)) / (R * exp (θ * I)  - r * exp (φ * I))
-      - (r * exp (θ * I)) / (r * exp (θ * I) - R * exp (φ * I))).im = 0 := by
-  simp_all +decide [Complex.div_im]
-  norm_num [Complex.normSq, Complex.exp_re, Complex.exp_im]
-  ring_nf
-  norm_num [Real.sin_sq, Real.cos_sq]
-  ring
-
 theorem testCase₃ {φ θ : ℝ} {r R : ℝ} (h₁ : 0 < r) (h₂ : r < R) :
     ( (R * exp (θ * I) + r * exp (φ * I)) / (R * exp (θ * I) - r * exp (φ * I)) ).re
     ≤ (R + r) / (R - r) := by
@@ -218,9 +43,15 @@ theorem testCase₃ {φ θ : ℝ} {r R : ℝ} (h₁ : 0 < r) (h₂ : r < R) :
     nlinarith [ mul_pos h₁ ( sub_pos.mpr h₂ ), Real.cos_le_one ( θ - φ ) ];
   -- Substitute the simplified expression back into the inequality.
   have h_subst : (R^2 - r^2) / (R^2 + r^2 - 2 * R * r * Real.cos (θ - φ)) ≤ (R + r) / (R - r) := by
-    rw [ div_le_div_iff₀ ] <;> nlinarith [ mul_pos h₁ ( sub_pos.mpr h₂ ) ];
-  convert h_subst using 1 ; norm_num [ Complex.normSq, Complex.exp_re, Complex.exp_im ] ; ring_nf ; norm_num [ Real.sin_sq, Real.cos_sq ] ; ring_nf;
-  rw [ Real.cos_sub ] ; ring;
+    rw [ div_le_div_iff₀ ]
+    <;> nlinarith [ mul_pos h₁ ( sub_pos.mpr h₂ ) ];
+  convert h_subst using 1
+  norm_num [ Complex.normSq, Complex.exp_re, Complex.exp_im ] ;
+  ring_nf ;
+  norm_num [ Real.sin_sq, Real.cos_sq ] ;
+  ring_nf;
+  rw [ Real.cos_sub ] ;
+  ring;
 
 theorem testCase₄ {φ θ : ℝ} {r R : ℝ} (h₁ : 0 < r) (h₂ : r < R) :
     (R - r) / (R + r)
@@ -228,10 +59,102 @@ theorem testCase₄ {φ θ : ℝ} {r R : ℝ} (h₁ : 0 < r) (h₂ : r < R) :
   norm_num [ Complex.normSq, Complex.div_re ];
   rw [ ← add_div, div_le_div_iff₀ ];
   · ring_nf;
-    norm_num [ Real.sin_sq, Real.cos_sq ] ; ring_nf;
-    nlinarith [ mul_le_mul_of_nonneg_left ( show Real.cos θ * Real.cos φ + Real.sin θ * Real.sin φ ≤ 1 by nlinarith only [ sq_nonneg ( Real.cos θ * Real.sin φ - Real.sin θ * Real.cos φ ), Real.sin_sq_add_cos_sq θ, Real.sin_sq_add_cos_sq φ ] ) ( show 0 ≤ R * r by nlinarith ), mul_le_mul_of_nonneg_left ( show Real.cos θ * Real.cos φ + Real.sin θ * Real.sin φ ≥ -1 by nlinarith only [ sq_nonneg ( Real.cos θ * Real.sin φ - Real.sin θ * Real.cos φ ), Real.sin_sq_add_cos_sq θ, Real.sin_sq_add_cos_sq φ ] ) ( show 0 ≤ R * r by nlinarith ) ];
+    norm_num [ Real.sin_sq, Real.cos_sq ] ;
+    ring_nf;
+    nlinarith [ mul_le_mul_of_nonneg_left
+      ( show Real.cos θ * Real.cos φ + Real.sin θ * Real.sin φ ≤ 1 by nlinarith only [ sq_nonneg ( Real.cos θ * Real.sin φ - Real.sin θ * Real.cos φ ), Real.sin_sq_add_cos_sq θ, Real.sin_sq_add_cos_sq φ ] )
+      ( show 0 ≤ R * r by nlinarith ), mul_le_mul_of_nonneg_left
+        ( show Real.cos θ * Real.cos φ + Real.sin θ * Real.sin φ ≥ -1 by nlinarith only [ sq_nonneg ( Real.cos θ * Real.sin φ - Real.sin θ * Real.cos φ ), Real.sin_sq_add_cos_sq θ, Real.sin_sq_add_cos_sq φ ] )
+        ( show 0 ≤ R * r by nlinarith ) ];
   · linarith;
   · -- Expanding the squares and simplifying, we get:
     have h_expand : (R * Real.cos θ - r * Real.cos φ) * (R * Real.cos θ - r * Real.cos φ) + (R * Real.sin θ - r * Real.sin φ) * (R * Real.sin θ - r * Real.sin φ) = R^2 + r^2 - 2 * R * r * Real.cos (θ - φ) := by
-      rw [ Real.cos_sub ] ; nlinarith [ Real.sin_sq_add_cos_sq θ, Real.sin_sq_add_cos_sq φ ] ;
+      rw [ Real.cos_sub ] ;
+      nlinarith [ Real.sin_sq_add_cos_sq θ, Real.sin_sq_add_cos_sq φ ] ;
     nlinarith [ mul_pos h₁ ( sub_pos.mpr h₂ ), Real.cos_le_one ( θ - φ ) ]
+
+theorem circleAverage_of_differentiable_on₃ [CompleteSpace E] (hf : ∀ z ∈ closedBall 0 R, DifferentiableAt ℂ f z)
+    (hw : w ∈ ball 0 R) (h₁w : w ≠ 0) (hR : 0 < R) :
+    circleAverage (fun z ↦ ((z + w) / (z - w)).re • f z) 0 R = f w := by
+  let W := R * exp (w.arg * I)
+  let q := ‖w‖ / R
+  have h₁q : 0 < q := div_pos (norm_pos_iff.mpr h₁w) hR
+  have h₂q : q < 1 := by
+    apply (div_lt_one hR).2
+    rwa [mem_ball, dist_zero_right] at hw
+
+  have η {x : ℂ} (h : ‖x‖ ≤ R) : q * x - W ≠ 0 := by
+    by_cases h₁ : x = 0
+    · aesop
+    · have : ‖q * x‖ < ‖W‖ := by
+        calc ‖q * x‖
+          _ = ‖q‖ * ‖x‖ := by
+            rw [Complex.norm_mul, norm_real, norm_eq_abs]
+          _ < ‖x‖ := by
+            rw [norm_eq_abs, abs_of_pos h₁q]
+            apply (mul_lt_iff_lt_one_left _).2 h₂q
+            aesop
+          _ ≤ ‖W‖ := by
+            simp_all [W, abs_of_pos hR]
+      grind
+
+  calc circleAverage (fun z ↦ ((z + w) / (z - w)).re • f z) 0 R
+    _ = circleAverage (fun z ↦ (z / (z - w) - (q • z) / (q • z - W)) • f z) 0 R := by
+      unfold q
+      unfold W
+      apply circleAverage_congr_sphere
+      intro z hz
+      simp only [real_smul, ofReal_div]
+      match_scalars
+      simp only [coe_algebraMap, mul_one]
+      have h₁φ : R * exp (z.arg * I) = z := by
+        convert norm_mul_exp_arg_mul_I z
+        simp_all [abs_of_pos]
+      rw [← norm_mul_exp_arg_mul_I w, ← h₁φ, ← testCase₁ (norm_pos_iff.mpr h₁w) (mem_ball_zero_iff.mp hw),
+        norm_mul_exp_arg_mul_I w]
+      congr 1
+      ring_nf
+      field [hR.ne.symm]
+    _ = circleAverage (fun z ↦ (z / (z - w)) • f z) 0 R
+        - circleAverage (fun z ↦ ((q • z) / (q • z - W)) • f z) 0 R := by
+      simp_rw [sub_smul]
+      rw [circleAverage_fun_sub]
+      · -- CircleIntegrable (fun z ↦ (z / (z - w)) • f z) 0 R
+        rw [← abs_of_pos hR] at hf hw
+        apply circleIntegrable₁ hf hw hR
+      · -- CircleIntegrable (fun z ↦ (q • z / (q • z - W)) • f z) 0 R
+        apply ContinuousOn.circleIntegrable'
+        intro z hz
+        rw [abs_of_pos hR] at hz
+        apply ContinuousAt.continuousWithinAt
+        have : q • z - W ≠ 0 := by aesop
+        have := hf z (sphere_subset_closedBall hz)
+        fun_prop (disch := assumption)
+    _ = f w - circleAverage (fun z ↦ ((q • z) / (q • z - W)) • f z) 0 R := by
+      rw [← abs_of_pos hR] at hf hw
+      simp only [real_smul, ← circleAverage_of_differentiable_on₁ hf hw (ne_of_lt hR).symm,
+        sub_zero, sub_left_inj]
+      aesop
+    _ = f w := by
+      simp [circleAverage_eq_circleIntegral (ne_of_lt hR).symm]
+      have : ∮ (z : ℂ) in C(0, R), z⁻¹ • ((q * z) / (q * z - W)) • f z
+          = ∮ (z : ℂ) in C(0, R), (q / (q * z - W)) • f z := by
+        apply circleIntegral.integral_congr hR.le
+        intro z hz
+        simp_all only [mem_closedBall, dist_zero_right, mem_ball, ne_eq, mem_sphere_iff_norm,
+          sub_zero]
+        match_scalars
+        field [(by aesop: z ≠ 0)]
+      rw [this]
+      apply DiffContOnCl.circleIntegral_eq_zero hR.le
+      constructor
+      · -- DifferentiableOn ℂ (fun z ↦ (↑q / (↑q * z - W)) • f z) (ball 0 R)
+        intro x hx
+        apply DifferentiableAt.differentiableWithinAt
+        have := ball_subset_closedBall hx
+        fun_prop (disch := simp_all)
+      · -- ContinuousOn (fun z ↦ (↑q / (↑q * z - W)) • f z) (closure (ball 0 R))
+        intro x hx
+        rw [closure_ball _ (ne_of_lt hR).symm] at hx
+        apply ContinuousAt.continuousWithinAt
+        fun_prop (disch := simp_all)
