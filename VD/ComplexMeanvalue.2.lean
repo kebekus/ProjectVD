@@ -32,7 +32,11 @@ theorem circleIntegrable₁ (hf : ∀ z ∈ closedBall 0 |R|, DifferentiableAt �
   have : z - w ≠ 0 := by
     simp [mem_closedBall, dist_zero_right, mem_ball, mem_sphere_iff_norm, sub_zero] at hz hw hf
     grind
-  apply ContinuousAt.continuousWithinAt (by fun_prop (disch := aesop))
+  apply ContinuousAt.continuousWithinAt
+  apply DifferentiableAt.continuousAt (𝕜 := ℂ)
+  rw [← abs_of_pos hR] at hz
+  have := sphere_subset_closedBall hz
+  fun_prop (disch := assumption)
 
 theorem testCase₃ {φ θ : ℝ} {r R : ℝ} (h₁ : 0 < r) (h₂ : r < R) :
     ( (R * exp (θ * I) + r * exp (φ * I)) / (R * exp (θ * I) - r * exp (φ * I)) ).re
@@ -128,7 +132,7 @@ theorem circleAverage_of_differentiable_on₃ [CompleteSpace E] (hf : ∀ z ∈ 
         rw [abs_of_pos hR] at hz
         apply ContinuousAt.continuousWithinAt
         have : q • z - W ≠ 0 := by aesop
-        have := hf z (sphere_subset_closedBall hz)
+        have := (hf z (sphere_subset_closedBall hz)).continuousAt
         fun_prop (disch := assumption)
     _ = f w - circleAverage (fun z ↦ ((q • z) / (q • z - W)) • f z) 0 R := by
       rw [← abs_of_pos hR] at hf hw
@@ -157,4 +161,5 @@ theorem circleAverage_of_differentiable_on₃ [CompleteSpace E] (hf : ∀ z ∈ 
         intro x hx
         rw [closure_ball _ (ne_of_lt hR).symm] at hx
         apply ContinuousAt.continuousWithinAt
+        have := (hf x hx).continuousAt
         fun_prop (disch := simp_all)
