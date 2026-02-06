@@ -5,7 +5,6 @@ import VD.CartanExperimentation
 import VD.CharacteristicMonotone
 import VD.Experiment
 import VD.MathlibPending.BoundednessLogCounting
-import VD.MathlibSubmitted.ComplexMeanvalue
 import VD.MathlibSubmitted.LogCounting
 import VD.MathlibSubmitted.Single
 import VD.Poisson.PoissonIntegral

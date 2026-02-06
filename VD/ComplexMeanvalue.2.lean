@@ -1,4 +1,4 @@
-import VD.MathlibSubmitted.ComplexMeanvalue
+import Mathlib.Analysis.Complex.MeanValue
 
 open Asymptotics Classical Complex ComplexConjugate Filter Function Metric Real Set Classical Topology
 
@@ -138,9 +138,7 @@ theorem circleAverage_of_differentiable_on₃ [CompleteSpace E]
         fun_prop (disch := assumption)
     _ = f w - circleAverage (fun z ↦ ((q • z) / (q • z - W)) • f z) 0 R := by
       rw [← abs_of_pos hR] at hf hw
-      simp only [real_smul, ← circleAverage_of_differentiable_on₁ hf hw (ne_of_lt hR).symm,
-        sub_zero, sub_left_inj]
-      aesop
+      simp [← circleAverage_sub_sub_inv_smul_of_differentiable_on hf hw (ne_of_lt hR).symm]
     _ = f w := by
       simp [circleAverage_eq_circleIntegral (ne_of_lt hR).symm]
       have : ∮ (z : ℂ) in C(0, R), z⁻¹ • ((q * z) / (q * z - W)) • f z
