@@ -5,9 +5,9 @@ import VD.CartanExperimentation
 import VD.CharacteristicMonotone
 import VD.Experiment
 import VD.MathlibPending.BoundednessLogCounting
-import VD.MathlibPending.LogCounting
-import VD.MathlibPending.Single
 import VD.MathlibSubmitted.ComplexMeanvalue
+import VD.MathlibSubmitted.LogCounting
+import VD.MathlibSubmitted.Single
 import VD.Poisson.PoissonIntegral
 import VD.leftovers.meromorphicAt_topology
 import VD.«ComplexMeanvalue.2»

@@ -6,8 +6,8 @@ Authors: Stefan Kebekus
 --module
 
 import Mathlib.Analysis.Complex.ValueDistribution.LogCounting.Basic
-import VD.MathlibPending.LogCounting
-import VD.MathlibPending.Single
+import VD.MathlibSubmitted.LogCounting
+import VD.MathlibSubmitted.Single
 
 open Asymptotics Filter Function Real Set Classical
 
