@@ -1,5 +1,5 @@
-import VD.MeanValue
-import VD.TrivialIntervalCongruence
+import VD.MathlibSubmitted.MeanValue
+import VD.MathlibSubmitted.TrivialIntervalCongruence
 
 
 @[fun_prop] theorem ContinuousWithinAt.smul'

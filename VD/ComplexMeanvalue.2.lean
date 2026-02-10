@@ -1,6 +1,6 @@
-import VD.MeanValue
-import VD.TrivialFunProp
-import VD.TrivialIntervalCongruence
+import VD.MathlibSubmitted.MeanValue
+import VD.MathlibSubmitted.TrivialFunProp
+import VD.MathlibSubmitted.TrivialIntervalCongruence
 
 open Asymptotics Classical Complex ComplexConjugate Filter Function Metric Real Set Classical Topology
 
@@ -168,6 +168,7 @@ theorem circleAverage_of_differentiable_on₃ [CompleteSpace E]
         field [(by aesop: z ≠ 0)]
       rw [this]
       apply DiffContOnCl.circleIntegral_eq_zero hR.le
+      -- DiffContOnCl ℂ (fun z ↦ (↑q / (↑q * z - W)) • f z) (ball 0 R)
       apply DiffContOnCl.smul
       · constructor
         · intro x hx
