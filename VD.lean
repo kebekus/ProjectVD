@@ -7,6 +7,9 @@ import VD.Experiment
 import VD.MathlibPending.BoundednessLogCounting
 import VD.MathlibSubmitted.LogCounting
 import VD.MathlibSubmitted.Single
+import VD.MeanValue
 import VD.Poisson.PoissonIntegral
+import VD.TrivialFunProp
+import VD.TrivialIntervalCongruence
 import VD.leftovers.meromorphicAt_topology
 import VD.«ComplexMeanvalue.2»

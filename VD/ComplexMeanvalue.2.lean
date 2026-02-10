@@ -1,4 +1,6 @@
-import Mathlib.Analysis.Complex.MeanValue
+import VD.MeanValue
+import VD.TrivialFunProp
+import VD.TrivialIntervalCongruence
 
 open Asymptotics Classical Complex ComplexConjugate Filter Function Metric Real Set Classical Topology
 
@@ -24,19 +26,33 @@ theorem testCase₁ {φ θ : ℝ} {r R : ℝ} (h₁ : 0 < r) (h₂ : r < R) :
     ring_nf
     norm_num
 
-theorem circleIntegrable₁ (hf : ∀ z ∈ closedBall 0 |R|, DifferentiableAt ℂ f z)
-    (hw : w ∈ ball 0 |R|) (hR : 0 < R) :
-    CircleIntegrable (fun z ↦ (z / (z - w)) • f z) 0 R := by
+private lemma circleIntegrable₁ (hf : DiffContOnCl ℂ f (ball c |R|))
+    (hw : w ∈ ball c |R|) (hR : 0 < R) :
+    CircleIntegrable (fun z ↦ (z / (z - w)) • f z) c R := by
   apply ContinuousOn.circleIntegrable hR.le
   intro z hz
   have : z - w ≠ 0 := by
-    simp [mem_closedBall, dist_zero_right, mem_ball, mem_sphere_iff_norm, sub_zero] at hz hw hf
-    grind
-  apply ContinuousAt.continuousWithinAt
-  apply DifferentiableAt.continuousAt (𝕜 := ℂ)
-  rw [← abs_of_pos hR] at hz
-  have := sphere_subset_closedBall hz
+    by_contra h
+    rw [abs_of_pos hR, sub_eq_zero] at *
+    simp_all [dist_eq_norm]
+  have : ContinuousWithinAt f (sphere c R) z := by
+    apply hf.2.mono _ z hz
+    rw [abs_of_pos hR, closure_ball c (ne_of_lt hR).symm]
+    apply sphere_subset_closedBall
   fun_prop (disch := assumption)
+
+/--
+The integrand of circleAverage_of_differentiable_on₄ is actually integrable.
+-/
+theorem circleIntegrable₁₁ (hf : DiffContOnCl ℂ f (ball c |R|))
+    (hw : w ∈ ball c |R|) :
+    CircleIntegrable (fun z ↦ (z / (z - w)) • f z) c R := by
+  rcases lt_trichotomy R 0 with (hR | hR | hR)
+  · rw [circleIntegrable_congr_neg_radius]
+    apply circleIntegrable₁ (by simpa) (by simpa) (by simpa)
+  · simp_all
+  · exact circleIntegrable₁ hf hw hR
+
 
 theorem testCase₃ {φ θ : ℝ} {r R : ℝ} (h₁ : 0 < r) (h₂ : r < R) :
     ( (R * exp (θ * I) + r * exp (φ * I)) / (R * exp (θ * I) - r * exp (φ * I)) ).re
@@ -78,8 +94,7 @@ theorem testCase₄ {φ θ : ℝ} {r R : ℝ} (h₁ : 0 < r) (h₂ : r < R) :
     nlinarith [ mul_pos h₁ ( sub_pos.mpr h₂ ), Real.cos_le_one ( θ - φ ) ]
 
 theorem circleAverage_of_differentiable_on₃ [CompleteSpace E]
-    --(h : DiffContOnCl ℂ f (ball c |R|))
-    (hf : ∀ z ∈ closedBall 0 R, DifferentiableAt ℂ f z)
+    (hf : DiffContOnCl ℂ f (ball 0 |R|))
     (hw : w ∈ ball 0 R) (h₁w : w ≠ 0) (hR : 0 < R) :
     circleAverage (fun z ↦ ((z + w) / (z - w)).re • f z) 0 R = f w := by
   let W := R * exp (w.arg * I)
@@ -127,39 +142,69 @@ theorem circleAverage_of_differentiable_on₃ [CompleteSpace E]
       rw [circleAverage_fun_sub]
       · -- CircleIntegrable (fun z ↦ (z / (z - w)) • f z) 0 R
         rw [← abs_of_pos hR] at hf hw
-        apply circleIntegrable₁ hf hw hR
+        apply circleIntegrable₁ _ hw hR
+        rwa [abs_abs] at hf
       · -- CircleIntegrable (fun z ↦ (q • z / (q • z - W)) • f z) 0 R
         apply ContinuousOn.circleIntegrable'
         intro z hz
-        rw [abs_of_pos hR] at hz
-        apply ContinuousAt.continuousWithinAt
-        have : q • z - W ≠ 0 := by aesop
-        have := (hf z (sphere_subset_closedBall hz)).continuousAt
-        fun_prop (disch := assumption)
+        have : ‖z‖ ≤ R := by
+            rw [mem_sphere_iff_norm, sub_zero, abs_of_pos hR] at hz
+            apply le_of_eq hz
+        have : ContinuousWithinAt f (sphere 0 |R|) z := by
+          apply hf.2.mono _ z hz
+          rw [abs_of_pos hR, closure_ball 0 (ne_of_lt hR).symm]
+          apply sphere_subset_closedBall
+        fun_prop (disch := aesop)
     _ = f w - circleAverage (fun z ↦ ((q • z) / (q • z - W)) • f z) 0 R := by
-      rw [← abs_of_pos hR] at hf hw
-      simp [← circleAverage_sub_sub_inv_smul_of_differentiable_on hf hw (ne_of_lt hR).symm]
+      rw [← abs_of_pos hR] at hw
+      simp [← circleAverage_sub_sub_inv_smul_of_differentiable_on hf hw]
     _ = f w := by
       simp [circleAverage_eq_circleIntegral (ne_of_lt hR).symm]
       have : ∮ (z : ℂ) in C(0, R), z⁻¹ • ((q * z) / (q * z - W)) • f z
           = ∮ (z : ℂ) in C(0, R), (q / (q * z - W)) • f z := by
         apply circleIntegral.integral_congr hR.le
         intro z hz
-        simp_all only [mem_closedBall, dist_zero_right, mem_ball, ne_eq, mem_sphere_iff_norm,
-          sub_zero]
         match_scalars
         field [(by aesop: z ≠ 0)]
       rw [this]
       apply DiffContOnCl.circleIntegral_eq_zero hR.le
-      constructor
-      · -- DifferentiableOn ℂ (fun z ↦ (↑q / (↑q * z - W)) • f z) (ball 0 R)
-        intro x hx
-        apply DifferentiableAt.differentiableWithinAt
-        have := ball_subset_closedBall hx
-        fun_prop (disch := simp_all)
-      · -- ContinuousOn (fun z ↦ (↑q / (↑q * z - W)) • f z) (closure (ball 0 R))
-        intro x hx
-        rw [closure_ball _ (ne_of_lt hR).symm] at hx
-        apply ContinuousAt.continuousWithinAt
-        have := (hf x hx).continuousAt
-        fun_prop (disch := simp_all)
+      apply DiffContOnCl.smul
+      · constructor
+        · intro x hx
+          have : ‖x‖ ≤ R := by
+            simp at hx
+            exact hx.le
+          have := η this
+          fun_prop (disch := assumption)
+        · intro x hx
+          have : ‖x‖ ≤ R := by
+            rw [closure_ball _ (ne_of_lt hR).symm] at hx
+            simp at hx
+            exact hx
+          have := η this
+          fun_prop (disch := assumption)
+      · rwa [← abs_of_pos hR]
+
+/-
+theorem circleAverage_of_differentiable_on₄ [CompleteSpace E]
+    --(h : DiffContOnCl ℂ f (ball c |R|))
+    (hf : ∀ z ∈ closedBall 0 |R|, DifferentiableAt ℂ f z)
+    (hw : w ∈ ball 0 |R|) :
+    circleAverage (fun z ↦ ((z + w) / (z - w)).re • f z) 0 R = f w := by
+  by_cases hR : R = 0
+  · subst hR
+    simp_all
+  by_cases hW : w = 0
+  · subst hW
+    simp
+  rcases gt_trichotomy R 0
+  · sorry
+  · sorry
+  · sorry
+
+
+
+  by_cases h₁w : w = 0
+  · simp [h₁w]
+  sorry
+-/
