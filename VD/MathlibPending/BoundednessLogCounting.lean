@@ -29,7 +29,8 @@ zero-divisor of a meromorphic function.
 ## TODO
 
 Establish the analogous characterization of meromorphic functions with finite
-set of poles, as functions whose logarithmic counting function big-O of `log`.
+set of poles, as functions whose logarithmic counting function is big-O of
+`log`.
 -/
 
 namespace Function.locallyFinsuppWithin
