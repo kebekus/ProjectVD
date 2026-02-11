@@ -186,26 +186,53 @@ theorem circleAverage_of_differentiable_on₃ [CompleteSpace E]
           fun_prop (disch := assumption)
       · rwa [← abs_of_pos hR]
 
-/-
 theorem circleAverage_of_differentiable_on₄ [CompleteSpace E]
-    --(h : DiffContOnCl ℂ f (ball c |R|))
-    (hf : ∀ z ∈ closedBall 0 |R|, DifferentiableAt ℂ f z)
-    (hw : w ∈ ball 0 |R|) :
+    (hf : DiffContOnCl ℂ f (ball 0 R))
+    (hw : w ∈ ball 0 R) :
     circleAverage (fun z ↦ ((z + w) / (z - w)).re • f z) 0 R = f w := by
-  by_cases hR : R = 0
-  · subst hR
-    simp_all
-  by_cases hW : w = 0
-  · subst hW
-    simp
-  rcases gt_trichotomy R 0
-  · sorry
-  · sorry
-  · sorry
-
-
-
+  by_cases hR : R ≤ 0
+  · simp [ball_eq_empty.2 hR] at hw
+  rw [not_le] at hR
   by_cases h₁w : w = 0
-  · simp [h₁w]
-  sorry
--/
+  · subst w
+    simp only [add_zero, sub_zero]
+    have : EqOn (fun z ↦ (z / z).re • f z) f (sphere 0 |R|) := by
+      intro z hz
+      simp only
+      rw [div_self]
+      simp
+      by_contra h
+      subst h
+      rw [mem_sphere_iff_norm, sub_self, norm_zero, eq_comm, abs_eq_zero] at hz
+      subst hz
+      aesop
+    rw [circleAverage_congr_sphere this]
+    rw [← abs_of_pos hR] at hf
+    apply circleAverage_of_differentiable_on hf
+  rw [← abs_of_pos hR] at hf
+  apply circleAverage_of_differentiable_on₃ hf hw h₁w hR
+
+lemma circleAverage_comp_add_right_iff :
+    circleAverage f c R = circleAverage (fun z ↦ f (z + c)) 0 R := by
+  unfold circleAverage
+  grind [← circleMap_sub_center]
+
+lemma circleAverage_comp_add_right_iff₁ :
+    circleAverage (fun z ↦ f (z - c)) c R = circleAverage f 0 R := by
+  unfold circleAverage
+  grind [← circleMap_sub_center]
+
+
+theorem circleAverage_of_differentiable_on₅ [CompleteSpace E] {c : ℂ}
+    (hf : DiffContOnCl ℂ f (ball c R))
+    (hw : w ∈ ball c R) :
+    circleAverage (fun z ↦ ((z - c + (w - c)) / (z - w)).re • f z) c R = f w := by
+  by_cases hR : R ≤ 0
+  · simp [ball_eq_empty.2 hR] at hw
+  rw [not_le] at hR
+  have h₁g : DiffContOnCl ℂ (fun z ↦ f (z + c)) (ball 0 R) :=
+    ⟨hf.1.comp (by fun_prop) (fun z hz ↦ by aesop),
+      hf.2.comp (by fun_prop) (fun z hz ↦ by simp_all [closure_ball _ (ne_of_lt hR).symm])⟩
+  have h₂g : w - c ∈ ball 0 R := by simpa using hw
+  simpa [← circleAverage_comp_add_right_iff₁ (c := c)]
+    using circleAverage_of_differentiable_on₄ h₁g h₂g
