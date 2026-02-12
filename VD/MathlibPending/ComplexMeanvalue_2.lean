@@ -1,7 +1,11 @@
+/-
+Copyright (c) 2026 [Your Name]. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Mihai Iancu, Stefan Kebekus, Sebastian Schleissinger
+-/
 import VD.MathlibSubmitted.MeanValue
-import VD.MathlibSubmitted.TrivialIntervalCongruence
 
-open Asymptotics Classical Complex ComplexConjugate Filter Function Metric Real Set Classical Topology
+open Complex Metric Real Set
 
 variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
@@ -15,33 +19,9 @@ Express arbitrary circle averages as circle averages centered at the origin.
   unfold circleAverage
   grind [← circleMap_sub_center]
 
--- Version of `circleIntegrable_smul_div` in case where `R` is positive.
-private lemma circleIntegrable_smul_div_of_pos_R (hf : DiffContOnCl ℂ f (ball c |R|))
-    (hw : w ∈ ball c |R|) (hR : 0 < R) :
-    CircleIntegrable (fun z ↦ (z / (z - w)) • f z) c R := by
-  apply ContinuousOn.circleIntegrable hR.le
-  intro z hz
-  have : z - w ≠ 0 := by
-    by_contra h
-    rw [abs_of_pos hR, sub_eq_zero] at *
-    simp_all [dist_eq_norm]
-  have : ContinuousWithinAt f (sphere c R) z := by
-    apply hf.2.mono _ z hz
-    rw [abs_of_pos hR, closure_ball c (ne_of_lt hR).symm]
-    apply sphere_subset_closedBall
-  fun_prop (disch := assumption)
-
-/--
-Complementary statement to `xxx`: The integrand is actually integrable.
+/-!
+# Poisson integral formula
 -/
-theorem circleIntegrable_smul_div (hf : DiffContOnCl ℂ f (ball c |R|))
-    (hw : w ∈ ball c |R|) :
-    CircleIntegrable (fun z ↦ (z / (z - w)) • f z) c R := by
-  rcases lt_trichotomy R 0 with (hR | hR | hR)
-  · rw [circleIntegrable_congr_neg_radius]
-    apply circleIntegrable_smul_div_of_pos_R (by simpa) (by simpa) (by simpa)
-  · simp_all
-  · exact circleIntegrable_smul_div_of_pos_R hf hw hR
 
 -- Version of `DiffContOnCl.circleAverage_re_smul` in case where the center of
 -- the ball is zero.
@@ -134,7 +114,17 @@ private lemma DiffContOnCl.circleAverage_re_smul_on_ball_zero [CompleteSpace E]
       rw [circleAverage_fun_sub]
       · -- CircleIntegrable (fun z ↦ (z / (z - w)) • f z) 0 R
         rw [← abs_of_pos hR] at hf hw
-        apply circleIntegrable_smul_div_of_pos_R hf hw hR
+        apply ContinuousOn.circleIntegrable hR.le
+        intro z hz
+        have : z - w ≠ 0 := by
+          by_contra h
+          rw [abs_of_pos hR, sub_eq_zero] at *
+          simp_all [dist_eq_norm]
+        have : ContinuousWithinAt f (sphere 0 R) z := by
+          apply hf.2.mono _ z hz
+          rw [abs_of_pos hR, closure_ball 0 (ne_of_lt hR).symm]
+          apply sphere_subset_closedBall
+        fun_prop (disch := assumption)
       · -- CircleIntegrable (fun z ↦ (q • z / (q • z - W)) • f z) 0 R
         apply ContinuousOn.circleIntegrable'
         intro z hz
@@ -178,35 +168,13 @@ private lemma DiffContOnCl.circleAverage_re_smul_on_ball_zero [CompleteSpace E]
           fun_prop (disch := assumption)
 
 /--
-Complementary statement to `DiffContOnCl.circleAverage_re_smul`: The integrand
-is actually integrable.
--/
-theorem DiffContOnCl.circleIntegrable_re_smul [CompleteSpace E] {c : ℂ}
-    (hf : DiffContOnCl ℂ f (ball c R)) (hw : w ∈ ball c R) :
-    CircleIntegrable (fun z ↦ ((z - c + (w - c)) / (z - w)).re • f z) c R := by
-  rcases le_or_gt R 0 with hR | hR
-  · simp_all [(ball_eq_empty).2 hR]
-  apply ContinuousOn.circleIntegrable'
-  intro x hx
-  apply ContinuousWithinAt.smul
-  · have : x - w ≠ 0 := by
-      by_contra h
-      rw [sub_eq_zero] at h
-      subst h
-      simp_all only [mem_sphere_iff_norm, mem_ball, dist_eq_norm]
-      grind
-    fun_prop (disch := aesop)
-  · apply hf.2.mono _ x hx
-    rw [abs_of_pos hR, closure_ball c (ne_of_lt hR).symm]
-    apply sphere_subset_closedBall
-
-/--
-Poisson's version of the mean value theorem, with a real-valued kernel of
-integration.
+**Poisson integral formula** for ℂ-differentiable functions on arbitrary disks
+in the complex plane, formulated with the real part of the Herglotz–Riesz kernel
+of integration.
 -/
 theorem DiffContOnCl.circleAverage_re_smul [CompleteSpace E] {c : ℂ}
     (hf : DiffContOnCl ℂ f (ball c R)) (hw : w ∈ ball c R) :
-    circleAverage (fun z ↦ ((z - c + (w - c)) / (z - w)).re • f z) c R = f w := by
+    circleAverage (fun z ↦ ((z - c + (w - c)) / ((z - c) - (w - c))).re • f z) c R = f w := by
   rcases le_or_gt R 0 with hR | hR
   · simp_all [(ball_eq_empty).2 hR]
   have h₁g : DiffContOnCl ℂ (fun z ↦ f (z + c)) (ball 0 R) :=
@@ -215,3 +183,28 @@ theorem DiffContOnCl.circleAverage_re_smul [CompleteSpace E] {c : ℂ}
   have h₂g : w - c ∈ ball 0 R := by simpa using hw
   simpa [← circleAverage_comp_add_right (c := c)]
     using circleAverage_re_smul_on_ball_zero h₁g h₂g
+
+/--
+**Poisson integral formula** for ℂ-differentiable functions on arbitrary disks
+in the complex plane, formulated with the Poisson kernel of integration.
+-/
+theorem DiffContOnCl.circleAverage_div_smul [CompleteSpace E] {c : ℂ}
+    (hf : DiffContOnCl ℂ f (ball c R)) (hw : w ∈ ball c R) :
+    circleAverage (fun z ↦ ((‖z - c‖ ^ 2 - ‖w - c‖ ^ 2) / ‖(z - c) - (w - c)‖ ^ 2) • f z) c R
+      = f w := by
+  rw [← hf.circleAverage_re_smul hw]
+  apply circleAverage_congr_sphere
+  intro z hz
+  have {a b : ℂ} :
+      ((a + b) / (a - b)).re = (‖a‖ ^ 2 - ‖b‖ ^ 2) / ‖a - b‖ ^ 2 := by
+    rw [div_re, normSq_eq_norm_sq (a - b)]
+    calc (a + b).re * (a - b).re / ‖a - b‖ ^ 2 + (a + b).im * (a - b).im / ‖a - b‖ ^ 2
+      _ = ((a.re + b.re) * (a.re - b.re) + (a.im + b.im) * (a.im - b.im)) / ‖a - b‖ ^ 2 := by
+        simp only [add_re, sub_re, add_im, sub_im, add_div]
+      _ = ((a.re * a.re + a.im * a.im) - (b.re * b.re + b.im * b.im)) / ‖a - b‖ ^ 2 := by
+        ring_nf
+      _ = ((normSq a) - (normSq b)) / ‖a - b‖ ^ 2 := by
+        simp only [normSq_apply]
+      _ = (‖a‖ ^ 2 - ‖b‖ ^ 2) / ‖a - b‖ ^ 2 := by
+        simp only [normSq_eq_norm_sq]
+  simp_rw [this]

@@ -3,10 +3,11 @@ import VD.BoundednessProximity
 import VD.Cartan
 import VD.CartanExperimentation
 import VD.CharacteristicMonotone
-import VD.ComplexMeanvalue_2
 import VD.Experiment
+import VD.HarmonicAsymptotic
 import VD.HarmonicMeanvalue_2
 import VD.MathlibPending.BoundednessLogCounting
+import VD.MathlibPending.ComplexMeanvalue_2
 import VD.MathlibSubmitted.LogCounting
 import VD.MathlibSubmitted.MeanValue
 import VD.MathlibSubmitted.Single
