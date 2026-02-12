@@ -3,13 +3,13 @@ import VD.BoundednessProximity
 import VD.Cartan
 import VD.CartanExperimentation
 import VD.CharacteristicMonotone
+import VD.ComplexMeanvalue_2
 import VD.Experiment
+import VD.HarmonicMeanvalue_2
 import VD.MathlibPending.BoundednessLogCounting
 import VD.MathlibSubmitted.LogCounting
+import VD.MathlibSubmitted.MeanValue
 import VD.MathlibSubmitted.Single
-import VD.MeanValue
+import VD.MathlibSubmitted.TrivialIntervalCongruence
 import VD.Poisson.PoissonIntegral
-import VD.TrivialFunProp
-import VD.TrivialIntervalCongruence
 import VD.leftovers.meromorphicAt_topology
-import VD.«ComplexMeanvalue.2»

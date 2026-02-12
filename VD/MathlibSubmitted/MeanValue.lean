@@ -38,7 +38,7 @@ continuous on a closed disc of radius `R` and center `c`, and is complex differe
 countably many points of its interior, then for every point `w` in the disk, the circle average
 `circleAverage (fun z ↦ ((z - c) * (z - w)⁻¹) • f z) c R` equals `f w`.
 -/
-theorem circleAverage_sub_sub_inv_smul_of_differentiable_on_off_countable (hs : s.Countable)
+theorem circleAverage_sub_sub_inv_smul_of_differentiable_on_off_countable_ (hs : s.Countable)
     (h₁f : ContinuousOn f (closedBall c |R|)) (h₂f : ∀ z ∈ ball c |R| \ s, DifferentiableAt ℂ f z)
     (hw : w ∈ ball c |R|) :
     circleAverage (fun z ↦ ((z - c) / (z - w)) • f z) c R = f w := by
@@ -67,12 +67,12 @@ complex differentiable at all points of a closed disc of radius `R` and center `
 point `w` in the disk, the circle average `circleAverage (fun z ↦ ((z - c) * (z - w)⁻¹) • f z) c R`
 equals `f w`.
 -/
-theorem circleAverage_sub_sub_inv_smul_of_differentiable_on
+theorem circleAverage_sub_sub_inv_smul_of_differentiable_on_
     (hf : DiffContOnCl ℂ f (ball c |R|)) (hw : w ∈ ball c |R|) :
     circleAverage (fun z ↦ ((z - c) / (z - w)) • f z) c R = f w := by
   by_cases hR : |R| ≤ 0
   · simp_all [(ball_eq_empty).2 hR]
-  apply circleAverage_sub_sub_inv_smul_of_differentiable_on_off_countable countable_empty _ _ hw
+  apply circleAverage_sub_sub_inv_smul_of_differentiable_on_off_countable_ countable_empty _ _ hw
   · simpa [← closure_ball _ (ne_of_not_ge hR).symm] using hf.2
   · intro z hz
     rw [diff_empty] at hz
@@ -91,12 +91,12 @@ The **Mean Value Property** of complex differentiable functions: If `f : ℂ →
 closed disc of radius `R` and center `c`, and is complex differentiable at all but countably many
 points of its interior, then the circle average `circleAverage f c R` equals `f c`.
 -/
-theorem circleAverage_of_differentiable_on_off_countable (hs : s.Countable)
+theorem circleAverage_of_differentiable_on_off_countable_ (hs : s.Countable)
     (h₁f : ContinuousOn f (closedBall c |R|)) (h₂f : ∀ z ∈ ball c |R| \ s, DifferentiableAt ℂ f z) :
     circleAverage f c R = f c := by
   by_cases hR : R = 0
   · simp [hR]
-  · rw [← circleAverage_sub_sub_inv_smul_of_differentiable_on_off_countable hs h₁f h₂f (by aesop)]
+  · rw [← circleAverage_sub_sub_inv_smul_of_differentiable_on_off_countable_ hs h₁f h₂f (by aesop)]
     apply circleAverage_congr_sphere fun z hz ↦ ?_
     have : z - c ≠ 0 := by grind [ne_of_mem_sphere]
     simp_all
@@ -106,11 +106,11 @@ The **Mean Value Property** of complex differentiable functions: If `f : ℂ →
 differentiable at all points of a closed disc of radius `R` and center `c`, then the circle average
 `circleAverage f c R` equals `f c`.
 -/
-theorem circleAverage_of_differentiable_on (hf : DiffContOnCl ℂ f (ball c |R|)) :
+theorem circleAverage_of_differentiable_on_ (hf : DiffContOnCl ℂ f (ball c |R|)) :
     circleAverage f c R = f c := by
   by_cases hR : R = 0
   · simp [hR]
-  · rw [← circleAverage_sub_sub_inv_smul_of_differentiable_on hf (by aesop)]
+  · rw [← circleAverage_sub_sub_inv_smul_of_differentiable_on_ hf (by aesop)]
     apply circleAverage_congr_sphere fun z hz ↦ ?_
     have : z - c ≠ 0 := by grind [ne_of_mem_sphere]
     simp_all

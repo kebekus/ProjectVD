@@ -63,7 +63,7 @@ private lemma DiffContOnCl.circleAverage_re_smul_on_ball_zero [CompleteSpace E]
       simp [div_self this]
     rw [circleAverage_congr_sphere this]
     rw [← abs_of_pos hR] at hf
-    apply circleAverage_of_differentiable_on hf
+    apply circleAverage_of_differentiable_on_ hf
   -- General case: positive radius, w is not at the center
   let W := R * exp (w.arg * I)
   let q := ‖w‖ / R
@@ -148,7 +148,7 @@ private lemma DiffContOnCl.circleAverage_re_smul_on_ball_zero [CompleteSpace E]
         fun_prop (disch := aesop)
     _ = f w - circleAverage (fun z ↦ ((q • z) / (q • z - W)) • f z) 0 R := by
       rw [← abs_of_pos hR] at hw hf
-      simp [← circleAverage_sub_sub_inv_smul_of_differentiable_on hf hw]
+      simp [← circleAverage_sub_sub_inv_smul_of_differentiable_on_ hf hw]
     _ = f w := by
       simp only [real_smul, circleAverage_eq_circleIntegral (ne_of_lt hR).symm, mul_inv_rev, inv_I,
         neg_mul, sub_zero, neg_smul, sub_neg_eq_add, add_eq_left, isUnit_iff_ne_zero, ne_eq,
