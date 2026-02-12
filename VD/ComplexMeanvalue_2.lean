@@ -49,9 +49,8 @@ private lemma DiffContOnCl.circleAverage_re_smul_on_ball_zero [CompleteSpace E]
     (hf : DiffContOnCl ℂ f (ball 0 R)) (hw : w ∈ ball 0 R) :
     circleAverage (fun z ↦ ((z + w) / (z - w)).re • f z) 0 R = f w := by
   -- Trivial case: nonpositive radius
-  by_cases hR : R ≤ 0
-  · simp [ball_eq_empty.2 hR] at hw
-  rw [not_le] at hR
+  rcases le_or_gt R 0 with hR | hR
+  · simp_all [(ball_eq_empty).2 hR]
   -- Trivial case: w is at the center
   by_cases h₁w : w = 0
   · subst w
@@ -185,9 +184,8 @@ is actually integrable.
 theorem DiffContOnCl.circleIntegrable_re_smul [CompleteSpace E] {c : ℂ}
     (hf : DiffContOnCl ℂ f (ball c R)) (hw : w ∈ ball c R) :
     CircleIntegrable (fun z ↦ ((z - c + (w - c)) / (z - w)).re • f z) c R := by
-  by_cases hR : R ≤ 0
-  · simp [ball_eq_empty.2 hR] at hw
-  rw [not_le] at hR
+  rcases le_or_gt R 0 with hR | hR
+  · simp_all [(ball_eq_empty).2 hR]
   apply ContinuousOn.circleIntegrable'
   intro x hx
   apply ContinuousWithinAt.smul
@@ -209,9 +207,8 @@ integration.
 theorem DiffContOnCl.circleAverage_re_smul [CompleteSpace E] {c : ℂ}
     (hf : DiffContOnCl ℂ f (ball c R)) (hw : w ∈ ball c R) :
     circleAverage (fun z ↦ ((z - c + (w - c)) / (z - w)).re • f z) c R = f w := by
-  by_cases hR : R ≤ 0
-  · simp [ball_eq_empty.2 hR] at hw
-  rw [not_le] at hR
+  rcases le_or_gt R 0 with hR | hR
+  · simp_all [(ball_eq_empty).2 hR]
   have h₁g : DiffContOnCl ℂ (fun z ↦ f (z + c)) (ball 0 R) :=
     ⟨hf.1.comp (by fun_prop) (fun z hz ↦ by aesop),
       hf.2.comp (by fun_prop) (fun z hz ↦ by simp_all [closure_ball _ (ne_of_lt hR).symm])⟩
