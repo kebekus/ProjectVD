@@ -5,7 +5,9 @@ import VD.CartanExperimentation
 import VD.CharacteristicMonotone
 import VD.Experiment
 import VD.HarmonicAsymptotic
+import VD.HarmonicContOnCl
 import VD.HarmonicMeanvalue_2
+import VD.IteratedFDeriv
 import VD.MathlibPending.BoundednessLogCounting
 import VD.MathlibPending.ComplexMeanvalue_2
 import VD.MathlibSubmitted.LogCounting

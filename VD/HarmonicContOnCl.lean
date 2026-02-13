@@ -1,11 +1,13 @@
 /-
-Copyright (c) 2022 Stefan Kebekus. All rights reserved.
+Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus, based on code by Yury Kudryashov
 -/
-module
+--module
 
-public import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
+--public import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
+import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
+import VD.IteratedFDeriv
 
 /-!
 # Functions harmonic on a domain and continuous on its closure
@@ -25,12 +27,33 @@ variable
   {f f₁ f₂ : E → F}
   {x : E} {s t : Set E} {c : ℝ}
 
+open Laplacian Metric Topology
 
 namespace InnerProductSpace
 
 /-!
 # ELSEWHERE
 -/
+
+theorem _root_.ContDiffAt.laplacian_sub (h₁ : ContDiffAt ℝ 2 f₁ x) (h₂ : ContDiffAt ℝ 2 f₂ x) :
+    Δ (f₁ - f₂) x = Δ f₁ x - Δ f₂ x := by
+  simp [laplacian_eq_iteratedFDeriv_stdOrthonormalBasis,
+    ← Finset.sum_sub_distrib, iteratedFDeriv_sub_apply h₁ h₂]
+
+theorem _root_.ContDiffAt.laplacian_sub_nhds (h₁ : ContDiffAt ℝ 2 f₁ x) (h₂ : ContDiffAt ℝ 2 f₂ x) :
+    Δ (f₁ - f₂) =ᶠ[𝓝 x] (Δ f₁) - (Δ f₂) := by
+  filter_upwards [h₁.eventually (by simp), h₂.eventually (by simp)] with x h₁x h₂x
+  exact h₁x.laplacian_sub h₂x
+
+theorem HarmonicAt.sub (h₁ : HarmonicAt f₁ x) (h₂ : HarmonicAt f₂ x) :
+    HarmonicAt (f₁ - f₂) x := by
+  constructor
+  · exact h₁.1.sub h₂.1
+  · filter_upwards [h₁.1.laplacian_sub_nhds h₂.1, h₁.2, h₂.2]
+    simp_all
+
+theorem HarmonicOnNhd.sub (h₁ : HarmonicOnNhd f₁ s) (h₂ : HarmonicOnNhd f₂ s) :
+    HarmonicOnNhd (f₁ - f₂) s := fun x hx ↦ (h₁ x hx).sub (h₂ x hx)
 
 @[fun_prop] theorem HarmonicOnNhd.continuousOn (h : HarmonicOnNhd f s) :
     ContinuousOn f s :=
@@ -41,11 +64,26 @@ namespace InnerProductSpace
   simp [laplacian_eq_iteratedFDeriv_stdOrthonormalBasis, iteratedFDeriv_const_of_ne two_ne_zero,
     Pi.zero_def]
 
-@[simp] theorem harmonicOnAt_const (c : F) : HarmonicAt (fun _ ↦ c) x :=
-  ⟨by fun_prop, by simp⟩
+@[simp] theorem harmonicOnAt_const (c : F) :
+    HarmonicAt (fun _ ↦ c) x := ⟨by fun_prop, by simp⟩
 
-@[simp] theorem harmonicOnNhd_const (c : F) : HarmonicOnNhd (fun _ ↦ c) s :=
-  fun _ _ ↦ by simp
+@[simp] theorem harmonicOnNhd_const (c : F) :
+    HarmonicOnNhd (fun _ ↦ c) s := fun _ _ ↦ by simp
+
+theorem laplacian_neg :
+    Δ (-f) = -(Δ f) := by
+  simp only [laplacian_eq_iteratedFDeriv_stdOrthonormalBasis, iteratedFDeriv_neg]
+  aesop
+
+theorem HarmonicAt.neg (h : HarmonicAt f x) :
+    HarmonicAt (-f) x := by
+  constructor
+  · simpa using h.1.neg
+  · filter_upwards [h.2] with x hx
+    simp_all [laplacian_neg]
+
+theorem HarmonicOnNhd.neg (h : HarmonicOnNhd f s) :
+    HarmonicOnNhd (-f) s := fun x hx ↦ (h x hx).neg
 
 /-!
 # END ELSEWHERE
@@ -55,31 +93,27 @@ namespace InnerProductSpace
 A predicate saying that a function is harmonic on a set and is continuous on its
 closure. This is a common assumption in harmonic analysis.
 -/
-structure HarmonicContOnCl (f : E → F) (s : Set E) : Prop where
+@[fun_prop] structure HarmonicContOnCl (f : E → F) (s : Set E) : Prop where
   protected harmonicOnNhd : HarmonicOnNhd f s
   protected continuousOn : ContinuousOn f (closure s)
 
-theorem HarmonicOnNhd.harmonicContOnCl (h : HarmonicOnNhd f (closure s)) :
+@[fun_prop] theorem HarmonicOnNhd.harmonicContOnCl (h : HarmonicOnNhd f (closure s)) :
     HarmonicContOnCl f s :=
   ⟨h.mono subset_closure, h.continuousOn⟩
 
-theorem IsClosed.diffContOnCl_iff (hs : IsClosed s) :
+theorem IsClosed.harmonicContOnCl_iff (hs : IsClosed s) :
     HarmonicContOnCl f s ↔ HarmonicOnNhd f s where
   mp := (·.1 · ·)
   mpr h := by
     rw [← hs.closure_eq] at h
     exact h.harmonicContOnCl
 
-theorem diffContOnCl_const {c : F} : HarmonicContOnCl (fun _ : E ↦ c) s :=
-  ⟨differentiableOn_const c, continuousOn_const⟩
+@[fun_prop] theorem harmonicContOnCl_const {c : F} : HarmonicContOnCl (fun _ : E ↦ c) s :=
+  ⟨harmonicOnNhd_const c, continuousOn_const⟩
 
-namespace DiffContOnCl
+namespace HarmonicContOnCl
 
-theorem comp {g : G → E} {t : Set G} (hf : DiffContOnCl 𝕜 f s) (hg : DiffContOnCl 𝕜 g t)
-    (h : MapsTo g t s) : DiffContOnCl 𝕜 (f ∘ g) t :=
-  ⟨hf.1.comp hg.1 h, hf.2.comp hg.2 <| h.closure_of_continuousOn hg.2⟩
-
-theorem continuousOn_ball [NormedSpace ℝ E] {x : E} {r : ℝ} (h : DiffContOnCl 𝕜 f (ball x r)) :
+theorem continuousOn_ball [NormedSpace ℝ E] {x : E} {r : ℝ} (h : HarmonicContOnCl f (ball x r)) :
     ContinuousOn f (closedBall x r) := by
   rcases eq_or_ne r 0 with (rfl | hr)
   · rw [closedBall_zero]
@@ -87,67 +121,45 @@ theorem continuousOn_ball [NormedSpace ℝ E] {x : E} {r : ℝ} (h : DiffContOnC
   · rw [← closure_ball x hr]
     exact h.continuousOn
 
-theorem mk_ball {x : E} {r : ℝ} (hd : DifferentiableOn 𝕜 f (ball x r))
-    (hc : ContinuousOn f (closedBall x r)) : DiffContOnCl 𝕜 f (ball x r) :=
+theorem mk_ball {x : E} {r : ℝ} (hd : HarmonicOnNhd f (ball x r))
+    (hc : ContinuousOn f (closedBall x r)) :
+    HarmonicContOnCl f (ball x r) :=
   ⟨hd, hc.mono <| closure_ball_subset_closedBall⟩
 
-protected theorem differentiableAt (h : DiffContOnCl 𝕜 f s) (hs : IsOpen s) (hx : x ∈ s) :
-    DifferentiableAt 𝕜 f x :=
-  h.differentiableOn.differentiableAt <| hs.mem_nhds hx
+@[fun_prop] theorem contDiffAt (h : HarmonicContOnCl f s) (hx : x ∈ s) :
+    ContDiffAt ℝ 2 f x := (h.1 x hx).1
 
-theorem differentiableAt' (h : DiffContOnCl 𝕜 f s) (hx : s ∈ 𝓝 x) : DifferentiableAt 𝕜 f x :=
-  h.differentiableOn.differentiableAt hx
+@[fun_prop] theorem differentiableAt (h : HarmonicContOnCl f s) (hx : x ∈ s) :
+    DifferentiableAt ℝ f x := (h.contDiffAt hx).differentiableAt two_ne_zero
 
-protected theorem mono (h : DiffContOnCl 𝕜 f s) (ht : t ⊆ s) : DiffContOnCl 𝕜 f t :=
-  ⟨h.differentiableOn.mono ht, h.continuousOn.mono (closure_mono ht)⟩
+@[fun_prop] theorem mono (h : HarmonicContOnCl f s) (ht : t ⊆ s) :
+    HarmonicContOnCl f t := ⟨h.harmonicOnNhd.mono ht, h.continuousOn.mono (closure_mono ht)⟩
 
-theorem add (hf : DiffContOnCl 𝕜 f s) (hg : DiffContOnCl 𝕜 g s) : DiffContOnCl 𝕜 (f + g) s :=
-  ⟨hf.1.add hg.1, hf.2.add hg.2⟩
+@[fun_prop] theorem add (hf₁ : HarmonicContOnCl f₁ s) (hf₂ : HarmonicContOnCl f₂ s) :
+    HarmonicContOnCl (f₁ + f₂) s := ⟨hf₁.1.add hf₂.1, hf₁.2.add hf₂.2⟩
 
-theorem add_const (hf : DiffContOnCl 𝕜 f s) (c : F) : DiffContOnCl 𝕜 (fun x => f x + c) s :=
-  hf.add diffContOnCl_const
+@[fun_prop] theorem add_const (hf : HarmonicContOnCl f s) (c : F) : HarmonicContOnCl (fun x => f x + c) s :=
+  hf.add harmonicContOnCl_const
 
-theorem const_add (hf : DiffContOnCl 𝕜 f s) (c : F) : DiffContOnCl 𝕜 (fun x => c + f x) s :=
-  diffContOnCl_const.add hf
+@[fun_prop] theorem const_add (hf : HarmonicContOnCl  f s) (c : F) : HarmonicContOnCl  (fun x => c + f x) s :=
+  harmonicContOnCl_const.add hf
 
-theorem neg (hf : DiffContOnCl 𝕜 f s) : DiffContOnCl 𝕜 (-f) s :=
+@[fun_prop] theorem neg (hf : HarmonicContOnCl  f s) : HarmonicContOnCl  (-f) s :=
   ⟨hf.1.neg, hf.2.neg⟩
 
-theorem sub (hf : DiffContOnCl 𝕜 f s) (hg : DiffContOnCl 𝕜 g s) : DiffContOnCl 𝕜 (f - g) s :=
-  ⟨hf.1.sub hg.1, hf.2.sub hg.2⟩
+@[fun_prop] theorem sub (hf₁ : HarmonicContOnCl f₁ s) (hf₂ : HarmonicContOnCl f₂ s) :
+    HarmonicContOnCl (f₁ - f₂) s :=
+  ⟨hf₁.1.sub hf₂.1, hf₁.2.sub hf₂.2⟩
 
-theorem sub_const (hf : DiffContOnCl 𝕜 f s) (c : F) : DiffContOnCl 𝕜 (fun x => f x - c) s :=
-  hf.sub diffContOnCl_const
+@[fun_prop] theorem sub_const (hf : HarmonicContOnCl  f s) (c : F) : HarmonicContOnCl  (fun x => f x - c) s :=
+  hf.sub harmonicContOnCl_const
 
-theorem const_sub (hf : DiffContOnCl 𝕜 f s) (c : F) : DiffContOnCl 𝕜 (fun x => c - f x) s :=
-  diffContOnCl_const.sub hf
+@[fun_prop] theorem const_sub (hf : HarmonicContOnCl  f s) (c : F) : HarmonicContOnCl  (fun x => c - f x) s :=
+  harmonicContOnCl_const.sub hf
 
-theorem const_smul {R : Type*} [Semiring R] [Module R F] [SMulCommClass 𝕜 R F]
-    [ContinuousConstSMul R F] (hf : DiffContOnCl 𝕜 f s) (c : R) : DiffContOnCl 𝕜 (c • f) s :=
-  ⟨hf.1.const_smul c, hf.2.const_smul c⟩
+@[fun_prop] theorem const_smul (hf : HarmonicContOnCl f s) (c : ℝ) : HarmonicContOnCl (c • f) s :=
+  ⟨hf.1.const_smul, hf.2.const_smul c⟩
 
-theorem smul {𝕜' : Type*} [NontriviallyNormedField 𝕜'] [NormedAlgebra 𝕜 𝕜'] [NormedSpace 𝕜' F]
-    [IsScalarTower 𝕜 𝕜' F] {c : E → 𝕜'} {f : E → F} {s : Set E} (hc : DiffContOnCl 𝕜 c s)
-    (hf : DiffContOnCl 𝕜 f s) : DiffContOnCl 𝕜 (fun x => c x • f x) s :=
-  ⟨hc.1.smul hf.1, hc.2.smul hf.2⟩
-
-theorem smul_const {𝕜' : Type*} [NontriviallyNormedField 𝕜'] [NormedAlgebra 𝕜 𝕜']
-    [NormedSpace 𝕜' F] [IsScalarTower 𝕜 𝕜' F] {c : E → 𝕜'} {s : Set E} (hc : DiffContOnCl 𝕜 c s)
-    (y : F) : DiffContOnCl 𝕜 (fun x => c x • y) s :=
-  hc.smul diffContOnCl_const
-
-theorem inv {f : E → 𝕜} (hf : DiffContOnCl 𝕜 f s) (h₀ : ∀ x ∈ closure s, f x ≠ 0) :
-    DiffContOnCl 𝕜 f⁻¹ s :=
-  ⟨differentiableOn_inv.comp hf.1 fun _ hx => h₀ _ (subset_closure hx), hf.2.inv₀ h₀⟩
-
-end DiffContOnCl
-
-theorem Differentiable.comp_diffContOnCl {g : G → E} {t : Set G} (hf : Differentiable 𝕜 f)
-    (hg : DiffContOnCl 𝕜 g t) : DiffContOnCl 𝕜 (f ∘ g) t :=
-  hf.diffContOnCl.comp hg (mapsTo_image _ _)
-
-theorem DifferentiableOn.diffContOnCl_ball {U : Set E} {c : E} {R : ℝ} (hf : DifferentiableOn 𝕜 f U)
-    (hc : closedBall c R ⊆ U) : DiffContOnCl 𝕜 f (ball c R) :=
-  DiffContOnCl.mk_ball (hf.mono (ball_subset_closedBall.trans hc)) (hf.continuousOn.mono hc)
+end HarmonicContOnCl
 
 end InnerProductSpace
