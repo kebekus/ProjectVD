@@ -1,5 +1,5 @@
 /-
-Copyright (c) 2026 [Your Name]. All rights reserved.
+Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Mihai Iancu, Stefan Kebekus, Sebastian Schleissinger
 -/
@@ -20,8 +20,110 @@ Express arbitrary circle averages as circle averages centered at the origin.
   grind [← circleMap_sub_center]
 
 /-!
-# Poisson integral formula
+# Poisson Integral Formula
+
+We present two versions of the **Poisson Integral Formula** for ℂ-differentiable
+functions on arbitrary disks in the complex plane, formulated with the real part
+of the Herglotz–Riesz kernel and with the Poisson kernel, respectively.
 -/
+
+/--
+Companion theorem to the Poisson Integral Formula: The real part of the
+Herglotz–Riesz kernel and the Poisson kernel agree on the path of integration.
+-/
+lemma re_herglotz_riesz_eq_poisson {a b : ℂ} :
+    ((a + b) / (a - b)).re = (‖a‖ ^ 2 - ‖b‖ ^ 2) / ‖a - b‖ ^ 2 := by
+  rw [div_re, normSq_eq_norm_sq (a - b)]
+  calc (a + b).re * (a - b).re / ‖a - b‖ ^ 2 + (a + b).im * (a - b).im / ‖a - b‖ ^ 2
+    _ = ((a.re + b.re) * (a.re - b.re) + (a.im + b.im) * (a.im - b.im)) / ‖a - b‖ ^ 2 := by
+      simp only [add_re, sub_re, add_im, sub_im, add_div]
+    _ = ((a.re * a.re + a.im * a.im) - (b.re * b.re + b.im * b.im)) / ‖a - b‖ ^ 2 := by
+      ring_nf
+    _ = ((normSq a) - (normSq b)) / ‖a - b‖ ^ 2 := by
+      simp only [normSq_apply]
+    _ = (‖a‖ ^ 2 - ‖b‖ ^ 2) / ‖a - b‖ ^ 2 := by
+      simp only [normSq_eq_norm_sq]
+
+private lemma re_herglotz_riesz_le_aux {φ θ : ℝ} {r R : ℝ} (h₁ : 0 < r) (h₂ : r < R) :
+    ((R * exp (θ * I) + r * exp (φ * I)) / (R * exp (θ * I) - r * exp (φ * I))).re
+      ≤ (R + r) / (R - r) := by
+  rw [ div_eq_mul_inv ]
+  have h_cos : (R ^ 2 + r ^ 2 - 2 * R * r * Real.cos (θ - φ)) ≥ (R - r) ^ 2 := by
+    nlinarith [ mul_pos h₁ ( sub_pos.mpr h₂ ), Real.cos_le_one ( θ - φ ) ]
+  have h_subst : (R^2 - r^2) / (R^2 + r^2 - 2 * R * r * Real.cos (θ - φ)) ≤ (R + r) / (R - r) := by
+    rw [div_le_div_iff₀]
+    <;> nlinarith [mul_pos h₁ ( sub_pos.mpr h₂ )]
+  convert h_subst using 1
+  norm_num [Complex.normSq, Complex.exp_re, Complex.exp_im]
+  ring_nf
+  norm_num [Real.sin_sq, Real.cos_sq]
+  ring_nf
+  rw [Real.cos_sub]
+  ring
+
+/--
+Companion theorem to the Poisson Integral Formula: Upper estimate for the real
+part of the Herglotz-Riesz kernel.
+-/
+theorem re_herglotz_riesz_le {c z : ℂ} (hz : z ∈ sphere c R) (hw : w ∈ ball c R) :
+    ((z - c + (w - c)) / ((z - c) - (w - c))).re ≤ (R + ‖w - c‖) / (R - ‖w - c‖) := by
+  have η₀ : 0 < R := by
+    by_contra h
+    grind [ball_eq_empty.2 (not_lt.1 h)]
+  have η₁ : R = ‖z - c‖ := by
+    simp_all
+  have η₂ : z - c ≠ 0 := by
+    aesop
+  by_cases h₁w : ‖w - c‖ = 0
+  · aesop
+  rw [← norm_mul_exp_arg_mul_I (z - c), η₁]
+  nth_rw 1 2 [← norm_mul_exp_arg_mul_I (w - c)]
+  apply re_herglotz_riesz_le_aux
+  · by_contra h
+    aesop
+  · rwa [mem_ball, dist_eq_norm, η₁] at hw
+
+private lemma le_re_herglotz_riesz_aux {φ θ : ℝ} {r R : ℝ} (h₁ : 0 < r) (h₂ : r < R) :
+    (R - r) / (R + r)
+      ≤ ((R * exp (θ * I) + r * exp (φ * I)) / (R * exp (θ * I) - r * exp (φ * I))).re := by
+  norm_num [ Complex.normSq, Complex.div_re ]
+  rw [ ← add_div, div_le_div_iff₀ ]
+  · ring_nf
+    norm_num [ Real.sin_sq, Real.cos_sq ]
+    ring_nf
+    nlinarith [ mul_le_mul_of_nonneg_left
+      ( show Real.cos θ * Real.cos φ + Real.sin θ * Real.sin φ ≤ 1 by nlinarith only [ sq_nonneg ( Real.cos θ * Real.sin φ - Real.sin θ * Real.cos φ ), Real.sin_sq_add_cos_sq θ, Real.sin_sq_add_cos_sq φ ] )
+      ( show 0 ≤ R * r by nlinarith ), mul_le_mul_of_nonneg_left
+        ( show Real.cos θ * Real.cos φ + Real.sin θ * Real.sin φ ≥ -1 by nlinarith only [ sq_nonneg ( Real.cos θ * Real.sin φ - Real.sin θ * Real.cos φ ), Real.sin_sq_add_cos_sq θ, Real.sin_sq_add_cos_sq φ ] )
+        ( show 0 ≤ R * r by nlinarith ) ]
+  · linarith
+  · -- Expanding the squares and simplifying, we get:
+    have h_expand : (R * Real.cos θ - r * Real.cos φ) * (R * Real.cos θ - r * Real.cos φ) + (R * Real.sin θ - r * Real.sin φ) * (R * Real.sin θ - r * Real.sin φ) = R^2 + r^2 - 2 * R * r * Real.cos (θ - φ) := by
+      rw [ Real.cos_sub ]
+      nlinarith [ Real.sin_sq_add_cos_sq θ, Real.sin_sq_add_cos_sq φ ]
+    nlinarith [ mul_pos h₁ ( sub_pos.mpr h₂ ), Real.cos_le_one ( θ - φ ) ]
+
+/--
+Companion theorem to the Poisson Integral Formula: Lower estimate for the real
+part of the Herglotz-Riesz kernel.
+-/
+theorem le_re_herglotz_riesz {c z : ℂ} (hz : z ∈ sphere c R) (hw : w ∈ ball c R) :
+    (R - ‖w - c‖) / (R + ‖w - c‖) ≤ ((z - c + (w - c)) / ((z - c) - (w - c))).re := by
+  have η₀ : 0 < R := by
+    by_contra h
+    grind [ball_eq_empty.2 (not_lt.1 h)]
+  have η₁ : R = ‖z - c‖ := by
+    simp_all
+  have η₂ : z - c ≠ 0 := by
+    aesop
+  by_cases h₁w : ‖w - c‖ = 0
+  · aesop
+  rw [← norm_mul_exp_arg_mul_I (z - c), η₁]
+  nth_rw 3 4 [← norm_mul_exp_arg_mul_I (w - c)]
+  apply le_re_herglotz_riesz_aux
+  · by_contra h
+    aesop
+  · rwa [mem_ball, dist_eq_norm, η₁] at hw
 
 -- Version of `DiffContOnCl.circleAverage_re_smul` in case where the center of
 -- the ball is zero.
@@ -195,16 +297,4 @@ theorem DiffContOnCl.circleAverage_div_smul [CompleteSpace E] {c : ℂ}
   rw [← hf.circleAverage_re_smul hw]
   apply circleAverage_congr_sphere
   intro z hz
-  have {a b : ℂ} :
-      ((a + b) / (a - b)).re = (‖a‖ ^ 2 - ‖b‖ ^ 2) / ‖a - b‖ ^ 2 := by
-    rw [div_re, normSq_eq_norm_sq (a - b)]
-    calc (a + b).re * (a - b).re / ‖a - b‖ ^ 2 + (a + b).im * (a - b).im / ‖a - b‖ ^ 2
-      _ = ((a.re + b.re) * (a.re - b.re) + (a.im + b.im) * (a.im - b.im)) / ‖a - b‖ ^ 2 := by
-        simp only [add_re, sub_re, add_im, sub_im, add_div]
-      _ = ((a.re * a.re + a.im * a.im) - (b.re * b.re + b.im * b.im)) / ‖a - b‖ ^ 2 := by
-        ring_nf
-      _ = ((normSq a) - (normSq b)) / ‖a - b‖ ^ 2 := by
-        simp only [normSq_apply]
-      _ = (‖a‖ ^ 2 - ‖b‖ ^ 2) / ‖a - b‖ ^ 2 := by
-        simp only [normSq_eq_norm_sq]
-  simp_rw [this]
+  simp_rw [re_herglotz_riesz_eq_poisson]

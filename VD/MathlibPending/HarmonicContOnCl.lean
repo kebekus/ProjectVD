@@ -7,7 +7,7 @@ Authors: Stefan Kebekus, based on code by Yury Kudryashov
 
 --public import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
 import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
-import VD.IteratedFDeriv
+import VD.MathlibSubmitted.IteratedFDeriv
 
 /-!
 # Functions harmonic on a domain and continuous on its closure
@@ -138,27 +138,50 @@ theorem mk_ball {x : E} {r : ℝ} (hd : HarmonicOnNhd f (ball x r))
 @[fun_prop] theorem add (hf₁ : HarmonicContOnCl f₁ s) (hf₂ : HarmonicContOnCl f₂ s) :
     HarmonicContOnCl (f₁ + f₂) s := ⟨hf₁.1.add hf₂.1, hf₁.2.add hf₂.2⟩
 
-@[fun_prop] theorem add_const (hf : HarmonicContOnCl f s) (c : F) : HarmonicContOnCl (fun x => f x + c) s :=
-  hf.add harmonicContOnCl_const
+@[fun_prop] theorem fun_add (hf₁ : HarmonicContOnCl f₁ s) (hf₂ : HarmonicContOnCl f₂ s) :
+    HarmonicContOnCl (fun x ↦ f₁ x + f₂ x) s := hf₁.add hf₂
 
-@[fun_prop] theorem const_add (hf : HarmonicContOnCl  f s) (c : F) : HarmonicContOnCl  (fun x => c + f x) s :=
-  harmonicContOnCl_const.add hf
+@[fun_prop] theorem add_const (hf : HarmonicContOnCl f s) (c : F) :
+    HarmonicContOnCl (f + fun _ ↦ c) s := hf.add harmonicContOnCl_const
 
-@[fun_prop] theorem neg (hf : HarmonicContOnCl  f s) : HarmonicContOnCl  (-f) s :=
-  ⟨hf.1.neg, hf.2.neg⟩
+@[fun_prop] theorem fun_add_const (hf : HarmonicContOnCl f s) (c : F) :
+    HarmonicContOnCl (fun x ↦ f x + c) s := hf.add harmonicContOnCl_const
+
+@[fun_prop] theorem const_add (hf : HarmonicContOnCl  f s) (c : F) :
+  HarmonicContOnCl ((fun _ ↦ c) + f) s := harmonicContOnCl_const.add hf
+
+@[fun_prop] theorem fun_const_add (hf : HarmonicContOnCl  f s) (c : F) :
+  HarmonicContOnCl (fun x ↦ c + f x) s := harmonicContOnCl_const.add hf
+
+@[fun_prop] theorem neg (hf : HarmonicContOnCl  f s) :
+    HarmonicContOnCl  (-f) s := ⟨hf.1.neg, hf.2.neg⟩
+
+@[fun_prop] theorem fun_neg (hf : HarmonicContOnCl  f s) :
+    HarmonicContOnCl  (fun x ↦ -f x) s := ⟨hf.1.neg, hf.2.neg⟩
 
 @[fun_prop] theorem sub (hf₁ : HarmonicContOnCl f₁ s) (hf₂ : HarmonicContOnCl f₂ s) :
-    HarmonicContOnCl (f₁ - f₂) s :=
-  ⟨hf₁.1.sub hf₂.1, hf₁.2.sub hf₂.2⟩
+    HarmonicContOnCl (f₁ - f₂) s := ⟨hf₁.1.sub hf₂.1, hf₁.2.sub hf₂.2⟩
 
-@[fun_prop] theorem sub_const (hf : HarmonicContOnCl  f s) (c : F) : HarmonicContOnCl  (fun x => f x - c) s :=
-  hf.sub harmonicContOnCl_const
+@[fun_prop] theorem fun_sub (hf₁ : HarmonicContOnCl f₁ s) (hf₂ : HarmonicContOnCl f₂ s) :
+    HarmonicContOnCl (fun x ↦ f₁ x - f₂ x) s := ⟨hf₁.1.sub hf₂.1, hf₁.2.sub hf₂.2⟩
 
-@[fun_prop] theorem const_sub (hf : HarmonicContOnCl  f s) (c : F) : HarmonicContOnCl  (fun x => c - f x) s :=
-  harmonicContOnCl_const.sub hf
+@[fun_prop] theorem sub_const (hf : HarmonicContOnCl  f s) (c : F) :
+    HarmonicContOnCl (f - fun _ ↦ c) s := hf.sub harmonicContOnCl_const
 
-@[fun_prop] theorem const_smul (hf : HarmonicContOnCl f s) (c : ℝ) : HarmonicContOnCl (c • f) s :=
-  ⟨hf.1.const_smul, hf.2.const_smul c⟩
+@[fun_prop] theorem fun_sub_const (hf : HarmonicContOnCl  f s) (c : F) :
+    HarmonicContOnCl (fun x ↦ f x - c) s := hf.sub harmonicContOnCl_const
+
+@[fun_prop] theorem const_sub (hf : HarmonicContOnCl  f s) (c : F) :
+    HarmonicContOnCl ((fun _ ↦ c) - f) s := harmonicContOnCl_const.sub hf
+
+@[fun_prop] theorem fun_const_sub (hf : HarmonicContOnCl  f s) (c : F) :
+    HarmonicContOnCl  (fun x ↦ c - f x) s := harmonicContOnCl_const.sub hf
+
+@[fun_prop] theorem const_smul (hf : HarmonicContOnCl f s) (c : ℝ) :
+    HarmonicContOnCl (c • f) s := ⟨hf.1.const_smul, hf.2.const_smul c⟩
+
+@[fun_prop] theorem fun_const_smul (hf : HarmonicContOnCl f s) (c : ℝ) :
+    HarmonicContOnCl (c • f) s := ⟨hf.1.const_smul, hf.2.const_smul c⟩
 
 end HarmonicContOnCl
 
