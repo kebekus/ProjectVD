@@ -10,7 +10,7 @@ import Mathlib.Analysis.InnerProductSpace.Harmonic.Basic
 import VD.MathlibSubmitted.IteratedFDeriv
 
 /-!
-# Functions harmonic on a domain and continuous on its closure
+# Functions Harmonic on a Domain and Continuous on Its Closure
 
 Many theorems in harmonic analysis assume that a function is complex harmonic on
 a domain and is continuous on its closure. In this file we define a predicate
@@ -23,9 +23,8 @@ predicate.
 variable
   {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
   {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
-  {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G]
   {f f₁ f₂ : E → F}
-  {x : E} {s t : Set E} {c : ℝ}
+  {x : E} {s : Set E} {c : ℝ}
 
 open Laplacian Metric Topology
 
