@@ -2,8 +2,9 @@
 Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Mihai Iancu, Stefan Kebekus, Sebastian Schleissinger
+Co-authored-by: Aristotle (Harmonic) <aristotle-harmonic@harmonic.fun>
 -/
-import VD.MathlibSubmitted.MeanValue
+import Mathlib.Analysis.Complex.MeanValue
 
 open Complex Metric Real Set
 
@@ -157,7 +158,7 @@ lemma circleAverage_re_smul_on_ball_zero_aux {φ θ : ℝ} {r : ℝ} (h₁ : 0 <
 -- the ball is zero.
 private lemma DiffContOnCl.circleAverage_re_smul_on_ball_zero [CompleteSpace E]
     (hf : DiffContOnCl ℂ f (ball 0 R)) (hw : w ∈ ball 0 R) :
-    circleAverage (fun z ↦ ((z + w) / (z - w)).re • f z) 0 R = f w := by
+    Real.circleAverage (fun z ↦ ((z + w) / (z - w)).re • f z) 0 R = f w := by
   -- Trivial case: nonpositive radius
   rcases le_or_gt R 0 with hR | hR
   · simp_all [(ball_eq_empty).2 hR]
@@ -173,7 +174,7 @@ private lemma DiffContOnCl.circleAverage_re_smul_on_ball_zero [CompleteSpace E]
       simp [div_self this]
     rw [circleAverage_congr_sphere this]
     rw [← abs_of_pos hR] at hf
-    apply circleAverage_of_differentiable_on_ hf
+    apply hf.circleAverage
   -- General case: positive radius, w is not at the center
   let W := R * exp (w.arg * I)
   let q := ‖w‖ / R
@@ -197,8 +198,8 @@ private lemma DiffContOnCl.circleAverage_re_smul_on_ball_zero [CompleteSpace E]
             simp_all [W, abs_of_pos hR]
       grind
   -- Main computation starts here
-  calc circleAverage (fun z ↦ ((z + w) / (z - w)).re • f z) 0 R
-    _ = circleAverage (fun z ↦ (z / (z - w) - (q • z) / (q • z - W)) • f z) 0 R := by
+  calc Real.circleAverage (fun z ↦ ((z + w) / (z - w)).re • f z) 0 R
+    _ = Real.circleAverage (fun z ↦ (z / (z - w) - (q • z) / (q • z - W)) • f z) 0 R := by
       apply circleAverage_congr_sphere
       intro z hz
       match_scalars
@@ -211,8 +212,8 @@ private lemma DiffContOnCl.circleAverage_re_smul_on_ball_zero [CompleteSpace E]
       congr 1
       ring_nf
       field [hR.ne.symm]
-    _ = circleAverage (fun z ↦ (z / (z - w)) • f z) 0 R
-        - circleAverage (fun z ↦ ((q • z) / (q • z - W)) • f z) 0 R := by
+    _ = Real.circleAverage (fun z ↦ (z / (z - w)) • f z) 0 R
+        - Real.circleAverage (fun z ↦ ((q • z) / (q • z - W)) • f z) 0 R := by
       simp_rw [sub_smul]
       rw [circleAverage_fun_sub]
       · -- CircleIntegrable (fun z ↦ (z / (z - w)) • f z) 0 R
@@ -239,9 +240,9 @@ private lemma DiffContOnCl.circleAverage_re_smul_on_ball_zero [CompleteSpace E]
           rw [abs_of_pos hR, closure_ball 0 (ne_of_lt hR).symm]
           apply sphere_subset_closedBall
         fun_prop (disch := aesop)
-    _ = f w - circleAverage (fun z ↦ ((q • z) / (q • z - W)) • f z) 0 R := by
+    _ = f w - Real.circleAverage (fun z ↦ ((q • z) / (q • z - W)) • f z) 0 R := by
       rw [← abs_of_pos hR] at hw hf
-      simp [← circleAverage_sub_sub_inv_smul_of_differentiable_on_ hf hw]
+      simp [← hf.circleAverage_smul_div hw]
     _ = f w := by
       simp only [real_smul, circleAverage_eq_circleIntegral (ne_of_lt hR).symm, mul_inv_rev, inv_I,
         neg_mul, sub_zero, neg_smul, sub_neg_eq_add, add_eq_left, isUnit_iff_ne_zero, ne_eq,
@@ -277,7 +278,7 @@ of integration.
 -/
 theorem DiffContOnCl.circleAverage_re_smul [CompleteSpace E] {c : ℂ}
     (hf : DiffContOnCl ℂ f (ball c R)) (hw : w ∈ ball c R) :
-    circleAverage (fun z ↦ ((z - c + (w - c)) / ((z - c) - (w - c))).re • f z) c R = f w := by
+    Real.circleAverage (fun z ↦ ((z - c + (w - c)) / ((z - c) - (w - c))).re • f z) c R = f w := by
   rcases le_or_gt R 0 with hR | hR
   · simp_all [(ball_eq_empty).2 hR]
   have h₁g : DiffContOnCl ℂ (fun z ↦ f (z + c)) (ball 0 R) :=
@@ -293,7 +294,7 @@ in the complex plane, formulated with the Poisson kernel of integration.
 -/
 theorem DiffContOnCl.circleAverage_div_smul [CompleteSpace E] {c : ℂ}
     (hf : DiffContOnCl ℂ f (ball c R)) (hw : w ∈ ball c R) :
-    circleAverage (fun z ↦ ((‖z - c‖ ^ 2 - ‖w - c‖ ^ 2) / ‖(z - c) - (w - c)‖ ^ 2) • f z) c R
+    Real.circleAverage (fun z ↦ ((‖z - c‖ ^ 2 - ‖w - c‖ ^ 2) / ‖(z - c) - (w - c)‖ ^ 2) • f z) c R
       = f w := by
   rw [← hf.circleAverage_re_smul hw]
   apply circleAverage_congr_sphere

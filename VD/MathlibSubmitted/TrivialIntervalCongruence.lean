@@ -1,4 +1,4 @@
-import VD.MathlibSubmitted.MeanValue
+import Mathlib.Analysis.Complex.MeanValue
 
 open Asymptotics Classical Complex ComplexConjugate Filter Function Metric Real Set Classical Topology
 

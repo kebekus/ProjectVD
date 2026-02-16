@@ -8,10 +8,9 @@ import VD.HarmonicAsymptotic
 import VD.HarmonicMeanvalue_2
 import VD.MathlibPending.BoundednessLogCounting
 import VD.MathlibPending.HarmonicContOnCl
-import VD.MathlibPending.Poisson
 import VD.MathlibSubmitted.IteratedFDeriv
 import VD.MathlibSubmitted.LogCounting
-import VD.MathlibSubmitted.MeanValue
+import VD.MathlibSubmitted.Poisson
 import VD.MathlibSubmitted.Single
 import VD.MathlibSubmitted.TrivialIntervalCongruence
 import VD.Poisson.PoissonIntegral
