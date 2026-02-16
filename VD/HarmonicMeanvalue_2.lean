@@ -25,7 +25,7 @@ theorem ContinuousOn.circleAverage {s : Set ℝ} {c : ℂ} (hs : ∀ r : s, 0 �
   fun_prop [circleMap]
 
 
-open InnerProductSpace Metric Real
+open InnerProductSpace Metric Real Topology
 
 variable {f : ℂ → ℝ} {c : ℂ} {R : ℝ}
 
@@ -53,25 +53,25 @@ theorem HarmonicOnNhd.circleAverage_eq₀ (hf : HarmonicOnNhd f (closedBall c |R
   · apply (h₁F.continuousOn.mono (fun _ _ ↦ by simp_all [dist_eq_norm])).circleIntegrable'
 
 theorem testCase₁ {f : ℝ → ℝ} {c R : ℝ} (hR : 0 < R)
-    (η₀ : ContinuousOn f (Set.Icc 0 R))
-    (η₁ : ∀ (r : (Set.Ico 0 R)), f ↑r = c) :
+    (h₁ : ContinuousOn f (Set.Icc 0 R))
+    (h₂ : ∀ (r : (Set.Ico 0 R)), f r = c) :
     f R = c := by
-  -- By continuity of $f$ at $R$, we have $\lim_{r \to R^-} f(r) = f(R)$.
-  have h_cont : Filter.Tendsto f (nhdsWithin R (Set.Iio R)) (nhds (f R)) := by
-    have := η₀ R ( Set.right_mem_Icc.mpr hR.le );
-    convert this.mono_left _ using 2
-    rw [ nhdsWithin_le_iff ]
-    exact mem_nhdsLT_iff_exists_Ioo_subset.mpr ⟨ 0, hR, fun x hx => ⟨ hx.1.le, hx.2.le ⟩ ⟩
-  refine' tendsto_nhds_unique h_cont _
-  exact tendsto_const_nhds.congr'
-    ( Filter.eventuallyEq_of_mem ( Ioo_mem_nhdsLT hR )
-      fun x hx => by have := η₁ ⟨ x, ⟨ hx.1.le, hx.2 ⟩ ⟩ ; aesop )
+  have h₃ : Filter.Tendsto f (𝓝[Set.Iio R] R) (𝓝 (f R)) := by
+    apply (h₁ R (Set.right_mem_Icc.mpr hR.le)).mono_left
+    rw [nhdsWithin_le_iff, mem_nhdsLT_iff_exists_Ioo_subset]
+    use 0
+    simp_all [Set.Ioo_subset_Icc_self]
+  apply tendsto_nhds_unique h₃ (tendsto_const_nhds.congr' _)
+  apply Filter.eventuallyEq_of_mem (Ioo_mem_nhdsLT hR)
+    (fun r hr ↦ by simp [h₂ ⟨r, hr.1.le, hr.2⟩])
 
 theorem HarmonicOnNhd.circleAverage_eq₁₁ (h₁f : HarmonicOnNhd f (ball c |R|))
     (h₂f : ContinuousOn f (closedBall c |R|)) :
     circleAverage f c R = f c := by
   by_cases hR : R = 0
   · simp_all
+  have η₃ : 0 < |R| := by
+    aesop
   have η₀ : ContinuousOn (circleAverage f c) (Set.Icc 0 |R|) := by
     apply ContinuousOn.circleAverage
     · aesop
@@ -88,8 +88,6 @@ theorem HarmonicOnNhd.circleAverage_eq₁₁ (h₁f : HarmonicOnNhd f (ball c |R
     intro x hx
     simp_all
     apply hx.trans_lt
-    aesop
-  have η₃ : 0 < |R| := by
     aesop
   rw [← circleAverage_abs_radius]
   exact testCase₁ η₃ η₀ η₁
