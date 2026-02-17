@@ -20,11 +20,9 @@ open Complex InnerProductSpace Metric Real Topology
 variable
   {f : ℂ → ℝ} {c w : ℂ} {R : ℝ}
 
-
 private lemma continuousOn_herglotz_riesz (_ : w ∈ ball c R) :
     ContinuousOn (fun x ↦ ((x - c + (w - c)) / (x - c - (w - c))).re) {z | ‖z - c‖ ∈ Set.Ioc ‖w - c‖ R} := by
   have : ∀ x ∈ {z | ‖z - c‖ ∈ Set.Ioc ‖w - c‖ R}, x - c - (w - c) ≠ 0 := by
-    intro x hx
     grind [mem_ball, mem_sphere]
   fun_prop (disch := assumption)
 
@@ -51,7 +49,7 @@ theorem HarmonicOnNhd.circleAverage_re_smul
       (fun z ↦ ((z - c + (w - c)) / (z - c - (w - c))).re • f z)
       (Complex.reCLM ∘ (fun z ↦ ((z - c + (w - c)) / (z - c - (w - c))).re • F z))
       (sphere c R) :=
-    fun x hx ↦ by simp [h₂F (sphere_subset_ball (lt_add_of_pos_left R h₁e) hx)]
+    fun _ hx ↦ by simp [h₂F (sphere_subset_ball (lt_add_of_pos_left R h₁e) hx)]
   rw [← abs_of_pos hR] at h₄F
   rw [circleAverage_congr_sphere h₄F, reCLM.circleAverage_comp_comm,
     h₃F.diffContOnCl.circleAverage_re_smul hw]
@@ -82,12 +80,9 @@ theorem HarmonicContOnCl.circleAverage_re_smul
     apply ContinuousOn.circleAverage
     · apply (continuousOn_herglotz_riesz hw).smul
       apply hf.2.mono
-      intro x hx
-      rw [closure_ball _ hR.ne', mem_closedBall_iff_norm]
-      grind
+      grind [closure_ball c hR.ne', mem_closedBall_iff_norm]
     · -- ∀ (r : ↑(Set.Ioc ‖w - c‖ R)), 0 ≤ ↑r
       simp only [Subtype.forall, Set.mem_Ioc, and_imp]
-      intro r h₁r _
       grind [norm_nonneg (w - c)]
   · grind [mem_ball_iff_norm]
   · intro r hr
