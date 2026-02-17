@@ -131,7 +131,7 @@ theorem mk_ball {x : E} {r : ℝ} (hd : HarmonicOnNhd f (ball x r))
 @[fun_prop] theorem differentiableAt (h : HarmonicContOnCl f s) (hx : x ∈ s) :
     DifferentiableAt ℝ f x := (h.contDiffAt hx).differentiableAt two_ne_zero
 
-@[fun_prop] theorem mono (h : HarmonicContOnCl f s) (ht : t ⊆ s) :
+@[fun_prop] theorem mono {t : Set E} (h : HarmonicContOnCl f s) (ht : t ⊆ s) :
     HarmonicContOnCl f t := ⟨h.harmonicOnNhd.mono ht, h.continuousOn.mono (closure_mono ht)⟩
 
 @[fun_prop] theorem add (hf₁ : HarmonicContOnCl f₁ s) (hf₂ : HarmonicContOnCl f₂ s) :
