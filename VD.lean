@@ -5,10 +5,9 @@ import VD.CartanExperimentation
 import VD.CharacteristicMonotone
 import VD.HarmonicAsymptotic
 import VD.MathlibPending.BoundednessLogCounting
-import VD.MathlibPending.HarmonicContOnCl
 import VD.MathlibPending.HarmonicMeanvalue
 import VD.MathlibPending.HarmonicPoisson
-import VD.MathlibSubmitted.IteratedFDeriv
+import VD.MathlibSubmitted.HarmonicContOnCl
 import VD.MathlibSubmitted.LogCounting
 import VD.MathlibSubmitted.Poisson
 import VD.MathlibSubmitted.Single

@@ -1,5 +1,5 @@
 import Mathlib.Analysis.Complex.Harmonic.MeanValue
-import VD.MathlibPending.HarmonicContOnCl
+import VD.MathlibSubmitted.HarmonicContOnCl
 
 open InnerProductSpace Metric Real Set Topology
 
