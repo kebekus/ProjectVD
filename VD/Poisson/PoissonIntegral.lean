@@ -6,6 +6,7 @@ Authors: Mihai Iancu, Stefan Kebekus, Sebastian Schleissinger
 module
 public import Mathlib.Analysis.Complex.Harmonic.Analytic
 public import Mathlib.MeasureTheory.Integral.CircleAverage
+set_option backward.isDefEq.respectTransparency false
 
 /-!
 # The Poisson Integral Formula on the Unit Disc

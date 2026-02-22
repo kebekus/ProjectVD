@@ -1,6 +1,7 @@
 import Mathlib.Analysis.Meromorphic.Order
 
 open Filter Topology
+set_option backward.isDefEq.respectTransparency false
 
 lemma tendsto_nhdsWithin_of_tendsto_nhds' {α β : Type*}
     [TopologicalSpace α] [TopologicalSpace β] {a : α} {f : α → β}

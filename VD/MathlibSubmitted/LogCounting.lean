@@ -50,7 +50,7 @@ lemma logCounting_strictMono {D : locallyFinsuppWithin (univ : Set E) ℤ} {e : 
     exact (norm_nonneg e).trans_lt ha
   · intro a ha b hb hab
     apply logCounting_mono _ _ ((norm_nonneg e).trans_lt hb) hab
-    · simp [hD]
+    · exact sub_nonneg_of_le hD
     · simpa [mem_Ioi] using (norm_nonneg e).trans_lt ha
 
 end Function.locallyFinsuppWithin

@@ -1,4 +1,5 @@
 import Mathlib
+set_option backward.isDefEq.respectTransparency false
 
 open Filter Function MeromorphicOn Metric Real Set Classical Topology ValueDistribution
 

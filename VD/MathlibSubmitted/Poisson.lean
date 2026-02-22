@@ -5,6 +5,7 @@ Authors: Mihai Iancu, Stefan Kebekus, Sebastian Schleissinger
 Co-authored-by: Aristotle (Harmonic) <aristotle-harmonic@harmonic.fun>
 -/
 import Mathlib.Analysis.Complex.MeanValue
+set_option backward.isDefEq.respectTransparency false
 
 open Complex Metric Real Set
 

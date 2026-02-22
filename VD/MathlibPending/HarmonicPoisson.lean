@@ -5,6 +5,7 @@ Authors: Mihai Iancu, Stefan Kebekus, Sebastian Schleissinger, Aristotle AI
 -/
 import VD.MathlibPending.HarmonicMeanvalue
 import VD.MathlibSubmitted.Poisson
+set_option backward.isDefEq.respectTransparency false
 
 /-!
 # Poisson Integral Formula

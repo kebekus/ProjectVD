@@ -30,8 +30,8 @@ noncomputable def single (x : X) : locallyFinsuppWithin (Set.univ : Set X) ℤ w
   supportWithinDomain' z hz := by tauto
   supportLocallyFiniteWithinDomain' := by
     intro _ _
-    use ⊤
-    simp only [top_eq_univ, univ_mem, univ_inter, true_and]
+    use Set.univ
+    simp only [univ_mem, univ_inter, true_and]
     convert (finite_singleton x)
     aesop
 

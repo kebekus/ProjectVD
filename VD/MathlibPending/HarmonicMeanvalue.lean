@@ -2,6 +2,7 @@ import Mathlib.Analysis.Complex.Harmonic.MeanValue
 import VD.MathlibSubmitted.HarmonicContOnCl
 
 open InnerProductSpace Metric Real Set Topology
+set_option backward.isDefEq.respectTransparency false
 
 variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
@@ -52,7 +53,6 @@ lemma ContinuousOn.eq_of_eqOn_Ioo {f : ℝ → ℝ} {c r R : ℝ}
 /-!
 # Mathlib.Analysis.Complex.Harmonic.MeanValue
 -/
-
 
 /--
 The **Mean Value Property** of harmonic functions: If `f : ℂ → ℝ` is harmonic on

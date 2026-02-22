@@ -10,6 +10,7 @@ import VD.MathlibSubmitted.LogCounting
 import VD.MathlibSubmitted.Single
 
 open Asymptotics Filter Function Real Set Classical
+set_option backward.isDefEq.respectTransparency false
 
 /-!
 # Asymptotic Behavior of the Logarithmic Counting Function
