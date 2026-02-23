@@ -70,7 +70,6 @@ lemma order_blaschke (R : ℝ) (w : ℂ) (h : 0 < R) (h₂ : ‖w‖ ≠ R) :
       rw [ne_eq, ← ofReal_pow, ofReal_inj]
       rw [sq_eq_sq₀ h.le (norm_nonneg w)]
       grind
-
   simp only [this]
   clear this
   simp [meromorphicOrderAt_const, h.ne']
