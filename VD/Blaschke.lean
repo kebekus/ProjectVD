@@ -43,10 +43,58 @@ lemma nonzero_blaschke {z : ℂ} (R : ℝ) (w : ℂ) (h : 0 < R) (hz : z ≠ w) 
     exact Or.inr ⟨ by nlinarith [ sq_nonneg ( w.re - z.re ), sq_nonneg ( w.im - z.im ) ], by nlinarith [ sq_nonneg ( w.re - z.re ), sq_nonneg ( w.im - z.im ) ] ⟩;
   exact div_ne_zero h_num_ne_zero h_denom_ne_zero
 
+/-- The order is additive when multiplying meromorphic functions. -/
+theorem meromorphicOrderAt_fun_mul {f g : ℂ → ℂ} (hf : MeromorphicAt f x) (hg : MeromorphicAt g x) :
+    meromorphicOrderAt (fun z ↦ f z * g z) x = meromorphicOrderAt f x + meromorphicOrderAt g x :=
+  meromorphicOrderAt_smul hf hg
+
+theorem meromorphicOrderAt_fun_inv {f : ℂ → ℂ} :
+    meromorphicOrderAt (fun z ↦ (f z)⁻¹) x = -meromorphicOrderAt f x := by
+  exact meromorphicOrderAt_inv
+
 lemma order_blaschke (R : ℝ) (w : ℂ) (h : 0 < R) (h₂ : ‖w‖ ≠ R) :
     meromorphicOrderAt (Blaschke R w) w = -1 := by
   unfold Blaschke
-  sorry
+  simp_rw [div_eq_mul_inv]
+  rw [meromorphicOrderAt_fun_mul]
+  have : meromorphicOrderAt (fun z ↦ ↑R ^ 2 - (starRingEnd ℂ) w * z) w = 0 := by
+    refine (MeromorphicNFAt.meromorphicOrderAt_eq_zero_iff ?_).mpr ?_
+    · apply AnalyticAt.meromorphicNFAt
+      fun_prop
+    · rw [← normSq_eq_conj_mul_self, normSq_eq_norm_sq w, sub_ne_zero]
+      have : R ^ 2 ≠ ‖w‖ ^ 2 := by
+        by_contra h₁
+        rw [sq_eq_sq₀] at h₁
+        grind
+        exact h.le
+        exact norm_nonneg w
+      rwa [ne_eq, ← ofReal_pow, ofReal_inj]
+  simp only [this, zero_add]
+  clear this
+  rw [meromorphicOrderAt_fun_inv]
+  simp
+  rw [meromorphicOrderAt_fun_mul]
+  have : meromorphicOrderAt (fun z ↦ (R : ℂ)) w = 0 := by
+    refine (MeromorphicNFAt.meromorphicOrderAt_eq_zero_iff ?_).mpr ?_
+    · apply AnalyticAt.meromorphicNFAt
+      fun_prop
+    exact ne_zero_of_re_pos h
+  rw [this, zero_add]
+  clear this
+  have : (1 : WithTop ℤ) = (1 : ℤ) := rfl
+  rw [this, meromorphicOrderAt_eq_int_iff (n := 1)]
+  use fun z ↦ 1
+  constructor
+  · fun_prop
+  · constructor
+    · exact one_ne_zero
+    · filter_upwards
+      aesop
+  fun_prop
+  fun_prop
+  fun_prop
+  fun_prop
+  fun_prop
 
 lemma meromorphicNFOn_blaschke (R : ℝ) (w : ℂ) (h : 0 < R) (h₂ : ‖w‖ ≠ R) :
     MeromorphicNFOn (Blaschke R w) Set.univ := by
