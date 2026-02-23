@@ -1,3 +1,4 @@
+import VD.Blaschke
 import VD.BoundednessCharacteristic
 import VD.BoundednessProximity
 import VD.Cartan
