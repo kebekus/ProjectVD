@@ -57,26 +57,30 @@ theorem meromorphicOrderAt_div {x : ℂ} {f g : ℂ → ℂ}  (hf : MeromorphicA
     meromorphicOrderAt (f / g) x = meromorphicOrderAt f x - meromorphicOrderAt g x := by
   rw [div_eq_mul_inv, meromorphicOrderAt_mul hf hg.inv, meromorphicOrderAt_inv, sub_eq_add_neg]
 
+theorem meromorphicOrderAt_id_sub_const {w : ℂ} :
+    meromorphicOrderAt (· - w) w = 1 := by
+  rw [(by rfl : (1 : WithTop ℤ) = (1 : ℤ)), meromorphicOrderAt_eq_int_iff (by fun_prop) (n := 1)]
+  use fun z ↦ 1, by fun_prop, one_ne_zero
+  aesop
+
+@[to_fun]
+theorem meromorphicOrderAt_zpow_id_sub_const {w : ℂ} {n : ℤ} :
+    meromorphicOrderAt ((· - w) ^ n) w = n := by
+  rw [meromorphicOrderAt_zpow (by fun_prop), meromorphicOrderAt_id_sub_const, mul_one]
+
 lemma order_blaschke (R : ℝ) (w : ℂ) (h : 0 < R) (h₂ : ‖w‖ ≠ R) :
     meromorphicOrderAt (Blaschke R w) w = -1 := by
   unfold Blaschke
-  rw [fun_meromorphicOrderAt_div (by fun_prop) (by fun_prop)]
-  rw [meromorphicOrderAt_fun_mul (by fun_prop) (by fun_prop)]
+  rw [fun_meromorphicOrderAt_div (by fun_prop) (by fun_prop),
+    meromorphicOrderAt_fun_mul (by fun_prop) (by fun_prop)]
   have : meromorphicOrderAt (fun z ↦ ↑R ^ 2 - (starRingEnd ℂ) w * z) w = 0 := by
     refine (MeromorphicNFAt.meromorphicOrderAt_eq_zero_iff ?_).mpr ?_
     · apply AnalyticAt.meromorphicNFAt
       fun_prop
-    · rw [← normSq_eq_conj_mul_self, normSq_eq_norm_sq w, sub_ne_zero]
-      rw [ne_eq, ← ofReal_pow, ofReal_inj]
-      rw [sq_eq_sq₀ h.le (norm_nonneg w)]
+    · rw [← normSq_eq_conj_mul_self, normSq_eq_norm_sq w, sub_ne_zero, ne_eq, ← ofReal_pow, ofReal_inj,
+        sq_eq_sq₀ h.le (norm_nonneg w)]
       grind
-  simp only [this]
-  clear this
-  simp [meromorphicOrderAt_const, h.ne']
-  have : (1 : WithTop ℤ) = (1 : ℤ) := rfl
-  rw [this, meromorphicOrderAt_eq_int_iff (by fun_prop) (n := 1)]
-  use fun z ↦ 1, by fun_prop, one_ne_zero
-  aesop
+  simp [this, meromorphicOrderAt_const, h.ne', meromorphicOrderAt_id_sub_const]
 
 lemma meromorphicNFOn_blaschke (R : ℝ) (w : ℂ) (h : 0 < R) (h₂ : ‖w‖ ≠ R) :
     MeromorphicNFOn (Blaschke R w) Set.univ := by
@@ -99,7 +103,7 @@ lemma blaschke_eval_circle_ne {z : ℂ} (R : ℝ) (w : ℂ) (h : 0 < R) (h₂ : 
     ‖Blaschke R w z‖ = 1 := by
   -- By definition of Blaschke factor, we have ‖Blaschke R w z‖ = ‖(R² - conj w * z) / (R * (z - w))‖.
   simp [Blaschke];
-  rw [ div_eq_iff ] <;> simp_all +decide [ Complex.normSq, Complex.norm_def ];
+  rw [ div_eq_iff ] <;> simp_all [Complex.normSq, Complex.norm_def]
   · rw [ ← Real.sqrt_sq_eq_abs ];
     rw [ ← Real.sqrt_mul <| by positivity ]
     congr 1
