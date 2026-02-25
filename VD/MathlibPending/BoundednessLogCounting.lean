@@ -136,7 +136,7 @@ theorem logCounting_isBigO_one_iff_analyticOnNhd {f : 𝕜 → E} (h : Meromorph
   rw [← Function.locallyFinsuppWithin.zero_iff_logCounting_bounded (negPart_nonneg _)]
   constructor
   · intro h₁f z hz
-    apply (meromorphicNFOn_toMeromorphicNFOn f ⊤
+    apply (meromorphicNFOn_toMeromorphicNFOn f univ
       trivial).meromorphicOrderAt_nonneg_iff_analyticAt.1
     rw [meromorphicOrderAt_toMeromorphicNFOn h.meromorphicOn (by trivial), ← WithTop.untop₀_nonneg,
       ← h.meromorphicOn.divisor_apply (by trivial), ← negPart_eq_zero,
