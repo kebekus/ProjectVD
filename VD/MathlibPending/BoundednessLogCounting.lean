@@ -6,11 +6,8 @@ Authors: Stefan Kebekus
 --module
 
 import Mathlib.Analysis.Complex.ValueDistribution.LogCounting.Basic
-import VD.MathlibSubmitted.LogCounting
-import VD.MathlibSubmitted.Single
 
 open Asymptotics Filter Function Real Set Classical
-set_option backward.isDefEq.respectTransparency false
 
 /-!
 # Asymptotic Behavior of the Logarithmic Counting Function
@@ -49,7 +46,7 @@ function `1 : ℝ → ℝ` is little o of the logarithmic counting function atta
 to `single e`.
 -/
 lemma one_isLittleO_logCounting_single [ProperSpace E] {e : E} :
-    (1 : ℝ → ℝ) =o[atTop] logCounting (single e) := by
+    (1 : ℝ → ℝ) =o[atTop] logCounting (single e 1) := by
   rw [isLittleO_iff]
   intro c hc
   simp only [Pi.one_apply, one_mem, CStarRing.norm_of_mem_unitary, norm_eq_abs, eventually_atTop,
@@ -69,12 +66,13 @@ lemma one_isLittleO_logCounting_single [ProperSpace E] {e : E} :
         · simp_all [exp_log]
       _ ≤ exp (|log ‖e‖| + c⁻¹) :=
         exp_monotone (le_add_of_le_of_nonneg (le_abs_self _) (inv_pos.2 hc).le)
-  rw [← inv_mul_le_iff₀ hc, mul_one, abs_of_nonneg (logCounting_nonneg single_pos.le h₁b)]
+  rw [← inv_mul_le_iff₀ hc, mul_one, abs_of_nonneg (logCounting_nonneg
+    (single_pos.2 Int.one_pos).le h₁b)]
   calc c⁻¹
-    _ ≤ logCounting (single e) (exp (|log ‖e‖| + c⁻¹)) := by
+    _ ≤ logCounting (single e 1) (exp (|log ‖e‖| + c⁻¹)) := by
       simp [logCounting_single_eq_log_sub_const h₁c, le_sub_iff_add_le', le_abs_self (log ‖e‖)]
-    _ ≤ logCounting (single e) b := by
-      apply logCounting_mono single_pos.le (mem_Ioi.2 (exp_pos _)) _ hb
+    _ ≤ logCounting (single e 1) b := by
+      apply logCounting_mono (single_pos.2 Int.one_pos).le (mem_Ioi.2 (exp_pos _)) _ hb
       simpa [mem_Ioi] using one_pos.trans_le h₁b
 
 /--
@@ -105,10 +103,10 @@ lemma zero_iff_logCounting_bounded [ProperSpace E] {D : locallyFinsuppWithin (un
     have h₄ℓ : ℓ > ‖e‖ := by grind
     use 1 + ℓ, h₁ℓ.le.trans (lt_one_add ℓ).le
     calc 1
-      _ ≤ (a * |logCounting (single e) ℓ|) := by simpa [h₂ℓ.le] using hc ℓ
+      _ ≤ (a * |logCounting (single e 1) ℓ|) := by simpa [h₂ℓ.le] using hc ℓ
       _ ≤ (a * |logCounting D ℓ|) := by
         gcongr
-        · apply logCounting_nonneg single_pos.le h₃ℓ
+        · apply logCounting_nonneg (single_pos.2 Int.one_pos).le h₃ℓ
         · apply logCounting_le he h₃ℓ
       _ < a * |logCounting D (1 + ℓ)| := by
         gcongr 2
@@ -133,8 +131,8 @@ A meromorphic function has only removable singularities if and only if the
 logarithmic counting function for its pole divisor is asymptotically bounded.
 -/
 theorem logCounting_isBigO_one_iff_analyticOnNhd {f : 𝕜 → E} (h : Meromorphic f) :
-    logCounting f ⊤ =O[atTop] (1 : ℝ → ℝ) ↔ AnalyticOnNhd 𝕜 (toMeromorphicNFOn f ⊤) ⊤ := by
-  simp only [logCounting, reduceDIte, top_eq_univ]
+    logCounting f ⊤ =O[atTop] (1 : ℝ → ℝ) ↔ AnalyticOnNhd 𝕜 (toMeromorphicNFOn f ⊤) univ := by
+  simp only [logCounting, reduceDIte]
   rw [← Function.locallyFinsuppWithin.zero_iff_logCounting_bounded (negPart_nonneg _)]
   constructor
   · intro h₁f z hz
