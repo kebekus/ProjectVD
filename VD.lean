@@ -4,9 +4,9 @@ import VD.BoundednessProximity
 import VD.Cartan
 import VD.CartanExperimentation
 import VD.CharacteristicMonotone
-import VD.MathlibPending.BoundednessLogCounting
 import VD.MathlibPending.HarmonicMeanvalue
 import VD.MathlibPending.HarmonicPoisson
+import VD.MathlibSubmitted.BoundednessLogCounting
 import VD.MathlibSubmitted.HarmonicContOnCl
 import VD.MathlibSubmitted.HarmonicLiouville
 import VD.MathlibSubmitted.TrivialIntervalCongruence
