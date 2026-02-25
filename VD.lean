@@ -9,8 +9,6 @@ import VD.MathlibPending.HarmonicMeanvalue
 import VD.MathlibPending.HarmonicPoisson
 import VD.MathlibSubmitted.HarmonicContOnCl
 import VD.MathlibSubmitted.HarmonicLiouville
-import VD.MathlibSubmitted.LogCounting
-import VD.MathlibSubmitted.Single
 import VD.MathlibSubmitted.TrivialIntervalCongruence
 import VD.Poisson.PoissonIntegral
 import VD.leftovers.meromorphicAt_topology
