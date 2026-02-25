@@ -6,7 +6,7 @@ Authors: Stefan Kebekus
 --module
 
 import VD.BoundednessProximity
-import VD.MathlibPending.BoundednessLogCounting
+import VD.MathlibSubmitted.BoundednessLogCounting
 
 open Filter Function Metric Real Set Classical Topology ValueDistribution
 set_option backward.isDefEq.respectTransparency false
