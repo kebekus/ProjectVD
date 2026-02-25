@@ -73,4 +73,5 @@ theorem HarmonicContOnCl.circleAverage_eq {f : ℂ → ℝ} {c : ℂ} {R : ℝ}
     exact closedBall_subset_ball hr.2
   · intro x hx
     rw [closure_ball _ (by aesop)]
+    rw [mem_closedBall_iff_norm]
     exact hx.2

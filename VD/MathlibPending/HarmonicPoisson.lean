@@ -3,8 +3,9 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Mihai Iancu, Stefan Kebekus, Sebastian Schleissinger, Aristotle AI
 -/
+
+import Mathlib.Analysis.Complex.Poisson
 import VD.MathlibPending.HarmonicMeanvalue
-import VD.MathlibSubmitted.Poisson
 set_option backward.isDefEq.respectTransparency false
 
 /-!
@@ -34,7 +35,7 @@ integration.
 -/
 theorem HarmonicOnNhd.circleAverage_re_smul
     (hf : HarmonicOnNhd f (closedBall c R)) (hw : w ∈ ball c R) :
-    Real.circleAverage (fun z ↦ ((z - c + (w - c)) / ((z - c) - (w - c))).re • f z) c R = f w := by
+    Real.circleAverage ((re ∘ herglotzRieszKernel c w) • f) c R = f w := by
   by_cases hR : R ≤ 0
   · simp_all [ball_eq_empty.2 hR]
   rw [not_le] at hR
@@ -47,13 +48,16 @@ theorem HarmonicOnNhd.circleAverage_re_smul
     apply (h₁F x _).differentiableWithinAt
     grind [mem_ball, mem_closedBall.1 (closure_ball_subset_closedBall hx)]
   have h₄F : Set.EqOn
-      (fun z ↦ ((z - c + (w - c)) / (z - c - (w - c))).re • f z)
+      (re ∘ herglotzRieszKernel c w • f)
       (Complex.reCLM ∘ (fun z ↦ ((z - c + (w - c)) / (z - c - (w - c))).re • F z))
-      (sphere c R) :=
-    fun _ hx ↦ by simp [h₂F (sphere_subset_ball (lt_add_of_pos_left R h₁e) hx)]
+      (sphere c R) := by
+    intro x hx
+    simp [h₂F (sphere_subset_ball (lt_add_of_pos_left R h₁e) hx)]
+    left
+    simp [herglotzRieszKernel]
   rw [← abs_of_pos hR] at h₄F
   rw [circleAverage_congr_sphere h₄F, reCLM.circleAverage_comp_comm,
-    h₃F.diffContOnCl.circleAverage_re_smul hw]
+    h₃F.diffContOnCl.circleAverage_re_herglotzRieszKernel_smul' hw]
   apply h₂F
   grind [mem_ball]
   -- CircleIntegrable (fun z ↦ ((z - c + (w - c)) / (z - c - (w - c))).re • F z) c R
@@ -70,9 +74,9 @@ theorem HarmonicOnNhd.circleAverage_re_smul
 complex plane, formulated with the real part of the Herglotz–Riesz kernel of
 integration.
 -/
-theorem HarmonicContOnCl.circleAverage_re_smul
+theorem HarmonicContOnCl.circleAverage_re_herglotzRieszKernel_smul
     (hf : HarmonicContOnCl f (ball c R)) (hw : w ∈ ball c R) :
-    Real.circleAverage (fun z ↦ ((z - c + (w - c)) / ((z - c) - (w - c))).re • f z) c R = f w := by
+    Real.circleAverage ((re ∘ herglotzRieszKernel c w) • f) c R = f w := by
   by_cases hR : R ≤ 0
   · simp_all [ball_eq_empty.2 hR]
   rw [not_le] at hR
@@ -96,11 +100,11 @@ complex plane, formulated with the Poisson kernel of integration.
 -/
 theorem HarmonicOnNhd.circleAverage_div_smul
     (hf : HarmonicOnNhd f (closedBall c R)) (hw : w ∈ ball c R) :
-    Real.circleAverage (fun z ↦ ((‖z - c‖ ^ 2 - ‖w - c‖ ^ 2) / ‖(z - c) - (w - c)‖ ^ 2) • f z) c R = f w := by
+    Real.circleAverage (poissonKernel c w • f) c R = f w := by
   rw [← HarmonicOnNhd.circleAverage_re_smul hf hw]
   apply circleAverage_congr_sphere
   intro z hz
-  simp_rw [re_herglotz_riesz_eq_poisson]
+  simp_rw [← poissonKernel_eq_re_herglotzRieszKernel]
 
 /--
 **Poisson integral formula** for harmonic functions on arbitrary disks in the
@@ -108,8 +112,8 @@ complex plane, formulated with the Poisson kernel of integration.
 -/
 theorem HarmonicContOnCl.circleAverage_div_smul
     (hf : HarmonicContOnCl f (ball c R)) (hw : w ∈ ball c R) :
-    Real.circleAverage (fun z ↦ ((‖z - c‖ ^ 2 - ‖w - c‖ ^ 2) / ‖(z - c) - (w - c)‖ ^ 2) • f z) c R = f w := by
-  rw [← HarmonicContOnCl.circleAverage_re_smul hf hw]
+    Real.circleAverage (poissonKernel c w • f) c R = f w := by
+  rw [← HarmonicContOnCl.circleAverage_re_herglotzRieszKernel_smul hf hw]
   apply circleAverage_congr_sphere
   intro z hz
-  simp_rw [re_herglotz_riesz_eq_poisson]
+  simp_rw [← poissonKernel_eq_re_herglotzRieszKernel]
