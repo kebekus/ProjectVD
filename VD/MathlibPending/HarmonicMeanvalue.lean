@@ -1,5 +1,5 @@
 import Mathlib.Analysis.Complex.Harmonic.MeanValue
-import VD.MathlibSubmitted.HarmonicContOnCl
+import Mathlib.Analysis.InnerProductSpace.Harmonic.HarmonicContOnCl
 
 open InnerProductSpace Metric Real Set Topology
 set_option backward.isDefEq.respectTransparency false
