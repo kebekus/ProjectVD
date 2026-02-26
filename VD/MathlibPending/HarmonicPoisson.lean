@@ -3,10 +3,10 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Mihai Iancu, Stefan Kebekus, Sebastian Schleissinger, Aristotle AI
 -/
+--module
 
 import Mathlib.Analysis.Complex.Poisson
 import VD.MathlibSubmitted.HarmonicMeanvalue
-set_option backward.isDefEq.respectTransparency false
 
 /-!
 # Poisson Integral Formula
@@ -28,12 +28,13 @@ private lemma continuousOn_herglotz_riesz (_ : w ∈ ball c R) :
     grind [mem_ball, mem_sphere]
   fun_prop (disch := assumption)
 
+set_option backward.isDefEq.respectTransparency false in
 /--
 **Poisson integral formula** for harmonic functions on arbitrary disks in the
 complex plane, formulated with the real part of the Herglotz–Riesz kernel of
 integration.
 -/
-theorem HarmonicOnNhd.circleAverage_re_smul
+theorem HarmonicOnNhd.circleAverage_re_herglotzRieszKernel_smul
     (hf : HarmonicOnNhd f (closedBall c R)) (hw : w ∈ ball c R) :
     Real.circleAverage ((re ∘ herglotzRieszKernel c w) • f) c R = f w := by
   by_cases hR : R ≤ 0
@@ -69,6 +70,7 @@ theorem HarmonicOnNhd.circleAverage_re_smul
     apply h₁F.mono
     grind [mem_sphere, mem_ball]
 
+set_option backward.isDefEq.respectTransparency false in
 /--
 **Poisson integral formula** for harmonic functions on arbitrary disks in the
 complex plane, formulated with the real part of the Herglotz–Riesz kernel of
@@ -91,26 +93,28 @@ theorem HarmonicContOnCl.circleAverage_re_herglotzRieszKernel_smul
       grind [norm_nonneg (w - c)]
   · grind [mem_ball_iff_norm]
   · intro r hr
-    rw [HarmonicOnNhd.circleAverage_re_smul (hf.1.mono (closedBall_subset_ball hr.2))
+    rw [HarmonicOnNhd.circleAverage_re_herglotzRieszKernel_smul (hf.1.mono (closedBall_subset_ball hr.2))
       (by grind [mem_ball_iff_norm])]
 
+set_option backward.isDefEq.respectTransparency false in
 /--
 **Poisson integral formula** for harmonic functions on arbitrary disks in the
 complex plane, formulated with the Poisson kernel of integration.
 -/
-theorem HarmonicOnNhd.circleAverage_div_smul
+theorem HarmonicOnNhd.circleAverage_poissonKernel_smul
     (hf : HarmonicOnNhd f (closedBall c R)) (hw : w ∈ ball c R) :
     Real.circleAverage (poissonKernel c w • f) c R = f w := by
-  rw [← HarmonicOnNhd.circleAverage_re_smul hf hw]
+  rw [← HarmonicOnNhd.circleAverage_re_herglotzRieszKernel_smul hf hw]
   apply circleAverage_congr_sphere
   intro z hz
   simp_rw [← poissonKernel_eq_re_herglotzRieszKernel]
 
+set_option backward.isDefEq.respectTransparency false in
 /--
 **Poisson integral formula** for harmonic functions on arbitrary disks in the
 complex plane, formulated with the Poisson kernel of integration.
 -/
-theorem HarmonicContOnCl.circleAverage_div_smul
+theorem HarmonicContOnCl.circleAverage_poissonKernel_smul
     (hf : HarmonicContOnCl f (ball c R)) (hw : w ∈ ball c R) :
     Real.circleAverage (poissonKernel c w • f) c R = f w := by
   rw [← HarmonicContOnCl.circleAverage_re_herglotzRieszKernel_smul hf hw]
