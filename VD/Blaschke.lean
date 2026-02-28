@@ -7,7 +7,19 @@ open Complex ComplexConjugate Real
 variable {R : ℝ} {w : ℂ}
 
 /-!
-## Blaschke Factors
+# Canonical Decomposition
+
+If a function `f` is meromorphic on a compact set `U`, then it has only finitely
+many zeros and poles on the disk, and the theorem
+`MeromorphicOn.extract_zeros_poles` can be used to re-write `f` as `(∏ᶠ u, (· -
+u) ^ divisor f U u) • g`, where `g` is analytic without zeros on `U`. In case
+where `U` is a disk, this file provides a similar decomposition, called
+"Canonical Decomposition" or "Blaschke Product" that replaces the factors `(· -
+u)` by "canonical factors" that take only values of norm one on the boundary of
+the circle.
+
+
+## Canonical Factors
 
 Given `R : ℝ` and `w : ℂ`, the Blaschke factor `Blaschke R w : ℂ → ℂ` is
 meromorphic in normal form, has a single pole at `w`, no zeros, and takes values
