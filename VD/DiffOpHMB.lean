@@ -23,8 +23,7 @@ variable (𝕜 E F G)
 /--
 Differential operator of order ≤ n
 -/
-def DiffOp (n : ℕ) : Type _ :=
-  E → (∀ i : Fin (n + 1), E [×i]→L[𝕜] F) → G
+def DiffOp (n : ℕ) : Type _ := E → (∀ i : Fin (n + 1), E [×i]→L[𝕜] F) → G
 
 noncomputable def diffOp_apply {n : ℕ} (D : DiffOp 𝕜 E F G n) (f : E → F) :
     E → G := fun e ↦ D e ((ftaylorSeries 𝕜 f e) ·)
@@ -46,26 +45,22 @@ lemma lieDerivative_apply (f : E → F) (v : E → E) :
   erw [iteratedFDeriv_one_apply ![v e] (𝕜 := 𝕜) (f := f) (x := e)]
   simp
 
-
 variable (H)
 /--
 Gradient
 -/
 noncomputable def gradientDiffOp : DiffOp ℝ H ℝ H 1 := by
-  let v := stdOrthonormalBasis ℝ H
-  exact fun e fps ↦ ∑ i, fps 1 ![v i] • v i
+  exact fun e fps ↦ (toDual ℝ H).symm (fps 1).curryRight.curry0
 
 lemma gradientDiffOp_apply (f : H → ℝ) :
     diffOp_apply ℝ H ℝ H (gradientDiffOp H) = ∇ := by
   ext g h
-  simp [diffOp_apply, gradientDiffOp, ftaylorSeries]
+  rw [diffOp_apply, gradientDiffOp, ftaylorSeries]
   unfold gradient
-  conv =>
-    left
-    arg 2
-    intro i
-    erw [iteratedFDeriv_one_apply (𝕜 := ℝ) (f := g) (x := h)]
-  sorry
+  congr
+  ext η
+  simp
+  congr
 
 /--
 Exterior derivative
@@ -76,16 +71,21 @@ noncomputable def extDerivativeDiffOp [FiniteDimensional 𝕜 E] :
   exact fun e fps ↦ ∑ i, fps 1 ![v i] • (v.dualBasis i)
 
 lemma extDerivativeOp_apply [FiniteDimensional 𝕜 E] (f : E → 𝕜) :
-    diffOp_apply 𝕜 E 𝕜 (Module.Dual 𝕜 E) (extDerivativeDiffOp 𝕜 E) =
-      0 := by
-  let v := Module.finBasisOfFinrankEq 𝕜 E (rfl)
-  ext g e
-  simp [diffOp_apply, extDerivativeDiffOp, ftaylorSeries]
+    diffOp_apply 𝕜 E 𝕜 (Module.Dual 𝕜 E) (extDerivativeDiffOp 𝕜 E) f
+      = (fun e ↦ ∑ i, ((fderiv 𝕜 f e) ((Module.finBasisOfFinrankEq 𝕜 E (rfl)) i)) • ((Module.finBasisOfFinrankEq 𝕜 E (rfl)).dualBasis i)) := by
+  ext e e₁
+  simp only [diffOp_apply, extDerivativeDiffOp, ftaylorSeries]
+  have {e₀ : E} : (iteratedFDeriv 𝕜 1 f e) ![e₀] = fderiv 𝕜 f e e₀ := by
+    simp only [iteratedFDeriv_one_apply, Fin.isValue, Matrix.cons_val_fin_one]
   conv =>
     left
+    arg 1
     arg 2
     intro i
-    sorry
+    simp
+    arg 1
+    erw [this]
+  simp
 
 /-!
 ## Examples: Differential Operators of Order ≤ 2
