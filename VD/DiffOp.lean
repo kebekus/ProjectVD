@@ -17,6 +17,7 @@ variable
   {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
   {G : Type*} [AddCommGroup G] [Module 𝕜 G] [TopologicalSpace G]
   {H : Type*} [NormedAddCommGroup H] [InnerProductSpace ℝ H] [FiniteDimensional ℝ H]
+set_option linter.unusedVariables false
 
 variable (𝕜 E F G) in
 /--
@@ -29,6 +30,7 @@ structure DiffOp0 where
 
   leibniz0 (f : E → 𝕜) (g) : toFun (f • g) - f • toFun g = 0
 
+#check FormalMultilinearSeries
 variable (𝕜 E F G) in
 /--
 Differential operator of order ≤ 1
@@ -64,8 +66,72 @@ structure DiffOp2 where
 
   localness (f₁ f₂ x) (h : f₁ =ᶠ[𝓝 x] f₂) : toFun f₁ x = toFun f₂ x
 
-  leibniz2 (φ : E → 𝕜) (e : E) (hφ : ContDiffAt 𝕜 1 φ e) : ∃ D : DiffOp1 𝕜 E F G,
-    ∀ g, ContDiffAt 𝕜 1 g e → toFun (φ • g) e - (φ • toFun g) e = D.toFun g e
+  leibniz2 (φ : E → 𝕜) (e : E) (hφ : ContDiffAt 𝕜 2 φ e) : ∃ D : DiffOp1 𝕜 E F G,
+    ∀ g, ContDiffAt 𝕜 2 g e → toFun (φ • g) e - (φ • toFun g) e = D.toFun g e
+
+-- variable (𝕜 E F G) in
+-- structure DiffOp2' where
+--   toFun : (E → F) → (E → G)
+
+--   map_add' (f₁ f₂ : E → F) (e : E) (hf₁ : ContDiffAt 𝕜 2 f₁ e) (hf₂ : ContDiffAt 𝕜 2 f₂ e) :
+--     toFun (f₁ + f₂) e = toFun f₁ e + toFun f₂ e
+
+--   map_smul' (f : E → F) (e : E) (m : 𝕜) (hf : ContDiffAt 𝕜 2 f e) :
+--     toFun (m • f) e = m • toFun f e
+
+--   localness (f₁ f₂ x) (h : f₁ =ᶠ[𝓝 x] f₂) : toFun f₁ x = toFun f₂ x
+--   helper (φ : E → 𝕜) (e : E) : DiffOp1 𝕜 E F G
+--   leibniz2 (φ : E → 𝕜) (e : E) (hφ : ContDiffAt 𝕜 2 φ e) :
+--     ∀ g, ContDiffAt 𝕜 2 g e → toFun (φ • g) e - (φ • toFun g) e = (helper φ e).toFun g e
+
+-- variable (𝕜 E F G) in
+-- inductive DiffOp2'' : Type _ where
+--   | mk :
+--   (toFun : (E → F) → (E → G)) →
+--   (map_add' : ∀ (f₁ f₂ : E → F) (e : E) (hf₁ : ContDiffAt 𝕜 2 f₁ e) (hf₂ : ContDiffAt 𝕜 2 f₂ e),
+--     toFun (f₁ + f₂) e = toFun f₁ e + toFun f₂ e) →
+--   (map_smul' : ∀ (f : E → F) (e : E) (m : 𝕜) (hf : ContDiffAt 𝕜 2 f e),
+--     toFun (m • f) e = m • toFun f e) →
+--   (localness : ∀ (f₁ f₂ x) (h : f₁ =ᶠ[𝓝 x] f₂), toFun f₁ x = toFun f₂ x) →
+--   (helper : ∀ (φ : E → 𝕜) (e : E), DiffOp1 𝕜 E F G) →
+--   (leibniz2 : ∀ (φ : E → 𝕜) (e : E) (hφ : ContDiffAt 𝕜 2 φ e),
+--     ∀ g, ContDiffAt 𝕜 2 g e → toFun (φ • g) e - (φ • toFun g) e = (helper φ e).toFun g e) → DiffOp2''
+
+
+
+
+-- variable (𝕜 E F G) in
+-- inductive DiffOp : ℤ → Type _ where
+--   | mk {n : ℤ} :
+--   (toFun : (E → F) → (E → G)) →
+--   (map_add' : ∀ (f₁ f₂ : E → F) (e : E) (hf₁ : ContDiffAt 𝕜 n.toNat f₁ e) (hf₂ : ContDiffAt 𝕜 n.toNat f₂ e),
+--     toFun (f₁ + f₂) e = toFun f₁ e + toFun f₂ e) →
+--   (map_smul' : ∀ (f : E → F) (e : E) (m : 𝕜) (hf : ContDiffAt 𝕜 n.toNat f e),
+--     toFun (m • f) e = m • toFun f e) →
+--   (localness : ∀ (f₁ f₂ x) (h : f₁ =ᶠ[𝓝 x] f₂), toFun f₁ x = toFun f₂ x) →
+--   (helper : ∀ (φ : E → 𝕜) (e : E), DiffOp (n - 1)) →
+--   (leibniz2 : ∀ (φ : E → 𝕜) (e : E) (hφ : ContDiffAt 𝕜 n.toNat φ e),
+--     ∀ g, ContDiffAt 𝕜 n.toNat g e → toFun (φ • g) e - (φ • toFun g) e = (helper φ e).toFun g e) → DiffOp n
+
+-- variable (𝕜) in
+-- inductive IsDiffOp : (toFun : (E → F) → (E → G)) → ℤ → Type _ where
+--   | mk {toFun : (E → F) → (E → G)} {n : ℤ} :
+--   (map_add' : ∀ (f₁ f₂ : E → F) (e : E) (hf₁ : ContDiffAt 𝕜 n.toNat f₁ e)
+--     (hf₂ : ContDiffAt 𝕜 n.toNat f₂ e),
+--     toFun (f₁ + f₂) e = toFun f₁ e + toFun f₂ e) →
+--   (map_smul' : ∀ (f : E → F) (e : E) (m : 𝕜) (hf : ContDiffAt 𝕜 n.toNat f e),
+--     toFun (m • f) e = m • toFun f e) →
+--   (localness : ∀ (f₁ f₂ x) (h : f₁ =ᶠ[𝓝 x] f₂), toFun f₁ x = toFun f₂ x) →
+--   (helper : ∀ (φ : E → 𝕜) (e : E), (E → F) → (E → G)) →
+--   (isDiffOp_helper : ∀ (φ : E → 𝕜) (e : E), IsDiffOp (helper φ e) (n - 1)) →
+--   (leibniz2 : ∀ (φ : E → 𝕜) (e : E) (hφ : ContDiffAt 𝕜 n.toNat φ e),
+--     ∀ g, ContDiffAt 𝕜 n.toNat g e → toFun (φ • g) e - (φ • toFun g) e = helper φ e g e) →
+--   (eq_zero_of_neg : ∀ (f : E → F) (e : E) (h : n < 0), toFun f e = 0) → IsDiffOp toFun n
+
+/- `n`-th order differential operator. Perhaps also useful for `n = -1`. -/
+def DiffOp (n : ℕ) : Type _ :=
+  E → (∀ i : Fin (n + 1), E [×i]→L[𝕜] F) → G
+
 
 /-!
 ## Examples: Differential Operator Order 0
