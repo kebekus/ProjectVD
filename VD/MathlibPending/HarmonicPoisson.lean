@@ -3,10 +3,10 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Mihai Iancu, Stefan Kebekus, Sebastian Schleissinger, Aristotle AI
 -/
---module
+module
 
-import Mathlib.Analysis.Complex.Poisson
-import VD.MathlibSubmitted.HarmonicMeanvalue
+public import Mathlib.Analysis.Complex.Harmonic.MeanValue
+public import Mathlib.Analysis.Complex.Poisson
 
 /-!
 # Poisson Integral Formula
@@ -16,6 +16,15 @@ harmonic functions on arbitrary disks in the complex plane, formulated with the
 real part of the Herglotz–Riesz kernel of integration and with the Poisson
 kernel, respectively.
 -/
+
+lemma herglotzRieszKernel_def₂ (c w : ℂ) :
+    herglotzRieszKernel c w  = fun z ↦ ((z - c) + (w - c)) / ((z - c) - (w - c)) := by
+  ext z
+  rw [herglotzRieszKernel_def]
+
+-- @[expose]
+
+public section
 
 open Complex InnerProductSpace Metric Real Topology
 
@@ -50,7 +59,7 @@ theorem HarmonicOnNhd.circleAverage_re_herglotzRieszKernel_smul
       (reCLM ∘ (fun z ↦ ((z - c + (w - c)) / (z - c - (w - c))).re • F z))
       (sphere c R) := by
     intro x hx
-    simp [h₂F (sphere_subset_ball (lt_add_of_pos_left R h₁e) hx), herglotzRieszKernel]
+    simp [h₂F (sphere_subset_ball (lt_add_of_pos_left R h₁e) hx),herglotzRieszKernel_def]
   rw [← abs_of_pos (pos_of_mem_ball hw)] at h₄F
   rw [circleAverage_congr_sphere h₄F, reCLM.circleAverage_comp_comm,
     h₃F.diffContOnCl.circleAverage_re_herglotzRieszKernel_smul' hw]
@@ -74,9 +83,10 @@ theorem HarmonicContOnCl.circleAverage_re_herglotzRieszKernel_smul
     Real.circleAverage ((re ∘ herglotzRieszKernel c w) • f) c R = f w := by
   apply ContinuousOn.eq_of_eqOn_Ioo (r := ‖w - c‖)
   · apply ContinuousOn.circleAverage
-    · apply (continuousOn_herglotz_riesz hw).smul (hf.2.mono _)
+    · rw [herglotzRieszKernel_def₂]
+      apply (continuousOn_herglotz_riesz hw).smul (hf.2.mono _)
       grind [closure_ball c (pos_of_mem_ball hw).ne', mem_closedBall_iff_norm]
-    · simp only [Subtype.forall, Set.mem_Ioc, and_imp]
+    · simp only [Set.mem_Ioc, and_imp]
       grind [norm_nonneg (w - c)]
   · grind [mem_ball_iff_norm]
   · intro r hr
