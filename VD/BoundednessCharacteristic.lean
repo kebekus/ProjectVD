@@ -5,8 +5,9 @@ Authors: Stefan Kebekus
 -/
 --module
 
+import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
+import Mathlib.Analysis.Complex.ValueDistribution.LogCounting.Asymptotic
 import VD.BoundednessProximity
-import VD.MathlibSubmitted.BoundednessLogCounting
 
 open Filter Function Metric Real Set Classical Topology ValueDistribution
 set_option backward.isDefEq.respectTransparency false

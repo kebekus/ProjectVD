@@ -269,7 +269,7 @@ theorem poisson_formula_of_harmonicOn_scaled_unitDisc {u : ℂ → ℝ} {z : ℂ
       ((1 - ‖z‖ ^ 2) / ‖exp (t * I) - z‖ ^ 2) * u (r * exp (t * I)) := by
   have hfu : ∃ (f : ℂ → ℂ), DifferentiableOn ℂ f (ball 0 1) ∧
     EqOn (fun (z : ℂ) => (f z).re) u (ball 0 1) := by
-    obtain ⟨f, hf⟩ := @harmonic_is_realOfHolomorphic u 0 1 hu
+    obtain ⟨f, hf⟩ := InnerProductSpace.HarmonicOnNhd.exists_analyticOnNhd_ball_re_eq hu
     use f
     exact ⟨hf.1.differentiableOn, hf.2⟩
   obtain ⟨f, hf, hf_eq⟩ := hfu
