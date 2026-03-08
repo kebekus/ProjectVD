@@ -14,12 +14,48 @@ open Complex ComplexConjugate Filter Metric Set Real
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 
-/-- The order is additive when multiplying meromorphic functions. -/
-@[to_fun] theorem meromorphicOrderAt_prod {x : 𝕜} {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → 𝕜}
-    (hf : ∀ i ∈ s, MeromorphicAt (f i) x) :
+theorem meromorphicAt_prod' {x : 𝕜} {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → 𝕜}
+    [DecidableEq ι] (hf : ∀ i ∈ s, MeromorphicAt (f i) x) :
+    MeromorphicAt (∏ i ∈ s, f i) x := by
+  induction s using Finset.induction with
+  | empty =>
+    rw [Finset.prod_empty]
+    apply MeromorphicAt.const
+  | insert a s ha hs =>
+    rw [Finset.prod_insert ha]
+    apply (hf a (Finset.mem_insert_self a s)).mul
+      (hs (fun i hi ↦ hf i (Finset.mem_insert_of_mem hi)))
+
+theorem meromorphicAt_sum' {x : 𝕜} {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → 𝕜}
+    [DecidableEq ι] (hf : ∀ i ∈ s, MeromorphicAt (f i) x) :
+    MeromorphicAt (∑ i ∈ s, f i) x := by
+  induction s using Finset.induction with
+  | empty =>
+    rw [Finset.sum_empty]
+    apply MeromorphicAt.const
+  | insert a s ha hs =>
+    rw [Finset.sum_insert ha]
+    apply (hf a (Finset.mem_insert_self a s)).add
+      (hs (fun i hi ↦ hf i (Finset.mem_insert_of_mem hi)))
+
+/--
+The order is additive in products of meromorphic functions.
+-/
+@[to_fun]
+theorem meromorphicOrderAt_prod {x : 𝕜} {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → 𝕜}
+    [DecidableEq ι] (hf : ∀ i ∈ s, MeromorphicAt (f i) x) :
     meromorphicOrderAt (∏ i ∈ s, f i) x = ∑ i ∈ s, meromorphicOrderAt (f i) x := by
-  --apply Finset.induction_on
-  sorry
+  induction s using Finset.induction with
+  | empty =>
+    rw [Finset.prod_empty, Finset.sum_empty,
+      MeromorphicNFAt.meromorphicOrderAt_eq_zero_iff]
+    simp only [Pi.one_apply, ne_eq, one_ne_zero, not_false_eq_true]
+    apply analyticAt_const.meromorphicNFAt
+  | insert a s ha hs =>
+    simp_all [Finset.sum_insert ha, Finset.prod_insert ha, meromorphicOrderAt_mul
+      (hf a (Finset.mem_insert_self a s))
+      (meromorphicAt_prod' (fun i hi ↦ hf i (Finset.mem_insert_of_mem hi)))]
+
 
 variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
@@ -53,6 +89,7 @@ theorem MeromorphicOn.canonicalDecomposition₀ {f : ℂ → E}
     rw [meromorphicOrderAt_toMeromorphicNFOn hφ (ball_subset_closedBall h₁z)]
     unfold φ
     rw [meromorphicOrderAt_smul]
+    rw [meromorphicOrderAt_prod]
     sorry
     sorry
     sorry
