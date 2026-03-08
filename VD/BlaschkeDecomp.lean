@@ -11,8 +11,10 @@ public import VD.MathlibSubmitted.Blaschke
 
 open Complex ComplexConjugate Filter Metric Set Real
 
-
-variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+variable
+  {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+  {F : Type*} [NormedAddCommGroup F] [NormedSpace 𝕜 F]
 
 theorem meromorphicAt_prod' {x : 𝕜} {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → 𝕜}
     [DecidableEq ι] (hf : ∀ i ∈ s, MeromorphicAt (f i) x) :
@@ -90,6 +92,22 @@ theorem MeromorphicOn.canonicalDecomposition₀ {f : ℂ → E}
     unfold φ
     rw [meromorphicOrderAt_smul]
     rw [meromorphicOrderAt_prod]
+    conv =>
+      left
+      arg 1
+      arg 2
+      intro i
+      rw [meromorphicOrderAt_zpow (meromorphicOn_canonicalFactor R i z (mem_univ z))]
+
+    by_cases h₂z : z ∈ (-divisor f (ball 0 R)).support
+    · sorry
+    · have : MeromorphicOn f (ball 0 R) := by
+        sorry
+      rw [divisor]
+      simp [divisor, h₁z, this] at h₂z
+
+      simp_rw [hz]
+      sorry
     sorry
     sorry
     sorry
