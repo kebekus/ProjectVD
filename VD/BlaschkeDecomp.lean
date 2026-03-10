@@ -66,7 +66,7 @@ variable
 
 theorem MeromorphicOn.canonicalDecomposition₀ {f : ℂ → E}
     (h₁f : MeromorphicOn f (closedBall 0 R))
-    (h₂f : ∀ u : (closedBall 0 R), meromorphicOrderAt f u ≠ ⊤) :
+    (h₂f : ∀ u : (closedBall (0 : ℂ) R), meromorphicOrderAt f u ≠ ⊤) :
     ∃ g : ℂ → E, MeromorphicNFOn g (closedBall 0 R)
       ∧ AnalyticOnNhd ℂ g (ball 0 R)
       ∧ (∀ u : (ball 0 R), g u ≠ 0)
@@ -74,6 +74,8 @@ theorem MeromorphicOn.canonicalDecomposition₀ {f : ℂ → E}
           (∏ᶠ u, (CanonicalFactor R u) ^ (-divisor f (ball 0 R) u)) • g := by
   have η₀ : Set.Finite (-divisor f (ball 0 R)).support := by
     sorry
+  have η₁ : (-divisor f (ball 0 R)).support = (divisor f (ball 0 R)).support := by
+    aesop
   rw [finprod_eq_prod_of_mulSupport_subset_of_finite _ (by aesop) η₀]
   let φ := (∏ i ∈ η₀.toFinset, CanonicalFactor R i ^ (divisor f (ball 0 R)) i) • f
   have hφ : MeromorphicOn φ (closedBall 0 R) := by
@@ -90,23 +92,21 @@ theorem MeromorphicOn.canonicalDecomposition₀ {f : ℂ → E}
     intro z h₁z
     rw [meromorphicOrderAt_toMeromorphicNFOn hφ (ball_subset_closedBall h₁z)]
     unfold φ
-    rw [meromorphicOrderAt_smul]
-    rw [meromorphicOrderAt_prod]
-    conv =>
-      left
-      arg 1
-      arg 2
-      intro i
-      rw [meromorphicOrderAt_zpow (meromorphicOn_canonicalFactor R i z (mem_univ z))]
-
+    rw [meromorphicOrderAt_smul, meromorphicOrderAt_prod]
+    simp_rw [meromorphicOrderAt_zpow (meromorphicOn_canonicalFactor R _ z (mem_univ z))]
     by_cases h₂z : z ∈ (-divisor f (ball 0 R)).support
-    · sorry
+    ·
+      sorry
     · have : MeromorphicOn f (ball 0 R) := by
         sorry
-      rw [divisor]
-      simp [divisor, h₁z, this] at h₂z
-
-      simp_rw [hz]
+      rw [Finset.sum_eq_zero]
+      simp
+      rw [η₁] at h₂z
+      simp at h₂z
+      have := h₂f ⟨z, ball_subset_closedBall h₁z⟩
+      simp_all
+      intro x hx
+      simp_all
       sorry
     sorry
     sorry
