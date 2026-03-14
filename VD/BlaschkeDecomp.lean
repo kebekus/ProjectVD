@@ -5,6 +5,7 @@ Authors: Stefan Kebekus
 -/
 --module
 
+import Mathlib.Analysis.Normed.Module.Connected
 import VD.MathlibSubmitted.Blaschke
 import VD.MathlibSubmitted.MeromorphicProd
 
@@ -71,9 +72,49 @@ theorem MeromorphicOn.canonicalDecomposition₀ {f : ℂ → E} :
     rw [zero_canonicalFactor_iff h₂b hz] at h₁b
     simp_all
 
+theorem MeromorphicOn.exists_meromorphicOrderAt_ne_top_iff_forall_mem {f : ℂ → ℂ} {U : Set ℂ}
+    (hf : MeromorphicOn f U) (hU : IsConnected U) :
+    (∃ u ∈ U, meromorphicOrderAt f u ≠ ⊤) ↔ (∀ u ∈ U, meromorphicOrderAt f u ≠ ⊤) := by
+  convert exists_meromorphicOrderAt_ne_top_iff_forall hf hU
+  <;> simp
+
+@[simp]
+lemma Function.locallyFinsuppWithin.coe_sum {U : Set ℂ} {s : Finset ℂ} {F : ℂ → Function.locallyFinsuppWithin U ℤ} :
+    (↑(∑ n ∈ s, F n) : ℂ → ℤ) = ∑ n ∈ s, (F n : ℂ → ℤ) := by
+  induction s using Finset.induction with
+  | empty => simp_all
+  | insert => simp_all
+
+lemma xx {U : Set ℂ} {F : Function.locallyFinsuppWithin U ℤ} (h : F.support.Finite) :
+    ∑ x ∈ h.toFinset, (F x) • ((Function.locallyFinsuppWithin.single x (1 : ℤ)).restrict (subset_univ U))
+      = F := by
+  ext z
+  simp [Finset.sum_apply]
+  by_cases hz : z ∈ F.support
+  · have : z ∈ h.toFinset := by
+      simp_all
+    rw [← Finset.add_sum_erase _ _ this]
+    rw [Finset.sum_eq_zero]
+    rw [Function.locallyFinsuppWithin.restrict_apply]
+    by_cases hz : z ∈ U
+    · simp_all
+    · simp_all
+    intro x hx
+    rw [Function.locallyFinsuppWithin.restrict_apply]
+    by_cases hz : z ∈ U
+    · simp_all
+      tauto
+    · simp_all
+  · simp_all
+    simp_rw [Function.locallyFinsuppWithin.restrict_apply]
+    by_cases h : z ∈ U
+    · simp_all
+    · simp_all
+
 theorem MeromorphicOn.canonicalDecomposition₁ {f : ℂ → E}
     (h₁f : MeromorphicOn f (closedBall 0 R)) :
-    divisor (∏ᶠ u, (CanonicalFactor R u) ^ (-divisor f (ball 0 R) u)) (ball 0 R) = 0 := by
+    divisor (∏ᶠ u, (CanonicalFactor R u) ^ (-divisor f (ball 0 R) u)) (ball 0 R)
+      = (divisor f (ball 0 R)) := by
   have η₀ : Set.Finite (-divisor f (ball 0 R)).support := by
     apply Set.Finite.subset (s := (-divisor f (closedBall 0 R)).support)
     · exact (-divisor f (closedBall 0 R)).finiteSupport (isCompact_closedBall 0 R)
@@ -90,14 +131,38 @@ theorem MeromorphicOn.canonicalDecomposition₁ {f : ℂ → E}
       aesop
   rw [finprod_eq_prod_of_mulSupport_subset_of_finite _ (by aesop) η₀]
   rw [MeromorphicOn.divisor_prod]
+  simp_rw [MeromorphicOn.divisor_zpow (fun z hz ↦ meromorphicOn_canonicalFactor R _ z (mem_univ z))]
+  have := xx η₀
   conv =>
-    left
-    arg 2
-    intro x
-    rw [MeromorphicOn.divisor_zpow (fun z hz ↦ meromorphicOn_canonicalFactor R x z (mem_univ z))]
-  sorry
-  sorry
-  sorry
+    right
+    rw [← neg_neg (divisor f (ball 0 R))]
+    rw [← this]
+    rw [← Finset.sum_neg_distrib]
+  apply Finset.sum_congr rfl
+  intro x hx
+  rw [divisor_canonicalFactor]
+  simp
+  by_contra hx
+  simp_all
+  · intro z hz
+    apply MeromorphicOn.zpow
+    intro x hx
+    exact meromorphicOn_canonicalFactor R z x (mem_univ x)
+  · intro z hz
+    have : z ∈ ball 0 R := by
+      simp at hz
+      by_contra h
+      exact hz ((divisor f (ball 0 R)).apply_eq_zero_of_notMem h)
+    rw [← MeromorphicOn.exists_meromorphicOrderAt_ne_top_iff_forall_mem]
+    use z, this
+    rw [meromorphicOrderAt_zpow]
+    rw [meromorphicOrderAt_canonicalFactor this]
+    exact Ne.symm (not_eq_of_beq_eq_false rfl)
+    exact meromorphicOn_canonicalFactor R z z (mem_univ z)
+    apply MeromorphicOn.zpow
+    intro x hx
+    exact meromorphicOn_canonicalFactor R z x (mem_univ x)
+    apply Metric.isConnected_ball (pos_of_mem_ball this)
 
 theorem MeromorphicOn.canonicalDecomposition₀₀ {f : ℂ → E}
     (h₁f : MeromorphicOn f (closedBall 0 R))
