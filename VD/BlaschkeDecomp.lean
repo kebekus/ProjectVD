@@ -313,7 +313,13 @@ theorem MeromorphicOn.canonicalDecomposition₀₀ {f : ℂ → E}
     · trans (∏ i ∈ η₀.toFinset, CanonicalFactor R i ^ (-(divisor f (ball 0 R)) i)) • φ
       · unfold φ
         rw [finprod_eq_prod_of_mulSupport_subset_of_finite _ _ η₀]
-        filter_upwards with a
+        have : (-divisor f (ball 0 R)).supportᶜ ∈ codiscreteWithin (closedBall 0 R) := by
+          have := Set.Finite.compl_mem_codiscrete η₀
+          unfold codiscrete at this
+          have := Filter.codiscreteWithin.mono (subset_univ (closedBall (0 : ℂ) R))
+          apply this
+          apply Set.Finite.compl_mem_codiscrete η₀
+        filter_upwards [this, Filter.self_mem_codiscreteWithin (closedBall 0 R)] with a ha h₂a
         simp only [Pi.smul_apply', Finset.prod_apply, Pi.pow_apply]
         rw [← smul_assoc]
         rw [← Finset.prod_smul]
@@ -324,8 +330,11 @@ theorem MeromorphicOn.canonicalDecomposition₀₀ {f : ℂ → E}
         rw [← zpow_add' (a := CanonicalFactor R x a)]
         simp
         simp_all
-
-        sorry
+        apply nonzero_canonicalFactor'
+        · by_contra h
+          simp_all
+        · simp_all
+        grind
         · intro i
           contrapose
           simp
