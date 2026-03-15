@@ -18,8 +18,25 @@ variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
   {R : ℝ} {c w : ℂ}
 
-/--
-Material on the canonical factor
+/-!
+## Other Material
+-/
+
+theorem MeromorphicOn.exists_meromorphicOrderAt_ne_top_iff_forall_mem {f : ℂ → ℂ} {U : Set ℂ}
+    (hf : MeromorphicOn f U) (hU : IsConnected U) :
+    (∃ u ∈ U, meromorphicOrderAt f u ≠ ⊤) ↔ (∀ u ∈ U, meromorphicOrderAt f u ≠ ⊤) := by
+  convert exists_meromorphicOrderAt_ne_top_iff_forall hf hU
+  <;> simp
+
+lemma meromorphicOrderAt_finprod_ne_top {z : ℂ} {F : ℂ → ℂ → ℂ}
+    (h₁ : ∀ c, MeromorphicAt (F c) z) (h₂ : ∀ c, meromorphicOrderAt (F c) z ≠ ⊤) :
+    meromorphicOrderAt (∏ᶠ c, F c) z ≠ ⊤ := by
+  by_cases hF : Function.HasFiniteMulSupport F
+  · simpa [finprod_eq_prod F hF, meromorphicOrderAt_prod (fun x _ ↦ h₁ x)] using fun x _ ↦ h₂ x
+  simp [finprod_of_not_hasFiniteMulSupport hF]
+
+/-!
+## Material on the canonical factor
 -/
 theorem zero_canonicalFactor_iff {z : ℂ} (hw : w ∈ ball 0 R) (hz : z ∈ ball 0 R) :
     CanonicalFactor R w z = 0 ↔ z = w := by
@@ -48,38 +65,53 @@ theorem divisor_canonicalFactor (hw : w ∈ ball 0 R) :
     exact fun z hz ↦ meromorphicOn_canonicalFactor R w z (mem_univ z)
   · simp_all
 
-theorem MeromorphicOn.canonicalDecomposition₀ {f : ℂ → E} :
-    MeromorphicNFOn (∏ᶠ u, (CanonicalFactor R u) ^ (-divisor f (ball 0 R) u)) (ball 0 R) := by
+lemma meromorphicOrderAt_canonicalFactor_ne_top (R : ℝ) (w : ℂ) (hR : 0 < R) :
+    ∀ z, meromorphicOrderAt (CanonicalFactor R w) z ≠ ⊤ := by
+  suffices h : ∀ z ∈ univ, meromorphicOrderAt (CanonicalFactor R w) z ≠ ⊤ from
+    fun z ↦ h z (mem_univ z)
+  rw [← (meromorphicOn_canonicalFactor R w).exists_meromorphicOrderAt_ne_top_iff_forall_mem
+    isConnected_univ]
+  use 0, mem_univ 0
+  by_cases hw : w = 0
+  · simp_all [meromorphicOrderAt_canonicalFactor (mem_ball_self hR)]
+  have : meromorphicOrderAt (CanonicalFactor R w) 0 = 0 := by
+    rw [MeromorphicNFAt.meromorphicOrderAt_eq_zero_iff]
+    · simp_all [CanonicalFactor, ne_of_gt hR]
+    · apply AnalyticAt.meromorphicNFAt
+      apply analyticOnNhd_canonicalFactor
+      grind
+  simp_all
+
+/-!
+## Material starts here
+-/
+
+theorem MeromorphicOn.canonicalDecomposition₀ (F : Function.locallyFinsuppWithin (ball 0 R) ℤ) :
+    MeromorphicNFOn (∏ᶠ u, (CanonicalFactor R u) ^ (F u)) (ball 0 R) := by
   classical
   apply meromorphicNFOn_finprod
   · intro w
     by_cases hw : w ∈ ball 0 R
     · apply MeromorphicNFOn.zpow (fun z _ ↦ (meromorphicNFOn_canonicalFactor hw) (mem_univ z))
     · simp only [hw, not_false_eq_true, Function.locallyFinsuppWithin.apply_eq_zero_of_notMem,
-        neg_zero, zpow_zero]
+        zpow_zero]
       apply AnalyticOnNhd.meromorphicNFOn
       apply analyticOnNhd_const
   · intro z hz a ha b hb
-    simp_all only [Pi.pow_apply, zpow_neg, inv_eq_zero, mem_setOf_eq]
+    simp_all only [Pi.pow_apply, mem_setOf_eq]
     have h₁a := eq_zero_of_zpow_eq_zero ha
     have h₂a : a ∈ ball 0 R := by
-      have : divisor f (ball 0 R) b ≠ 0 := by aesop
-      by_contra h
-      simp_all
-    have h₁b := eq_zero_of_zpow_eq_zero hb
-    have h₂b : b ∈ ball 0 R := by
-      have : divisor f (ball 0 R) b ≠ 0 := by aesop
+      have : F b ≠ 0 := by aesop
       by_contra h
       simp_all
     rw [zero_canonicalFactor_iff h₂a hz] at h₁a
+    have h₁b := eq_zero_of_zpow_eq_zero hb
+    have h₂b : b ∈ ball 0 R := by
+      have : F b ≠ 0 := by aesop
+      by_contra h
+      simp_all
     rw [zero_canonicalFactor_iff h₂b hz] at h₁b
-    simp_all
-
-theorem MeromorphicOn.exists_meromorphicOrderAt_ne_top_iff_forall_mem {f : ℂ → ℂ} {U : Set ℂ}
-    (hf : MeromorphicOn f U) (hU : IsConnected U) :
-    (∃ u ∈ U, meromorphicOrderAt f u ≠ ⊤) ↔ (∀ u ∈ U, meromorphicOrderAt f u ≠ ⊤) := by
-  convert exists_meromorphicOrderAt_ne_top_iff_forall hf hU
-  <;> simp
+    aesop
 
 theorem MeromorphicOn.canonicalDecomposition₁ {f : ℂ → E}
     (h₁f : MeromorphicOn f (closedBall 0 R)) :
@@ -131,36 +163,6 @@ theorem MeromorphicOn.canonicalDecomposition₁ {f : ℂ → E}
     intro x hx
     exact meromorphicOn_canonicalFactor R z x (mem_univ x)
     apply Metric.isConnected_ball (pos_of_mem_ball this)
-
-lemma tt {z : ℂ} {F : ℂ → ℂ → ℂ} (h₁ : ∀ c, MeromorphicAt (F c) z) (h₂ : ∀ c, meromorphicOrderAt (F c) z ≠ ⊤) :
-    meromorphicOrderAt (∏ᶠ c, F c) z ≠ ⊤ := by
-  by_cases hF : Function.HasFiniteMulSupport F
-  · rw [finprod_eq_prod F hF]
-    rw [meromorphicOrderAt_prod]
-    simp
-    intro x hx
-    apply h₂ x
-    intro z₁ hz₁
-    exact h₁ z₁
-  rw [finprod_of_not_hasFiniteMulSupport hF]
-  simp
-
-lemma ss (R : ℝ) (w : ℂ) (hR : 0 < R) :
-    ∀ z, meromorphicOrderAt (CanonicalFactor R w) z ≠ ⊤ := by
-  suffices h : ∀ z ∈ univ, meromorphicOrderAt (CanonicalFactor R w) z ≠ ⊤ from
-    fun z ↦ h z (mem_univ z)
-  rw [← (meromorphicOn_canonicalFactor R w).exists_meromorphicOrderAt_ne_top_iff_forall_mem
-    isConnected_univ]
-  use 0, mem_univ 0
-  by_cases hw : w = 0
-  · simp_all [meromorphicOrderAt_canonicalFactor (mem_ball_self hR)]
-  have : meromorphicOrderAt (CanonicalFactor R w) 0 = 0 := by
-    rw [MeromorphicNFAt.meromorphicOrderAt_eq_zero_iff]
-    · simp_all [CanonicalFactor, ne_of_gt hR]
-    · apply AnalyticAt.meromorphicNFAt
-      apply analyticOnNhd_canonicalFactor
-      grind
-  simp_all
 
 theorem MeromorphicOn.canonicalDecomposition₀₀ {f : ℂ → E}
     (h₁f : MeromorphicOn f (closedBall 0 R))
@@ -215,13 +217,13 @@ theorem MeromorphicOn.canonicalDecomposition₀₀ {f : ℂ → E}
     apply h₁f x
     apply ball_subset_closedBall hx
     · intro z hz
-      apply tt
+      apply meromorphicOrderAt_finprod_ne_top
       · intro c
         apply MeromorphicAt.zpow
         apply meromorphicOn_canonicalFactor _ _ _ (mem_univ z)
       · intro c
         rw [meromorphicOrderAt_zpow]
-        have := ss R c (pos_of_mem_ball hz) z
+        have := meromorphicOrderAt_canonicalFactor_ne_top R c (pos_of_mem_ball hz) z
         lift meromorphicOrderAt (CanonicalFactor R c) z to ℤ using this with ℓ
         rw [← WithTop.coe_mul]
         exact WithTop.coe_ne_top
