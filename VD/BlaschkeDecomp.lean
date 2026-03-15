@@ -14,6 +14,8 @@ import VD.MathlibSubmitted.LocallyFinsupp
 
 open Complex ComplexConjugate Filter Metric Set Real
 
+set_option backward.isDefEq.respectTransparency false
+
 variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
   {R : ℝ} {c w : ℂ}
@@ -21,6 +23,13 @@ variable
 /-!
 ## Other Material
 -/
+
+theorem nonneg_of_mem_closedBall {z c : ℂ} {R : ℝ} (h : z ∈ closedBall c R) :
+    0 ≤ R := by
+  rw [mem_closedBall_iff_norm] at h
+  trans ‖z - c‖
+  · exact Complex.norm_nonneg (z - c)
+  · exact h
 
 theorem MeromorphicOn.exists_meromorphicOrderAt_ne_top_iff_forall_mem {f : ℂ → ℂ} {U : Set ℂ}
     (hf : MeromorphicOn f U) (hU : IsConnected U) :
@@ -180,14 +189,11 @@ theorem MeromorphicOn.canonicalDecomposition₀₀ {f : ℂ → E}
       apply AnalyticAt.meromorphicNFAt
       apply analyticAt_const
     · filter_upwards [Filter.self_mem_codiscreteWithin (closedBall 0 R)] with a ha
-      rw [closedBall_eq_empty]
-      rw [closedBall_eq_]
-      have : ‖a‖ ≤ 0 := by
-        sorry
       have : a = 0 := by
+        have := nonneg_of_mem_closedBall ha
+        have : R = 0 := by
+          grind
         simp_all
-
-        sorry
       rw [this]
   have η₀ : Set.Finite (-divisor f (ball 0 R)).support := by
     apply Set.Finite.subset (s := (-divisor f (closedBall 0 R)).support)
@@ -265,7 +271,7 @@ theorem MeromorphicOn.canonicalDecomposition₀₀ {f : ℂ → E}
       · intro c
         rw [meromorphicOrderAt_zpow]
         have : 0 < R := by
-          sorry
+          simp_all
         have := meromorphicOrderAt_canonicalFactor_ne_top R c this z
         lift meromorphicOrderAt (CanonicalFactor R c) z to ℤ using this with ℓ
         rw [← WithTop.coe_mul]
@@ -304,15 +310,26 @@ theorem MeromorphicOn.canonicalDecomposition₀₀ {f : ℂ → E}
       apply (h₂g (ball_subset_closedBall hx)).meromorphicAt
       exact hz
       apply (h₂g (ball_subset_closedBall hz))
-    ·
-      sorry
+    · trans (∏ i ∈ η₀.toFinset, CanonicalFactor R i ^ (-(divisor f (ball 0 R)) i)) • φ
+      · unfold φ
+        rw [finprod_eq_prod_of_mulSupport_subset_of_finite _ _ η₀]
+        filter_upwards with a
+        simp only [Pi.smul_apply', Finset.prod_apply, Pi.pow_apply]
+        rw [← smul_assoc]
+        rw [← Finset.prod_smul]
+        rw [Finset.prod_eq_one]
+        simp
+        intro x hx
+        rw [smul_eq_mul]
+        rw [← zpow_add' (a := CanonicalFactor R x a)]
+        simp
+        simp_all
 
-
-theorem MeromorphicOn.canonicalDecomposition {f : ℂ → E}
-    (h₁f : MeromorphicOn f (closedBall 0 R))
-    (h₂f : ∀ u : (closedBall 0 R), meromorphicOrderAt f u ≠ ⊤) :
-    ∃ g : ℂ → E, AnalyticOnNhd ℂ g (closedBall 0 R) ∧ (∀ u : (closedBall 0 R), g u ≠ 0) ∧
-      f =ᶠ[codiscreteWithin (closedBall 0 R)]
-        (∏ᶠ u, (· - u) ^ divisor f (sphere 0 R) u)
-          • (∏ᶠ u, (CanonicalFactor R u) ^ (-divisor f (ball 0 R) u)) • g := by
-  sorry
+        sorry
+        · intro i
+          contrapose
+          simp
+          intro hi
+          simp_all
+      · filter_upwards [toMeromorphicNFOn_eqOn_codiscrete hφ] with z hz
+        simp_all [g]
