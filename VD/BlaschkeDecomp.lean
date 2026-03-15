@@ -172,6 +172,23 @@ theorem MeromorphicOn.canonicalDecomposition₀₀ {f : ℂ → E}
       ∧ (∀ u ∈ (ball 0 R), g u ≠ 0)
       ∧ f =ᶠ[codiscreteWithin (closedBall 0 R)]
           (∏ᶠ u, (CanonicalFactor R u) ^ (-divisor f (ball 0 R) u)) • g := by
+  by_cases hR : R ≤ 0
+  · simp_all [ball_eq_empty.2 hR]
+    use fun z ↦ f 0
+    constructor
+    · intro z hz
+      apply AnalyticAt.meromorphicNFAt
+      apply analyticAt_const
+    · filter_upwards [Filter.self_mem_codiscreteWithin (closedBall 0 R)] with a ha
+      rw [closedBall_eq_empty]
+      rw [closedBall_eq_]
+      have : ‖a‖ ≤ 0 := by
+        sorry
+      have : a = 0 := by
+        simp_all
+
+        sorry
+      rw [this]
   have η₀ : Set.Finite (-divisor f (ball 0 R)).support := by
     apply Set.Finite.subset (s := (-divisor f (closedBall 0 R)).support)
     · exact (-divisor f (closedBall 0 R)).finiteSupport (isCompact_closedBall 0 R)
@@ -199,7 +216,7 @@ theorem MeromorphicOn.canonicalDecomposition₀₀ {f : ℂ → E}
     intro z₁ hz₁
     apply meromorphicOn_canonicalFactor _ _ _ (mem_univ z₁)
   let g := toMeromorphicNFOn φ (closedBall 0 R)
-  have h₁g := meromorphicNFOn_toMeromorphicNFOn φ (closedBall 0 R)
+  have h₁g : MeromorphicNFOn g (closedBall 0 R) := meromorphicNFOn_toMeromorphicNFOn φ (closedBall 0 R)
   have h₃g : divisor g (ball 0 R) = 0 := by
     unfold g
     rw [MeromorphicOn.divisor_congr_codiscreteWithin (f₂ := φ)]
@@ -234,46 +251,61 @@ theorem MeromorphicOn.canonicalDecomposition₀₀ {f : ℂ → E}
     apply (toMeromorphicNFOn_eqOn_codiscrete (f := φ) _).symm
     exact hφ
     exact isOpen_ball
-  have h₂g : ∀ z ∈ ball 0 R, meromorphicOrderAt g z = 0 := by
-    intro z h₁z
-    rw [meromorphicOrderAt_toMeromorphicNFOn hφ (ball_subset_closedBall h₁z)]
+  have h₂g : MeromorphicNFOn g (closedBall 0 R) := meromorphicNFOn_toMeromorphicNFOn φ (closedBall 0 R)
+  have h₄g : ∀ z ∈ closedBall 0 R, meromorphicOrderAt g z ≠ ⊤ := by
+    intro z hz
+    rw [meromorphicOrderAt_toMeromorphicNFOn]
     unfold φ
-    rw [meromorphicOrderAt_smul, meromorphicOrderAt_prod]
-    simp_rw [meromorphicOrderAt_zpow (meromorphicOn_canonicalFactor R _ z (mem_univ z))]
-    by_cases h₂z : z ∈ (-divisor f (ball 0 R)).support
-    ·
-      sorry
-    · have : MeromorphicOn f (ball 0 R) := by
-        sorry
-      rw [Finset.sum_eq_zero]
-      simp
-      rw [η₁] at h₂z
-      simp at h₂z
-      have := h₂f ⟨z, ball_subset_closedBall h₁z⟩
-      simp_all
-      intro x hx
-      simp_all
-      sorry
-    sorry
-    sorry
-    sorry
+    rw [meromorphicOrderAt_smul]
+    have : meromorphicOrderAt (∏ᶠ (c : ℂ), CanonicalFactor R c ^ (divisor f (ball 0 R)) c) z ≠ ⊤ := by
+      apply meromorphicOrderAt_finprod_ne_top
+      · intro c
+        apply MeromorphicAt.zpow
+        apply meromorphicOn_canonicalFactor _ _ _ (mem_univ z)
+      · intro c
+        rw [meromorphicOrderAt_zpow]
+        have : 0 < R := by
+          sorry
+        have := meromorphicOrderAt_canonicalFactor_ne_top R c this z
+        lift meromorphicOrderAt (CanonicalFactor R c) z to ℤ using this with ℓ
+        rw [← WithTop.coe_mul]
+        exact WithTop.coe_ne_top
+        · exact meromorphicOn_canonicalFactor R c z (mem_univ z)
+    have : meromorphicOrderAt f z ≠ ⊤ := h₂f ⟨z, hz⟩
+    simp_all
+    apply meromorphicAt_finprod
+    intro x
+    apply MeromorphicAt.zpow
+    exact meromorphicOn_canonicalFactor _ _ z (mem_univ z)
+    exact h₁f z hz
+    exact hφ
+    exact hz
   use g, h₁g
   constructor
   · intro z hz
     rw [← MeromorphicNFAt.meromorphicOrderAt_nonneg_iff_analyticAt
       (h₁g (ball_subset_closedBall hz))]
-    rw [meromorphicOrderAt_toMeromorphicNFOn hφ (ball_subset_closedBall hz)]
-    unfold φ
-    rw [meromorphicOrderAt_smul]
-    rw [meromorphicOrderAt_prod]
-    sorry
-    sorry
-    sorry
-    sorry
-
+    have : divisor g (ball 0 R) z = 0 := by simp [h₃g]
+    rw [divisor_apply] at this
+    simp_all
+    rcases this
+    <;> simp_all
+    intro x hx
+    apply (h₂g (ball_subset_closedBall hx)).meromorphicAt
+    exact hz
   · constructor
-    · sorry
-    · sorry
+    · intro z hz
+      rw [← MeromorphicNFAt.meromorphicOrderAt_eq_zero_iff]
+      have : divisor g (ball 0 R) z = 0 := by simp [h₃g]
+      rw [divisor_apply] at this
+      have := h₄g z (ball_subset_closedBall hz)
+      simp_all
+      intro x hx
+      apply (h₂g (ball_subset_closedBall hx)).meromorphicAt
+      exact hz
+      apply (h₂g (ball_subset_closedBall hz))
+    ·
+      sorry
 
 
 theorem MeromorphicOn.canonicalDecomposition {f : ℂ → E}
