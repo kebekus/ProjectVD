@@ -164,6 +164,11 @@ theorem MeromorphicOn.canonicalDecomposition₁₁ {f : ℂ → E} (hR : 0 < R):
     rw [← WithTop.coe_mul]
     exact WithTop.coe_ne_top
 
+/--
+Canonical decomposition: A meromorphic function on a disk is equal, up to
+modification over a discrete set, to a product of canonical factors and a
+function without zeros or poles in the interior of the disk.
+-/
 theorem MeromorphicOn.canonicalDecomposition₀₀ {f : ℂ → E}
     (h₁f : MeromorphicOn f (closedBall 0 R))
     (h₂f : ∀ u : (closedBall (0 : ℂ) R), meromorphicOrderAt f u ≠ ⊤) :
