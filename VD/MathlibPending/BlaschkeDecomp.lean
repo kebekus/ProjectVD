@@ -6,7 +6,7 @@ Authors: Stefan Kebekus
 --module
 
 import Mathlib.Analysis.Normed.Module.Connected
-import VD.MathlibSubmitted.Blaschke
+import Mathlib.Analysis.Complex.CanonicalDecomposition
 import VD.MathlibSubmitted.MeromorphicProd
 import VD.MathlibSubmitted.LocallyFinsupp
 
@@ -55,11 +55,11 @@ lemma meromorphicOrderAt_finprod_ne_top {z : ℂ} {F : ℂ → ℂ → ℂ}
 The canonical factor `CanonicalFactor R w` vanishes only at `w`.
 -/
 theorem zero_canonicalFactor_iff {z : ℂ} (hw : w ∈ ball 0 R) (hz : z ∈ ball 0 R) :
-    CanonicalFactor R w z = 0 ↔ z = w := by
+    canonicalFactor R w z = 0 ↔ z = w := by
   constructor
   · intro h
     by_contra h₁
-    have := canonicalFactor_ne_zero hw (ball_subset_closedBall hz) h₁
+    have := Complex.canonicalFactor_ne_zero hw (ball_subset_closedBall hz) h₁
     tauto
   · simp_all
 
@@ -67,17 +67,17 @@ theorem zero_canonicalFactor_iff {z : ℂ} (hw : w ∈ ball 0 R) (hz : z ∈ bal
 The divisor of the canonical factor `CanonicalFactor R w` is `-w`.
 -/
 theorem divisor_canonicalFactor (hw : w ∈ ball 0 R) :
-    MeromorphicOn.divisor (CanonicalFactor R w) (ball 0 R)
+    MeromorphicOn.divisor (canonicalFactor R w) (ball 0 R)
       = -(locallyFinsuppWithin.single w 1).restrict (subset_univ (ball 0 R)) := by
   ext z
   by_cases hz : z ∈ ball 0 R
-  · rw [MeromorphicOn.divisor_apply (fun z hz ↦ meromorphicOn_canonicalFactor R w z (mem_univ z)) hz]
+  · rw [MeromorphicOn.divisor_apply (fun z hz ↦ Complex.meromorphicOn_canonicalFactor R w z (mem_univ z)) hz]
     by_cases h₂z : z = w
     · subst h₂z
       rw [meromorphicOrderAt_canonicalFactor hz]
       have : (-1 : WithTop ℤ).untop₀ = (-1 : ℤ) := by rfl
       simp_all [locallyFinsuppWithin.restrict_apply]
-    · have : meromorphicOrderAt (CanonicalFactor R w) z = 0 := by
+    · have : meromorphicOrderAt (canonicalFactor R w) z = 0 := by
         rw [(meromorphicNFOn_canonicalFactor hw (mem_univ z)).meromorphicOrderAt_eq_zero_iff]
         exact canonicalFactor_ne_zero hw (ball_subset_closedBall hz) h₂z
       simp [this, h₂z, locallyFinsuppWithin.restrict_apply, hz]
@@ -87,17 +87,17 @@ theorem divisor_canonicalFactor (hw : w ∈ ball 0 R) :
 Canonical factors are nowhere locally constant zero.
 -/
 lemma meromorphicOrderAt_canonicalFactor_ne_top {z : ℂ} {R : ℝ} (w : ℂ) (hR : 0 < R) :
-    meromorphicOrderAt (CanonicalFactor R w) z ≠ ⊤ := by
-  suffices h : ∀ z ∈ univ, meromorphicOrderAt (CanonicalFactor R w) z ≠ ⊤ from
+    meromorphicOrderAt (canonicalFactor R w) z ≠ ⊤ := by
+  suffices h : ∀ z ∈ univ, meromorphicOrderAt (canonicalFactor R w) z ≠ ⊤ from
     h z (mem_univ z)
   rw [← (meromorphicOn_canonicalFactor R w).exists_meromorphicOrderAt_ne_top_iff_forall_mem
     isConnected_univ]
   use 0, mem_univ 0
   by_cases hw : w = 0
   · simp_all [meromorphicOrderAt_canonicalFactor (mem_ball_self hR)]
-  have : meromorphicOrderAt (CanonicalFactor R w) 0 = 0 := by
+  have : meromorphicOrderAt (canonicalFactor R w) 0 = 0 := by
     rw [MeromorphicNFAt.meromorphicOrderAt_eq_zero_iff]
-    · simp_all [CanonicalFactor, ne_of_gt hR]
+    · simp_all [canonicalFactor, ne_of_gt hR]
     · apply AnalyticAt.meromorphicNFAt
       apply analyticOnNhd_canonicalFactor
       grind
@@ -114,7 +114,7 @@ variable
 
 -- Auxiliary lemma for the proof of the canonical decomposition theorem
 private lemma canonicalDecomposition_aux₁ (F : locallyFinsuppWithin (ball 0 R) ℤ) :
-    MeromorphicNFOn (∏ᶠ u, (CanonicalFactor R u) ^ (F u)) (ball 0 R) := by
+    MeromorphicNFOn (∏ᶠ u, (canonicalFactor R u) ^ (F u)) (ball 0 R) := by
   classical
   apply meromorphicNFOn_finprod
   · intro w
@@ -136,8 +136,8 @@ private lemma canonicalDecomposition_aux₁ (F : locallyFinsuppWithin (ball 0 R)
       zero_canonicalFactor_iff h₂b hz, zero_canonicalFactor_iff h₂a hz]
 
 -- Auxiliary lemma for the proof of the canonical decomposition theorem
-theorem canonicalDecomposition_aux₂ (h₁f : MeromorphicOn f (closedBall 0 R)) :
-    divisor (∏ᶠ u, (CanonicalFactor R u) ^ (divisor f (ball 0 R) u)) (ball 0 R)
+private lemma canonicalDecomposition_aux₂ (h₁f : MeromorphicOn f (closedBall 0 R)) :
+    divisor (∏ᶠ u, (canonicalFactor R u) ^ (divisor f (ball 0 R) u)) (ball 0 R)
       = -(divisor f (ball 0 R)) := by
   have η₀ : (-divisor f (ball 0 R)).support.Finite := by
     apply ((-divisor f (closedBall 0 R)).finiteSupport (isCompact_closedBall 0 R)).subset
@@ -161,19 +161,19 @@ theorem canonicalDecomposition_aux₂ (h₁f : MeromorphicOn f (closedBall 0 R))
     apply zpow (fun x hx ↦ meromorphicOn_canonicalFactor R z x (mem_univ x))
   · intro z hz x hx
     rw [meromorphicOrderAt_zpow (meromorphicOn_canonicalFactor R z x (mem_univ x))]
-    lift (meromorphicOrderAt (CanonicalFactor R z) x) to ℤ using
+    lift (meromorphicOrderAt (canonicalFactor R z) x) to ℤ using
       (meromorphicOrderAt_canonicalFactor_ne_top z (pos_of_mem_ball hx)) with ℓ
     simp [← WithTop.coe_mul]
 
 -- Auxiliary lemma for the proof of the canonical decomposition theorem
 private lemma canonicalDecomposition_aux₃ {z : ℂ} (hR : 0 < R) :
     meromorphicOrderAt
-      (∏ᶠ (c : ℂ), CanonicalFactor R c ^ (divisor f (ball 0 R)) c) z ≠ ⊤ := by
+      (∏ᶠ (c : ℂ), canonicalFactor R c ^ (divisor f (ball 0 R)) c) z ≠ ⊤ := by
   apply meromorphicOrderAt_finprod_ne_top
     (fun _ ↦ MeromorphicAt.zpow (meromorphicOn_canonicalFactor _ _ _ (mem_univ z)) _)
   intro c
   rw [meromorphicOrderAt_zpow (meromorphicOn_canonicalFactor R c z (mem_univ z))]
-  lift meromorphicOrderAt (CanonicalFactor R c) z to ℤ using
+  lift meromorphicOrderAt (canonicalFactor R c) z to ℤ using
     (meromorphicOrderAt_canonicalFactor_ne_top c hR) with ℓ
   simp [← WithTop.coe_mul]
 
@@ -188,7 +188,7 @@ theorem canonicalDecomposition
     ∃ g : ℂ → E, MeromorphicNFOn g (closedBall 0 R)
       ∧ (∀ u ∈ (ball 0 R), g u ≠ 0)
       ∧ f =ᶠ[codiscreteWithin (closedBall 0 R)]
-          (∏ᶠ u, (CanonicalFactor R u) ^ (-divisor f (ball 0 R) u)) • g := by
+          (∏ᶠ u, (canonicalFactor R u) ^ (-divisor f (ball 0 R) u)) • g := by
   by_cases hR : R ≤ 0
   · simp_all [ball_eq_empty.2 hR]
     use fun z ↦ f 0, fun z hz ↦ AnalyticAt.meromorphicNFAt analyticAt_const
@@ -206,7 +206,7 @@ theorem canonicalDecomposition
     rwa [divisor_apply (h₁f.mono_set ball_subset_closedBall) (by aesop)] at hz
   have η₁ : (-divisor f (ball 0 R)).support = (divisor f (ball 0 R)).support := by aesop
   rw [finprod_eq_prod_of_mulSupport_subset_of_finite _ (by aesop) η₀]
-  let φ := (∏ᶠ c, CanonicalFactor R c ^ (divisor f (ball 0 R)) c) • f
+  let φ := (∏ᶠ c, canonicalFactor R c ^ (divisor f (ball 0 R)) c) • f
   have hφ : MeromorphicOn φ (closedBall 0 R) := by
     apply smul (meromorphicOn_finprod _) h₁f
     exact fun z ↦ zpow (fun z₁ hz₁ ↦ meromorphicOn_canonicalFactor _ _ _ (mem_univ z₁)) _
@@ -237,7 +237,7 @@ theorem canonicalDecomposition
     have : divisor g (ball 0 R) z = 0 := by simp [h₃g]
     rw [divisor_apply (fun x hx ↦ (h₂g (ball_subset_closedBall hx)).meromorphicAt) hz] at this
     simpa [h₄g z (ball_subset_closedBall hz)] using this
-  · trans (∏ i ∈ η₀.toFinset, CanonicalFactor R i ^ (-(divisor f (ball 0 R)) i)) • φ
+  · trans (∏ i ∈ η₀.toFinset, canonicalFactor R i ^ (-(divisor f (ball 0 R)) i)) • φ
     · unfold φ
       rw [finprod_eq_prod_of_mulSupport_subset_of_finite _ _ η₀]
       filter_upwards [Filter.codiscreteWithin.mono (by tauto) η₀.compl_mem_codiscrete,

@@ -1,4 +1,4 @@
-import VD.MathlibSubmitted.Blaschke
+import Mathlib.Analysis.Meromorphic.NormalForm
 
 variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜]
