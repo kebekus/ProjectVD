@@ -5,9 +5,9 @@ import VD.CartanExperimentation
 import VD.CharacteristicMonotone
 import VD.LinearDiffOp.Basic
 import VD.LinearDiffOp.Regularity
+import VD.MathlibPending.BlaschkeDecomp
 import VD.MathlibSubmitted.Aux
 import VD.MathlibSubmitted.Blaschke
-import VD.MathlibSubmitted.BlaschkeDecomp
 import VD.MathlibSubmitted.HarmonicPoisson
 import VD.MathlibSubmitted.LocallyFinsupp
 import VD.MathlibSubmitted.MeromorphicProd
