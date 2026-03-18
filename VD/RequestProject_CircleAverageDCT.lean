@@ -187,7 +187,7 @@ lemma intervalIntegrable_log_norm_circleMap_sub (R : ℝ) (ρ : ℂ) :
                 rw [ ← intervalIntegrable_iff_integrableOn_Ioc_of_le ( by linarith [ Real.pi_pos ] ) ] at *;
                 rw [ intervalIntegrable_iff_integrableOn_Ioo_of_le ( by linarith [ Real.pi_pos ] ) ] at *;
                 rw [ ← MeasureTheory.integrable_indicator_iff ( measurableSet_Ioo ) ] at *;
-                convert h_integrable.comp_sub_left Real.pi using 1 ; ext ; simp +decide [ Set.indicator ] ; ring;
+                convert h_integrable.comp_sub_left Real.pi using 1 ; ext ; simp +decide [ Set.indicator ] ; ring_nf;
                 grind
               generalize_proofs at *; (
               have h_integrable : MeasureTheory.IntegrableOn (fun θ' : ℝ => Real.log (Real.sin θ')) (Set.Ioc 0 Real.pi) := by
@@ -203,22 +203,22 @@ lemma intervalIntegrable_log_norm_circleMap_sub (R : ℝ) (ρ : ℂ) :
             exact h_integrable.mono_set ( by rw [ Set.Icc_union_Icc_eq_Icc ] <;> linarith [ Real.pi_pos ] )));
           have h_integrable : MeasureTheory.IntegrableOn (fun θ' : ℝ => Real.log (|Real.sin ((θ' - θ) / 2)|)) (Set.Icc (θ - 2 * Real.pi) (θ + 2 * Real.pi)) := by
             rw [ ← MeasureTheory.integrable_indicator_iff ( measurableSet_Icc ) ] at *;
-            convert h_integrable.comp_div ( show ( 2 : ℝ ) ≠ 0 by norm_num ) |> fun h => h.comp_sub_right θ using 1 ; ext ; norm_num [ Set.indicator ] ; ring;
+            convert h_integrable.comp_div ( show ( 2 : ℝ ) ≠ 0 by norm_num ) |> fun h => h.comp_sub_right θ using 1 ; ext ; norm_num [ Set.indicator ] ; ring_nf;
             exact if_congr ⟨ fun h => ⟨ by linarith, by linarith ⟩, fun h => ⟨ by linarith, by linarith ⟩ ⟩ rfl rfl;
           exact h_integrable.mono_set <| Set.Icc_subset_Icc ( by linarith ) ( by linarith );
-        rw [ Set.uIoc_of_le ( by linarith [ Real.pi_pos ] ) ] ; simp_all +decide [ Real.log_mul, ne_of_gt ] ; (
+        rw [ Set.uIoc_of_le ( by linarith [ Real.pi_pos ] ) ] ; simp_all +decide ; (
         have h_integrable : IntegrableOn (fun θ' : ℝ => Real.log (2 * |R|) + Real.log (|Real.sin ((θ' - θ) / 2)|)) (Set.Ioc 0 (2 * Real.pi)) := by
           exact MeasureTheory.Integrable.add ( MeasureTheory.integrable_const _ ) ( by simpa using h_integrable.mono_set <| Set.Ioc_subset_Icc_self );
         refine' h_integrable.congr _;
         rw [ Filter.EventuallyEq, MeasureTheory.ae_restrict_iff' ] <;> norm_num [ Real.pi_pos.le ];
-        filter_upwards [ MeasureTheory.measure_eq_zero_iff_ae_notMem.mp ( show MeasureTheory.MeasureSpace.volume ( { x : ℝ | Real.sin ( ( x - θ ) / 2 ) = 0 } ) = 0 from by rw [ show { x : ℝ | Real.sin ( ( x - θ ) / 2 ) = 0 } = ( Set.range fun n : ℤ => θ + 2 * n * Real.pi ) by ext x; simp +decide [ Real.sin_eq_zero_iff ] ; exact ⟨ fun ⟨ n, hn ⟩ => ⟨ n, by linarith ⟩, fun ⟨ n, hn ⟩ => ⟨ n, by linarith ⟩ ⟩ ] ; exact ( Set.countable_range _ |> Set.Countable.measure_zero <| MeasureTheory.MeasureSpace.volume ) ) ] with x hx₁ hx₂ hx₃ ; rw [ Real.log_mul ] <;> norm_num [ hx₁, hx₂, hx₃, hR ] ; ring;
+        filter_upwards [ MeasureTheory.measure_eq_zero_iff_ae_notMem.mp ( show MeasureTheory.MeasureSpace.volume ( { x : ℝ | Real.sin ( ( x - θ ) / 2 ) = 0 } ) = 0 from by rw [ show { x : ℝ | Real.sin ( ( x - θ ) / 2 ) = 0 } = ( Set.range fun n : ℤ => θ + 2 * n * Real.pi ) by ext x; simp +decide [ Real.sin_eq_zero_iff ] ; exact ⟨ fun ⟨ n, hn ⟩ => ⟨ n, by linarith ⟩, fun ⟨ n, hn ⟩ => ⟨ n, by linarith ⟩ ⟩ ] ; exact ( Set.countable_range _ |> Set.Countable.measure_zero <| MeasureTheory.MeasureSpace.volume ) ) ] with x hx₁ hx₂ hx₃ ; rw [ Real.log_mul ] <;> norm_num [ hx₁, hx₂, hx₃, hR ] ; ring_nf;
         rw [ Real.log_mul, Real.log_mul ] <;> norm_num [ hx₁, hR ] ; ring;
-        · convert hx₁ using 2 ; ring;
-        · convert hx₁ using 2 ; ring);
+        · convert hx₁ using 2 ; ring_nf;
+        · convert hx₁ using 2 ; ring_nf);
       -- Substitute ρ = R * exp(I * θ) into the expression inside the logarithm.
       have h_subst : ∀ θ' : ℝ, ‖R * Complex.exp (I * θ') - ρ‖ = 2 * |R| * |Real.sin ((θ' - θ) / 2)| := by
-        intro θ'; rw [ ← hθ₂ ] ; norm_num [ Complex.norm_def, Complex.normSq, Complex.exp_re, Complex.exp_im ] ; ring; (
-        rw [ Real.sqrt_eq_iff_mul_self_eq ] <;> norm_num <;> ring <;> norm_num [ Real.sin_sq, Real.cos_sq ] <;> ring;
+        intro θ'; rw [ ← hθ₂ ] ; norm_num [ Complex.norm_def, Complex.normSq, Complex.exp_re, Complex.exp_im ] ; ring_nf; (
+        rw [ Real.sqrt_eq_iff_mul_self_eq ] <;> norm_num <;> ring_nf <;> norm_num [ Real.sin_sq, Real.cos_sq ] <;> ring_nf;
         · rw [ Real.cos_sub ] ; ring;
         · nlinarith [ sq_nonneg ( R * Real.sin θ' - R * Real.sin θ ), sq_nonneg ( R * Real.cos θ' - R * Real.cos θ ), Real.sin_sq_add_cos_sq θ', Real.sin_sq_add_cos_sq θ ];
         · positivity);
