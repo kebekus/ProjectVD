@@ -1,47 +1,6 @@
 import Mathlib
 
-open Complex Filter Metric Real MeasureTheory Set
-
-/-!
-# Dominated Convergence for Circle Averages
-
-We prove that circle averages converge when the radius converges, provided
-the hypotheses of the dominated convergence theorem are satisfied.
-
-We then define the Herglotz–Riesz kernel and apply the general result to
-the specific integrand `(re ∘ herglotzRieszKernel 0 w) • f`, where
-`f z = log ‖z - ρ‖`, `‖ρ‖ = R`, and `‖w‖ < R`.
--/
-
-section General
-
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
-
-omit [CompleteSpace E] in
-/-- **Dominated convergence for circle averages.**
-If the integrand `g ∘ circleMap c (r n)` converges pointwise a.e. to `g ∘ circleMap c R`
-and is dominated by an integrable function, then the circle averages converge. -/
-theorem circleAverage_tendsto_of_tendsto_radius
-    {g : ℂ → E} {c : ℂ} {R : ℝ}
-    {r : ℕ → ℝ}
-    (bound : ℝ → ℝ)
-    (hbound : IntervalIntegrable bound volume 0 (2 * π))
-    (hmeas : ∀ᶠ n in atTop,
-      AEStronglyMeasurable (fun θ => g (circleMap c (r n) θ))
-        (volume.restrict (uIoc 0 (2 * π))))
-    (hdom : ∀ᶠ n in atTop,
-      ∀ᵐ θ, θ ∈ uIoc 0 (2 * π) → ‖g (circleMap c (r n) θ)‖ ≤ bound θ)
-    (hconv : ∀ᵐ θ, θ ∈ uIoc 0 (2 * π) →
-      Tendsto (fun n => g (circleMap c (r n) θ)) atTop
-        (nhds (g (circleMap c R θ)))) :
-    Tendsto (fun n => circleAverage g c (r n)) atTop
-      (nhds (circleAverage g c R)) := by
-        refine' Filter.Tendsto.smul _ _
-        · exact tendsto_const_nhds
-        · have := @intervalIntegral.tendsto_integral_filter_of_dominated_convergence E
-          specialize this bound hmeas hdom hbound hconv ; simpa using this
-
-end General
+open Complex Filter Metric Real MeasureTheory Set Topology
 
 /-!
 ## Herglotz–Riesz kernel
@@ -55,83 +14,28 @@ noncomputable def herglotzLogIntegrand (w ρ : ℂ) : ℂ → ℝ :=
 ## Helper lemmas for the specific convergence result
 -/
 
-/-
-PROBLEM
-Points on a circle of radius `r` centered at the origin have norm `|r|`.
-
-PROVIDED SOLUTION
-Unfold circleMap, use norm_mul, abs_ofReal, and Complex.norm_exp_ofReal_mul_I.
--/
-lemma norm_circleMap_zero' (r : ℝ) (θ : ℝ) : ‖circleMap 0 r θ‖ = |r| := by
-  norm_num [ circleMap ]
-
-/-
-PROBLEM
-If `‖w‖ ≠ |r|`, then `circleMap 0 r θ ≠ w` for all `θ`.
-
-PROVIDED SOLUTION
-If circleMap 0 r θ = w then ‖w‖ = ‖circleMap 0 r θ‖ = |r|, contradicting h.
--/
-lemma circleMap_zero_ne_of_norm_ne {w : ℂ} {r : ℝ} (h : ‖w‖ ≠ |r|) (θ : ℝ) :
-    circleMap 0 r θ ≠ w := by
-      unfold circleMap; aesop;
-
-/-
-PROBLEM
-`herglotzLogIntegrand` is continuous at `z` provided `z ≠ w` and `z ≠ ρ`.
-
-PROVIDED SOLUTION
-herglotzLogIntegrand w ρ z = Re((z+w)/(z-w)) * log ‖z - ρ‖. The function z ↦ (z+w)/(z-w) is continuous at z ≠ w (the denominator z-w ≠ 0). Taking Re is continuous. The function z ↦ log ‖z - ρ‖ is continuous at z ≠ ρ (since ‖z - ρ‖ > 0 there). The product of two continuous-at functions is continuous-at.
--/
+-- Continuity of the herglotzLogIntegrand
 lemma herglotzLogIntegrand_continuousAt {w ρ z : ℂ} (hz_w : z ≠ w) (hz_ρ : z ≠ ρ) :
     ContinuousAt (herglotzLogIntegrand w ρ) z := by
-      refine' ContinuousAt.mul _ _;
-      · refine' Complex.continuous_re.continuousAt.comp _;
-        refine' ContinuousAt.div _ _ _ <;> norm_num [ hz_w, hz_ρ ];
-        · exact continuousAt_id.add continuousAt_const;
-        · exact continuousAt_id.sub continuousAt_const;
-        · exact sub_ne_zero_of_ne hz_w;
-      · exact ContinuousAt.log ( ContinuousAt.norm ( continuousAt_id.sub continuousAt_const ) ) ( norm_ne_zero_iff.mpr ( sub_ne_zero.mpr hz_ρ ) )
+  have : ‖z - ρ‖ ≠ 0 := by simp_all [sub_eq_zero]
+  simp only [herglotzLogIntegrand, herglotzRieszKernel_fun_def, sub_zero, smul_eq_mul]
+  fun_prop (disch := grind)
 
-/-
-PROBLEM For `‖w‖ < r` and `0 < r < R = ‖ρ‖`, the function `θ ↦
-herglotzLogIntegrand w ρ (circleMap 0 r θ)` is continuous.
-
-PROVIDED SOLUTION
-
-The composition of herglotzLogIntegrand w ρ with circleMap 0 r is continuous
-because herglotzLogIntegrand is continuous at every point z on the circle |z| =
-r (since z ≠ w because ‖w‖ < r implies ‖w‖ ≠ |r| so circleMap_zero_ne_of_norm_ne
-applies, and z ≠ ρ because ‖ρ‖ = R > r implies ‖ρ‖ ≠ |r| so
-circleMap_zero_ne_of_norm_ne applies), and circleMap is continuous. Use
-herglotzLogIntegrand_continuousAt and continuous_circleMap.
--/
+-- Continuity of the herglotzLogIntegrand
 lemma herglotzLogIntegrand_continuous_on_circle
     {w ρ : ℂ} {R r : ℝ} (hR : 0 < R) (hρ : ‖ρ‖ = R)
     (hr_pos : 0 < r) (hr_lt : r < R) (hwr : ‖w‖ < r) :
     Continuous (fun θ => herglotzLogIntegrand w ρ (circleMap 0 r θ)) := by
-      refine' continuous_iff_continuousAt.mpr _;
-      intro θ; apply_rules [ ContinuousAt.mul, ContinuousAt.comp, continuousAt_const, continuousAt_id, continuousAt_of_tendsto_nhds ] ;
-      any_goals apply_rules [ Complex.continuous_re.continuousAt, continuousAt_id ];
-      · refine' ContinuousAt.div _ _ _ <;> norm_num [ circleMap ];
-        · fun_prop (disch := solve_by_elim);
-        · exact Continuous.continuousAt ( by continuity );
-        · exact sub_ne_zero_of_ne <| ne_of_apply_ne Complex.normSq <| by norm_num [ Complex.normSq_eq_norm_sq, Complex.norm_exp ] ; nlinarith [ norm_nonneg w ] ;
-      · refine' ContinuousAt.log _ _ <;> norm_num [ circleMap ];
-        · exact Continuous.continuousAt ( by continuity );
-        · exact sub_ne_zero_of_ne <| ne_of_apply_ne Norm.norm <| by norm_num [ Complex.norm_exp, abs_of_pos hr_pos ] ; linarith;
-
-/-
-PROBLEM
-For `r ≤ R`, `‖circleMap 0 r θ - ρ‖ ≤ r + R ≤ 2 * R`.
-
-PROVIDED SOLUTION
-By triangle inequality, ‖circleMap 0 r θ - ρ‖ ≤ ‖circleMap 0 r θ‖ + ‖ρ‖ = |r| + R ≤ R + R = 2R since r ≤ R implies |r| ≤ R (using hr : 0 ≤ r).
--/
-lemma norm_circleMap_sub_le {r R : ℝ} {ρ : ℂ} (hρ : ‖ρ‖ = R) (hr : 0 ≤ r) (hrR : r ≤ R) (θ : ℝ) :
-    ‖circleMap 0 r θ - ρ‖ ≤ 2 * R := by
-      refine' le_trans ( norm_sub_le _ _ ) _;
-      simp_all +decide [ circleMap ] ; linarith [ abs_of_nonneg hr ] ;
+  rw [continuous_iff_continuousAt]
+  intro θ
+  apply ContinuousAt.comp _ (by fun_prop)
+  apply herglotzLogIntegrand_continuousAt
+  · by_contra h
+    rw [← h, norm_circleMap_zero] at hwr
+    grind
+  · by_contra h
+    rw [← h, norm_circleMap_zero] at hρ
+    grind
 
 /-!
 ## Additional helper lemmas for the domination bound
@@ -160,12 +64,19 @@ lemma norm_sq_circleMap_sub_lower_bound
     {r₀ r R : ℝ} {ρ : ℂ} (hρ : ‖ρ‖ = R)
     (hr₀ : 0 < r₀) (hR : 0 < R) (hr₀r : r₀ ≤ r) (hrR : r ≤ R) (θ : ℝ) :
     (r₀ / R) * ‖circleMap 0 R θ - ρ‖ ^ 2 ≤ ‖circleMap 0 r θ - ρ‖ ^ 2 := by
-      -- By the cosine law, we have ‖circleMap 0 r θ - ρ‖² = r² + R² - 2rR cos(θ - α) and ‖circleMap 0 R θ - ρ‖² = R² + R² - 2R² cos(θ - α).
-      have h_cos_law : ‖circleMap 0 r θ - ρ‖ ^ 2 = r ^ 2 + R ^ 2 - 2 * r * R * Real.cos (θ - Complex.arg ρ) ∧ ‖circleMap 0 R θ - ρ‖ ^ 2 = R ^ 2 + R ^ 2 - 2 * R ^ 2 * Real.cos (θ - Complex.arg ρ) := by
-        norm_num [ Complex.normSq, Complex.sq_norm, circleMap ];
-        rw [ ← Complex.norm_mul_cos_arg ρ, ← Complex.norm_mul_sin_arg ρ ] ; ring_nf ; norm_num [ Real.sin_sub, Real.cos_sub, hρ ];
-        constructor <;> rw [ Real.sin_sq, Real.sin_sq ] <;> ring;
-      rw [ div_mul_eq_mul_div, div_le_iff₀ ] <;> nlinarith [ mul_le_mul_of_nonneg_left hr₀r hR.le, mul_le_mul_of_nonneg_left hrR hR.le, Real.neg_one_le_cos ( θ - ρ.arg ), Real.cos_le_one ( θ - ρ.arg ) ]
+  -- By the cosine law, we have ‖circleMap 0 r θ - ρ‖² = r² + R² - 2rR cos(θ - α) and ‖circleMap 0 R θ - ρ‖² = R² + R² - 2R² cos(θ - α).
+  have h_cos_law : ‖circleMap 0 r θ - ρ‖ ^ 2 = r ^ 2 + R ^ 2 - 2 * r * R * Real.cos (θ - Complex.arg ρ)
+      ∧ ‖circleMap 0 R θ - ρ‖ ^ 2 = R ^ 2 + R ^ 2 - 2 * R ^ 2 * Real.cos (θ - Complex.arg ρ) := by
+    norm_num [ Complex.normSq, Complex.sq_norm, circleMap ];
+    rw [← Complex.norm_mul_cos_arg ρ, ← Complex.norm_mul_sin_arg ρ]
+    ring_nf
+    norm_num [Real.sin_sub, Real.cos_sub, hρ]
+    constructor
+    <;> rw [ Real.sin_sq, Real.sin_sq ]
+    <;> ring;
+  rw [div_mul_eq_mul_div, div_le_iff₀]
+  <;> nlinarith [mul_le_mul_of_nonneg_left hr₀r hR.le, mul_le_mul_of_nonneg_left hrR hR.le,
+    Real.neg_one_le_cos, Real.cos_le_one]
 
 /-
 PROBLEM
@@ -178,7 +89,7 @@ lemma norm_circleMap_sub_lower_bound
     {r₀ r R : ℝ} {ρ : ℂ} (hρ : ‖ρ‖ = R)
     (hr₀ : 0 < r₀) (hR : 0 < R) (hr₀r : r₀ ≤ r) (hrR : r ≤ R) (θ : ℝ) :
     Real.sqrt (r₀ / R) * ‖circleMap 0 R θ - ρ‖ ≤ ‖circleMap 0 r θ - ρ‖ := by
-      convert Real.sqrt_le_sqrt ( norm_sq_circleMap_sub_lower_bound hρ hr₀ hR hr₀r hrR θ ) using 1 ; ring_nf ; norm_num [ hr₀.le, hR.le ] ; ring_nf ; aesop;
+  convert Real.sqrt_le_sqrt ( norm_sq_circleMap_sub_lower_bound hρ hr₀ hR hr₀r hrR θ ) using 1 ; ring_nf ; norm_num [ hr₀.le, hR.le ] ; ring_nf ; aesop;
 
 /-
 PROBLEM
@@ -250,19 +161,24 @@ lemma abs_log_norm_circleMap_sub_bound
     {ρ : ℂ} {R r₀ r : ℝ} (hR : 0 < R) (hρ : ‖ρ‖ = R)
     (hr₀ : 0 < r₀) (hr₀r : r₀ ≤ r) (hrR : r ≤ R) (θ : ℝ)
     (hdR : 0 < ‖circleMap 0 R θ - ρ‖) :
-    |Real.log ‖circleMap 0 r θ - ρ‖| ≤
-      |Real.log (2 * R)| + |Real.log (Real.sqrt (r₀ / R))| +
+    |Real.log ‖circleMap 0 r θ - ρ‖| ≤|Real.log (2 * R)| + |Real.log (Real.sqrt (r₀ / R))| +
       |Real.log ‖circleMap 0 R θ - ρ‖| := by
-        refine' abs_le.mpr ⟨ _, _ ⟩;
-        · -- By the properties of logarithms and absolute values, we can show that Real.log ‖circleMap 0 r θ - ρ‖ is bounded below by Real.log (√(r₀/R)) + Real.log ‖circleMap 0 R θ - ρ‖.
-          have h_log_lower_bound : Real.log ‖circleMap 0 r θ - ρ‖ ≥ Real.log (Real.sqrt (r₀ / R)) + Real.log ‖circleMap 0 R θ - ρ‖ := by
-            rw [ ← Real.log_mul ( by positivity ) ( by positivity ) ];
-            exact Real.log_le_log ( mul_pos ( Real.sqrt_pos.mpr ( div_pos hr₀ hR ) ) hdR ) ( by linarith [ norm_circleMap_sub_lower_bound hρ hr₀ hR hr₀r hrR θ ] );
-          grind;
-        · refine' le_trans _ ( le_add_of_le_of_nonneg ( le_add_of_nonneg_right <| abs_nonneg _ ) <| abs_nonneg _ );
-          refine' le_trans ( Real.log_le_log ( _ ) _ ) ( le_abs_self _ );
-          · refine' lt_of_lt_of_le _ ( norm_circleMap_sub_lower_bound hρ hr₀ hR hr₀r hrR θ ) ; aesop;
-          · exact norm_circleMap_sub_le hρ ( by linarith ) ( by linarith ) _
+  refine' abs_le.mpr ⟨ _, _ ⟩;
+  · -- By the properties of logarithms and absolute values, we can show that Real.log ‖circleMap 0 r θ - ρ‖ is bounded below by Real.log (√(r₀/R)) + Real.log ‖circleMap 0 R θ - ρ‖.
+    have h_log_lower_bound : Real.log ‖circleMap 0 r θ - ρ‖ ≥ Real.log (Real.sqrt (r₀ / R)) + Real.log ‖circleMap 0 R θ - ρ‖ := by
+      rw [ ← Real.log_mul (by positivity) (by positivity)]
+      exact Real.log_le_log
+        (mul_pos (Real.sqrt_pos.mpr (div_pos hr₀ hR)) hdR)
+        (by linarith [norm_circleMap_sub_lower_bound hρ hr₀ hR hr₀r hrR θ])
+    grind;
+  · refine' le_trans _ ( le_add_of_le_of_nonneg ( le_add_of_nonneg_right <| abs_nonneg _ ) <| abs_nonneg _ );
+    refine' le_trans ( Real.log_le_log ( _ ) _ ) ( le_abs_self _ );
+    · refine' lt_of_lt_of_le _ ( norm_circleMap_sub_lower_bound hρ hr₀ hR hr₀r hrR θ ) ; aesop;
+    · apply le_trans (norm_sub_le _ _)
+      simp only [circleMap, zero_add, Complex.norm_mul, norm_real, norm_eq_abs,
+        norm_exp_ofReal_mul_I, mul_one]
+      linarith [abs_of_nonneg (by linarith : 0 ≤ r)]
+
 
 /-
 PROBLEM
@@ -302,7 +218,7 @@ lemma herglotzLogIntegrand_bound
       convert herglotzRieszKernel_re_bound
         (show 0 < r by linarith)
         (show ‖w‖ < r by linarith)
-        (show ‖circleMap 0 r θ‖ = r by rw [norm_circleMap_zero']; rw [abs_of_nonneg]; linarith)
+        (show ‖circleMap 0 r θ‖ = r by norm_num [circleMap]; linarith)
         using 1;
     exact h_bound.trans (by rw [div_le_div_iff₀] <;> nlinarith [norm_nonneg w])
   have h_log : |Real.log ‖circleMap 0 r θ - ρ‖| ≤ |Real.log (2 * R)| + |Real.log (Real.sqrt (r₀ / R))| + |Real.log ‖circleMap 0 R θ - ρ‖| := by
@@ -355,14 +271,8 @@ private theorem herglotzLogIntegrand_circleAverage_tendsto
       (nhds (circleAverage (herglotzLogIntegrand w ρ) 0 R)) := by
   -- Apply the dominated convergence theorem.
   let bound := fun θ ↦ ((R + ‖w‖) / ((R + ‖w‖) / 2 - ‖w‖)) * (|Real.log (2 * R)| + |Real.log (Real.sqrt ((R + ‖w‖) / 2 / R))| + |Real.log ‖circleMap 0 R θ - ρ‖|)
-  apply circleAverage_tendsto_of_tendsto_radius (bound := bound)
-  · -- IntervalIntegrable bound volume 0 (2 * π)
-    apply IntervalIntegrable.const_mul
-    apply IntervalIntegrable.add
-    · exact IntervalIntegrable.add (by simp) (by continuity)
-    · apply IntervalIntegrable.abs
-      exact circleIntegrable_log_norm_meromorphicOn (f := fun z ↦ z - ρ)
-        (fun x hx ↦ by fun_prop)
+  apply Filter.Tendsto.smul tendsto_const_nhds _
+  apply intervalIntegral.tendsto_integral_filter_of_dominated_convergence bound
   · -- The herglotzLogIntegrand is AEStronglyMeasurable
     filter_upwards [hr_tendsto.eventually (lt_mem_nhds hw) ] with n hn
     apply Continuous.aestronglyMeasurable
@@ -372,9 +282,8 @@ private theorem herglotzLogIntegrand_circleAverage_tendsto
       Filter.eventually_atTop.mp (hr_tendsto.eventually (lt_mem_nhds (by linarith)))
     filter_upwards [Filter.eventually_ge_atTop N] with n hn
     have h_bound {θ : ℝ} : ‖herglotzLogIntegrand w ρ (circleMap 0 (r n) θ)‖ ≤ bound θ ∨ ‖circleMap 0 R θ - ρ‖ = 0 := by
-      unfold bound
       by_cases h : ‖circleMap 0 R θ - ρ‖ = 0
-      <;> simp_all [circleMap]
+      <;> simp_all [bound, circleMap]
       convert herglotzLogIntegrand_bound hR hρ
         (show 0 < (R + ‖w‖) / 2 by linarith [norm_nonneg w])
         (show ‖w‖ < (R + ‖w‖) / 2 by linarith [norm_nonneg w])
@@ -388,6 +297,13 @@ private theorem herglotzLogIntegrand_circleAverage_tendsto
     apply Set.Countable.measure_zero _ MeasureTheory.MeasureSpace.volume
     simp only [norm_eq_zero, sub_eq_zero]
     exact (countable_singleton ρ).preimage_circleMap 0 (hR.ne')
+  · -- IntervalIntegrable bound volume 0 (2 * π)
+    apply IntervalIntegrable.const_mul
+    apply IntervalIntegrable.add
+    · exact IntervalIntegrable.add (by simp) (by continuity)
+    · apply IntervalIntegrable.abs
+      exact circleIntegrable_log_norm_meromorphicOn (f := fun z ↦ z - ρ)
+        (fun x hx ↦ by fun_prop)
   · -- Pointwise convergence outside a null set
     have h_measure_zero : MeasureTheory.volume {θ : ℝ | circleMap 0 R θ = w ∨ circleMap 0 R θ = ρ} = 0 := by
       apply Set.Countable.measure_zero _ MeasureTheory.MeasureSpace.volume
