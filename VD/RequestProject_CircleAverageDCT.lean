@@ -94,12 +94,17 @@ lemma herglotzLogIntegrand_continuousAt {w ρ z : ℂ} (hz_w : z ≠ w) (hz_ρ :
       · exact ContinuousAt.log ( ContinuousAt.norm ( continuousAt_id.sub continuousAt_const ) ) ( norm_ne_zero_iff.mpr ( sub_ne_zero.mpr hz_ρ ) )
 
 /-
-PROBLEM
-For `‖w‖ < r` and `0 < r < R = ‖ρ‖`, the function
-`θ ↦ herglotzLogIntegrand w ρ (circleMap 0 r θ)` is continuous.
+PROBLEM For `‖w‖ < r` and `0 < r < R = ‖ρ‖`, the function `θ ↦
+herglotzLogIntegrand w ρ (circleMap 0 r θ)` is continuous.
 
 PROVIDED SOLUTION
-The composition of herglotzLogIntegrand w ρ with circleMap 0 r is continuous because herglotzLogIntegrand is continuous at every point z on the circle |z| = r (since z ≠ w because ‖w‖ < r implies ‖w‖ ≠ |r| so circleMap_zero_ne_of_norm_ne applies, and z ≠ ρ because ‖ρ‖ = R > r implies ‖ρ‖ ≠ |r| so circleMap_zero_ne_of_norm_ne applies), and circleMap is continuous. Use herglotzLogIntegrand_continuousAt and continuous_circleMap.
+
+The composition of herglotzLogIntegrand w ρ with circleMap 0 r is continuous
+because herglotzLogIntegrand is continuous at every point z on the circle |z| =
+r (since z ≠ w because ‖w‖ < r implies ‖w‖ ≠ |r| so circleMap_zero_ne_of_norm_ne
+applies, and z ≠ ρ because ‖ρ‖ = R > r implies ‖ρ‖ ≠ |r| so
+circleMap_zero_ne_of_norm_ne applies), and circleMap is continuous. Use
+herglotzLogIntegrand_continuousAt and continuous_circleMap.
 -/
 lemma herglotzLogIntegrand_continuous_on_circle
     {w ρ : ℂ} {R r : ℝ} (hR : 0 < R) (hρ : ‖ρ‖ = R)
@@ -118,23 +123,6 @@ lemma herglotzLogIntegrand_continuous_on_circle
 
 /-
 PROBLEM
-The norm of `circleMap 0 r θ - ρ` is bounded below by `2 * √(r * R) * |sin((θ - α)/2)|`
-where `ρ = R * exp(I * α)`. Here we state a weaker but more usable version.
-
-PROVIDED SOLUTION
-By the reverse triangle inequality: ‖circleMap 0 r θ - ρ‖ ≥ ‖circleMap 0 R θ - ρ‖ - ‖circleMap 0 r θ - circleMap 0 R θ‖. We have ‖circleMap 0 r θ - circleMap 0 R θ‖ = ‖(r - R) * exp(I*θ)‖ = |r - R| = |R - r| (using hrR : r ≤ R so R - r ≥ 0). So the result follows from norm_sub_norm_le (the reverse triangle inequality).
--/
-lemma norm_circleMap_sub_ge {r R : ℝ} {ρ : ℂ}
-    (hrR : r ≤ R) (θ : ℝ) :
-    ‖circleMap 0 R θ - ρ‖ - |R - r| ≤ ‖circleMap 0 r θ - ρ‖ := by
-      rw [ abs_of_nonneg ( sub_nonneg_of_le hrR ) ];
-      have := norm_sub_le ( circleMap 0 r θ - ρ ) ( circleMap 0 r θ - circleMap 0 R θ ) ; simp_all +decide [ circleMap ];
-      refine le_trans this ?_;
-      norm_num [ ← sub_mul ];
-      norm_cast ; rw [ Real.norm_of_nonpos ] <;> linarith
-
-/-
-PROBLEM
 For `r ≤ R`, `‖circleMap 0 r θ - ρ‖ ≤ r + R ≤ 2 * R`.
 
 PROVIDED SOLUTION
@@ -144,87 +132,6 @@ lemma norm_circleMap_sub_le {r R : ℝ} {ρ : ℂ} (hρ : ‖ρ‖ = R) (hr : 0 
     ‖circleMap 0 r θ - ρ‖ ≤ 2 * R := by
       refine' le_trans ( norm_sub_le _ _ ) _;
       simp_all +decide [ circleMap ] ; linarith [ abs_of_nonneg hr ] ;
-
-/-
-PROBLEM
-`θ ↦ log ‖circleMap 0 R θ - ρ‖` is interval-integrable on `[0, 2π]`.
-
-PROVIDED SOLUTION
-Apply intervalIntegrable_log_norm_meromorphicOn. The function θ ↦ circleMap 0 R θ - ρ is meromorphic (in fact analytic) as a function ℝ → ℂ. To show MeromorphicOn, show MeromorphicAt at each point by showing AnalyticAt (via AnalyticAt.meromorphicAt). circleMap 0 R θ = R * exp(I * θ) is analytic in θ, and subtracting the constant ρ preserves analyticity.
--/
-lemma intervalIntegrable_log_norm_circleMap_sub (R : ℝ) (ρ : ℂ) :
-    IntervalIntegrable (fun θ => Real.log ‖circleMap 0 R θ - ρ‖) volume 0 (2 * π) := by
-      by_contra h_contra; contrapose! h_contra with h_contra; simp_all +decide [ circleMap ] ; (
-      by_cases h : ∃ θ ∈ Set.Icc 0 ( 2 * Real.pi ), ( R : ℂ ) * Complex.exp ( θ * Complex.I ) - ρ = 0 <;> simp_all +decide ; (
-      obtain ⟨ θ, hθ₁, hθ₂ ⟩ := h; rw [ sub_eq_zero ] at hθ₂; simp_all +decide [mul_comm] ;
-      -- The integral of the logarithm of the norm of the difference is finite because the logarithm of the norm of the difference is integrable.
-      have h_integrable : IntervalIntegrable (fun θ' : ℝ => Real.log (2 * |R| * |Real.sin ((θ' - θ) / 2)|)) volume 0 (2 * Real.pi) := by
-        by_cases hR : R = 0 <;> simp_all +decide [ intervalIntegrable_iff ];
-        have h_integrable : IntegrableOn (fun θ' : ℝ => Real.log (|Real.sin ((θ' - θ) / 2)|)) (Set.Icc 0 (2 * Real.pi)) := by
-          have h_integrable : MeasureTheory.IntegrableOn (fun θ' : ℝ => Real.log (|Real.sin θ'|)) (Set.Icc (-Real.pi) Real.pi) := by
-            have h_integrable : MeasureTheory.IntegrableOn (fun θ' : ℝ => Real.log (|Real.sin θ'|)) (Set.Icc 0 Real.pi) := by
-              have h_integrable : MeasureTheory.IntegrableOn (fun θ' : ℝ => Real.log (Real.sin θ')) (Set.Ioc 0 (Real.pi / 2)) := by
-                have h_integrable : MeasureTheory.IntegrableOn (fun θ' : ℝ => Real.log (Real.sin θ')) (Set.Ioc 0 (Real.pi / 2)) := by
-                  have h_bound : ∀ θ' ∈ Set.Ioc 0 (Real.pi / 2), |Real.log (Real.sin θ')| ≤ |Real.log θ'| + |Real.log 2| := by
-                    intros θ' hθ'
-                    have h_sin_bound : Real.sin θ' ≥ θ' / 2 := by
-                      have := Real.mul_le_sin hθ'.1.le hθ'.2;
-                      rw [ div_mul_eq_mul_div, div_le_iff₀ ] at this <;> nlinarith [ Real.pi_gt_three, Real.pi_le_four, hθ'.1, hθ'.2 ]
-                    generalize_proofs at *; (
-                    rw [ abs_le ] ; constructor <;> cases abs_cases ( Real.log θ' ) <;> cases abs_cases ( Real.log 2 ) <;> linarith [ Real.log_le_log ( by linarith [ hθ'.1 ] ) h_sin_bound, Real.log_le_log ( by linarith [ hθ'.1 ] ) ( show Real.sin θ' ≤ θ' from le_of_lt ( Real.sin_lt <| by linarith [ hθ'.1 ] ) ), Real.log_div ( show θ' ≠ 0 from hθ'.1.ne' ) ( show ( 2 : ℝ ) ≠ 0 from by norm_num ) ] ;)
-                  have h_integrable : MeasureTheory.IntegrableOn (fun θ' : ℝ => |Real.log θ'|) (Set.Ioc 0 (Real.pi / 2)) := by
-                    have h_integrable : MeasureTheory.IntegrableOn (fun θ' : ℝ => Real.log θ') (Set.Ioc 0 (Real.pi / 2)) := by
-                      rw [ ← intervalIntegrable_iff_integrableOn_Ioc_of_le Real.pi_div_two_pos.le ] at * ; aesop;
-                    generalize_proofs at *; (
-                    exact h_integrable.abs)
-                  generalize_proofs at *; (
-                  refine' MeasureTheory.Integrable.mono' _ _ _;
-                  exacts [ fun θ' => |Real.log θ'| + |Real.log 2|, by exact MeasureTheory.Integrable.add h_integrable ( MeasureTheory.integrable_const _ ), by exact Measurable.aestronglyMeasurable ( by exact Measurable.log ( Real.continuous_sin.measurable ) ), Filter.eventually_of_mem ( MeasureTheory.ae_restrict_mem measurableSet_Ioc ) fun x hx => h_bound x hx ])
-                generalize_proofs at *; (
-                exact h_integrable)
-              generalize_proofs at *; (
-              have h_integrable : MeasureTheory.IntegrableOn (fun θ' : ℝ => Real.log (Real.sin θ')) (Set.Ioc (Real.pi / 2) Real.pi) := by
-                rw [ ← intervalIntegrable_iff_integrableOn_Ioc_of_le ( by linarith [ Real.pi_pos ] ) ] at *;
-                rw [ intervalIntegrable_iff_integrableOn_Ioo_of_le ( by linarith [ Real.pi_pos ] ) ] at *;
-                rw [ ← MeasureTheory.integrable_indicator_iff ( measurableSet_Ioo ) ] at *;
-                convert h_integrable.comp_sub_left Real.pi using 1 ; ext ; simp +decide [ Set.indicator ] ; ring_nf;
-                grind
-              generalize_proofs at *; (
-              have h_integrable : MeasureTheory.IntegrableOn (fun θ' : ℝ => Real.log (Real.sin θ')) (Set.Ioc 0 Real.pi) := by
-                convert MeasureTheory.IntegrableOn.union ‹IntegrableOn ( fun θ' => Real.log ( Real.sin θ' ) ) ( Ioc 0 ( Real.pi / 2 ) ) volume› ‹IntegrableOn ( fun θ' => Real.log ( Real.sin θ' ) ) ( Ioc ( Real.pi / 2 ) Real.pi ) volume› using 1 ; rw [ Set.Ioc_union_Ioc_eq_Ioc ] <;> linarith [ Real.pi_pos ]
-              generalize_proofs at *; (
-              simpa [ MeasureTheory.IntegrableOn, MeasureTheory.Measure.restrict_congr_set MeasureTheory.Ioc_ae_eq_Icc ] using h_integrable)));
-            have h_integrable : MeasureTheory.IntegrableOn (fun θ' : ℝ => Real.log (|Real.sin θ'|)) (Set.Icc (-Real.pi) 0) := by
-              convert h_integrable.comp_neg using 1 ; norm_num [ Real.sin_neg, abs_neg ] ; ring_nf ; aesop;
-            generalize_proofs at *; (
-            have h_integrable : MeasureTheory.IntegrableOn (fun θ' : ℝ => Real.log (|Real.sin θ'|)) (Set.Icc (-Real.pi) 0 ∪ Set.Icc 0 Real.pi) := by
-              exact MeasureTheory.IntegrableOn.union h_integrable ‹_›
-            generalize_proofs at *; (
-            exact h_integrable.mono_set ( by rw [ Set.Icc_union_Icc_eq_Icc ] <;> linarith [ Real.pi_pos ] )));
-          have h_integrable : MeasureTheory.IntegrableOn (fun θ' : ℝ => Real.log (|Real.sin ((θ' - θ) / 2)|)) (Set.Icc (θ - 2 * Real.pi) (θ + 2 * Real.pi)) := by
-            rw [ ← MeasureTheory.integrable_indicator_iff ( measurableSet_Icc ) ] at *;
-            convert h_integrable.comp_div ( show ( 2 : ℝ ) ≠ 0 by norm_num ) |> fun h => h.comp_sub_right θ using 1 ; ext ; norm_num [ Set.indicator ] ; ring_nf;
-            exact if_congr ⟨ fun h => ⟨ by linarith, by linarith ⟩, fun h => ⟨ by linarith, by linarith ⟩ ⟩ rfl rfl;
-          exact h_integrable.mono_set <| Set.Icc_subset_Icc ( by linarith ) ( by linarith );
-        rw [ Set.uIoc_of_le ( by linarith [ Real.pi_pos ] ) ] ; simp_all +decide ; (
-        have h_integrable : IntegrableOn (fun θ' : ℝ => Real.log (2 * |R|) + Real.log (|Real.sin ((θ' - θ) / 2)|)) (Set.Ioc 0 (2 * Real.pi)) := by
-          exact MeasureTheory.Integrable.add ( MeasureTheory.integrable_const _ ) ( by simpa using h_integrable.mono_set <| Set.Ioc_subset_Icc_self );
-        refine' h_integrable.congr _;
-        rw [ Filter.EventuallyEq, MeasureTheory.ae_restrict_iff' ] <;> norm_num [ Real.pi_pos.le ];
-        filter_upwards [ MeasureTheory.measure_eq_zero_iff_ae_notMem.mp ( show MeasureTheory.MeasureSpace.volume ( { x : ℝ | Real.sin ( ( x - θ ) / 2 ) = 0 } ) = 0 from by rw [ show { x : ℝ | Real.sin ( ( x - θ ) / 2 ) = 0 } = ( Set.range fun n : ℤ => θ + 2 * n * Real.pi ) by ext x; simp +decide [ Real.sin_eq_zero_iff ] ; exact ⟨ fun ⟨ n, hn ⟩ => ⟨ n, by linarith ⟩, fun ⟨ n, hn ⟩ => ⟨ n, by linarith ⟩ ⟩ ] ; exact ( Set.countable_range _ |> Set.Countable.measure_zero <| MeasureTheory.MeasureSpace.volume ) ) ] with x hx₁ hx₂ hx₃ ; rw [ Real.log_mul ] <;> norm_num [ hx₁, hx₂, hx₃, hR ] ; ring_nf;
-        rw [ Real.log_mul, Real.log_mul ] <;> norm_num [ hx₁, hR ] ; ring;
-        · convert hx₁ using 2 ; ring_nf;
-        · convert hx₁ using 2 ; ring_nf);
-      -- Substitute ρ = R * exp(I * θ) into the expression inside the logarithm.
-      have h_subst : ∀ θ' : ℝ, ‖R * Complex.exp (I * θ') - ρ‖ = 2 * |R| * |Real.sin ((θ' - θ) / 2)| := by
-        intro θ'; rw [ ← hθ₂ ] ; norm_num [ Complex.norm_def, Complex.normSq, Complex.exp_re, Complex.exp_im ] ; ring_nf; (
-        rw [ Real.sqrt_eq_iff_mul_self_eq ] <;> norm_num <;> ring_nf <;> norm_num [ Real.sin_sq, Real.cos_sq ] <;> ring_nf;
-        · rw [ Real.cos_sub ] ; ring;
-        · nlinarith [ sq_nonneg ( R * Real.sin θ' - R * Real.sin θ ), sq_nonneg ( R * Real.cos θ' - R * Real.cos θ ), Real.sin_sq_add_cos_sq θ', Real.sin_sq_add_cos_sq θ ];
-        · positivity);
-      simp_all +decide [ mul_comm ]);
-      apply_rules [ ContinuousOn.intervalIntegrable ];
-      exact ContinuousOn.log ( Continuous.continuousOn ( by continuity ) ) fun x hx => norm_ne_zero_iff.mpr ( h x ( by simpa [ Real.pi_pos.le ] using hx.1 ) ( by simpa [ Real.pi_pos.le ] using hx.2 ) ) ;)
 
 /-!
 ## Additional helper lemmas for the domination bound
@@ -382,22 +289,28 @@ By abs_log_norm_circleMap_sub_bound:
 Step 3: multiply the two bounds.
 -/
 lemma herglotzLogIntegrand_bound
-    {w ρ : ℂ} {R r₀ r : ℝ} (hR : 0 < R) (hρ : ‖ρ‖ = R)
-    (hr₀ : 0 < r₀) (hw : ‖w‖ < r₀) (hr₀r : r₀ ≤ r) (hrR : r ≤ R) (θ : ℝ)
-    (hdR : 0 < ‖circleMap 0 R θ - ρ‖) :
-    ‖herglotzLogIntegrand w ρ (circleMap 0 r θ)‖ ≤
-      ((R + ‖w‖) / (r₀ - ‖w‖)) *
-      (|Real.log (2 * R)| + |Real.log (Real.sqrt (r₀ / R))| +
-       |Real.log ‖circleMap 0 R θ - ρ‖|) := by
-         -- By the properties of the norm, we have:
-         have h_norm : ‖(Complex.re ∘ herglotzRieszKernel 0 w) (circleMap 0 r θ)‖ ≤ (R + ‖w‖) / (r₀ - ‖w‖) := by
-           have h_bound : ‖(Complex.re ∘ herglotzRieszKernel 0 w) (circleMap 0 r θ)‖ ≤ (r + ‖w‖) / (r - ‖w‖) := by
-             convert herglotzRieszKernel_re_bound ( show 0 < r by linarith ) ( show ‖w‖ < r by linarith ) ( show ‖circleMap 0 r θ‖ = r by rw [ norm_circleMap_zero' ] ; rw [ abs_of_nonneg ] ; linarith ) using 1;
-           exact h_bound.trans ( by rw [ div_le_div_iff₀ ] <;> nlinarith [ norm_nonneg w ] );
-         have h_log : |Real.log ‖circleMap 0 r θ - ρ‖| ≤ |Real.log (2 * R)| + |Real.log (Real.sqrt (r₀ / R))| + |Real.log ‖circleMap 0 R θ - ρ‖| := by
-           apply abs_log_norm_circleMap_sub_bound hR hρ hr₀ hr₀r hrR θ hdR;
-         unfold herglotzLogIntegrand;
-         simpa [ abs_mul ] using mul_le_mul h_norm h_log ( by positivity ) ( by exact div_nonneg ( by linarith [ norm_nonneg w ] ) ( by linarith [ norm_nonneg w ] ) )
+  {w ρ : ℂ} {R r₀ r : ℝ} (hR : 0 < R) (hρ : ‖ρ‖ = R)
+  (hr₀ : 0 < r₀) (hw : ‖w‖ < r₀) (hr₀r : r₀ ≤ r) (hrR : r ≤ R) (θ : ℝ)
+  (hdR : 0 < ‖circleMap 0 R θ - ρ‖) :
+  ‖herglotzLogIntegrand w ρ (circleMap 0 r θ)‖ ≤
+    ((R + ‖w‖) / (r₀ - ‖w‖)) *
+    (|Real.log (2 * R)| + |Real.log (Real.sqrt (r₀ / R))| +
+     |Real.log ‖circleMap 0 R θ - ρ‖|) := by
+  -- By the properties of the norm, we have:
+  have h_norm : ‖(Complex.re ∘ herglotzRieszKernel 0 w) (circleMap 0 r θ)‖ ≤ (R + ‖w‖) / (r₀ - ‖w‖) := by
+    have h_bound : ‖(Complex.re ∘ herglotzRieszKernel 0 w) (circleMap 0 r θ)‖ ≤ (r + ‖w‖) / (r - ‖w‖) := by
+      convert herglotzRieszKernel_re_bound
+        (show 0 < r by linarith)
+        (show ‖w‖ < r by linarith)
+        (show ‖circleMap 0 r θ‖ = r by rw [norm_circleMap_zero']; rw [abs_of_nonneg]; linarith)
+        using 1;
+    exact h_bound.trans (by rw [div_le_div_iff₀] <;> nlinarith [norm_nonneg w])
+  have h_log : |Real.log ‖circleMap 0 r θ - ρ‖| ≤ |Real.log (2 * R)| + |Real.log (Real.sqrt (r₀ / R))| + |Real.log ‖circleMap 0 R θ - ρ‖| := by
+    apply abs_log_norm_circleMap_sub_bound hR hρ hr₀ hr₀r hrR θ hdR;
+  unfold herglotzLogIntegrand
+  simp
+  exact mul_le_mul h_norm h_log (by positivity)
+    (by exact div_nonneg (by linarith [norm_nonneg w]) (by linarith [norm_nonneg w]))
 
 /-!
 ## The specific convergence result
@@ -434,73 +347,102 @@ The key Lean tactics:
 - Use Filter.Eventually.mono for the ae conditions
 - For pointwise convergence of circleMap in radius: circleMap 0 (r n) θ = (r n) * exp(I * θ) and r n → R, so this converges to R * exp(I * θ) = circleMap 0 R θ. Use Filter.Tendsto.const_mul or similar.
 -/
-theorem herglotzLogIntegrand_circleAverage_tendsto
+private theorem herglotzLogIntegrand_circleAverage_tendsto
     {ρ w : ℂ} {R : ℝ} (hR : 0 < R) (hρ : ‖ρ‖ = R) (hw : ‖w‖ < R)
     {r : ℕ → ℝ} (hr_lt : ∀ n, r n < R) (hr_pos : ∀ n, 0 < r n)
     (hr_tendsto : Tendsto r atTop (nhds R)) :
-    Tendsto (fun n => circleAverage (herglotzLogIntegrand w ρ) 0 (r n)) atTop
+    Tendsto (fun n ↦ circleAverage (herglotzLogIntegrand w ρ) 0 (r n)) atTop
       (nhds (circleAverage (herglotzLogIntegrand w ρ) 0 R)) := by
-        -- Apply the dominated convergence theorem.
-        apply circleAverage_tendsto_of_tendsto_radius
-        rotate_right;
-        use fun θ => ( ( R + ‖w‖ ) / ( ( R + ‖w‖ ) / 2 - ‖w‖ ) ) * ( |Real.log ( 2 * R )| + |Real.log ( Real.sqrt ( ( R + ‖w‖ ) / 2 / R ) )| + |Real.log ‖circleMap 0 R θ - ρ‖| );
-        · have h_integrable : IntervalIntegrable (fun θ => |Real.log ‖circleMap 0 R θ - ρ‖|) volume 0 (2 * Real.pi) := by
-            have := intervalIntegrable_log_norm_circleMap_sub R ρ;
-            exact this.abs;
-          convert h_integrable.const_mul ( ( R + ‖w‖ ) / ( ( R + ‖w‖ ) / 2 - ‖w‖ ) ) |> fun h => h.add ( Continuous.intervalIntegrable ( show Continuous fun θ => ( R + ‖w‖ ) / ( ( R + ‖w‖ ) / 2 - ‖w‖ ) * ( |Real.log ( 2 * R )| + |Real.log ( Real.sqrt ( ( R + ‖w‖ ) / 2 / R ) )| ) from by continuity ) 0 ( 2 * Real.pi ) ) using 2 ; ring;
-        · filter_upwards [ hr_tendsto.eventually ( lt_mem_nhds hw ) ] with n hn;
-          refine' Continuous.aestronglyMeasurable _;
-          apply_rules [ herglotzLogIntegrand_continuous_on_circle ];
-        · -- Since $r_n \to R$ and $‖w‖ < R$, there exists $N$ such that for all $n \geq N$, $r_n > (R + ‖w‖) / 2$.
-          obtain ⟨N, hN⟩ : ∃ N, ∀ n ≥ N, r n > (R + ‖w‖) / 2 := by
-            exact Filter.eventually_atTop.mp ( hr_tendsto.eventually ( lt_mem_nhds ( by linarith ) ) );
-          filter_upwards [ Filter.eventually_ge_atTop N ] with n hn;
-          -- Using the bound from Lemma 2, we have:
-          have h_bound : ∀ θ, ‖herglotzLogIntegrand w ρ (circleMap 0 (r n) θ)‖ ≤ ((R + ‖w‖) / ((R + ‖w‖) / 2 - ‖w‖)) * (|Real.log (2 * R)| + |Real.log (Real.sqrt ((R + ‖w‖) / 2 / R))| + |Real.log ‖circleMap 0 R θ - ρ‖|) ∨ ‖circleMap 0 R θ - ρ‖ = 0 := by
-            intro θ;
-            by_cases h : ‖circleMap 0 R θ - ρ‖ = 0 <;> simp_all +decide [ circleMap ];
-            convert herglotzLogIntegrand_bound hR hρ ( show 0 < ( R + ‖w‖ ) / 2 by linarith [ norm_nonneg w ] ) ( show ‖w‖ < ( R + ‖w‖ ) / 2 by linarith [ norm_nonneg w ] ) ( show ( R + ‖w‖ ) / 2 ≤ r n by linarith [ hN n hn ] ) ( show r n ≤ R by linarith [ hr_lt n ] ) θ _ using 1;
-            · norm_num [ circleMap ];
-            · norm_num [ circleMap ];
-            · exact norm_pos_iff.mpr ( by simpa [ circleMap ] using h );
-          refine' MeasureTheory.measure_mono_null _ _;
-          exact { θ : ℝ | ‖circleMap 0 R θ - ρ‖ = 0 };
-          · grind;
-          · -- The set {θ | ‖circleMap 0 R θ - ρ‖ = 0} is a singleton set, hence it has measure zero.
-            have h_singleton : {θ : ℝ | ‖circleMap 0 R θ - ρ‖ = 0} ⊆ {θ : ℝ | circleMap 0 R θ = ρ} := by
-              exact fun x hx => sub_eq_zero.mp <| norm_eq_zero.mp hx;
-            -- The set {θ | circleMap 0 R θ = ρ} is a singleton set, hence it has measure zero.
-            have h_singleton : {θ : ℝ | circleMap 0 R θ = ρ} ⊆ {θ : ℝ | ∃ k : ℤ, θ = Complex.arg ρ + 2 * Real.pi * k} := by
-              intro θ hθ; rw [ Set.mem_setOf_eq ] at hθ; rw [ ← Complex.norm_mul_exp_arg_mul_I ρ ] at hθ; simp_all +decide [mul_comm
-                    (2 * Real.pi)] ;
-              simp_all +decide [circleMap];
-              exact Complex.exp_eq_exp_iff_exists_int.mp ( hθ.resolve_right hR.ne' ) |> fun ⟨ k, hk ⟩ => ⟨ k, by norm_num [ Complex.ext_iff ] at hk; linarith ⟩;
-            exact MeasureTheory.measure_mono_null ( Set.Subset.trans ‹_› h_singleton ) ( by rw [ show { θ : ℝ | ∃ k : ℤ, θ = ρ.arg + 2 * Real.pi * k } = ( Set.range fun k : ℤ => ρ.arg + 2 * Real.pi * k ) by ext; aesop ] ; exact ( by rw [ Set.countable_range _ |> Set.Countable.measure_zero ] ) );
-        · -- The set of $\theta$ where $circleMap 0 R θ = w$ or $circleMap 0 R θ = ρ$ has measure zero.
-          have h_measure_zero : MeasureTheory.volume {θ : ℝ | circleMap 0 R θ = w ∨ circleMap 0 R θ = ρ} = 0 := by
-            -- The set of θ where circleMap 0 R θ = w or circleMap 0 R θ = ρ is countable, hence has measure zero.
-            have h_countable : Set.Countable {θ : ℝ | circleMap 0 R θ = w ∨ circleMap 0 R θ = ρ} := by
-              have h_countable : ∀ z : ℂ, Set.Countable {θ : ℝ | circleMap 0 R θ = z} := by
-                intro z
-                have h_eq : ∀ θ, circleMap 0 R θ = z → ∃ k : ℤ, θ = Complex.arg (z / R) + 2 * k * Real.pi := by
-                  intro θ hθ
-                  have h_eq : Complex.exp (θ * Complex.I) = z / R := by
-                    simp_all +decide [circleMap];
-                    rw [ ← hθ, mul_div_cancel_left₀ _ ( Complex.ofReal_ne_zero.mpr hR.ne' ) ];
-                  have h_eq : ∃ k : ℤ, θ = Complex.arg (z / R) + 2 * k * Real.pi := by
-                    have h_eq : Complex.exp (θ * Complex.I) = Complex.exp (Complex.arg (z / R) * Complex.I) := by
-                      rw [ h_eq, Complex.exp_eq_exp_re_mul_sin_add_cos ] ; norm_num [ hR.ne', hρ ];
-                      conv_lhs => rw [ ← Complex.norm_mul_cos_add_sin_mul_I ( z / R ) ];
-                      norm_num [ ← h_eq, Complex.norm_exp, hR.ne' ]
-                    rw [ Complex.exp_eq_exp_iff_exists_int ] at h_eq; obtain ⟨ k, hk ⟩ := h_eq; exact ⟨ k, by norm_num [ Complex.ext_iff ] at hk; linarith ⟩ ;
-                  exact h_eq;
-                exact Set.Countable.mono ( fun x hx => by obtain ⟨ k, rfl ⟩ := h_eq x hx; exact ⟨ k, rfl ⟩ ) ( Set.countable_range fun k : ℤ => ( z / R |> Complex.arg ) + 2 * k * Real.pi );
-              exact Set.Countable.union ( h_countable w ) ( h_countable ρ );
-            exact h_countable.measure_zero MeasureTheory.MeasureSpace.volume;
-          filter_upwards [ MeasureTheory.measure_eq_zero_iff_ae_notMem.mp h_measure_zero ] with θ hθ;
-          -- Since $circleMap 0 R θ ≠ w$ and $circleMap 0 R θ ≠ ρ$, we can apply the continuity of $herglotzLogIntegrand$.
-          have h_cont : ContinuousAt (herglotzLogIntegrand w ρ) (circleMap 0 R θ) := by
-            exact herglotzLogIntegrand_continuousAt ( by tauto ) ( by tauto );
-          intro hθ';
-          refine' h_cont.tendsto.comp _;
-          exact Filter.Tendsto.add ( tendsto_const_nhds ) ( Filter.Tendsto.mul ( Complex.continuous_ofReal.continuousAt.tendsto.comp hr_tendsto ) ( tendsto_const_nhds ) )
+  -- Apply the dominated convergence theorem.
+  let bound := fun θ ↦ ((R + ‖w‖) / ((R + ‖w‖) / 2 - ‖w‖)) * (|Real.log (2 * R)| + |Real.log (Real.sqrt ((R + ‖w‖) / 2 / R))| + |Real.log ‖circleMap 0 R θ - ρ‖|)
+  apply circleAverage_tendsto_of_tendsto_radius (bound := bound)
+  · -- IntervalIntegrable bound volume 0 (2 * π)
+    apply IntervalIntegrable.const_mul
+    apply IntervalIntegrable.add
+    · exact IntervalIntegrable.add (by simp) (by continuity)
+    · apply IntervalIntegrable.abs
+      exact circleIntegrable_log_norm_meromorphicOn (f := fun z ↦ z - ρ)
+        (fun x hx ↦ by fun_prop)
+  · -- The herglotzLogIntegrand is AEStronglyMeasurable
+    filter_upwards [hr_tendsto.eventually (lt_mem_nhds hw) ] with n hn
+    apply Continuous.aestronglyMeasurable
+    apply_rules [herglotzLogIntegrand_continuous_on_circle]
+  · -- Pointwise boundedness outside a null set
+    obtain ⟨N, hN⟩ : ∃ N, ∀ n ≥ N, r n > (R + ‖w‖) / 2 :=
+      Filter.eventually_atTop.mp (hr_tendsto.eventually (lt_mem_nhds (by linarith)))
+    filter_upwards [Filter.eventually_ge_atTop N] with n hn
+    have h_bound {θ : ℝ} : ‖herglotzLogIntegrand w ρ (circleMap 0 (r n) θ)‖ ≤ bound θ ∨ ‖circleMap 0 R θ - ρ‖ = 0 := by
+      unfold bound
+      by_cases h : ‖circleMap 0 R θ - ρ‖ = 0
+      <;> simp_all [circleMap]
+      convert herglotzLogIntegrand_bound hR hρ
+        (show 0 < (R + ‖w‖) / 2 by linarith [norm_nonneg w])
+        (show ‖w‖ < (R + ‖w‖) / 2 by linarith [norm_nonneg w])
+        (show (R + ‖w‖) / 2 ≤ r n by linarith [hN n hn])
+        (show r n ≤ R by linarith [hr_lt n]) θ _
+        using 1
+      · norm_num [circleMap]
+      · norm_num [circleMap]
+      · exact norm_pos_iff.mpr (by simpa [circleMap] using h)
+    apply MeasureTheory.measure_mono_null (t := {θ | ‖circleMap 0 R θ - ρ‖ = 0}) (by grind)
+    apply Set.Countable.measure_zero _ MeasureTheory.MeasureSpace.volume
+    simp only [norm_eq_zero, sub_eq_zero]
+    exact (countable_singleton ρ).preimage_circleMap 0 (hR.ne')
+  · -- Pointwise convergence outside a null set
+    have h_measure_zero : MeasureTheory.volume {θ : ℝ | circleMap 0 R θ = w ∨ circleMap 0 R θ = ρ} = 0 := by
+      apply Set.Countable.measure_zero _ MeasureTheory.MeasureSpace.volume
+      exact Set.Countable.union ((countable_singleton w).preimage_circleMap 0 (hR.ne'))
+          ((countable_singleton ρ).preimage_circleMap 0 (hR.ne'))
+    filter_upwards [MeasureTheory.measure_eq_zero_iff_ae_notMem.mp h_measure_zero] with θ hθ
+    intro _
+    apply (herglotzLogIntegrand_continuousAt (by tauto) (by tauto)).tendsto.comp
+    apply Filter.Tendsto.add tendsto_const_nhds
+      (Filter.Tendsto.mul (Complex.continuous_ofReal.continuousAt.tendsto.comp hr_tendsto)
+        tendsto_const_nhds)
+
+theorem xx (w ρ : ℂ)
+    {R : ℝ} (hR : 0 < R) (hρ : ‖ρ‖ = R) (hw : ‖w‖ < R)  :
+    circleAverage (herglotzLogIntegrand w ρ) (0 : ℂ) R = Real.log ‖w - ρ‖ := by
+  let r : ℕ → ℝ := fun n ↦ R - (R - ‖w‖) / (n + 2)
+  have hr_lt : ∀ n, r n < R := by
+    intro n
+    simp_all only [sub_lt_self_iff, sub_pos, div_pos_iff_of_pos_left, r]
+    linarith
+  have hr_pos : ∀ n, 0 < r n := by
+    intro n
+    simp_all only [sub_lt_self_iff, sub_pos, div_pos_iff_of_pos_left, r]
+    apply (div_lt_iff₀ (by linarith)).2
+    calc R - ‖w‖
+      _ ≤ R := by aesop
+      _ < R * (n + 2) := by
+        rw [lt_mul_iff_one_lt_right hR]
+        linarith
+  have hr_tendsto : Tendsto r atTop (nhds R) :=
+    le_trans (tendsto_const_nhds.sub <| tendsto_const_nhds.div_atTop <|
+      Filter.tendsto_atTop_add_const_right _ _ tendsto_natCast_atTop_atTop)
+      (by norm_num)
+  have DCT := herglotzLogIntegrand_circleAverage_tendsto hR hρ hw hr_lt hr_pos hr_tendsto
+  have {n : ℕ} : circleAverage (herglotzLogIntegrand w ρ) 0 (r n) = Real.log ‖w - ρ‖ := by
+    unfold herglotzLogIntegrand
+    rw [InnerProductSpace.HarmonicContOnCl.circleAverage_re_herglotzRieszKernel_smul]
+    · constructor
+      · intro z hz
+        have : z ≠ ρ := by
+          by_contra h
+          simp only [mem_ball, dist_zero_right] at hz
+          grind
+        apply AnalyticAt.harmonicAt_log_norm (by fun_prop) (by grind)
+      · intro x hx
+        apply ContinuousAt.continuousWithinAt
+        have : ‖x - ρ‖ ≠ 0 := by
+          by_contra h
+          rw [norm_eq_zero, sub_eq_zero] at h
+          rw [closure_ball _ (by grind), mem_closedBall, dist_zero_right] at hx
+          grind
+        fun_prop (disch := grind)
+    · simp [r, lt_sub_iff_add_lt]
+      apply add_lt_of_lt_neg_add
+      nth_rw 2 [add_comm]
+      rw [← sub_eq_add_neg]
+      exact div_lt_self (by simp_all) (by linarith)
+  aesop
