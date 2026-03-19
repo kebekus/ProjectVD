@@ -1,7 +1,7 @@
 /-
 Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Mihai Iancu, Stefan Kebekus, Sebastian Schleissinger, Aristotle AI
+Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Calculus.ContDiff.Operations
 import VD.MathlibSubmitted.Aux
@@ -20,7 +20,10 @@ a linear function of the tuple (f x, f' x, f'' x, … up to order n)`.
 
 - Composition of differentials operators
 
-- Loss of Regularity
+- Notion of "n times continuously differentiable differential operator", loss of
+  regularity when applying the operator.
+
+- Leibniz rule
 -/
 open Filter Function Metric Real Set Classical Topology
 
