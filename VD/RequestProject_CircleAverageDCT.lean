@@ -6,10 +6,9 @@ open Filter Metric Real MeasureTheory Set Topology
 ## Herglotz–Riesz kernel
 -/
 
-/-- The integrand in our application: `Re((z + w)/(z - w)) · log ‖z - ρ‖`. -/
-noncomputable def herglotzLogIntegrand (w ρ : ℂ) : ℂ → ℝ :=
-  (Complex.re ∘ herglotzRieszKernel 0 w) • (fun z ↦ log ‖z - ρ‖)
-
+-- Shorthand for the integrand in our computations
+private noncomputable def herglotzLogIntegrand (w ρ : ℂ) : ℂ → ℝ :=
+  (Complex.re ∘ herglotzRieszKernel 0 w) • (log ‖· - ρ‖)
 
 -- Continuity of the herglotzLogIntegrand
 private lemma herglotzLogIntegrand_continuousAt {w ρ z : ℂ} (hz_w : z ≠ w) (hz_ρ : z ≠ ρ) :
@@ -22,45 +21,39 @@ private lemma herglotzLogIntegrand_continuousAt {w ρ z : ℂ} (hz_w : z ≠ w) 
 private lemma herglotzLogIntegrand_continuous_on_circle
     {w ρ : ℂ} {R r : ℝ} (hR : 0 < R) (hρ : ‖ρ‖ = R)
     (hr_pos : 0 < r) (hr_lt : r < R) (hwr : ‖w‖ < r) :
-    Continuous (fun θ => herglotzLogIntegrand w ρ (circleMap 0 r θ)) := by
+    Continuous (fun θ ↦ herglotzLogIntegrand w ρ (circleMap 0 r θ)) := by
   rw [continuous_iff_continuousAt]
   intro θ
-  apply ContinuousAt.comp _ (by fun_prop)
-  apply herglotzLogIntegrand_continuousAt
-  · by_contra h
-    rw [← h, norm_circleMap_zero] at hwr
-    grind
-  · by_contra h
-    rw [← h, norm_circleMap_zero] at hρ
-    grind
+  apply ContinuousAt.comp (herglotzLogIntegrand_continuousAt _ _) (by fun_prop)
+  all_goals
+    by_contra h
+    grind [norm_circleMap_zero]
 
-lemma norm_sq_circleMap_sub_lower_bound
+-- Auxiliary computation for the boundedness required by the dominated
+-- convergence theorem, Part I.
+private lemma dctBoundedness₀
     {r₀ r R : ℝ} {ρ : ℂ} (hρ : ‖ρ‖ = R)
     (hr₀ : 0 < r₀) (hR : 0 < R) (hr₀r : r₀ ≤ r) (hrR : r ≤ R) (θ : ℝ) :
-    (r₀ / R) * ‖circleMap 0 R θ - ρ‖ ^ 2 ≤ ‖circleMap 0 r θ - ρ‖ ^ 2 := by
-  -- By the cosine law, we have ‖circleMap 0 r θ - ρ‖² = r² + R² - 2rR cos(θ - α) and ‖circleMap 0 R θ - ρ‖² = R² + R² - 2R² cos(θ - α).
-  have h_cos_law : ‖circleMap 0 r θ - ρ‖ ^ 2 = r ^ 2 + R ^ 2 - 2 * r * R * cos (θ - Complex.arg ρ)
-      ∧ ‖circleMap 0 R θ - ρ‖ ^ 2 = R ^ 2 + R ^ 2 - 2 * R ^ 2 * cos (θ - Complex.arg ρ) := by
+    sqrt (r₀ / R) * ‖circleMap 0 R θ - ρ‖ ≤ ‖circleMap 0 r θ - ρ‖ := by
+  have h_cos_law (r₁ : ℝ) :
+      ‖circleMap 0 r₁ θ - ρ‖ ^ 2 = r₁ ^ 2 + R ^ 2 - 2 * r₁ * R * cos (θ - Complex.arg ρ) := by
     norm_num [ Complex.normSq, Complex.sq_norm, circleMap ];
     rw [← Complex.norm_mul_cos_arg ρ, ← Complex.norm_mul_sin_arg ρ]
     ring_nf
     norm_num [sin_sub, cos_sub, hρ]
-    constructor
-    <;> rw [sin_sq, sin_sq]
-    <;> ring;
-  rw [div_mul_eq_mul_div, div_le_iff₀]
-  <;> nlinarith [mul_le_mul_of_nonneg_left hr₀r hR.le, mul_le_mul_of_nonneg_left hrR hR.le,
-    neg_one_le_cos, cos_le_one]
+    rw [sin_sq, sin_sq]
+    ring
+  have : (r₀ / R) * ‖circleMap 0 R θ - ρ‖ ^ 2 ≤ ‖circleMap 0 r θ - ρ‖ ^ 2 := by
+    rw [div_mul_eq_mul_div, div_le_iff₀ hR]
+    nlinarith [h_cos_law r, h_cos_law R, mul_le_mul_of_nonneg_left hr₀r hR.le,
+      mul_le_mul_of_nonneg_left hrR hR.le, neg_one_le_cos, cos_le_one]
+  convert sqrt_le_sqrt this using 1
+  simp only [hr₀.le, sqrt_div, norm_nonneg, pow_succ_nonneg, sqrt_mul', sqrt_sq]
+  rw [sqrt_sq (norm_nonneg (circleMap 0 r θ - ρ))]
 
-lemma norm_circleMap_sub_lower_bound
-    {r₀ r R : ℝ} {ρ : ℂ} (hρ : ‖ρ‖ = R)
-    (hr₀ : 0 < r₀) (hR : 0 < R) (hr₀r : r₀ ≤ r) (hrR : r ≤ R) (θ : ℝ) :
-    sqrt (r₀ / R) * ‖circleMap 0 R θ - ρ‖ ≤ ‖circleMap 0 r θ - ρ‖ := by
-  convert sqrt_le_sqrt (norm_sq_circleMap_sub_lower_bound hρ hr₀ hR hr₀r hrR θ) using 1
-  norm_num [hr₀.le, hR.le]
-  aesop
-
-lemma herglotzLogIntegrand_bound
+-- Auxiliary computation for the boundedness required by the dominated
+-- convergence theorem, Part II.
+private lemma dctBoundedness₁
   {w ρ : ℂ} {R r₀ r : ℝ} (hR : 0 < R) (hρ : ‖ρ‖ = R)
   (hr₀ : 0 < r₀) (hw : ‖w‖ < r₀) (hr₀r : r₀ ≤ r) (hrR : r ≤ R) (θ : ℝ)
   (hdR : 0 < ‖circleMap 0 R θ - ρ‖) :
@@ -82,26 +75,24 @@ lemma herglotzLogIntegrand_bound
         grind [norm_circleMap_zero]
     · gcongr
       linarith
-  · refine' abs_le.mpr ⟨ _, _ ⟩
+  · refine' abs_le.mpr ⟨_, _⟩
     · have h_log_lower_bound : log ‖circleMap 0 r θ - ρ‖ ≥ log (sqrt (r₀ / R)) + log ‖circleMap 0 R θ - ρ‖ := by
         rw [← log_mul (by positivity) (by positivity)]
         exact log_le_log
           (mul_pos (sqrt_pos.mpr (div_pos hr₀ hR)) hdR)
-          (by linarith [norm_circleMap_sub_lower_bound hρ hr₀ hR hr₀r hrR θ])
+          (by linarith [dctBoundedness₀ hρ hr₀ hR hr₀r hrR θ])
       grind
     · refine' le_trans _ (le_add_of_le_of_nonneg (le_add_of_nonneg_right <| abs_nonneg _ ) <| abs_nonneg _)
       refine' le_trans (log_le_log _ _) (le_abs_self _)
-      · refine' lt_of_lt_of_le _ (norm_circleMap_sub_lower_bound hρ hr₀ hR hr₀r hrR θ)
+      · refine' lt_of_lt_of_le _ (dctBoundedness₀ hρ hr₀ hR hr₀r hrR θ)
         aesop
       · apply le_trans (norm_sub_le _ _)
         simp only [circleMap, zero_add, Complex.norm_mul, Complex.norm_real, norm_eq_abs,
           Complex.norm_exp_ofReal_mul_I, mul_one]
         linarith [abs_of_nonneg (by linarith : 0 ≤ r)]
 
-/-!
-## The specific convergence result
--/
-
+-- Dominated convergence theorem: circle average can be computed by a sequence
+-- of circle averages integrating over circles in the interior
 private theorem herglotzLogIntegrand_circleAverage_tendsto
     {ρ w : ℂ} {R : ℝ} (hR : 0 < R) (hρ : ‖ρ‖ = R) (hw : ‖w‖ < R)
     {r : ℕ → ℝ} (hr_lt : ∀ n, r n < R) (hr_pos : ∀ n, 0 < r n)
@@ -123,15 +114,14 @@ private theorem herglotzLogIntegrand_circleAverage_tendsto
     have h_bound {θ : ℝ} : ‖herglotzLogIntegrand w ρ (circleMap 0 (r n) θ)‖ ≤ bound θ ∨ ‖circleMap 0 R θ - ρ‖ = 0 := by
       by_cases h : ‖circleMap 0 R θ - ρ‖ = 0
       <;> simp_all [bound, circleMap]
-      convert herglotzLogIntegrand_bound hR hρ
+      convert dctBoundedness₁ hR hρ
         (show 0 < (R + ‖w‖) / 2 by linarith [norm_nonneg w])
         (show ‖w‖ < (R + ‖w‖) / 2 by linarith [norm_nonneg w])
         (show (R + ‖w‖) / 2 ≤ r n by linarith [hN n hn])
         (show r n ≤ R by linarith [hr_lt n]) θ _
         using 1
-      · norm_num [circleMap]
-      · norm_num [circleMap]
-      · exact norm_pos_iff.mpr (by simpa [circleMap] using h)
+      <;> norm_num [circleMap]
+      · exact h
     apply MeasureTheory.measure_mono_null (t := {θ | ‖circleMap 0 R θ - ρ‖ = 0}) (by grind)
     apply Set.Countable.measure_zero _ MeasureTheory.MeasureSpace.volume
     simp only [norm_eq_zero, sub_eq_zero]
@@ -155,9 +145,14 @@ private theorem herglotzLogIntegrand_circleAverage_tendsto
       (Filter.Tendsto.mul (Complex.continuous_ofReal.continuousAt.tendsto.comp hr_tendsto)
         tendsto_const_nhds)
 
-theorem xx (w ρ : ℂ)
-    {R : ℝ} (hR : 0 < R) (hρ : ‖ρ‖ = R) (hw : ‖w‖ < R)  :
-    circleAverage (herglotzLogIntegrand w ρ) (0 : ℂ) R = log ‖w - ρ‖ := by
+-- Statement of circleAverage_re_herglotzRieszKernel_mul_log₀ in case where the
+-- center equals zero
+theorem circleAverage_re_herglotzRieszKernel_mul_log₀ {w ρ : ℂ} {R : ℝ}
+    (hρ : ρ ∈ sphere 0 R) (hw : w ∈ ball 0 R)  :
+    circleAverage ((Complex.re ∘ herglotzRieszKernel 0 w) • (log ‖· - ρ‖)) (0 : ℂ) R = log ‖w - ρ‖ := by
+  have hR : 0 < R := pos_of_mem_ball hw
+  rw [mem_sphere_iff_norm, sub_zero] at hρ
+  rw [mem_ball_iff_norm, sub_zero] at hw
   let r : ℕ → ℝ := fun n ↦ R - (R - ‖w‖) / (n + 2)
   have hr_lt : ∀ n, r n < R := by
     intro n
@@ -201,3 +196,38 @@ theorem xx (w ρ : ℂ)
       rw [← sub_eq_add_neg]
       exact div_lt_self (by simp_all) (by linarith)
   aesop
+
+lemma herglotzRieszKernel_add_const (c w z : ℂ) :
+    herglotzRieszKernel c w (z + c) = herglotzRieszKernel 0 (w - c) z := by
+  simp [herglotzRieszKernel_fun_def]
+
+/--
+Analogue of the **Poisson Integral Formula** for the circle average function
+`log ‖· - ρ‖` along the circle with radius `‖ρ‖`.
+
+- See
+  `InnerProductSpace.HarmonicContOnCl.circleAverage_re_herglotzRieszKernel_smul`
+  in the file `Mathlib/Analysis/Complex/Harmonic/Poisson` for the classic
+  Poisson Integral Formula, for harmonic functions without logarithmic poles.
+
+- See `MeromorphicOn.extract_zeros_poles` in the file
+  `Mathlib/Analysis/Meromorphic/FactorizedRational` for a construction that
+  splits factors of the form `· - ρ` off arbitrary meromorphic functions.
+-/
+@[simp]
+theorem circleAverage_re_herglotzRieszKernel_mul_log' {w ρ c : ℂ} {R : ℝ}
+    (hρ : ρ ∈ sphere c R) (hw : w ∈ ball c R)  :
+    circleAverage ((Complex.re ∘ herglotzRieszKernel c w) • (log ‖· - ρ‖)) c R = log ‖w - ρ‖ := by
+  simp only [smul_eq_mul, ← circleAverage_map_add_const, Pi.mul_apply, Function.comp_apply,
+    add_zero]
+  conv =>
+    left; arg 1
+    intro z
+    rw [(by ring : (z + 0 + c) - ρ = z - (ρ - c))]
+    arg 1; arg 1
+    rw [add_zero, herglotzRieszKernel_add_const c w z]
+  have : (fun z ↦ (herglotzRieszKernel 0 (w - c) z).re * log ‖z - (ρ - c)‖) =
+    (Complex.re ∘ herglotzRieszKernel 0 (w - c)) • (log ‖· - (ρ - c)‖) := by rfl
+  rw [this, circleAverage_re_herglotzRieszKernel_mul_log₀ (by simp_all)
+    (by simp_all [mem_ball_iff_norm.1 hw])]
+  simp
