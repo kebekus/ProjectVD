@@ -185,7 +185,7 @@ For sufficiently regular functions, linear differential operators commute with s
       = ∑ i ∈ I, (fun (x : Fin (n + 1)) ↦ ftaylorSeriesWithin 𝕜 (φ i) s e x) := by
     ext m v
     unfold ftaylorSeriesWithin
-    rw [iteratedFDerivWithin_sum_apply' _ hs he]
+    rw [iteratedFDerivWithin_sum_apply hs he]
     simp only [ContinuousMultilinearMap.sum_apply, Finset.sum_apply]
     exact fun j hj ↦ (h j hj).of_le (by norm_num; grind)
   simp_all [linearDiffOp_applyWithin]
@@ -282,7 +282,7 @@ Linear differential operators map zero to zero.
 @[simp, to_fun] lemma linearDiffOp_apply_zero (D : LinearDiffOp 𝕜 E F G n) :
     D 0 e = 0 := by
   rw [linearDiffOp_coe_apply]
-  simp only [ftaylorSeries_zero_fun, Pi.zero_apply, FormalMultilinearSeries.zero_apply]
+  simp only [ftaylorSeries_zero, Pi.zero_apply, FormalMultilinearSeries.zero_apply]
   exact (D.tensorField e).map_zero
 
 /--
@@ -291,5 +291,5 @@ Linear differential operators map zero to zero.
 @[simp, to_fun] lemma linearDiffOp_applyWithin_zero (D : LinearDiffOp 𝕜 E F G n) :
     D.applyWithin s 0 e = 0 := by
   rw [linearDiffOp_applyWithin]
-  simp only [ftaylorSeriesWithin_zero_fun, Pi.zero_apply, FormalMultilinearSeries.zero_apply]
+  simp only [ftaylorSeriesWithin_zero, Pi.zero_apply, FormalMultilinearSeries.zero_apply]
   exact (D.tensorField e).map_zero
