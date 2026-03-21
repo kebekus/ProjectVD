@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Calculus.ContDiff.Operations
-import VD.MathlibSubmitted.Aux
 
 /-!
 # Linear Differential Operators

@@ -19,8 +19,10 @@ variable
 
 noncomputable section
 
+/-
 @[simp] theorem MultlinearMap.map_zero {n : ℕ} (D : E [×n]→L[𝕜] F) (hn : 0 < n) :
     D 0 = 0 := D.map_coord_zero ⟨0, hn⟩ rfl
 
 @[simp] theorem ContinuousMultlinearMap.map_zero {n : ℕ} (D : E [×n]→L[𝕜] F) (hn : 0 < n) :
     D 0 = 0 := D.map_coord_zero ⟨0, hn⟩ rfl
+-/
