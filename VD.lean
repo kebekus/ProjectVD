@@ -6,7 +6,6 @@ import VD.CharacteristicMonotone
 import VD.LinearDiffOp.Basic
 import VD.LinearDiffOp.Regularity
 import VD.MathlibPending.BlaschkeDecomp
-import VD.MathlibSubmitted.Aux
 import VD.MathlibSubmitted.LocallyFinsupp
 import VD.MathlibSubmitted.MeromorphicProd
 import VD.MathlibSubmitted.Poisson_log_affine
