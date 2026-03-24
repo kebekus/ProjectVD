@@ -22,13 +22,13 @@ the fun!
 
 - Formalized Nevanlinna's [First Main
   Theorem](https://en.wikipedia.org/wiki/Nevanlinna_theory#First_fundamental_theorem).
-
 - Merged the formalization of first main theorem into Lean's mathlib.
 
 ### Next Milestones 
 
-- Formalize the Theorem on Logarithmic Differentials
-- Formalize the [Second Main
+- Rationality criteria, transcendence criteria
+- The Theorem on Logarithmic Differentials
+- The [Second Main
   Theorem](https://en.wikipedia.org/wiki/Nevanlinna_theory#Second_fundamental_theorem)
 - Merge formalizations into mathlib
 - Establish some of the more immediate applications
