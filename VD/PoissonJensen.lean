@@ -89,15 +89,17 @@ theorem PoissonJensen_aux₁ {w c : ℂ} {R : ℝ} {f g : ℂ → ℂ}
         = circleAverage ((Complex.re ∘ herglotzRieszKernel c w)
           • (fun x ↦ ∑ᶠ (i : ℂ), ↑((divisor g (closedBall 0 R)) i) * log ‖x - i‖ + log ‖h x‖)) 0 R := by
   have h₅g : ∀ (u : ↑(closedBall (0 : ℂ) R)), meromorphicOrderAt g ↑u ≠ ⊤ := by
+
     sorry
-  have h₆g : (divisor g (closedBall 0 R)).support.Finite := by
-    sorry
+  have h₆g : (divisor g (closedBall 0 R)).support.Finite :=
+    (divisor g (closedBall 0 R)).finiteSupport (isCompact_closedBall 0 R)
   obtain ⟨h, h₁h, h₂h, h₃h⟩ := h₁g.meromorphicOn.extract_zeros_poles h₅g h₆g
   use h, h₁h, (h₂h ⟨·, ·⟩), h₃h
   apply circleAverage_congr_codiscreteWithin _ (pos_of_mem_ball hw).ne'
   simp_rw [abs_of_pos (pos_of_mem_ball hw)]
   have : (divisor g (closedBall 0 R)).supportᶜ ∈ codiscreteWithin (sphere 0 R) := by
-    sorry
+    apply Filter.codiscreteWithin.mono (subset_univ _) (codiscrete_le_cofinite _)
+    simp [h₆g]
   filter_upwards [h₃h.filter_mono (Filter.codiscreteWithin.mono sphere_subset_closedBall),
     Filter.self_mem_codiscreteWithin _, this] with x h₁x h₂x h₃x
   simp
