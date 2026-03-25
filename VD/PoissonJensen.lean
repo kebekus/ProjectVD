@@ -70,16 +70,10 @@ theorem PoissonJensen_aux₀ {w c : ℂ} {R : ℝ} {f : ℂ → ℂ}
   rw [log_mul (by simp_all) (by simp_all)]
   simp_all
 
-theorem PoissonJensen_aux₁ {w c : ℂ} {R : ℝ} {f g : ℂ → ℂ}
-    (h₁f : MeromorphicOn f (closedBall 0 R))
-    (h₂f : ∀ u : (closedBall (0 : ℂ) R), meromorphicOrderAt f u ≠ ⊤)
+theorem PoissonJensen_aux₁ {w c : ℂ} {R : ℝ} {g : ℂ → ℂ}
     (hw : w ∈ ball c R)
     (h₁g : MeromorphicNFOn g (closedBall (0 : ℂ) R))
-    (h₂g : ∀ u ∈ ball (0 : ℂ) R, g u ≠ 0)
-    (h₃g : f =ᶠ[codiscreteWithin (closedBall 0 R)]
-        (∏ᶠ (u : ℂ), Complex.canonicalFactor R u ^ (-(divisor f (ball 0 R)) u)) • g)
-    (h₄g : circleAverage ((Complex.re ∘ herglotzRieszKernel c w) • (log ‖f ·‖)) 0 R
-        = circleAverage ((Complex.re ∘ herglotzRieszKernel c w) • (log ‖g ·‖)) 0 R) :
+    (h₂g : ∀ u ∈ ball (0 : ℂ) R, g u ≠ 0) :
     ∃ h : ℂ → ℂ,
       AnalyticOnNhd ℂ h (closedBall 0 R)
       ∧ (∀ u ∈ closedBall (0 : ℂ) R, h u ≠ 0)
@@ -89,8 +83,17 @@ theorem PoissonJensen_aux₁ {w c : ℂ} {R : ℝ} {f g : ℂ → ℂ}
         = circleAverage ((Complex.re ∘ herglotzRieszKernel c w)
           • (fun x ↦ ∑ᶠ (i : ℂ), ↑((divisor g (closedBall 0 R)) i) * log ‖x - i‖ + log ‖h x‖)) 0 R := by
   have h₅g : ∀ (u : ↑(closedBall (0 : ℂ) R)), meromorphicOrderAt g ↑u ≠ ⊤ := by
-
-    sorry
+    rw [← MeromorphicOn.exists_meromorphicOrderAt_ne_top_iff_forall]
+    have s₀ : (0 : ℂ) ∈ ball 0 R := by
+      simp [pos_of_mem_ball hw]
+    have : (0 : ℂ) ∈ closedBall 0 R := by
+      simp [(pos_of_mem_ball hw).le]
+    use ⟨0, this⟩
+    simp only []
+    rw [(h₁g this).meromorphicOrderAt_eq_zero_iff.2 (h₂g 0 s₀)]
+    simp
+    exact h₁g.meromorphicOn
+    refine isConnected_closedBall (pos_of_mem_ball hw).le
   have h₆g : (divisor g (closedBall 0 R)).support.Finite :=
     (divisor g (closedBall 0 R)).finiteSupport (isCompact_closedBall 0 R)
   obtain ⟨h, h₁h, h₂h, h₃h⟩ := h₁g.meromorphicOn.extract_zeros_poles h₅g h₆g
@@ -141,72 +144,3 @@ theorem PoissonJensen_aux₁ {w c : ℂ} {R : ℝ} {f g : ℂ → ℂ}
       aesop
     · simp [finprod_of_infinite_mulSupport h]
   · simp [h₂h ⟨x, sphere_subset_closedBall h₂x⟩]
-
-theorem PoissonJensen {w ρ c : ℂ} {R : ℝ} {f : ℂ → ℂ}
-    (h₁f : MeromorphicOn f (closedBall 0 R))
-    (h₂f : ∀ u : (closedBall (0 : ℂ) R), meromorphicOrderAt f u ≠ ⊤)
-    (hρ : ρ ∈ sphere c R) (hw : w ∈ ball c R) :
-    ∃ g : ℂ → ℂ,
-      MeromorphicNFOn g (closedBall 0 R)
-      ∧ (∀ u ∈ ball (0 : ℂ) R, g u ≠ 0)
-      ∧ f =ᶠ[codiscreteWithin (closedBall 0 R)]
-        (∏ᶠ (u : ℂ), Complex.canonicalFactor R u ^ (-(divisor f (ball 0 R)) u)) • g
-      ∧ circleAverage ((Complex.re ∘ herglotzRieszKernel c w) • (log ‖f ·‖)) 0 R
-        = circleAverage ((Complex.re ∘ herglotzRieszKernel c w) • (log ‖g ·‖)) 0 R := by
-  obtain ⟨g, h₁g, h₂g, h₃g⟩ := canonicalDecomposition h₁f h₂f
-  use g, h₁g, h₂g, h₃g
-  have h₅g : MeromorphicOn g (sphere 0 R) := h₁g.meromorphicOn.mono_set sphere_subset_closedBall
-  have h₆g : ∀ u ∈ (sphere (0 : ℂ) R), meromorphicOrderAt g u ≠ ⊤ := by
-    intro u hu
-    apply h₁g.meromorphicOn.meromorphicOrderAt_ne_top_of_isPreconnected isPreconnected_closedBall
-      (mem_closedBall_self (pos_of_mem_ball hw).le) (sphere_subset_closedBall hu)
-    simp [(h₁g (mem_closedBall_self (pos_of_mem_ball hw).le)).meromorphicOrderAt_eq_zero_iff.2
-      (h₂g 0 (mem_ball_self (pos_of_mem_ball hw)))]
-  have h₇g : ∀ (u : (closedBall (0 : ℂ) R)), meromorphicOrderAt g ↑u ≠ ⊤ := by
-    sorry
-  have h₈g : (divisor g (closedBall 0 R)).support.Finite := by
-    sorry
-  obtain ⟨h, h₁h, h₂h, h₃h⟩ := h₁g.meromorphicOn.extract_zeros_poles h₇g h₈g
-
-  calc circleAverage (Complex.re ∘ herglotzRieszKernel c w • fun x ↦ log ‖f x‖) 0 R
-    _ = circleAverage (Complex.re ∘ herglotzRieszKernel c w • fun x ↦ log ‖g x‖) 0 R := by
-      apply circleAverage_congr_codiscreteWithin _ (pos_of_mem_ball hw).ne'
-      simp_rw [abs_of_pos (pos_of_mem_ball hw)]
-      filter_upwards [h₃g.filter_mono (Filter.codiscreteWithin.mono sphere_subset_closedBall),
-        Filter.self_mem_codiscreteWithin _,
-        h₅g.codiscreteWithin_setOf_ne_zero h₆g] with x h₁x h₂x h₃x
-      simp
-      left
-      rw [h₁x]
-      simp
-      have : ‖(∏ᶠ (u : ℂ), (Complex.canonicalFactor R u ^ (divisor f (ball 0 R)) u)⁻¹) x‖ = 1 := by
-        by_cases hf : Set.Finite
-          (fun u ↦ (Complex.canonicalFactor R u ^ (divisor f (ball 0 R)) u)⁻¹).mulSupport
-        · rw [finprod_eq_prod _ hf, Finset.prod_apply, norm_prod, Finset.prod_eq_one]
-          intro a ha
-          by_cases ha : a ∈ ball 0 R
-          · simp [Complex.norm_canonicalFactor_eval_circle_eq_one ha h₂x]
-          · simp_all
-        · rw [finprod_of_infinite_mulSupport (Set.not_finite.mp hf)]
-          simp
-      rw [log_mul (by simp_all) (by simp_all)]
-      simp_all
-    _ = circleAverage (Complex.re ∘ herglotzRieszKernel c w
-        • fun x ↦ log ‖((∏ᶠ (u : ℂ), (fun x ↦ x - u) ^ (divisor g (closedBall 0 R)) u) • h) x‖) 0 R := by
-      apply circleAverage_congr_codiscreteWithin _ (pos_of_mem_ball hw).ne'
-      simp_rw [abs_of_pos (pos_of_mem_ball hw)]
-      filter_upwards [h₃h.filter_mono (Filter.codiscreteWithin.mono sphere_subset_closedBall),
-        Filter.self_mem_codiscreteWithin _,
-        h₅g.codiscreteWithin_setOf_ne_zero h₆g] with x h₁x h₂x h₃x
-      simp
-      left
-      rw [h₁x]
-      simp
-    _ = circleAverage (Complex.re ∘ herglotzRieszKernel c w
-        • (fun x ↦ log ‖(∏ᶠ (u : ℂ), (x - u) ^ (divisor g (closedBall 0 R)) u)‖ + log ‖h x‖)) 0 R := by
-      apply circleAverage_congr_codiscreteWithin _ (pos_of_mem_ball hw).ne'
-      congr
-      sorry
-    _ = 0 := by
-      simp
-      sorry
