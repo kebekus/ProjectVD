@@ -4,6 +4,13 @@ import VD.MathlibSubmitted.Poisson_log_affine
 open Filter Function MeromorphicOn Metric Real Set Classical Topology ValueDistribution
 
 
+theorem finprod_ne_zero {ι : Type*} {M₀ : Type*} [CommMonoidWithZero M₀] [Nontrivial M₀] [NoZeroDivisors M₀]
+  {f : ι → M₀} (h : ∀ i, f i ≠ 0) :
+    ∏ᶠ i, f i ≠ 0 := by
+  by_cases h₂ : Set.Finite f.mulSupport
+  · grind [finprod_eq_prod f h₂, Finset.prod_ne_zero_iff]
+  · simp [finprod_of_infinite_mulSupport h₂]
+
 theorem MeromorphicOn.codiscreteWithin_setOf_meromorphicOrderAt_eq_zero_or_top {U : Set ℂ} {f : ℂ → ℂ}
     (h₁f : MeromorphicOn f U)
     (h₂f : ∀ u ∈ U, meromorphicOrderAt f u ≠ ⊤) :
@@ -89,8 +96,10 @@ theorem PoissonJensen_aux₁ {w c : ℂ} {R : ℝ} {f g : ℂ → ℂ}
   use h, h₁h, (h₂h ⟨·, ·⟩), h₃h
   apply circleAverage_congr_codiscreteWithin _ (pos_of_mem_ball hw).ne'
   simp_rw [abs_of_pos (pos_of_mem_ball hw)]
+  have : (divisor g (closedBall 0 R)).supportᶜ ∈ codiscreteWithin (sphere 0 R) := by
+    sorry
   filter_upwards [h₃h.filter_mono (Filter.codiscreteWithin.mono sphere_subset_closedBall),
-    Filter.self_mem_codiscreteWithin _] with x h₁x h₂x
+    Filter.self_mem_codiscreteWithin _, this] with x h₁x h₂x h₃x
   simp
   left
   rw [h₁x]
@@ -107,11 +116,29 @@ theorem PoissonJensen_aux₁ {w c : ℂ} {R : ℝ} {f g : ℂ → ℂ}
   · intro a ha
     aesop
   · intro a ha
-    sorry
+    simp at ha
+    apply zpow_ne_zero
+    simp
+    by_contra h
+    rw [sub_eq_zero] at h
+    subst h
+    aesop
   · intro a ha
     aesop
-  · sorry
-  · sorry
+  · rw [ne_eq, norm_eq_zero, ← ne_eq]
+    by_cases h : Set.Finite (fun u ↦ (fun x ↦ x - u) ^ (divisor g (closedBall 0 R)) u).mulSupport
+    · rw [finprod_eq_prod _ h, Finset.prod_apply]
+      rw [Finset.prod_ne_zero_iff]
+      intro a ha
+      simp_all
+      apply zpow_ne_zero
+      simp
+      by_contra h
+      rw [sub_eq_zero] at h
+      subst h
+      aesop
+    · simp [finprod_of_infinite_mulSupport h]
+  · simp [h₂h ⟨x, sphere_subset_closedBall h₂x⟩]
 
 theorem PoissonJensen {w ρ c : ℂ} {R : ℝ} {f : ℂ → ℂ}
     (h₁f : MeromorphicOn f (closedBall 0 R))
