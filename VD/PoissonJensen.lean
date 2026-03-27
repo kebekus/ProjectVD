@@ -1,5 +1,6 @@
 import VD.MathlibPending.BlaschkeDecomp
 import VD.MathlibSubmitted.Poisson_log_affine
+import Mathlib.LinearAlgebra.Complex.Module
 
 open Filter Function MeromorphicOn Metric Real Set Classical Topology ValueDistribution
 
@@ -53,21 +54,15 @@ theorem PoissonJensen_aux₀ {w c : ℂ} {R : ℝ} {f : ℂ → ℂ}
   filter_upwards [h₃g.filter_mono (Filter.codiscreteWithin.mono sphere_subset_closedBall),
     Filter.self_mem_codiscreteWithin _,
     h₅g.codiscreteWithin_setOf_ne_zero h₆g] with x h₁x h₂x h₃x
-  simp
-  left
-  rw [h₁x]
-  simp
   have : ‖(∏ᶠ (u : ℂ), (Complex.canonicalFactor R u ^ (divisor f (ball 0 R)) u)⁻¹) x‖ = 1 := by
     by_cases hf : Set.Finite
-      (fun u ↦ (Complex.canonicalFactor R u ^ (divisor f (ball 0 R)) u)⁻¹).mulSupport
+        (fun u ↦ (Complex.canonicalFactor R u ^ (divisor f (ball 0 R)) u)⁻¹).mulSupport
     · rw [finprod_eq_prod _ hf, Finset.prod_apply, norm_prod, Finset.prod_eq_one]
-      intro a ha
+      intro a _
       by_cases ha : a ∈ ball 0 R
       · simp [Complex.norm_canonicalFactor_eval_circle_eq_one ha h₂x]
       · simp_all
-    · rw [finprod_of_infinite_mulSupport (Set.not_finite.mp hf)]
-      simp
-  rw [log_mul (by simp_all) (by simp_all)]
+    · simp [finprod_of_infinite_mulSupport (Set.not_finite.mp hf)]
   simp_all
 
 theorem PoissonJensen_aux₁ {w c : ℂ} {R : ℝ} {g : ℂ → ℂ}
@@ -81,7 +76,7 @@ theorem PoissonJensen_aux₁ {w c : ℂ} {R : ℝ} {g : ℂ → ℂ}
           (∏ᶠ (u : ℂ), (fun x ↦ x - u) ^ (divisor g (closedBall 0 R)) u) • h
       ∧ circleAverage ((Complex.re ∘ herglotzRieszKernel c w) • (log ‖g ·‖)) 0 R
         = circleAverage ((Complex.re ∘ herglotzRieszKernel c w)
-          • (fun x ↦ ∑ᶠ (i : ℂ), ↑((divisor g (closedBall 0 R)) i) * log ‖x - i‖ + log ‖h x‖)) 0 R := by
+          • (∑ᶠ (i : ℂ), (fun x ↦ ↑((divisor g (closedBall 0 R)) i) * log ‖x - i‖) + ((fun x ↦ log ‖h x‖)))) 0 R := by
   have h₅g : ∀ (u : ↑(closedBall (0 : ℂ) R)), meromorphicOrderAt g ↑u ≠ ⊤ := by
     rw [← MeromorphicOn.exists_meromorphicOrderAt_ne_top_iff_forall]
     have s₀ : (0 : ℂ) ∈ ball 0 R := by
@@ -105,42 +100,135 @@ theorem PoissonJensen_aux₁ {w c : ℂ} {R : ℝ} {g : ℂ → ℂ}
     simp [h₆g]
   filter_upwards [h₃h.filter_mono (Filter.codiscreteWithin.mono sphere_subset_closedBall),
     Filter.self_mem_codiscreteWithin _, this] with x h₁x h₂x h₃x
-  simp
+  simp only [Pi.smul_apply', comp_apply, smul_eq_mul, mul_eq_mul_left_iff]
   left
-  rw [h₁x]
-  simp
-  rw [log_mul]
+  rw [h₁x, Pi.smul_apply', smul_eq_mul, Complex.norm_mul, log_mul]
   rw [finprod_eq_prod_of_mulSupport_subset (s := h₆g.toFinset)]
+  rw [finsum_eq_sum_of_support_subset (s := h₆g.toFinset)]
   rw [Finset.prod_apply]
   simp_rw [Pi.pow_apply]
   rw [norm_prod]
   simp_rw [norm_zpow]
   rw [log_prod]
   simp_rw [log_zpow]
-  rw [← finsum_eq_sum_of_support_subset (s := h₆g.toFinset)]
-  · intro a ha
-    aesop
+  simp
   · intro a ha
     simp at ha
-    apply zpow_ne_zero
+    rw [zpow_ne_zero_iff]
     simp
     by_contra h
     rw [sub_eq_zero] at h
     subst h
-    aesop
+    simp_all
+    tauto
   · intro a ha
+    simp_all
+    by_contra h
+    simp [h] at ha
+    exact false_of_ne ha
+  · intro a ha
+    simp
+    simp at ha
     aesop
   · rw [ne_eq, norm_eq_zero, ← ne_eq]
     by_cases h : Set.Finite (fun u ↦ (fun x ↦ x - u) ^ (divisor g (closedBall 0 R)) u).mulSupport
     · rw [finprod_eq_prod _ h, Finset.prod_apply]
       rw [Finset.prod_ne_zero_iff]
       intro a ha
-      simp_all
       apply zpow_ne_zero
-      simp
+      simp only [ne_eq]
       by_contra h
       rw [sub_eq_zero] at h
-      subst h
       aesop
     · simp [finprod_of_infinite_mulSupport h]
   · simp [h₂h ⟨x, sphere_subset_closedBall h₂x⟩]
+
+set_option backward.isDefEq.respectTransparency false in
+theorem PoissonJensen_aux₂ {w c : ℂ} {R : ℝ} {h : ℂ → ℂ} [IsScalarTower ℝ ℂ ℂ]
+    {F : Function.locallyFinsuppWithin (sphere (0 : ℂ) R) ℤ}
+    (hw : w ∈ ball 0 R)
+    (h₁h : AnalyticOnNhd ℂ h (closedBall 0 R))
+    (h₂h : ∀ u ∈ closedBall (0 : ℂ) R, h u ≠ 0) :
+    circleAverage ((Complex.re ∘ herglotzRieszKernel 0 w)
+        • (∑ᶠ (i : ℂ), (fun x ↦ (F i) * log ‖x - i‖) + ((fun x ↦ log ‖h x‖)))) 0 R
+      = ∑ᶠ x, ↑(F x) • log ‖w - x‖
+        + circleAverage ((Complex.re ∘ herglotzRieszKernel 0 w) • (fun x ↦ log ‖h x‖)) 0 R := by
+  have η₀ : CircleIntegrable (Complex.re ∘ herglotzRieszKernel 0 w • fun x ↦ log ‖h x‖) 0 R := by
+    apply IntervalIntegrable.continuousOn_mul
+    · apply intervalIntegrable_log_norm_meromorphicOn
+      apply AnalyticOnNhd.meromorphicOn
+      intro x hx
+      apply AnalyticAt.comp'
+      have : AnalyticAt ℂ h (circleMap 0 R x) := by
+        apply h₁h (circleMap 0 R x)
+        simp
+        rw [abs_of_nonneg]
+        exact (pos_of_mem_ball hw).le
+      exact AnalyticAt.restrictScalars this
+      exact analyticOnNhd_circleMap 0 R x (by tauto)
+    sorry
+  rw [smul_add]
+  rw [circleAverage_add]
+  simp
+  have h₁F : Set.Finite F.support := by
+    sorry
+  rw [finsum_eq_sum_of_support_subset (s := h₁F.toFinset)]
+  rw [finsum_eq_sum_of_support_subset (s := h₁F.toFinset)]
+  rw [Finset.mul_sum]
+  rw [circleAverage_sum]
+  have {i : ℂ} : Complex.re ∘ herglotzRieszKernel 0 w * (fun x ↦ (F i) * log ‖x - i‖)
+      = ((F i) : ℝ) • (Complex.re ∘ herglotzRieszKernel 0 w * (fun x ↦ log ‖x - i‖)) := by
+    ext a
+    simp
+    ring
+  simp_rw [this]
+  clear this
+  conv =>
+    left
+    arg 2
+    intro x
+    rw [circleAverage_smul]
+  apply Finset.sum_congr
+  rfl
+  intro a ha
+  simp
+  left
+  have h₁a : a ∈ sphere (0 : ℂ) R := by
+    sorry
+  apply circleAverage_re_herglotzRieszKernel_mul_log h₁a hw
+  · -- ∀ i ∈ h₁F.toFinset, CircleIntegrable (Complex.re ∘ herglotzRieszKernel 0 w * fun x ↦ ↑(F i) * log ‖x - i‖) 0 R
+    intro i hi
+    unfold CircleIntegrable
+    apply IntervalIntegrable.continuousOn_mul
+    · apply IntervalIntegrable.const_mul
+      --apply circleIntegrable_log_norm_meromorphicOn
+      apply intervalIntegrable_log_norm_meromorphicOn
+      apply AnalyticOnNhd.meromorphicOn
+      apply AnalyticOnNhd.sub
+      · intro x hx
+        exact analyticOnNhd_circleMap 0 R x (by tauto)
+      · intro x hx
+        fun_prop
+    · apply Continuous.continuousOn
+      unfold herglotzRieszKernel
+      simp
+      have {x : ℝ} : circleMap 0 R x - w ≠ 0 := by
+        by_contra h
+        rw [sub_eq_zero] at h
+        have : ‖w‖ = R := by
+          simp [← h, (pos_of_mem_ball hw).le]
+        simp_all
+      fun_prop (disch := assumption)
+  · intro x hx
+    aesop
+  · intro x
+    contrapose
+    aesop
+  · by_cases h : Set.Finite (fun i ↦ (fun x ↦ ↑(F i) * log ‖x - i‖)).support
+    · rw [finsum_eq_sum _ h]
+      rw [Finset.smul_sum]
+      apply CircleIntegrable.sum
+      -- We have that above
+      sorry
+    · simp [finsum_of_infinite_support h, CircleIntegrable]
+  · sorry

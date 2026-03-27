@@ -7,7 +7,6 @@ Authors: Stefan Kebekus
 
 import Mathlib.Analysis.Normed.Module.Connected
 import Mathlib.Analysis.Complex.CanonicalDecomposition
-import VD.MathlibSubmitted.MeromorphicProd
 import VD.MathlibSubmitted.LocallyFinsupp
 
 --@[expose] public section
@@ -208,7 +207,7 @@ theorem canonicalDecomposition
   rw [finprod_eq_prod_of_mulSupport_subset_of_finite _ (by aesop) η₀]
   let φ := (∏ᶠ c, canonicalFactor R c ^ (divisor f (ball 0 R)) c) • f
   have hφ : MeromorphicOn φ (closedBall 0 R) := by
-    apply smul (meromorphicOn_finprod _) h₁f
+    apply smul (MeromorphicOn.finprod _) h₁f
     exact fun z ↦ zpow (fun z₁ hz₁ ↦ meromorphicOn_canonicalFactor _ _ _ (mem_univ z₁)) _
   let g := toMeromorphicNFOn φ (closedBall 0 R)
   have h₁g : MeromorphicNFOn g (closedBall 0 R) :=
@@ -229,7 +228,7 @@ theorem canonicalDecomposition
     rw [meromorphicOrderAt_toMeromorphicNFOn hφ hz, meromorphicOrderAt_smul _ (h₁f z hz)]
     simp only [ne_eq, LinearOrderedAddCommGroupWithTop.add_eq_top, h₂f ⟨z, hz⟩, or_false]
     apply canonicalDecomposition_aux₃ hR
-    apply meromorphicAt_finprod (fun x ↦ (meromorphicOn_canonicalFactor R x z (by tauto)).zpow _)
+    apply MeromorphicAt.finprod (fun x ↦ (meromorphicOn_canonicalFactor R x z (by tauto)).zpow _)
   use g, h₁g
   constructor
   · intro z hz
