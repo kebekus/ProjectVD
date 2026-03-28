@@ -144,7 +144,7 @@ theorem PoissonJensen_aux₁ {w c : ℂ} {R : ℝ} {g : ℂ → ℂ}
   · simp [h₂h ⟨x, sphere_subset_closedBall h₂x⟩]
 
 set_option backward.isDefEq.respectTransparency false in
-theorem PoissonJensen_aux₂ {w : ℂ} {R : ℝ} {g h : ℂ → ℂ} [IsScalarTower ℝ ℂ ℂ]
+theorem PoissonJensen_aux₂ {w : ℂ} {R : ℝ} {g h : ℂ → ℂ}
     (hw : w ∈ ball 0 R)
     (h₁g : MeromorphicNFOn g (closedBall (0 : ℂ) R))
     (h₂g : ∀ u ∈ ball (0 : ℂ) R, g u ≠ 0)
@@ -156,7 +156,7 @@ theorem PoissonJensen_aux₂ {w : ℂ} {R : ℝ} {g h : ℂ → ℂ} [IsScalarTo
   have μ₁ : (divisor g (closedBall 0 R)).support ⊆ sphere 0 R := by
     intro a
     contrapose
-    simp_all only [ne_eq, sub_zero, mem_support, Decidable.not_not]
+    simp_all only [ne_eq, mem_support, Decidable.not_not]
     intro ha
     rcases lt_trichotomy ‖a‖ R with h|h|h
     · have h₁a : a ∈ closedBall 0 R := by simpa [mem_closedBall_iff_norm] using h.le
@@ -254,19 +254,33 @@ theorem PoissonJensen_aux₂ {w : ℂ} {R : ℝ} {g h : ℂ → ℂ} [IsScalarTo
   · -- CircleIntegrable (Complex.re ∘ herglotzRieszKernel 0 w • fun x ↦ log ‖h x‖) 0 R
     exact η₀
 
-theorem PoissonJensen_aux₃ {w c : ℂ} {R : ℝ} {f : ℂ → ℂ}
+theorem PoissonJensen_aux₃ {w c : ℂ} {R : ℝ} {f g : ℂ → ℂ}
     (h₁f : MeromorphicOn f (closedBall 0 R))
     (h₂f : ∀ u : (closedBall (0 : ℂ) R), meromorphicOrderAt f u ≠ ⊤)
-    (hw : w ∈ ball c R) :
-    ∃ g : ℂ → ℂ,
-      MeromorphicNFOn g (closedBall 0 R)
-      ∧ (∀ u ∈ ball (0 : ℂ) R, g u ≠ 0)
+    (hw : w ∈ ball (0 : ℂ) R) :
+    ∃ h : ℂ → ℂ,
+      AnalyticOnNhd ℂ h (closedBall 0 R)
+      ∧ (∀ u ∈ closedBall (0 : ℂ) R, h u ≠ 0)
       ∧ f =ᶠ[codiscreteWithin (closedBall 0 R)]
-        (∏ᶠ (u : ℂ), Complex.canonicalFactor R u ^ (-(divisor f (ball 0 R)) u)) • g
-      ∧ circleAverage ((Complex.re ∘ herglotzRieszKernel c w) • (log ‖f ·‖)) 0 R
-        = circleAverage ((Complex.re ∘ herglotzRieszKernel c w) • (log ‖g ·‖)) 0 R := by
+        (∏ᶠ (u : ℂ), (Complex.canonicalFactor R u ^ (divisor f (ball 0 R)) u)⁻¹)
+          * ((∏ᶠ (u : ℂ), (fun x ↦ x - u) ^ (divisor f (sphere 0 R)) u) * h)
+      ∧ circleAverage (Complex.re ∘ herglotzRieszKernel 0 w • fun x ↦ log ‖f x‖) 0 R =
+        ∑ᶠ (x : ℂ), (divisor f (sphere 0 R)) x • log ‖w - x‖
+        + circleAverage (Complex.re ∘ herglotzRieszKernel 0 w • fun x ↦ log ‖h x‖) 0 R := by
   obtain ⟨g, h₁g, h₂g, h₃g, h₄g⟩ := PoissonJensen_aux₀ h₁f h₂f hw
+  have h₅g {u : ℂ}: (divisor g (closedBall 0 R)) u = (divisor f (sphere 0 R)) u := by
+    sorry
+  have h₆g : (∏ᶠ (u : ℂ), (fun x ↦ x - u) ^ (divisor g (closedBall 0 R)) u)
+      = (∏ᶠ (u : ℂ), (fun x ↦ x - u) ^ (divisor f (sphere 0 R)) u) := by
+    simp_rw [h₅g]
   obtain ⟨h, h₁h, h₂h, h₃h, h₄h⟩ := PoissonJensen_aux₁ hw h₁g h₂g
-
-
-  sorry
+  rw [← h₄g] at h₄h
+  rw [PoissonJensen_aux₂ hw h₁g h₂g h₁h] at h₄h
+  simp_rw [h₅g] at h₄h
+  use h
+  simp_all
+  filter_upwards [h₃g, h₃h] with a h₁a h₂a
+  rw [h₁a]
+  rw [Pi.mul_apply]
+  rw [h₂a]
+  simp
