@@ -5,6 +5,12 @@ import Mathlib.LinearAlgebra.Complex.Module
 open Filter Function MeromorphicOn Metric Real Set Classical Topology ValueDistribution
 
 
+theorem meromorphicNFAt_comp_iff_of_deriv_ne_zero {x : ℂ} {f g : ℂ → ℂ} (hg : AnalyticAt ℂ g x) (hg' : deriv g x ≠ 0) :
+    MeromorphicNFAt (f ∘ g) x ↔ MeromorphicNFAt f (g x) := by
+  simp [meromorphicNFAt_iff_analyticAt_or, analyticAt_comp_iff_of_deriv_ne_zero hg hg',
+    meromorphicAt_comp_iff_of_deriv_ne_zero hg hg',
+    meromorphicOrderAt_comp_of_deriv_ne_zero hg hg']
+
 theorem finprod_ne_zero {ι : Type*} {M₀ : Type*} [CommMonoidWithZero M₀] [Nontrivial M₀] [NoZeroDivisors M₀]
   {f : ι → M₀} (h : ∀ i, f i ≠ 0) :
     ∏ᶠ i, f i ≠ 0 := by
@@ -269,6 +275,7 @@ theorem PoissonJensen_aux₃ {w c : ℂ} {R : ℝ} {f g : ℂ → ℂ}
         + circleAverage (Complex.re ∘ herglotzRieszKernel 0 w • fun x ↦ log ‖h x‖) 0 R := by
   obtain ⟨g, h₁g, h₂g, h₃g, h₄g⟩ := PoissonJensen_aux₀ h₁f h₂f hw
   have h₅g {u : ℂ}: (divisor g (closedBall 0 R)) u = (divisor f (sphere 0 R)) u := by
+    --have := divisor_of_toMeromorphicNFOn
     sorry
   have h₆g : (∏ᶠ (u : ℂ), (fun x ↦ x - u) ^ (divisor g (closedBall 0 R)) u)
       = (∏ᶠ (u : ℂ), (fun x ↦ x - u) ^ (divisor f (sphere 0 R)) u) := by
