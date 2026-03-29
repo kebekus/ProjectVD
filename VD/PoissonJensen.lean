@@ -1,6 +1,7 @@
 import VD.MathlibPending.BlaschkeDecomp
 import VD.MathlibSubmitted.Poisson_log_affine
 import Mathlib.LinearAlgebra.Complex.Module
+import Mathlib.Analysis.Complex.Harmonic.Poisson
 
 open Filter Function MeromorphicOn Metric Real Set Classical Topology ValueDistribution
 
@@ -154,11 +155,11 @@ theorem PoissonJensen_aux₂ {w : ℂ} {R : ℝ} {g h : ℂ → ℂ}
     (hw : w ∈ ball 0 R)
     (h₁g : MeromorphicNFOn g (closedBall (0 : ℂ) R))
     (h₂g : ∀ u ∈ ball (0 : ℂ) R, g u ≠ 0)
-    (h₁h : AnalyticOnNhd ℂ h (closedBall 0 R)) :
+    (h₁h : AnalyticOnNhd ℂ h (closedBall 0 R))
+    (h₂h : ∀ u ∈ closedBall (0 : ℂ) R, h u ≠ 0) :
     circleAverage ((Complex.re ∘ herglotzRieszKernel 0 w)
         • (∑ᶠ (i : ℂ), (fun x ↦ ((divisor g (closedBall 0 R)) i) * log ‖x - i‖) + ((fun x ↦ log ‖h x‖)))) 0 R
-      = ∑ᶠ x, ↑((divisor g (closedBall 0 R)) x) • log ‖w - x‖
-        + circleAverage ((Complex.re ∘ herglotzRieszKernel 0 w) • (fun x ↦ log ‖h x‖)) 0 R := by
+      = ∑ᶠ x, ↑((divisor g (closedBall 0 R)) x) • log ‖w - x‖ +  log ‖h w‖ := by
   have μ₁ : (divisor g (closedBall 0 R)).support ⊆ sphere 0 R := by
     intro a
     contrapose
@@ -215,6 +216,7 @@ theorem PoissonJensen_aux₂ {w : ℂ} {R : ℝ} {g h : ℂ → ℂ}
     · exact η₂
   rw [smul_add]
   rw [circleAverage_add]
+  rw [InnerProductSpace.HarmonicContOnCl.circleAverage_re_herglotzRieszKernel_smul (f := fun x ↦ log ‖h x‖)]
   simp
   rw [finsum_eq_sum_of_support_subset (s := h₁F.toFinset)]
   rw [finsum_eq_sum_of_support_subset (s := h₁F.toFinset)]
@@ -243,6 +245,18 @@ theorem PoissonJensen_aux₂ {w : ℂ} {R : ℝ} {g h : ℂ → ℂ}
   · intro x
     contrapose
     aesop
+  · -- InnerProductSpace.HarmonicContOnCl (fun x ↦ log ‖h x‖) (ball 0 R)
+    constructor
+    · intro x hx
+      apply AnalyticAt.harmonicAt_log_norm (h₁h x (ball_subset_closedBall hx)) (h₂h x (ball_subset_closedBall hx))
+    · intro x hx
+      apply ContinuousAt.continuousWithinAt
+      apply ContinuousAt.log
+      apply ContinuousAt.norm
+      apply AnalyticAt.continuousAt (𝕜 := ℂ)
+      apply h₁h x (closure_ball_subset_closedBall hx)
+      simpa using h₂h x (closure_ball_subset_closedBall hx)
+  · exact hw
   · by_cases h : Set.Finite (fun i ↦ (fun x ↦ ↑((divisor g (closedBall 0 R)) i) * log ‖x - i‖)).support
     · rw [finsum_eq_sum _ h]
       rw [Finset.smul_sum]
@@ -271,8 +285,7 @@ theorem PoissonJensen_aux₃ {w c : ℂ} {R : ℝ} {f g : ℂ → ℂ}
         (∏ᶠ (u : ℂ), (Complex.canonicalFactor R u ^ (divisor f (ball 0 R)) u)⁻¹)
           * ((∏ᶠ (u : ℂ), (fun x ↦ x - u) ^ (divisor f (sphere 0 R)) u) * h)
       ∧ circleAverage (Complex.re ∘ herglotzRieszKernel 0 w • fun x ↦ log ‖f x‖) 0 R =
-        ∑ᶠ (x : ℂ), (divisor f (sphere 0 R)) x • log ‖w - x‖
-        + circleAverage (Complex.re ∘ herglotzRieszKernel 0 w • fun x ↦ log ‖h x‖) 0 R := by
+        ∑ᶠ (x : ℂ), (divisor f (sphere 0 R)) x • log ‖w - x‖ + log ‖h w‖ := by
   obtain ⟨g, h₁g, h₂g, h₃g, h₄g⟩ := PoissonJensen_aux₀ h₁f h₂f hw
   have h₅g {u : ℂ}: (divisor g (closedBall 0 R)) u = (divisor f (sphere 0 R)) u := by
     --have := divisor_of_toMeromorphicNFOn
@@ -282,7 +295,7 @@ theorem PoissonJensen_aux₃ {w c : ℂ} {R : ℝ} {f g : ℂ → ℂ}
     simp_rw [h₅g]
   obtain ⟨h, h₁h, h₂h, h₃h, h₄h⟩ := PoissonJensen_aux₁ hw h₁g h₂g
   rw [← h₄g] at h₄h
-  rw [PoissonJensen_aux₂ hw h₁g h₂g h₁h] at h₄h
+  rw [PoissonJensen_aux₂ hw h₁g h₂g h₁h h₂h] at h₄h
   simp_rw [h₅g] at h₄h
   use h
   simp_all
