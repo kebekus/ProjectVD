@@ -5,7 +5,6 @@ Authors: Stefan Kebekus
 -/
 --module
 
-import Mathlib.Analysis.Normed.Module.Connected
 import Mathlib.Analysis.Complex.CanonicalDecomposition
 import VD.MathlibSubmitted.LocallyFinsupp
 

@@ -1,9 +1,11 @@
 import VD.MathlibPending.BlaschkeDecomp
+import VD.BlaschkeDecomp2
 import VD.MathlibSubmitted.Poisson_log_affine
 import Mathlib.LinearAlgebra.Complex.Module
 import Mathlib.Analysis.Complex.Harmonic.Poisson
 
 open Filter Function MeromorphicOn Metric Real Set Classical Topology ValueDistribution
+
 
 
 theorem meromorphicNFAt_comp_iff_of_deriv_ne_zero {x : ℂ} {f g : ℂ → ℂ} (hg : AnalyticAt ℂ g x) (hg' : deriv g x ≠ 0) :
@@ -274,7 +276,7 @@ theorem PoissonJensen_aux₂ {w : ℂ} {R : ℝ} {g h : ℂ → ℂ}
   · -- CircleIntegrable (Complex.re ∘ herglotzRieszKernel 0 w • fun x ↦ log ‖h x‖) 0 R
     exact η₀
 
-theorem PoissonJensen_aux₃ {w c : ℂ} {R : ℝ} {f g : ℂ → ℂ}
+theorem PoissonJensen_aux₃ {w : ℂ} {R : ℝ} {f : ℂ → ℂ}
     (h₁f : MeromorphicOn f (closedBall 0 R))
     (h₂f : ∀ u : (closedBall (0 : ℂ) R), meromorphicOrderAt f u ≠ ⊤)
     (hw : w ∈ ball (0 : ℂ) R) :
@@ -288,8 +290,12 @@ theorem PoissonJensen_aux₃ {w c : ℂ} {R : ℝ} {f g : ℂ → ℂ}
         ∑ᶠ (x : ℂ), (divisor f (sphere 0 R)) x • log ‖w - x‖ + log ‖h w‖ := by
   obtain ⟨g, h₁g, h₂g, h₃g, h₄g⟩ := PoissonJensen_aux₀ h₁f h₂f hw
   have h₅g {u : ℂ}: (divisor g (closedBall 0 R)) u = (divisor f (sphere 0 R)) u := by
-    --have := divisor_of_toMeromorphicNFOn
-    sorry
+    apply canonicalDecomposition₂
+    exact pos_of_mem_ball hw
+    exact h₁f
+    exact h₁g
+    exact h₂g
+    exact h₃g
   have h₆g : (∏ᶠ (u : ℂ), (fun x ↦ x - u) ^ (divisor g (closedBall 0 R)) u)
       = (∏ᶠ (u : ℂ), (fun x ↦ x - u) ^ (divisor f (sphere 0 R)) u) := by
     simp_rw [h₅g]

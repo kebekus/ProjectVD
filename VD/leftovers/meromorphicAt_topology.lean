@@ -17,7 +17,7 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 theorem MeromorphicAt.order_nonneg_if_exists_continuous_extension (hf : MeromorphicAt f z₀)
     (h : ∃ (g : 𝕜 → E), ContinuousAt g z₀ ∧ f =ᶠ[𝓝[≠] z₀] g) : 0 ≤ meromorphicOrderAt f z₀ := by
   by_contra h₀
-  push_neg at h₀
+  push Not at h₀
   set n := (meromorphicOrderAt f z₀).untop (by exact LT.lt.ne_top h₀) with h₁
   have h₁ : meromorphicOrderAt f z₀ = n := by simp [n]
   simp [h₁] at h₀
