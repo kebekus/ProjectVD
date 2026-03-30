@@ -347,5 +347,11 @@ theorem PoissonJensen_aux₄ {w : ℂ} {R : ℝ} {f h : ℂ → ℂ}
   have η₃ {x : ℂ} : MeromorphicAt (Complex.canonicalFactor R x) w := by
     sorry
   simp_rw [MeromorphicAt.meromorphicTrailingCoeffAt_zpow η₃]
-
+  sorry
+  sorry
+  sorry
+  sorry
+  sorry
+  sorry
+  sorry
   sorry
