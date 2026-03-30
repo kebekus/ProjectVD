@@ -29,7 +29,7 @@ theorem MeromorphicAt.eventuallyEq_nhdsNE_of_eventuallyEq_codiscreteWithin_prepe
     (hU : Preperfect U)
     (h : f =ᶠ[Filter.codiscreteWithin U] g) :
     f =ᶠ[𝓝[≠] x] g :=
-  MeromorphicAt.eventuallyEq_nhdsNE_of_eventuallyEq_codiscreteWithin hf hg hx (hU x hx) h
+  hf.eventuallyEq_nhdsNE_of_eventuallyEq_codiscreteWithin hg hx (hU x hx) h
 
 theorem MeromorphicOn.eventuallyEq_nhdsNE_of_eventuallyEq_codiscreteWithin_preperfect
     (hf : MeromorphicOn f U)
@@ -44,7 +44,7 @@ theorem MeromorphicOn.eventuallyEq_nhdsNE_of_eventuallyEq_codiscreteWithin_prepe
   rw [divisor_apply hf hz, divisor_apply hg hz]
   congr 1
   apply meromorphicOrderAt_congr
-  apply MeromorphicAt.eventuallyEq_nhdsNE_of_eventuallyEq_codiscreteWithin_preperfect (hf z hz) (hg z hz) hz hU h
+  apply (hf z hz).eventuallyEq_nhdsNE_of_eventuallyEq_codiscreteWithin_preperfect (hg z hz) hz hU h
 
 theorem PerfectSpace.preperfect_of_isOpen {α : Type*} [TopologicalSpace α] [PerfectSpace α] {U : Set α} (hU : IsOpen U) :
     Preperfect U := by
