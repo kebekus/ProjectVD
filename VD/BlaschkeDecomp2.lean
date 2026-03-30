@@ -6,7 +6,7 @@ Authors: Stefan Kebekus
 --module
 
 import VD.MathlibPending.BlaschkeDecomp
-import VD.Perfect
+import VD.MathlibSubmitted.Perfect
 
 open Complex ComplexConjugate Filter Function Metric Set Topology Real
 

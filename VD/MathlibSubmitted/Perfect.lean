@@ -22,6 +22,11 @@ variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   {U : Set 𝕜} {x : 𝕜} {f g : 𝕜 → E}
 
+/-
+If two meromorphic functions agree outside a set codiscrete within a perfect
+set, then they agree in punctured neighbourhoods of every point in the perfect
+set.
+-/
 theorem MeromorphicAt.eventuallyEq_nhdsNE_of_eventuallyEq_codiscreteWithin_preperfect
     (hf : MeromorphicAt f x)
     (hg : MeromorphicAt g x)
@@ -31,7 +36,11 @@ theorem MeromorphicAt.eventuallyEq_nhdsNE_of_eventuallyEq_codiscreteWithin_prepe
     f =ᶠ[𝓝[≠] x] g :=
   hf.eventuallyEq_nhdsNE_of_eventuallyEq_codiscreteWithin hg hx (hU x hx) h
 
-theorem MeromorphicOn.eventuallyEq_nhdsNE_of_eventuallyEq_codiscreteWithin_preperfect
+/-
+If two meromorphic functions agree outside a set codiscrete within a perfect
+set, then they define the same divisors there.
+-/
+theorem MeromorphicOn.divisor_of_eventuallyEq_codiscreteWithin_preperfect
     (hf : MeromorphicOn f U)
     (hg : MeromorphicOn g U)
     (hU : Preperfect U)
@@ -46,11 +55,17 @@ theorem MeromorphicOn.eventuallyEq_nhdsNE_of_eventuallyEq_codiscreteWithin_prepe
   apply meromorphicOrderAt_congr
   apply (hf z hz).eventuallyEq_nhdsNE_of_eventuallyEq_codiscreteWithin_preperfect (hg z hz) hz hU h
 
+/-
+Open subsects in perfect spaces are preperfect.
+-/
 theorem PerfectSpace.preperfect_of_isOpen {α : Type*} [TopologicalSpace α] [PerfectSpace α] {U : Set α} (hU : IsOpen U) :
     Preperfect U := by
   rw [← inter_univ (a := U)]
   exact Preperfect.open_inter univ_preperfect hU
 
+/-
+Closures of open subsects in perfect spaces are preperfect, hence perfect.
+-/
 theorem PerfectSpace.preperfect_closure_of_isOpen {α : Type*} [TopologicalSpace α] [PerfectSpace α] {U : Set α} (hU : IsOpen U) :
     Preperfect (closure U) :=
   (PerfectSpace.preperfect_of_isOpen hU).perfect_closure.2

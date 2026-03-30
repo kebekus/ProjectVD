@@ -1,6 +1,7 @@
 import VD.MathlibPending.BlaschkeDecomp
 import VD.BlaschkeDecomp2
 import VD.MathlibSubmitted.Poisson_log_affine
+import VD.MathlibSubmitted.Perfect
 import Mathlib.LinearAlgebra.Complex.Module
 import Mathlib.Analysis.Complex.Harmonic.Poisson
 
@@ -310,3 +311,41 @@ theorem PoissonJensen_aux₃ {w : ℂ} {R : ℝ} {f : ℂ → ℂ}
   rw [Pi.mul_apply]
   rw [h₂a]
   simp
+
+theorem PoissonJensen_aux₄ {w : ℂ} {R : ℝ} {f h : ℂ → ℂ}
+    (h₁f : MeromorphicOn f (closedBall 0 R))
+    (h₂f : ∀ u : (closedBall (0 : ℂ) R), meromorphicOrderAt f u ≠ ⊤)
+    (hw : w ∈ ball (0 : ℂ) R)
+    (h₁h : AnalyticOnNhd ℂ h (closedBall 0 R))
+    (h₂h : ∀ u ∈ closedBall (0 : ℂ) R, h u ≠ 0)
+    (h₃h : f =ᶠ[codiscreteWithin (closedBall 0 R)]
+        (∏ᶠ (u : ℂ), (Complex.canonicalFactor R u ^ (divisor f (ball 0 R)) u)⁻¹)
+          * ((∏ᶠ (u : ℂ), (fun x ↦ x - u) ^ (divisor f (sphere 0 R)) u) * h)) :
+    meromorphicTrailingCoeffAt f w = h w := by
+  have η₀ : w ∈ closedBall (0 : ℂ) R := by
+    sorry
+  have η₁ : Preperfect (closedBall (0 : ℂ) R) := by
+    sorry
+  have η₂ : MeromorphicAt
+      ((∏ᶠ (u : ℂ), (Complex.canonicalFactor R u ^ (divisor f (ball 0 R)) u)⁻¹) *
+      ((∏ᶠ (u : ℂ), (fun x ↦ x - u) ^ (divisor f (sphere 0 R)) u) * h)) w := by
+    sorry
+  have := (h₁f w η₀).eventuallyEq_nhdsNE_of_eventuallyEq_codiscreteWithin_preperfect η₂ η₀ η₁ h₃h
+  rw [meromorphicTrailingCoeffAt_congr_nhdsNE this]
+  clear this
+  rw [MeromorphicAt.meromorphicTrailingCoeffAt_mul]
+  rw [MeromorphicAt.meromorphicTrailingCoeffAt_mul]
+  have μ₀ : (divisor f (ball 0 R)).support.Finite := by
+    sorry
+  have μ₁ : (mulSupport fun u ↦ (Complex.canonicalFactor R u ^ (divisor f (ball 0 R)) u)⁻¹) ⊆ ↑μ₀.toFinset := by
+    sorry
+  rw [finprod_eq_prod_of_mulSupport_subset _ μ₁]
+  rw [finprod_eq_prod]
+  rw [meromorphicTrailingCoeffAt_prod]
+  rw [meromorphicTrailingCoeffAt_prod]
+  simp_rw [meromorphicTrailingCoeffAt_inv]
+  have η₃ {x : ℂ} : MeromorphicAt (Complex.canonicalFactor R x) w := by
+    sorry
+  simp_rw [MeromorphicAt.meromorphicTrailingCoeffAt_zpow η₃]
+
+  sorry
