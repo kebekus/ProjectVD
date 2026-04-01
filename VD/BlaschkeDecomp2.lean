@@ -25,6 +25,10 @@ variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
   {R : ℝ} {x c w : ℂ}
 
+/-!
+# Generic Material
+-/
+
 theorem finprod_ne_zero {ι : Type*} {M₀ : Type*} [CommMonoidWithZero M₀] [Nontrivial M₀] [NoZeroDivisors M₀]
   {f : ι → M₀} (h : ∀ i, f i ≠ 0) :
     ∏ᶠ i, f i ≠ 0 := by
@@ -40,22 +44,21 @@ theorem finprod_apply_ne_zero {ι : Type*} {N₀ M₀ : Type*} [CommMonoidWithZe
     grind [Finset.prod_apply, Finset.prod_ne_zero_iff]
   · simp [finprod_of_infinite_mulSupport h₂]
 
+/-!
+# Terms in the Canonical Decomposition
+-/
+
 theorem canonicalDecomposition₀ {f g : ℂ → E}
     (hR : 0 < R)
-    (h₁f : MeromorphicOn f (closedBall 0 R))
     (h₁g : MeromorphicNFOn g (closedBall 0 R))
-    (h₂g : ∀ u ∈ (ball 0 R), g u ≠ 0)
     (h₃g: f =ᶠ[codiscreteWithin (closedBall 0 R)] (∏ᶠ u, (canonicalFactor R u) ^ (-divisor f (ball 0 R) u)) • g) :
     AnalyticOnNhd ℂ (∏ᶠ (u : ℂ), canonicalFactor R u ^ (-(divisor f (ball 0 R)) u)) (sphere 0 R) := by
   intro x hx
   apply analyticAt_finprod
   intro a
   by_cases ha : a ∈ ball 0 R
-  · apply AnalyticAt.zpow
-    · apply analyticOnNhd_canonicalFactor
-      aesop
-    · apply canonicalFactor_ne_zero ha (by aesop)
-      aesop
+  · apply (analyticOnNhd_canonicalFactor R a x (by aesop)).zpow
+      (canonicalFactor_ne_zero ha (by aesop) (by aesop))
   · simp_all
     apply analyticAt_const
 
@@ -64,11 +67,10 @@ theorem canonicalDecomposition₁ {f g : ℂ → E}
     (hx : x ∈ sphere 0 R)
     (h₁f : MeromorphicOn f (closedBall 0 R))
     (h₁g : MeromorphicNFOn g (closedBall 0 R))
-    (h₂g : ∀ u ∈ (ball 0 R), g u ≠ 0)
     (h₃g: f =ᶠ[codiscreteWithin (closedBall 0 R)] (∏ᶠ u, (canonicalFactor R u) ^ (-divisor f (ball 0 R) u)) • g) :
     f =ᶠ[𝓝[≠] x] (∏ᶠ (u : ℂ), canonicalFactor R u ^ (-(divisor f (ball 0 R)) u)) • g := by
   apply MeromorphicAt.eventuallyEq_nhdsNE_of_eventuallyEq_codiscreteWithin_preperfect (U := closedBall 0 R)
-    (h₁f x (by aesop)) ((canonicalDecomposition₀ hR h₁f h₁g h₂g h₃g x hx).meromorphicAt.smul
+    (h₁f x (by aesop)) ((canonicalDecomposition₀ hR h₁g h₃g x hx).meromorphicAt.smul
       (h₁g.meromorphicOn x (by aesop))) (by aesop) _ h₃g
   rw [← closure_ball 0 hR.ne']
   apply PerfectSpace.preperfect_closure_of_isOpen isOpen_ball
