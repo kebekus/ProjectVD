@@ -1,4 +1,4 @@
-import VD.MathlibPending.BlaschkeDecomp
+import VD.MathlibSubmitted.BlaschkeDecomp
 import VD.BlaschkeDecomp2
 import VD.MathlibSubmitted.Poisson_log_affine
 import VD.MathlibSubmitted.Perfect
@@ -50,7 +50,7 @@ theorem PoissonJensen_aux₀ {w c : ℂ} {R : ℝ} {f : ℂ → ℂ}
         (∏ᶠ (u : ℂ), Complex.canonicalFactor R u ^ (-(divisor f (ball 0 R)) u)) • g
       ∧ circleAverage ((Complex.re ∘ herglotzRieszKernel c w) • (log ‖f ·‖)) 0 R
         = circleAverage ((Complex.re ∘ herglotzRieszKernel c w) • (log ‖g ·‖)) 0 R := by
-  obtain ⟨g, h₁g, h₂g, h₃g⟩ := canonicalDecomposition h₁f h₂f
+  obtain ⟨g, h₁g, h₂g, h₃g⟩ := congr_codiscreteWitin_closedBall_prod_canonicalFactor_smul h₁f h₂f
   use g, h₁g, h₂g, h₃g
   have h₅g : MeromorphicOn g (sphere 0 R) := h₁g.meromorphicOn.mono_set sphere_subset_closedBall
   have h₆g : ∀ u ∈ (sphere (0 : ℂ) R), meromorphicOrderAt g u ≠ ⊤ := by
@@ -375,7 +375,6 @@ theorem PoissonJensen_aux₄ {w : ℂ} {R : ℝ} {f h : ℂ → ℂ}
   have η₃ {x : ℂ} : MeromorphicAt (Complex.canonicalFactor R x) w := by
     sorry
   simp_rw [MeromorphicAt.meromorphicTrailingCoeffAt_zpow η₃]
-  sorry
   sorry
   sorry
   sorry

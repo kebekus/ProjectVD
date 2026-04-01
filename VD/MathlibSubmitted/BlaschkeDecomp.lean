@@ -6,7 +6,7 @@ Authors: Stefan Kebekus
 --module
 
 import Mathlib.Analysis.Complex.CanonicalDecomposition
-import VD.MathlibSubmitted.LocallyFinsupp
+--import VD.MathlibSubmitted.LocallyFinsupp
 
 --@[expose] public section
 
@@ -134,6 +134,22 @@ private lemma canonicalDecomposition_aux₁ (F : locallyFinsuppWithin (ball 0 R)
       zero_canonicalFactor_iff h₂b hz, zero_canonicalFactor_iff h₂a hz]
 
 -- Auxiliary lemma for the proof of the canonical decomposition theorem
+open Function.locallyFinsuppWithin in
+private lemma sum_apply_smul_single_eq_self
+    {X : Type*} [TopologicalSpace X] [DecidableEq X] {U : Set X}
+    {F : Function.locallyFinsuppWithin U ℤ} (h : F.support.Finite) :
+    ∑ x ∈ h.toFinset, (F x) • ((single x (1 : ℤ)).restrict (subset_univ U)) = F := by
+  ext z
+  by_cases hz : z ∉ U
+  · aesop
+  simp only [coe_sum, coe_zsmul, zsmul_eq_mul, Finset.sum_apply, Pi.mul_apply, Pi.intCast_apply,
+    Int.cast_eq, Function.locallyFinsuppWithin.restrict_apply]
+  by_cases hz : z ∈ F.support
+  · rw [← Finset.add_sum_erase _ _ (by aesop : z ∈ h.toFinset), Finset.sum_eq_zero (by aesop)]
+    aesop
+  · aesop
+
+-- Auxiliary lemma for the proof of the canonical decomposition theorem
 private lemma canonicalDecomposition_aux₂ (h₁f : MeromorphicOn f (closedBall 0 R)) :
     divisor (∏ᶠ u, (canonicalFactor R u) ^ (divisor f (ball 0 R) u)) (ball 0 R)
       = -(divisor f (ball 0 R)) := by
@@ -149,7 +165,7 @@ private lemma canonicalDecomposition_aux₂ (h₁f : MeromorphicOn f (closedBall
   simp_rw [divisor_zpow (fun z hz ↦ meromorphicOn_canonicalFactor R _ z (mem_univ z))]
   conv =>
     right
-    rw [← locallyFinsuppWithin.sum_apply_smul_single_eq_self η₀]
+    rw [← sum_apply_smul_single_eq_self η₀]
   apply Finset.sum_congr rfl
   intro x hx
   rw [divisor_canonicalFactor, smul_neg, locallyFinsuppWithin.coe_neg, Pi.neg_apply, neg_smul]
@@ -180,7 +196,7 @@ private lemma canonicalDecomposition_aux₃ {z : ℂ} (hR : 0 < R) :
 modification over a discrete set, to a product of canonical factors and a
 meromorphic function without zeros or poles in the interior of the disk.
 -/
-theorem canonicalDecomposition
+theorem congr_codiscreteWitin_closedBall_prod_canonicalFactor_smul
     (h₁f : MeromorphicOn f (closedBall 0 R))
     (h₂f : ∀ u : (closedBall (0 : ℂ) R), meromorphicOrderAt f u ≠ ⊤) :
     ∃ g : ℂ → E, MeromorphicNFOn g (closedBall 0 R)
