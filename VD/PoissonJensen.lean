@@ -189,7 +189,7 @@ theorem PoissonJensen_aux₂ {w : ℂ} {R : ℝ} {g h : ℂ → ℂ}
   have η₀ : CircleIntegrable (Complex.re ∘ herglotzRieszKernel 0 w • fun x ↦ log ‖h x‖) 0 R := by
     apply IntervalIntegrable.continuousOn_mul
     · -- IntervalIntegrable (fun x ↦ (fun x ↦ log ‖h x‖) (circleMap 0 R x)) MeasureTheory.volume 0 (2 * π)
-      apply intervalIntegrable_log_norm_meromorphicOn
+      apply MeromorphicOn.intervalIntegrable_log_norm
       apply AnalyticOnNhd.meromorphicOn
       intro x hx
       apply AnalyticAt.comp'
@@ -209,7 +209,7 @@ theorem PoissonJensen_aux₂ {w : ℂ} {R : ℝ} {g h : ℂ → ℂ}
     unfold CircleIntegrable
     apply IntervalIntegrable.continuousOn_mul
     · apply IntervalIntegrable.const_mul
-      apply intervalIntegrable_log_norm_meromorphicOn
+      apply MeromorphicOn.intervalIntegrable_log_norm
       apply AnalyticOnNhd.meromorphicOn
       apply AnalyticOnNhd.sub
       · intro x hx

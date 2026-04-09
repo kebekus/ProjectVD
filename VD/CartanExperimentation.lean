@@ -127,7 +127,7 @@ lemma ρ₃'' {r : ℝ} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) :
   · filter_upwards with a
     have z₀ : MeromorphicOn (fun x ↦ f (circleMap 0 r a) - circleMap 0 1 x) (uIcc 0 (2 * π)) := by
       sorry
-    have := intervalIntegrable_log_norm_meromorphicOn (a := 0) (b := 2 * π)
+    have := MeromorphicOn.intervalIntegrable_log_norm (a := 0) (b := 2 * π)
         (f := fun x ↦ f (circleMap 0 r a) - circleMap 0 1 x) z₀
     unfold IntervalIntegrable at this
     simp at this
@@ -152,7 +152,7 @@ lemma ρ₄ {r : ℝ} {hr : r ≠ 0} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤)
     filter_upwards with a
     have z₀ : MeromorphicOn (fun x ↦ f (circleMap 0 r x) - circleMap 0 1 a) (uIcc 0 (2 * π)) := by
       sorry
-    have := intervalIntegrable_log_norm_meromorphicOn (a := 0) (b := 2 * π)
+    have := MeromorphicOn.intervalIntegrable_log_norm (a := 0) (b := 2 * π)
         (f := fun x ↦ f (circleMap 0 r x) - circleMap 0 1 a) z₀
     unfold IntervalIntegrable at this
     simp at this
@@ -167,7 +167,7 @@ lemma ρ₄ {r : ℝ} {hr : r ≠ 0} {f : ℂ → ℂ} (h : MeromorphicOn f ⊤)
     filter_upwards with a
     have z₀ : MeromorphicOn (fun x ↦ f (circleMap 0 r a) - circleMap 0 1 x) (uIcc 0 (2 * π)) := by
       sorry
-    have := intervalIntegrable_log_norm_meromorphicOn (a := 0) (b := 2 * π)
+    have := MeromorphicOn.intervalIntegrable_log_norm (a := 0) (b := 2 * π)
         (f := fun x ↦ f (circleMap 0 r a) - circleMap 0 1 x) z₀
     unfold IntervalIntegrable at this
     simp at this
@@ -287,7 +287,7 @@ theorem cartan {r : ℝ} {f : ℂ → ℂ} (hr : r ≠ 0) (h : Meromorphic f) (h
     · constructor
       · simp
         filter_upwards with a
-        have := intervalIntegrable_log_norm_meromorphicOn
+        have := MeromorphicOn.intervalIntegrable_log_norm
           (f := (fun y ↦ circleMap 0 1 y - f (circleMap 0 r a))) (a := 0) (b := 2 * Real.pi)
         unfold IntervalIntegrable at this
         have : MeromorphicOn (fun y ↦ circleMap 0 1 y - f (circleMap 0 r a)) (uIcc 0 (2 * π)) →

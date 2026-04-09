@@ -133,7 +133,7 @@ private theorem herglotzLogIntegrand_circleAverage_tendsto
     apply IntervalIntegrable.add
     · exact IntervalIntegrable.add (by simp) (by continuity)
     · apply IntervalIntegrable.abs
-      exact circleIntegrable_log_norm_meromorphicOn (f := fun z ↦ z - ρ)
+      exact MeromorphicOn.circleIntegrable_log_norm (f := fun z ↦ z - ρ)
         (fun x hx ↦ by fun_prop)
   · -- Pointwise convergence outside a null set
     have h_measure_zero : MeasureTheory.volume {θ : ℝ | circleMap 0 R θ = w ∨ circleMap 0 R θ = ρ} = 0 := by
