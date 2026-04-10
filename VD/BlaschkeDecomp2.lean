@@ -5,6 +5,7 @@ Authors: Stefan Kebekus
 -/
 --module
 
+import Mathlib.Analysis.Normed.Module.Connected
 import VD.MathlibSubmitted.BlaschkeDecomp
 import VD.MathlibSubmitted.Perfect
 
@@ -96,13 +97,14 @@ theorem canonicalDecomposition₂ {f g : ℂ → E}
           aesop
         · apply canonicalFactor_ne_zero ha (by aesop)
           aesop
-      · simp_all
-        apply analyticAt_const
+      · simp_all only [mem_ball, dist_zero_right, ne_eq, zpow_neg, not_lt,
+          locallyFinsuppWithin.apply_eq_zero_of_notMem, neg_zero, zpow_zero]
+        exact analyticAt_const
     have η₀ : f =ᶠ[𝓝[≠] x] (∏ᶠ (u : ℂ), canonicalFactor R u ^ (-(divisor f (ball 0 R)) u)) • g := by
       apply MeromorphicAt.eventuallyEq_nhdsNE_of_eventuallyEq_codiscreteWithin_preperfect (U := closedBall 0 R)
         (h₁f x (by aesop)) (η₁.meromorphicAt.smul (h₁g.meromorphicOn x (by aesop))) (by aesop) _ h₃g
       rw [← closure_ball 0 hR.ne']
-      apply PerfectSpace.preperfect_closure_of_isOpen isOpen_ball
+      exact PerfectSpace.preperfect_closure_of_isOpen isOpen_ball
     have : meromorphicOrderAt (∏ᶠ (u : ℂ), canonicalFactor R u ^ (-(divisor f (ball 0 R)) u)) x = 0 := by
       rw [MeromorphicNFAt.meromorphicOrderAt_eq_zero_iff]
       apply finprod_apply_ne_zero
@@ -119,5 +121,30 @@ theorem canonicalDecomposition₂ {f g : ℂ → E}
     simp_all
   · have : x ∉ sphere (0 : ℂ) R := by aesop
     simp_all
+
+theorem congr_codiscreteWitin_closedBall_prod_canonicalFactor_mul_prod_smul {f : ℂ → E}
+    (hw : w ∈ ball c R)
+    (h₁f : MeromorphicOn f (closedBall (0 : ℂ) R))
+    (h₂f : ∀ u : (closedBall (0 : ℂ) R), meromorphicOrderAt f u ≠ ⊤) :
+    ∃ h : ℂ → E, AnalyticOnNhd ℂ h (closedBall 0 R)
+      ∧ (∀ u ∈ (closedBall 0 R), h u ≠ 0)
+      ∧ f =ᶠ[codiscreteWithin (closedBall 0 R)]
+          ((∏ᶠ u, (canonicalFactor R u) ^ (-divisor f (ball 0 R) u))
+            * (∏ᶠ u, (· - u) ^ (divisor f (sphere 0 R)) u)) • h := by
+  obtain ⟨g, h₁g, h₂g, h₃g⟩ := congr_codiscreteWitin_closedBall_prod_canonicalFactor_smul h₁f h₂f
+  have h₄g : ∀ (u : ↑(closedBall (0 : ℂ) R)), meromorphicOrderAt g ↑u ≠ ⊤ := by
+    rw [← h₁g.meromorphicOn.exists_meromorphicOrderAt_ne_top_iff_forall
+      (isConnected_closedBall (pos_of_mem_ball hw).le)]
+    have s₀ : (0 : ℂ) ∈ ball 0 R := by simp [pos_of_mem_ball hw]
+    have s₁ : (0 : ℂ) ∈ closedBall 0 R := by simp [(pos_of_mem_ball hw).le]
+    use ⟨0, s₁⟩
+    rw [(h₁g s₁).meromorphicOrderAt_eq_zero_iff.2 (h₂g 0 s₀)]
+    simp only [ne_eq, LinearOrderedAddCommGroupWithTop.zero_ne_top, not_false_eq_true]
+  obtain ⟨h, h₁h, h₂h, h₃h⟩ := h₁g.meromorphicOn.extract_zeros_poles h₄g
+    ((divisor g (closedBall 0 R)).finiteSupport (isCompact_closedBall 0 R))
+  use h, h₁h, (h₂h ⟨·, ·⟩)
+  filter_upwards [h₃g, h₃h] with a h₁a h₂a
+  simp_rw [← canonicalDecomposition₂ (pos_of_mem_ball hw) h₁f h₁g h₂g h₃g]
+  simp_all [← smul_assoc]
 
 end MeromorphicOn
