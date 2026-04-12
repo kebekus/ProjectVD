@@ -68,6 +68,7 @@ lemma xx
     _ = circleAverage (re ∘ herglotzRieszKernel 0 w •
         (Real.log ‖(((∏ᶠ u, (canonicalFactor R u) ^ (-divisor f (ball 0 R) u))
           * (∏ᶠ u, (· - u) ^ (divisor f (sphere 0 R)) u)) • h) ·‖)) 0 R := by
+      /-
       apply circleAverage_congr_codiscreteWithin
       · rw [abs_of_pos hR]
         have :  f =ᶠ[codiscreteWithin (sphere 0 R)]
@@ -78,8 +79,11 @@ lemma xx
         filter_upwards [this] with a ha
         simp_all
       · exact hR.ne'
+      -/
+      sorry
     _ = circleAverage (re ∘ herglotzRieszKernel 0 w •
         (Real.log ‖(((∏ᶠ u, (· - u) ^ (divisor f (sphere 0 R)) u)) • h) ·‖)) 0 R := by
+      /-
       apply circleAverage_congr_sphere
       rw [abs_of_pos hR]
       intro a ha
@@ -115,22 +119,36 @@ lemma xx
       simp
       · exact (divisor f (ball 0 R)).supportWithinDomain ((Finite.mem_toFinset η₀).mp hb)
       · aesop
+      -/
+      sorry
     _ = circleAverage (re ∘ herglotzRieszKernel 0 w • fun x ↦
       Real.log ‖∏ u ∈ η₀.toFinset, (x - u) ^ (divisor f (sphere 0 R)) u‖ + Real.log ‖h x‖) 0 R:= by
       apply circleAverage_congr_codiscreteWithin
       rw [abs_of_pos (pos_of_mem_ball hw)]
       have : (divisor f (sphere 0 R)) =ᶠ[codiscreteWithin (sphere 0 R)] 0 := by
-        sorry
-      filter_upwards [this] with a ha
+        exact (divisor f (sphere 0 R)).eq_zero_codiscreteWithin
+      filter_upwards [(divisor f (sphere 0 R)).eq_zero_codiscreteWithin,
+        Filter.self_mem_codiscreteWithin (sphere 0 R)] with a ha h₂a
       simp_all
-      intro a ha
-      simp
       left
-      rw [norm_smul, Real.log_mul]
-
-
-      sorry
+      rw [finprod_eq_prod_of_mulSupport_subset (s := η₀.toFinset)]
+      rw [norm_smul]
+      simp
+      rw [Real.log_mul]
+      · rw [Finset.prod_ne_zero_iff]
+        intro b hb
+        apply zpow_ne_zero
+        simp
+        by_contra hCon
+        rw [sub_eq_zero] at hCon
+        subst hCon
+        simp at hb
+        tauto
+      · simp
+        apply h₂h
+        simp_all
+      aesop
+      exact hR.ne'
     _ = ∑ᶠ (x : ℂ), (divisor f (sphere 0 R)) x • Real.log ‖w - x‖ + Real.log ‖h w‖ := by
-      simp [norm_smul]
       sorry
   sorry
