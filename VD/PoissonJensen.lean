@@ -1,7 +1,6 @@
 import VD.MathlibSubmitted.BlaschkeDecomp
 import VD.BlaschkeDecomp2
 import VD.MathlibSubmitted.Poisson_log_affine
-import VD.MathlibSubmitted.Perfect
 import Mathlib.LinearAlgebra.Complex.Module
 import Mathlib.Analysis.Complex.Harmonic.Poisson
 

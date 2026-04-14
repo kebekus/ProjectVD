@@ -7,7 +7,6 @@ Authors: Stefan Kebekus
 
 import Mathlib.Analysis.Normed.Module.Connected
 import VD.MathlibSubmitted.BlaschkeDecomp
-import VD.MathlibSubmitted.Perfect
 
 open Complex ComplexConjugate Filter Function Metric Set Topology Real
 
@@ -74,7 +73,7 @@ theorem canonicalDecomposition₁ {f g : ℂ → E}
     (h₁f x (by aesop)) ((canonicalDecomposition₀ hR h₁g h₃g x hx).meromorphicAt.smul
       (h₁g.meromorphicOn x (by aesop))) (by aesop) _ h₃g
   rw [← closure_ball 0 hR.ne']
-  apply PerfectSpace.preperfect_closure_of_isOpen isOpen_ball
+  apply isOpen_ball.perfect_closure.2
 
 theorem canonicalDecomposition₂ {f g : ℂ → E}
     (hR : 0 < R)
@@ -104,7 +103,7 @@ theorem canonicalDecomposition₂ {f g : ℂ → E}
       apply MeromorphicAt.eventuallyEq_nhdsNE_of_eventuallyEq_codiscreteWithin_preperfect (U := closedBall 0 R)
         (h₁f x (by aesop)) (η₁.meromorphicAt.smul (h₁g.meromorphicOn x (by aesop))) (by aesop) _ h₃g
       rw [← closure_ball 0 hR.ne']
-      exact PerfectSpace.preperfect_closure_of_isOpen isOpen_ball
+      exact isOpen_ball.perfect_closure.2
     have : meromorphicOrderAt (∏ᶠ (u : ℂ), canonicalFactor R u ^ (-(divisor f (ball 0 R)) u)) x = 0 := by
       rw [MeromorphicNFAt.meromorphicOrderAt_eq_zero_iff]
       apply finprod_apply_ne_zero

@@ -1,7 +1,6 @@
 import VD.MathlibSubmitted.BlaschkeDecomp
 import VD.BlaschkeDecomp2
 import VD.MathlibSubmitted.Poisson_log_affine
-import VD.MathlibSubmitted.Perfect
 import Mathlib.LinearAlgebra.Complex.Module
 import Mathlib.Analysis.Complex.Harmonic.Poisson
 
@@ -122,31 +121,17 @@ lemma xx
       -/
       sorry
     _ = circleAverage (re ∘ herglotzRieszKernel 0 w • fun x ↦
-      (∑ u ∈ η₀.toFinset, (divisor f (sphere 0 R)) u * Real.log ‖(x - u)‖) + Real.log ‖h x‖) 0 R:= by
-      /-
+        Real.log ‖∏ u ∈ η₀.toFinset, (x - u) ^ (divisor f (sphere 0 R)) u‖ + Real.log ‖h x‖) 0 R:= by
       apply circleAverage_congr_codiscreteWithin
       rw [abs_of_pos (pos_of_mem_ball hw)]
-      have : (divisor f (sphere 0 R)) =ᶠ[codiscreteWithin (sphere 0 R)] 0 := by
-        exact (divisor f (sphere 0 R)).eq_zero_codiscreteWithin
       filter_upwards [(divisor f (sphere 0 R)).eq_zero_codiscreteWithin,
         Filter.self_mem_codiscreteWithin (sphere 0 R)] with a ha h₂a
       simp_all
       left
       rw [finprod_eq_prod_of_mulSupport_subset (s := η₀.toFinset)]
       rw [norm_smul]
-      rw [Finset.prod_apply, norm_prod]
-      simp_rw [Pi.pow_apply]
-      simp_rw [norm_zpow]
-      rw [Real.log_mul, Real.log_prod]
-      simp_rw [Real.log_zpow]
-      · intro b hb
-        apply zpow_ne_zero
-        simp
-        by_contra hCon
-        rw [sub_eq_zero] at hCon
-        subst hCon
-        simp at hb
-        tauto
+      simp
+      rw [Real.log_mul]
       · rw [Finset.prod_ne_zero_iff]
         intro b hb
         apply zpow_ne_zero
@@ -161,35 +146,6 @@ lemma xx
         simp_all
       aesop
       exact hR.ne'
-      -/
-      sorry
     _ = ∑ᶠ (x : ℂ), (divisor f (sphere 0 R)) x • Real.log ‖w - x‖ + Real.log ‖h w‖ := by
-      have : (re ∘ herglotzRieszKernel 0 w • fun x ↦
-        ∑ u ∈ η₀.toFinset, ↑((divisor f (sphere 0 R)) u) * Real.log ‖x - u‖ + Real.log ‖h x‖)
-        = ∑ u ∈ η₀.toFinset, ↑((divisor f (sphere 0 R)) u)
-          * (re ∘ herglotzRieszKernel 0 w • fun x ↦ Real.log ‖x - u‖)
-          + (re ∘ herglotzRieszKernel 0 w • fun x ↦ Real.log ‖h x‖) := by
-        ext x
-        simp
-        rw [mul_add]
-        congr
-        rw [Finset.mul_sum]
-        apply Finset.sum_congr rfl
-        intro b hb
-        ring
-      rw [this]
-      clear this
-      rw [circleAverage_add]
-      rw [circleAverage_sum]
-      rw [InnerProductSpace.HarmonicOnNhd.circleAverage_re_herglotzRieszKernel_smul
-        (f := fun x ↦ Real.log ‖h x‖)]
-      congr
-      rw [finsum_eq_sum_of_support_subset (s := η₀.toFinset)]
-      apply Finset.sum_congr rfl
-      intro x hx
-      rw [← smul_eq_mul]
-
-
 
       sorry
-  sorry
