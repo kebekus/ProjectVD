@@ -122,6 +122,7 @@ lemma xx
       sorry
     _ = circleAverage (re ∘ herglotzRieszKernel 0 w • fun x ↦
         Real.log ‖∏ u ∈ η₀.toFinset, (x - u) ^ (divisor f (sphere 0 R)) u‖ + Real.log ‖h x‖) 0 R:= by
+      /-
       apply circleAverage_congr_codiscreteWithin
       rw [abs_of_pos (pos_of_mem_ball hw)]
       filter_upwards [(divisor f (sphere 0 R)).eq_zero_codiscreteWithin,
@@ -146,6 +147,29 @@ lemma xx
         simp_all
       aesop
       exact hR.ne'
+      -/
+      sorry
+    _ = circleAverage (re ∘ herglotzRieszKernel 0 w • fun x ↦
+        ∑ u ∈ η₀.toFinset, (divisor f (sphere 0 R) u) * Real.log ‖x - u‖ + Real.log ‖h x‖) 0 R:= by
+      apply circleAverage_congr_codiscreteWithin
+      rw [abs_of_pos (pos_of_mem_ball hw)]
+      filter_upwards [(divisor f (sphere 0 R)).eq_zero_codiscreteWithin,
+        Filter.self_mem_codiscreteWithin (sphere 0 R)] with a ha h₂a
+      simp_all
+      left
+      rw [Real.log_prod]
+      apply Finset.sum_congr rfl
+      intro i hi
+      exact log_zpow ‖a - i‖ ((divisor f (sphere 0 R)) i)
+      · intro b hb
+        apply zpow_ne_zero
+        simp
+        by_contra hCon
+        rw [sub_eq_zero] at hCon
+        subst hCon
+        simp at hb
+        tauto
+      · exact hR.ne'
     _ = ∑ᶠ (x : ℂ), (divisor f (sphere 0 R)) x • Real.log ‖w - x‖ + Real.log ‖h w‖ := by
 
       sorry
