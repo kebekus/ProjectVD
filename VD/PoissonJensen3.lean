@@ -47,8 +47,8 @@ variable
 
 
 lemma xx
-    {f h : ℂ → E}
-    (hw : w ∈ ball c R)
+    {f h : ℂ → ℂ}
+    (hw : w ∈ ball 0 R)
     (h₀f : MeromorphicOn f (closedBall 0 R)) -- can be deduced
     (h₁h : AnalyticOnNhd ℂ h (closedBall 0 R))
     (h₂h : ∀ u ∈ (closedBall 0 R), h u ≠ 0)
@@ -148,6 +148,7 @@ lemma xx
       sorry
     _ = circleAverage (re ∘ herglotzRieszKernel 0 w • fun x ↦
         ∑ u ∈ η₀.toFinset, (divisor f (sphere 0 R) u) * Real.log ‖x - u‖ + Real.log ‖h x‖) 0 R:= by
+      /-
       apply circleAverage_congr_codiscreteWithin
       rw [abs_of_pos (pos_of_mem_ball hw)]
       filter_upwards [(divisor f (sphere 0 R)).eq_zero_codiscreteWithin,
@@ -167,8 +168,11 @@ lemma xx
         simp at hb
         tauto
       · exact hR.ne'
+      -/
+      sorry
     _ = circleAverage ( (∑ u ∈ η₀.toFinset, (divisor f (sphere 0 R) u) • re ∘ herglotzRieszKernel 0 w • (Real.log ‖· - u‖))
           + re ∘ herglotzRieszKernel 0 w • (Real.log ‖h ·‖) ) 0 R := by
+      /-
       apply circleAverage_congr_sphere
       intro b hb
       simp
@@ -176,11 +180,14 @@ lemma xx
       congr
       ext i
       ring
+      -/
+      sorry
     _ = ∑ᶠ (x : ℂ), (divisor f (sphere 0 R)) x • Real.log ‖w - x‖ + Real.log ‖h w‖ := by
       rw [circleAverage_add, circleAverage_sum]
-      rw [InnerProductSpace.HarmonicOnNhd.circleAverage_re_herglotzRieszKernel_smul]
+      rw [InnerProductSpace.HarmonicOnNhd.circleAverage_re_herglotzRieszKernel_smul
+        (fun x hx ↦ (h₁h x hx).harmonicAt_log_norm (h₂h x hx)) hw]
       congr
-      rw [finsum_eq_sum_of_support_subset (s := η₀.toFinset)]
+      rw [finsum_eq_sum_of_support_subset (s := η₀.toFinset) _ (fun _ _ ↦ (by aesop))]
       apply Finset.sum_congr rfl
       intro x hx
       have : (divisor f (sphere 0 R)) x • re ∘ herglotzRieszKernel 0 w • (Real.log ‖· - x‖)
@@ -188,21 +195,12 @@ lemma xx
         aesop
       rw [this]
       rw [circleAverage_smul]
-      rw [circleAverage_re_herglotzRieszKernel_mul_log]
+      rw [circleAverage_re_herglotzRieszKernel_mul_log
+        ((divisor f (sphere 0 R)).supportWithinDomain ((Finite.mem_toFinset η₀).mp hx)) hw]
       simp
-      · -- x ∈ sphere 0 R
-        sorry
-      · -- w ∈ ball 0 R
-        sorry
-      · -- (support fun x ↦ (divisor f (sphere 0 R)) x • Real.log ‖w - x‖) ⊆ ↑η₀.toFinset
-        sorry
-      · -- InnerProductSpace.HarmonicOnNhd (fun x ↦ Real.log ‖h x‖) (closedBall 0 R)
-        sorry
-      · -- w ∈ ball 0 R
-        sorry
       · -- ∀ i ∈ η₀.toFinset, CircleIntegrable ((divisor f (sphere 0 R)) i • re ∘ herglotzRieszKernel 0 w • fun x ↦ Real.log ‖x - i‖) 0 R
         sorry
-      · -- CircleIntegrable(∑ u ∈ η₀.toFinset, (divisor f (sphere 0 R)) u • re ∘ herglotzRieszKernel 0 w • fun x ↦ Real.log ‖x - u‖) 0 R
+      · -- CircleIntegrable(∑ u ∈ η₀.toFinset,  (divisor f (sphere 0 R)) u • re ∘ herglotzRieszKernel 0 w • fun x ↦ Real.log ‖x - u‖) 0 R
         sorry
       · -- CircleIntegrable (re ∘ herglotzRieszKernel 0 w • fun x ↦ Real.log ‖h x‖) 0 R
         sorry
