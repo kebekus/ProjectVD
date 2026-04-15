@@ -1,10 +1,7 @@
-import VD.MathlibSubmitted.BlaschkeDecomp
-import VD.BlaschkeDecomp2
+import Mathlib.Analysis.Complex.CanonicalDecomposition
 import VD.MathlibSubmitted.Poisson_log_affine
-import Mathlib.LinearAlgebra.Complex.Module
-import Mathlib.Analysis.Complex.Harmonic.Poisson
 
-open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology ValueDistribution
+open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --ValueDistribution
 
 /-!
 ## Additional Material
@@ -170,6 +167,16 @@ lemma xx
         simp at hb
         tauto
       · exact hR.ne'
+    _ = circleAverage ( (∑ u ∈ η₀.toFinset, (divisor f (sphere 0 R) u) • re ∘ herglotzRieszKernel 0 w • (Real.log ‖· - u‖))
+          + re ∘ herglotzRieszKernel 0 w • (Real.log ‖h ·‖) ) 0 R := by
+      apply circleAverage_congr_sphere
+      intro b hb
+      simp
+      rw [mul_add, Finset.mul_sum]
+      congr
+      ext i
+      ring
     _ = ∑ᶠ (x : ℂ), (divisor f (sphere 0 R)) x • Real.log ‖w - x‖ + Real.log ‖h w‖ := by
+      rw [circleAverage_add, circleAverage_sum]
 
       sorry
