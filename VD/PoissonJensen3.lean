@@ -45,7 +45,7 @@ variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
   {R : ℝ} {x c w : ℂ}
 
-
+set_option backward.isDefEq.respectTransparency false in
 lemma xx
     {f h : ℂ → ℂ}
     (hw : w ∈ ball 0 R)
@@ -58,55 +58,70 @@ lemma xx
     circleAverage (re ∘ herglotzRieszKernel 0 w • (Real.log ‖f ·‖)) 0 R =
         ∑ᶠ (x : ℂ), (divisor f (sphere 0 R)) x • Real.log ‖w - x‖ + Real.log ‖h w‖ := by
   have hR : 0 < R := pos_of_mem_ball hw
-  have η₀ : Set.Finite (divisor f (sphere 0 R)).support :=
+  have η₀x : (divisor f (sphere 0 R)).support.Finite :=
     (divisor f (sphere 0 R)).finiteSupport (isCompact_sphere 0 R)
+  have η₂ : ContinuousOn (fun x ↦ (Complex.re ∘ herglotzRieszKernel 0 w) (circleMap 0 R x)) (uIcc 0 (2 * π)) := by
+    unfold herglotzRieszKernel
+    apply Continuous.continuousOn
+    have {x : ℝ} : circleMap 0 R x - w ≠ 0 := by
+      by_contra h
+      rw [← (sub_eq_zero.1 h), mem_ball, dist_zero_right, norm_circleMap_zero] at hw
+      grind
+    fun_prop (disch := aesop)
+  have η₀ : CircleIntegrable (Complex.re ∘ herglotzRieszKernel 0 w • (Real.log ‖h ·‖)) 0 R := by
+    apply IntervalIntegrable.continuousOn_mul _ η₂
+    apply MeromorphicOn.intervalIntegrable_log_norm
+    apply AnalyticOnNhd.meromorphicOn
+    intro x hx
+    apply AnalyticAt.comp' _ (analyticOnNhd_circleMap 0 R x (by tauto))
+    apply AnalyticAt.restrictScalars (𝕜' := ℂ)
+    apply h₁h (circleMap 0 R x)
+    simp [abs_of_nonneg (pos_of_mem_ball hw).le]
+  have η₁ : ∀ i ∈ η₀x.toFinset, CircleIntegrable ((divisor f (sphere 0 R)) i • re ∘ herglotzRieszKernel 0 w • fun x ↦ Real.log ‖x - i‖) 0 R := by
+    intro i hi
+    have {x : ℂ} : (divisor f (sphere 0 R)) x • re ∘ herglotzRieszKernel 0 w • (Real.log ‖· - x‖)
+        = ((divisor f (sphere 0 R)) x : ℝ) • re ∘ herglotzRieszKernel 0 w • (Real.log ‖· - x‖) := by
+      aesop
+    rw [this]
+    apply IntervalIntegrable.const_mul
+    apply IntervalIntegrable.continuousOn_mul _ η₂
+    apply MeromorphicOn.intervalIntegrable_log_norm
+    apply AnalyticOnNhd.meromorphicOn
+    apply AnalyticOnNhd.sub (fun x _ ↦ analyticOnNhd_circleMap 0 R x (mem_univ x)) (fun _ _ ↦ by fun_prop)
+
   calc circleAverage (re ∘ herglotzRieszKernel 0 w • (Real.log ‖f ·‖)) 0 R
     _ = circleAverage (re ∘ herglotzRieszKernel 0 w •
         (Real.log ‖(((∏ᶠ u, (canonicalFactor R u) ^ (-divisor f (ball 0 R) u))
           * (∏ᶠ u, (· - u) ^ (divisor f (sphere 0 R)) u)) • h) ·‖)) 0 R := by
-      /-
-      apply circleAverage_congr_codiscreteWithin
-      · rw [abs_of_pos hR]
-        have :  f =ᶠ[codiscreteWithin (sphere 0 R)]
-            ((∏ᶠ (u : ℂ), canonicalFactor R u ^ (-(divisor f (ball 0 R)) u)) *
-            ∏ᶠ (u : ℂ), (fun x ↦ x - u) ^ (divisor f (sphere 0 R)) u) • h := by
-          apply h₁f.filter_mono
-          apply codiscreteWithin.mono sphere_subset_closedBall
-        filter_upwards [this] with a ha
-        simp_all
-      · exact hR.ne'
-      -/
-      sorry
+      apply circleAverage_congr_codiscreteWithin _ hR.ne'
+      rw [abs_of_pos hR]
+      filter_upwards [h₁f.filter_mono (codiscreteWithin.mono sphere_subset_closedBall)] with a ha
+      simp_all only [mem_ball, dist_zero_right, mem_closedBall, ne_eq, zpow_neg, smul_eq_mul,
+        comp_apply, Finite.mem_toFinset, mem_support, zsmul_eq_mul, Pi.smul_apply', Pi.mul_apply,
+        Complex.norm_mul]
     _ = circleAverage (re ∘ herglotzRieszKernel 0 w •
         (Real.log ‖(((∏ᶠ u, (· - u) ^ (divisor f (sphere 0 R)) u)) • h) ·‖)) 0 R := by
-      /-
       apply circleAverage_congr_sphere
       rw [abs_of_pos hR]
       intro a ha
-      simp only [zpow_neg, Pi.smul_apply', Pi.mul_apply, comp_apply]
-      rw [norm_smul, norm_smul, norm_mul]
+      simp only [zpow_neg, Pi.smul_apply', Pi.mul_apply, comp_apply, norm_smul, norm_smul, norm_mul]
       congr
-      convert one_mul (a := ‖(∏ᶠ (u : ℂ), (fun x ↦ x - u) ^ (divisor f (sphere 0 R)) u) a‖)
+      convert one_mul (a := ‖(∏ᶠ (u : ℂ), (· - u) ^ (divisor f (sphere 0 R)) u) a‖)
       have η₀ : Set.Finite (divisor f (ball 0 R)).support := by
-        have ζ₁ : Set.Finite (divisor f (closedBall 0 R)).support :=
-          (divisor f (closedBall 0 R)).finiteSupport (isCompact_closedBall 0 R)
-        have ζ₂ : (divisor f (ball 0 R)).support ⊆ (divisor f (closedBall 0 R)).support := by
-          intro b hb
-          have h₂b := hb
-          simp
-          rw [divisor_apply]
-          simp only [mem_support, ne_eq] at h₂b
-          rw [divisor_apply] at h₂b
-          exact h₂b
-          · intro c hc
-            apply h₀f c
-            apply ball_subset_closedBall
-            exact hc
-          · exact (divisor f (ball 0 R)).supportWithinDomain hb
-          · exact h₀f
-          · apply ball_subset_closedBall
-            exact (divisor f (ball 0 R)).supportWithinDomain hb
-        apply Set.Finite.subset ζ₁ ζ₂
+        apply ((divisor f (closedBall 0 R)).finiteSupport (isCompact_closedBall 0 R)).subset
+        intro b hb
+        have h₂b := hb
+        simp only [mem_support, ne_eq]
+        rw [divisor_apply]
+        simp only [mem_support, ne_eq] at h₂b
+        rwa [divisor_apply] at h₂b
+        · intro c hc
+          apply h₀f c
+          apply ball_subset_closedBall hc
+        · exact (divisor f (ball 0 R)).supportWithinDomain hb
+        · exact h₀f
+        · apply ball_subset_closedBall
+          exact (divisor f (ball 0 R)).supportWithinDomain hb
       rw [finprod_eq_prod_of_mulSupport_subset (s := η₀.toFinset)]
       simp
       apply Finset.prod_eq_one
@@ -115,19 +130,16 @@ lemma xx
       simp
       · exact (divisor f (ball 0 R)).supportWithinDomain ((Finite.mem_toFinset η₀).mp hb)
       · aesop
-      -/
-      sorry
     _ = circleAverage (re ∘ herglotzRieszKernel 0 w • fun x ↦
-        Real.log ‖∏ u ∈ η₀.toFinset, (x - u) ^ (divisor f (sphere 0 R)) u‖ + Real.log ‖h x‖) 0 R:= by
-      /-
+        Real.log ‖∏ u ∈ η₀x.toFinset, (x - u) ^ (divisor f (sphere 0 R)) u‖ + Real.log ‖h x‖) 0 R:= by
       apply circleAverage_congr_codiscreteWithin
       rw [abs_of_pos (pos_of_mem_ball hw)]
       filter_upwards [(divisor f (sphere 0 R)).eq_zero_codiscreteWithin,
         Filter.self_mem_codiscreteWithin (sphere 0 R)] with a ha h₂a
       simp_all
       left
-      rw [finprod_eq_prod_of_mulSupport_subset (s := η₀.toFinset)]
-      rw [norm_smul]
+      rw [finprod_eq_prod_of_mulSupport_subset (s := η₀x.toFinset)]
+      --rw [norm_mul]
       simp
       rw [Real.log_mul]
       · rw [Finset.prod_ne_zero_iff]
@@ -144,11 +156,8 @@ lemma xx
         simp_all
       aesop
       exact hR.ne'
-      -/
-      sorry
     _ = circleAverage (re ∘ herglotzRieszKernel 0 w • fun x ↦
-        ∑ u ∈ η₀.toFinset, (divisor f (sphere 0 R) u) * Real.log ‖x - u‖ + Real.log ‖h x‖) 0 R:= by
-      /-
+        ∑ u ∈ η₀x.toFinset, (divisor f (sphere 0 R) u) * Real.log ‖x - u‖ + Real.log ‖h x‖) 0 R:= by
       apply circleAverage_congr_codiscreteWithin
       rw [abs_of_pos (pos_of_mem_ball hw)]
       filter_upwards [(divisor f (sphere 0 R)).eq_zero_codiscreteWithin,
@@ -168,11 +177,8 @@ lemma xx
         simp at hb
         tauto
       · exact hR.ne'
-      -/
-      sorry
-    _ = circleAverage ( (∑ u ∈ η₀.toFinset, (divisor f (sphere 0 R) u) • re ∘ herglotzRieszKernel 0 w • (Real.log ‖· - u‖))
+    _ = circleAverage ( (∑ u ∈ η₀x.toFinset, (divisor f (sphere 0 R) u) • re ∘ herglotzRieszKernel 0 w • (Real.log ‖· - u‖))
           + re ∘ herglotzRieszKernel 0 w • (Real.log ‖h ·‖) ) 0 R := by
-      /-
       apply circleAverage_congr_sphere
       intro b hb
       simp
@@ -180,14 +186,12 @@ lemma xx
       congr
       ext i
       ring
-      -/
-      sorry
     _ = ∑ᶠ (x : ℂ), (divisor f (sphere 0 R)) x • Real.log ‖w - x‖ + Real.log ‖h w‖ := by
-      rw [circleAverage_add, circleAverage_sum]
+      rw [circleAverage_add (CircleIntegrable.sum _ η₁) η₀, circleAverage_sum η₁]
       rw [InnerProductSpace.HarmonicOnNhd.circleAverage_re_herglotzRieszKernel_smul
         (fun x hx ↦ (h₁h x hx).harmonicAt_log_norm (h₂h x hx)) hw]
       congr
-      rw [finsum_eq_sum_of_support_subset (s := η₀.toFinset) _ (fun _ _ ↦ (by aesop))]
+      rw [finsum_eq_sum_of_support_subset (s := η₀x.toFinset) _ (fun _ _ ↦ (by aesop))]
       apply Finset.sum_congr rfl
       intro x hx
       have : (divisor f (sphere 0 R)) x • re ∘ herglotzRieszKernel 0 w • (Real.log ‖· - x‖)
@@ -196,11 +200,5 @@ lemma xx
       rw [this]
       rw [circleAverage_smul]
       rw [circleAverage_re_herglotzRieszKernel_mul_log
-        ((divisor f (sphere 0 R)).supportWithinDomain ((Finite.mem_toFinset η₀).mp hx)) hw]
+        ((divisor f (sphere 0 R)).supportWithinDomain ((Finite.mem_toFinset η₀x).mp hx)) hw]
       simp
-      · -- ∀ i ∈ η₀.toFinset, CircleIntegrable ((divisor f (sphere 0 R)) i • re ∘ herglotzRieszKernel 0 w • fun x ↦ Real.log ‖x - i‖) 0 R
-        sorry
-      · -- CircleIntegrable(∑ u ∈ η₀.toFinset,  (divisor f (sphere 0 R)) u • re ∘ herglotzRieszKernel 0 w • fun x ↦ Real.log ‖x - u‖) 0 R
-        sorry
-      · -- CircleIntegrable (re ∘ herglotzRieszKernel 0 w • fun x ↦ Real.log ‖h x‖) 0 R
-        sorry
