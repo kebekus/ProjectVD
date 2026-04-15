@@ -178,5 +178,31 @@ lemma xx
       ring
     _ = ∑ᶠ (x : ℂ), (divisor f (sphere 0 R)) x • Real.log ‖w - x‖ + Real.log ‖h w‖ := by
       rw [circleAverage_add, circleAverage_sum]
-
-      sorry
+      rw [InnerProductSpace.HarmonicOnNhd.circleAverage_re_herglotzRieszKernel_smul]
+      congr
+      rw [finsum_eq_sum_of_support_subset (s := η₀.toFinset)]
+      apply Finset.sum_congr rfl
+      intro x hx
+      have : (divisor f (sphere 0 R)) x • re ∘ herglotzRieszKernel 0 w • (Real.log ‖· - x‖)
+          = ((divisor f (sphere 0 R)) x : ℝ) • re ∘ herglotzRieszKernel 0 w • (Real.log ‖· - x‖) := by
+        aesop
+      rw [this]
+      rw [circleAverage_smul]
+      rw [circleAverage_re_herglotzRieszKernel_mul_log]
+      simp
+      · -- x ∈ sphere 0 R
+        sorry
+      · -- w ∈ ball 0 R
+        sorry
+      · -- (support fun x ↦ (divisor f (sphere 0 R)) x • Real.log ‖w - x‖) ⊆ ↑η₀.toFinset
+        sorry
+      · -- InnerProductSpace.HarmonicOnNhd (fun x ↦ Real.log ‖h x‖) (closedBall 0 R)
+        sorry
+      · -- w ∈ ball 0 R
+        sorry
+      · -- ∀ i ∈ η₀.toFinset, CircleIntegrable ((divisor f (sphere 0 R)) i • re ∘ herglotzRieszKernel 0 w • fun x ↦ Real.log ‖x - i‖) 0 R
+        sorry
+      · -- CircleIntegrable(∑ u ∈ η₀.toFinset, (divisor f (sphere 0 R)) u • re ∘ herglotzRieszKernel 0 w • fun x ↦ Real.log ‖x - u‖) 0 R
+        sorry
+      · -- CircleIntegrable (re ∘ herglotzRieszKernel 0 w • fun x ↦ Real.log ‖h x‖) 0 R
+        sorry
