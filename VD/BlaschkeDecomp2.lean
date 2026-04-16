@@ -94,8 +94,7 @@ theorem canonicalDecomposition₂ {f g : ℂ → E}
       · apply AnalyticAt.zpow
         · apply analyticOnNhd_canonicalFactor
           aesop
-        · apply canonicalFactor_ne_zero ha (by aesop)
-          aesop
+        · exact canonicalFactor_ne_zero ha (by aesop) (by aesop)
       · simp_all only [mem_ball, dist_zero_right, ne_eq, zpow_neg, not_lt,
           locallyFinsuppWithin.apply_eq_zero_of_notMem, neg_zero, zpow_zero]
         exact analyticAt_const
@@ -109,9 +108,7 @@ theorem canonicalDecomposition₂ {f g : ℂ → E}
       apply finprod_apply_ne_zero
       intro a
       by_cases ha : a ∈ ball 0 R
-      · apply zpow_ne_zero
-        apply canonicalFactor_ne_zero ha (by aesop)
-        aesop
+      · exact zpow_ne_zero _ (canonicalFactor_ne_zero ha (by aesop) (by aesop))
       · simp_all
       apply η₁.meromorphicNFAt
     rw [divisor_apply (h₁f.mono_set sphere_subset_closedBall) (by aesop),
