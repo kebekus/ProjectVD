@@ -155,3 +155,40 @@ lemma xx
       intro x hx
       rw [cast_smul, circleAverage_smul, circleAverage_re_herglotzRieszKernel_mul_log
         ((divisor f (sphere 0 R)).supportWithinDomain (h₂f.mem_toFinset.1 hx)) hw, smul_eq_mul, zsmul_eq_mul]
+
+lemma yy
+    {f h : ℂ → ℂ}
+    (hw : w ∈ ball 0 R)
+    (h₀f : MeromorphicOn f (closedBall 0 R)) -- can be deduced
+    (h₁h : AnalyticOnNhd ℂ h (closedBall 0 R))
+    (h₂h : ∀ u ∈ (closedBall 0 R), h u ≠ 0)
+    (h₁f : f =ᶠ[codiscreteWithin (closedBall 0 R)]
+      ((∏ᶠ u, (canonicalFactor R u) ^ (-divisor f (ball 0 R) u))
+        * (∏ᶠ u, (· - u) ^ (divisor f (sphere 0 R)) u)) • h) :
+    meromorphicTrailingCoeffAt f w = 0 := by
+  have η₀ : w ∈ closedBall (0 : ℂ) R := by
+    exact ball_subset_closedBall hw
+  have η₁ : Preperfect (closedBall (0 : ℂ) R) := by
+    rw [← closure_ball _ (pos_of_mem_ball hw).ne']
+    apply isOpen_ball.perfect_closure.2
+  have η₂ : MeromorphicAt
+      (((∏ᶠ u, (canonicalFactor R u) ^ (-divisor f (ball 0 R) u))
+        * (∏ᶠ u, (· - u) ^ (divisor f (sphere 0 R)) u)) • h) w := by
+    apply MeromorphicAt.mul
+    · apply MeromorphicAt.mul
+      · apply MeromorphicAt.finprod
+        intro z
+        apply MeromorphicAt.zpow
+        apply meromorphicOn_canonicalFactor R z w (mem_univ w)
+      · fun_prop
+    · apply (h₁h w η₀).meromorphicAt
+
+  calc meromorphicTrailingCoeffAt f w
+    _ = meromorphicTrailingCoeffAt (((∏ᶠ (u : ℂ), canonicalFactor R u ^ (-(divisor f (ball 0 R)) u)) *
+        ∏ᶠ (u : ℂ), (· - u) ^ (divisor f (sphere 0 R)) u) • h) w := by
+      rw [meromorphicTrailingCoeffAt_congr_nhdsNE ((h₀f w (ball_subset_closedBall
+        hw)).eventuallyEq_nhdsNE_of_eventuallyEq_codiscreteWithin_preperfect η₂ η₀ η₁ h₁f)]
+    _ = 0 := by
+
+      sorry
+  sorry
