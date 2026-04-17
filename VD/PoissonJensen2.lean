@@ -1,10 +1,10 @@
 import VD.MathlibSubmitted.BlaschkeDecomp
-import VD.BlaschkeDecomp2
+import VD.MathlibPending.BlaschkeDecomp2
 import VD.MathlibSubmitted.Poisson_log_affine
 import Mathlib.LinearAlgebra.Complex.Module
 import Mathlib.Analysis.Complex.Harmonic.Poisson
 
-open Filter Function MeromorphicOn Metric Real Set Classical Topology ValueDistribution
+open Filter Function MeromorphicOn Metric Real Set Classical Topology
 
 
 
@@ -290,7 +290,7 @@ theorem PoissonJensen_aux₃ {w : ℂ} {R : ℝ} {f : ℂ → ℂ}
         ∑ᶠ (x : ℂ), (divisor f (sphere 0 R)) x • log ‖w - x‖ + log ‖h w‖ := by
   obtain ⟨g, h₁g, h₂g, h₃g, h₄g⟩ := PoissonJensen_aux₀ h₁f h₂f hw
   have h₅g {u : ℂ}: (divisor g (closedBall 0 R)) u = (divisor f (sphere 0 R)) u := by
-    apply canonicalDecomposition₂
+    apply divisor_congr_codiscreteWitin_closedBall_prod_canonicalFactor_smul
     exact pos_of_mem_ball hw
     exact h₁f
     exact h₁g

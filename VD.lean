@@ -1,4 +1,3 @@
-import VD.BlaschkeDecomp2
 import VD.BoundednessCharacteristic
 import VD.BoundednessProximity
 import VD.Cartan
@@ -6,6 +5,7 @@ import VD.CartanExperimentation
 import VD.CharacteristicMonotone
 import VD.LinearDiffOp.Basic
 import VD.LinearDiffOp.Regularity
+import VD.MathlibPending.BlaschkeDecomp2
 import VD.MathlibSubmitted.BlaschkeDecomp
 import VD.MathlibSubmitted.Poisson_log_affine
 import VD.PoissonJensen

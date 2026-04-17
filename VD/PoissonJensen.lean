@@ -1,5 +1,5 @@
 import VD.MathlibSubmitted.BlaschkeDecomp
-import VD.BlaschkeDecomp2
+import VD.MathlibPending.BlaschkeDecomp2
 import VD.MathlibSubmitted.Poisson_log_affine
 import Mathlib
 
@@ -290,7 +290,7 @@ theorem PoissonJensen_aux₃ {w : ℂ} {R : ℝ} {f : ℂ → ℂ}
   obtain ⟨g, h₁g, h₂g, h₃g, h₄g⟩ := PoissonJensen_aux₀ h₁f h₂f hw
   have h₅g {u : ℂ}: (divisor g (closedBall 0 R)) u = (divisor f (sphere 0 R)) u := by
     apply canonicalDecomposition₂
-    exact pos_of_mem_ball hw
+    exact divisor_congr_codiscreteWitin_closedBall_prod_canonicalFactor_smul
     exact h₁f
     exact h₁g
     exact h₂g
