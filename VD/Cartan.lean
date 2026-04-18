@@ -37,7 +37,7 @@ at the origin, the trailing-coefficient term vanishes.
 
 namespace ValueDistribution
 
-private lemma circleAverage_add_const {f : ℂ → ℝ} {c : ℂ} {R : ℝ} {x : ℝ}
+lemma circleAverage_add_const {f : ℂ → ℝ} {c : ℂ} {R : ℝ} {x : ℝ}
     (hf : CircleIntegrable f c R) :
     circleAverage (fun a ↦ f a + x) c R = circleAverage f c R + x := by
   simpa [Pi.add_apply] using
