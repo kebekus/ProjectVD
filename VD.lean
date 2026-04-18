@@ -2,6 +2,8 @@ import VD.BlaschkeDecomp2
 import VD.BoundednessCharacteristic
 import VD.BoundednessProximity
 import VD.Cartan
+import VD.CartanKernel
+import VD.CartanTrailing
 import VD.CharacteristicMonotone
 import VD.LinearDiffOp.Basic
 import VD.LinearDiffOp.Regularity
