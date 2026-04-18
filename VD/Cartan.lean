@@ -33,7 +33,6 @@ at the origin, the trailing-coefficient term vanishes.
 - `ValueDistribution.characteristic_top_eq_circleAverage_logCounting_of_meromorphicOrderAt_pos`
 - `ValueDistribution.characteristic_top_eq_circleAverage_logCounting_add_const`
 
-
 -/
 
 namespace ValueDistribution
