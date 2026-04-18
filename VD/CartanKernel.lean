@@ -32,13 +32,6 @@ The file provides the Fubini and integrability argument for the Cartan kernel in
 auxiliary lemmas in the namespace `ValueDistribution.Cartan`. They are used by
 `VD/Cartan.lean` and `VD/CartanTrailing.lean`.
 
-## References
-
-* [S. Lang, *Introduction to Complex Hyperbolic Spaces*][MR886677]
-
-## Tags
-
-Cartan, Nevanlinna theory, kernel, circle average, Fubini
 -/
 
 namespace ValueDistribution
