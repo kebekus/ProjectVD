@@ -166,29 +166,45 @@ lemma yy
       ((∏ᶠ u, (canonicalFactor R u) ^ (-divisor f (ball 0 R) u))
         * (∏ᶠ u, (· - u) ^ (divisor f (sphere 0 R)) u)) • h) :
     meromorphicTrailingCoeffAt f w = 0 := by
-  have η₀ : w ∈ closedBall (0 : ℂ) R := by
-    exact ball_subset_closedBall hw
+  have η₀ : w ∈ closedBall (0 : ℂ) R := ball_subset_closedBall hw
   have η₁ : Preperfect (closedBall (0 : ℂ) R) := by
     rw [← closure_ball _ (pos_of_mem_ball hw).ne']
-    apply isOpen_ball.perfect_closure.2
+    exact isOpen_ball.perfect_closure.2
   have η₂ : MeromorphicAt
       (((∏ᶠ u, (canonicalFactor R u) ^ (-divisor f (ball 0 R) u))
         * (∏ᶠ u, (· - u) ^ (divisor f (sphere 0 R)) u)) • h) w := by
-    apply MeromorphicAt.mul
-    · apply MeromorphicAt.mul
-      · apply MeromorphicAt.finprod
-        intro z
-        apply MeromorphicAt.zpow
-        apply meromorphicOn_canonicalFactor R z w (mem_univ w)
-      · fun_prop
-    · apply (h₁h w η₀).meromorphicAt
-
+    apply MeromorphicAt.mul _ (h₁h w η₀).meromorphicAt
+    exact MeromorphicAt.mul (MeromorphicAt.finprod
+      (fun z ↦ (meromorphicOn_canonicalFactor R z w (mem_univ w)).zpow _)) (by fun_prop)
+  have h₂f : (divisor f (sphere 0 R)).support.Finite :=
+    (divisor f (sphere 0 R)).finiteSupport (isCompact_sphere 0 R)
+  have h₃f : (divisor f (ball 0 R)).support.Finite := by
+    apply ((divisor f (closedBall 0 R)).finiteSupport (isCompact_closedBall 0 R)).subset
+    intro b hb
+    have h₂b := hb
+    rw [mem_support, ne_eq, divisor_apply (fun c hc ↦ h₀f c (ball_subset_closedBall hc))
+      ((divisor f (ball 0 R)).supportWithinDomain hb)] at h₂b
+    rwa [mem_support, ne_eq, divisor_apply h₀f
+      (ball_subset_closedBall ((divisor f (ball 0 R)).supportWithinDomain hb))]
+  --
   calc meromorphicTrailingCoeffAt f w
-    _ = meromorphicTrailingCoeffAt (((∏ᶠ (u : ℂ), canonicalFactor R u ^ (-(divisor f (ball 0 R)) u)) *
-        ∏ᶠ (u : ℂ), (· - u) ^ (divisor f (sphere 0 R)) u) • h) w := by
+    _ = meromorphicTrailingCoeffAt (((∏ᶠ u, canonicalFactor R u ^ (-(divisor f (ball 0 R)) u)) *
+        ∏ᶠ u, (· - u) ^ (divisor f (sphere 0 R)) u) • h) w := by
       rw [meromorphicTrailingCoeffAt_congr_nhdsNE ((h₀f w (ball_subset_closedBall
         hw)).eventuallyEq_nhdsNE_of_eventuallyEq_codiscreteWithin_preperfect η₂ η₀ η₁ h₁f)]
-    _ = 0 := by
-
+    _ = 14 := by
+      rw [finprod_eq_prod_of_mulSupport_subset (s := h₃f.toFinset) _ (by aesop)]
+      rw [finprod_eq_prod_of_mulSupport_subset (s := h₂f.toFinset) _ (by aesop)]
+      rw [MeromorphicAt.meromorphicTrailingCoeffAt_smul _
+        (h₁h w (ball_subset_closedBall hw)).meromorphicAt]
+      rw [MeromorphicAt.meromorphicTrailingCoeffAt_mul]
+      rw [meromorphicTrailingCoeffAt_prod]
+      rw [meromorphicTrailingCoeffAt_prod]
+      --
+      sorry
+      sorry
+      sorry
+      sorry
+      sorry
       sorry
   sorry
