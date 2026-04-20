@@ -46,12 +46,12 @@ namespace ValueDistribution
 difference of counting functions at `0` and at `⊤` equals a circle average minus the logarithm of
 the first nonzero Laurent coefficient at `0`. This is the one-variable input used later in
 Cartan's formula. -/
-theorem logCounting_zero_sub_logCounting_top_eq_circleAverage_sub_log_trailingCoeff
+private theorem logCounting_zero_sub_logCounting_top_eq_circleAverage_sub_log_trailingCoeff
     {f : ℂ → ℂ} (hf : Meromorphic f) {R : ℝ} (hR : R ≠ 0) :
     logCounting f 0 R - logCounting f ⊤ R =
-      circleAverage (fun z ↦ Real.log ‖f z‖) 0 R - Real.log ‖meromorphicTrailingCoeffAt f 0‖ := by
+      circleAverage (Real.log ‖f ·‖) 0 R - Real.log ‖meromorphicTrailingCoeffAt f 0‖ := by
   have h_eval :
-      circleAverage (fun z ↦ Real.log ‖f z‖) 0 R
+      circleAverage (Real.log ‖f ·‖) 0 R
         - (MeromorphicOn.divisor f Set.univ).logCounting R =
         Real.log ‖meromorphicTrailingCoeffAt f 0‖ := by
     exact
@@ -71,16 +71,16 @@ theorem logCounting_zero_sub_logCounting_top_eq_circleAverage_sub_log_trailingCo
 
 namespace Cartan
 
-lemma norm_eq_one_of_mem_unitSphere {a : ℂ}
+private lemma norm_eq_one_of_mem_unitSphere {a : ℂ}
     (ha : a ∈ Metric.sphere (0 : ℂ) |(1 : ℝ)|) : ‖a‖ = 1 := by
   simpa [Metric.mem_sphere, abs_one] using ha
 
-lemma ne_zero_of_mem_unitSphere {a : ℂ}
+private lemma ne_zero_of_mem_unitSphere {a : ℂ}
     (ha : a ∈ Metric.sphere (0 : ℂ) |(1 : ℝ)|) : a ≠ 0 := by
   intro h0
   simpa [h0] using norm_eq_one_of_mem_unitSphere ha
 
-lemma meromorphicTrailingCoeffAt_eq_of_tendsto_order_eq_zero {g : ℂ → ℂ}
+private lemma meromorphicTrailingCoeffAt_eq_of_tendsto_order_eq_zero {g : ℂ → ℂ}
     (hg : MeromorphicAt g 0) (hord : meromorphicOrderAt g 0 = 0)
     {L : ℂ} (hL : Tendsto g (𝓝[≠] (0 : ℂ)) (𝓝 L)) :
     meromorphicTrailingCoeffAt g 0 = L := by
@@ -121,7 +121,7 @@ lemma logCounting_add_log_trailingCoeff_eq_circleAverage_add_logCounting_top
 
 /-- If `f` has a zero at the origin, then subtracting a nonzero constant shifts the trailing
 coefficient of `f` at `0` to that constant term. -/
-lemma meromorphicTrailingCoeff_sub_const_eq_neg {f : ℂ → ℂ}
+private lemma meromorphicTrailingCoeff_sub_const_eq_neg {f : ℂ → ℂ}
     (h : MeromorphicOn f ⊤) (h₂ : 0 < meromorphicOrderAt f 0) {a : ℂ} (ha : a ≠ 0) :
     meromorphicTrailingCoeffAt (fun z ↦ f z - a) 0 = -a := by
   let g : ℂ → ℂ := fun z ↦ f z - a
@@ -138,7 +138,7 @@ lemma meromorphicTrailingCoeff_sub_const_eq_neg {f : ℂ → ℂ}
   simpa [g] using
     meromorphicTrailingCoeffAt_eq_of_tendsto_order_eq_zero hmero_g h_ord h_tendsto_g
 
-lemma log_trailingCoeff_eq_zero_on_unitSphere {f : ℂ → ℂ}
+private lemma log_trailingCoeff_eq_zero_on_unitSphere {f : ℂ → ℂ}
     (h : MeromorphicOn f ⊤) (h₂ : 0 < meromorphicOrderAt f 0) :
     ∀ a ∈ Metric.sphere (0 : ℂ) |(1 : ℝ)|,
       Real.log ‖meromorphicTrailingCoeffAt (fun z ↦ f z - a) 0‖ = (0 : ℝ) := by
@@ -159,7 +159,7 @@ lemma circleAverage_log_trailingCoeff_eq_zero {f : ℂ → ℂ} (h : Meromorphic
 
 /-- If `f` has a pole at the origin, subtracting a nonzero constant does not change the trailing
 coefficient at `0`. -/
-lemma meromorphicTrailingCoeff_sub_const_eq_of_meromorphicOrderAt_neg {f : ℂ → ℂ}
+private lemma meromorphicTrailingCoeff_sub_const_eq_of_meromorphicOrderAt_neg {f : ℂ → ℂ}
     (_ : MeromorphicOn f ⊤) (hneg : meromorphicOrderAt f 0 < 0) {a : ℂ} (ha : a ≠ 0) :
     meromorphicTrailingCoeffAt (fun z ↦ f z - a) 0 = meromorphicTrailingCoeffAt f 0 := by
   have hconst : MeromorphicAt (fun _ ↦ -a : ℂ → ℂ) 0 := analyticAt_const.meromorphicAt
@@ -173,7 +173,7 @@ lemma meromorphicTrailingCoeff_sub_const_eq_of_meromorphicOrderAt_neg {f : ℂ �
 
 /-- If `f` has meromorphic order `0` at the origin and the leading terms do not cancel, then
 subtracting `a` subtracts `a` from the trailing coefficient at `0`. -/
-lemma meromorphicTrailingCoeff_sub_const_eq_sub_of_meromorphicOrderAt_eq_zero {f : ℂ → ℂ}
+private lemma meromorphicTrailingCoeff_sub_const_eq_sub_of_meromorphicOrderAt_eq_zero {f : ℂ → ℂ}
     (h : MeromorphicOn f ⊤) (hzero : meromorphicOrderAt f 0 = 0)
     {a : ℂ} (ha0 : a ≠ 0) (ha : meromorphicTrailingCoeffAt f 0 ≠ a) :
     meromorphicTrailingCoeffAt (fun z ↦ f z - a) 0 = meromorphicTrailingCoeffAt f 0 - a := by
@@ -189,7 +189,7 @@ lemma meromorphicTrailingCoeff_sub_const_eq_sub_of_meromorphicOrderAt_eq_zero {f
       (f₁ := f) (f₂ := fun _ ↦ -a) (x := 0) hmero hconst
       (by simpa [h_order_const] using hzero) h_noncancel)
 
-lemma singleton_compl_mem_codiscreteWithin_unitSphere (z : ℂ) :
+private lemma singleton_compl_mem_codiscreteWithin_unitSphere (z : ℂ) :
     {a : ℂ | z ≠ a} ∈ codiscreteWithin (Metric.sphere (0 : ℂ) |(1 : ℝ)|) := by
   apply codiscreteWithin_iff_locallyFiniteComplementWithin.2
   intro a ha
@@ -202,7 +202,7 @@ lemma singleton_compl_mem_codiscreteWithin_unitSphere (z : ℂ) :
     a₁ = z := ha₁.2.symm
     _ = a₂ := ha₂.2
 
-lemma eventuallyEq_log_trailingCoeff_of_meromorphicOrderAt_eq_zero {f : ℂ → ℂ}
+private lemma eventuallyEq_log_trailingCoeff_of_meromorphicOrderAt_eq_zero {f : ℂ → ℂ}
     (h : MeromorphicOn f ⊤) (hzero : meromorphicOrderAt f 0 = 0) :
     (fun a ↦ Real.log ‖meromorphicTrailingCoeffAt f 0 - a‖) =ᶠ[
       codiscreteWithin (Metric.sphere (0 : ℂ) |(1 : ℝ)|)]
@@ -215,7 +215,7 @@ lemma eventuallyEq_log_trailingCoeff_of_meromorphicOrderAt_eq_zero {f : ℂ → 
     (ne_zero_of_mem_unitSphere ha_sphere) ha_ne
   simp [h_tc]
 
-lemma log_trailingCoeff_eq_const_on_unitSphere_of_meromorphicOrderAt_neg {f : ℂ → ℂ}
+private lemma log_trailingCoeff_eq_const_on_unitSphere_of_meromorphicOrderAt_neg {f : ℂ → ℂ}
     (h : MeromorphicOn f ⊤) (hneg : meromorphicOrderAt f 0 < 0) :
     ∀ a ∈ Metric.sphere (0 : ℂ) |(1 : ℝ)|,
       Real.log ‖meromorphicTrailingCoeffAt (fun z ↦ f z - a) 0‖ =
@@ -226,7 +226,7 @@ lemma log_trailingCoeff_eq_const_on_unitSphere_of_meromorphicOrderAt_neg {f : �
 
 /-- If `f` has a pole at the origin, then the Cartan trailing-coefficient correction term is circle
 integrable in the value variable. -/
-lemma circleIntegrable_log_trailingCoeff_of_meromorphicOrderAt_neg {f : ℂ → ℂ}
+private lemma circleIntegrable_log_trailingCoeff_of_meromorphicOrderAt_neg {f : ℂ → ℂ}
     (h : MeromorphicOn f ⊤) (hneg : meromorphicOrderAt f 0 < 0) :
     CircleIntegrable
       (fun a ↦ Real.log ‖meromorphicTrailingCoeffAt (fun z ↦ f z - a) 0‖) 0 1 := by
@@ -235,7 +235,7 @@ lemma circleIntegrable_log_trailingCoeff_of_meromorphicOrderAt_neg {f : ℂ → 
 
 /-- If `f` has meromorphic order `0` at the origin, then the Cartan trailing-coefficient
 correction term is circle integrable in the value variable. -/
-lemma circleIntegrable_log_trailingCoeff_of_meromorphicOrderAt_eq_zero {f : ℂ → ℂ}
+private lemma circleIntegrable_log_trailingCoeff_of_meromorphicOrderAt_eq_zero {f : ℂ → ℂ}
     (h : MeromorphicOn f ⊤) (hzero : meromorphicOrderAt f 0 = 0) :
     CircleIntegrable
       (fun a ↦ Real.log ‖meromorphicTrailingCoeffAt (fun z ↦ f z - a) 0‖) 0 1 := by
@@ -245,7 +245,7 @@ lemma circleIntegrable_log_trailingCoeff_of_meromorphicOrderAt_eq_zero {f : ℂ 
 
 /-- If `f` has a zero at the origin, then the Cartan trailing-coefficient correction term is circle
 integrable in the value variable. -/
-lemma circleIntegrable_log_trailingCoeff {f : ℂ → ℂ} (h : MeromorphicOn f ⊤)
+private lemma circleIntegrable_log_trailingCoeff {f : ℂ → ℂ} (h : MeromorphicOn f ⊤)
     (h₂ : 0 < meromorphicOrderAt f 0) :
     CircleIntegrable
       (fun a ↦ Real.log ‖meromorphicTrailingCoeffAt (fun z ↦ f z - a) 0‖) 0 1 := by
