@@ -1,7 +1,8 @@
 import VD.BoundednessCharacteristic
 import VD.BoundednessProximity
 import VD.Cartan
-import VD.CartanExperimentation
+import VD.CartanKernel
+import VD.CartanTrailing
 import VD.CharacteristicMonotone
 import VD.LinearDiffOp.Basic
 import VD.LinearDiffOp.Regularity
