@@ -117,19 +117,11 @@ end IntervalIntegralSwap
 noncomputable def cartanKernel (f : ℂ → ℂ) (R : ℝ) (α β : ℝ) : ℝ :=
   log ‖f (circleMap 0 R β) - circleMap 0 1 α‖
 
-lemma intervalIntegrable_cartanKernel_in_alpha (f : ℂ → ℂ) (R : ℝ) (β : ℝ) :
-    IntervalIntegrable (fun α => cartanKernel f R α β) volume 0 (2 * π) := by
-  have h_eq : (log ‖f (circleMap 0 R β) - circleMap 0 1 ·‖) =
-      (log ‖circleMap 0 1 · - f (circleMap 0 R β)‖) := by
-    ext α
-    rw [norm_sub_rev]
-  simpa [cartanKernel, h_eq, CircleIntegrable] using circleIntegrable_log_norm_sub_const 1
-
 lemma integrable_cartanKernel_in_alpha (f : ℂ → ℂ) (R : ℝ) (β : ℝ) :
     Integrable (cartanKernel f R · β)
-      (volume.restrict (Set.Ioc 0 (2 * π))) :=
-  (intervalIntegrable_iff_integrableOn_Ioc_of_le two_pi_pos.le).1
-    (intervalIntegrable_cartanKernel_in_alpha f R β)
+      (volume.restrict (Set.Ioc 0 (2 * π))) := by
+  apply (intervalIntegrable_iff_integrableOn_Ioc_of_le two_pi_pos.le).1
+  simpa [cartanKernel, norm_sub_rev, CircleIntegrable] using circleIntegrable_log_norm_sub_const 1
 
 lemma integrable_posLog_norm_circleMap {f : ℂ → ℂ} (h : Meromorphic f) {R : ℝ} :
     Integrable (fun β ↦ log⁺ ‖f (circleMap 0 R β)‖)
@@ -163,26 +155,19 @@ lemma integral_norm_eq_two_mul_integral_max_sub
     · rw [Real.norm_eq_abs, abs_of_neg (lt_of_not_ge hx),
         max_eq_right (le_of_lt (lt_of_not_ge hx))]
       ring
-  rw [integral_congr_ae (Filter.Eventually.of_forall h_eq), integral_sub]
-  · simp [integral_const_mul]
-  · exact hmax.const_mul 2
-  · exact hg
+  rw [integral_congr_ae (Filter.Eventually.of_forall h_eq), integral_sub (hmax.const_mul 2) hg,
+    integral_const_mul]
 
 lemma intervalIntegral_cartanKernel_eq_two_pi_mul_posLog (f : ℂ → ℂ) (R β : ℝ) :
     ∫ α in (0 : ℝ)..2 * π, cartanKernel f R α β =
       (2 * π) * log⁺ ‖f (circleMap 0 R β)‖ := by
   let z := f (circleMap 0 R β)
   have h_avg : circleAverage (fun a ↦ log ‖z - a‖) 0 1 = log⁺ ‖z‖ := by
-    have h_eq : (fun a ↦ log ‖z - a‖) = fun a ↦ log ‖a - z‖ := by
-      funext a
-      rw [norm_sub_rev]
-    rw [h_eq]
-    exact circleAverage_log_norm_sub_const_eq_posLog (a := z)
-  rw [Real.circleAverage_def] at h_avg
-  simp only [smul_eq_mul] at h_avg
-  have h_two_pi : (2 * π) ≠ 0 := by positivity
-  field_simp [h_two_pi] at h_avg
-  simpa [z, cartanKernel] using h_avg
+    simp_rw [norm_sub_rev]
+    exact circleAverage_log_norm_sub_const_eq_posLog
+  simp only [Real.circleAverage_def, smul_eq_mul] at h_avg
+  field_simp [two_pi_pos.ne'] at h_avg
+  simpa using h_avg
 
 lemma measurable_cartanKernel {f : ℂ → ℂ} (hf : Measurable f) {R : ℝ} :
     Measurable (fun p : ℝ × ℝ => cartanKernel f R p.1 p.2) := by
@@ -202,9 +187,9 @@ lemma integral_max_cartanKernel_le (f : ℂ → ℂ) (R β : ℝ) :
       ∫ α, max (cartanKernel f R α β) 0 ∂(volume.restrict (Set.Ioc 0 (2 * π))) ≤
         ∫ _, log⁺ ‖z‖ + log 2 ∂(volume.restrict (Set.Ioc 0 (2 * π))) := by
     apply integral_mono_of_nonneg
-    · exact Filter.Eventually.of_forall fun _ => le_max_right _ _
+    · exact Filter.Eventually.of_forall fun _ ↦ le_max_right _ _
     · exact integrable_const _
-    · exact Filter.Eventually.of_forall fun α ↦ by simpa [z] using max_cartanKernel_le f R α β
+    · exact Filter.Eventually.of_forall (max_cartanKernel_le f R · β)
   have h_int_const :
       ∫ _, log⁺ ‖z‖ + log 2 ∂(volume.restrict (Set.Ioc 0 (2 * π))) =
         (log⁺ ‖z‖ + log 2) * (2 * π) := by
@@ -262,45 +247,33 @@ lemma integrable_integral_norm_cartanKernel {f : ℂ → ℂ} (h : Meromorphic f
         (h_meas_K.max measurable_const).stronglyMeasurable.integral_prod_left'.aestronglyMeasurable
     · filter_upwards with β
       have h_int_nonneg : 0 ≤ ∫ α, max (cartanKernel f R α β) 0 ∂μ :=
-        integral_nonneg fun _ => le_max_right _ _
+        integral_nonneg fun _ ↦ le_max_right _ _
       have h_bound_nonneg : 0 ≤ (2 * π) * (log⁺ ‖f (circleMap 0 R β)‖ + log 2) := by
-        apply mul_nonneg (by linarith [Real.two_pi_pos])
-        apply add_nonneg Real.posLog_nonneg
-        exact log_nonneg (by norm_num)
-      rw [Real.norm_of_nonneg h_int_nonneg, Real.norm_of_nonneg h_bound_nonneg]
-      simpa [μ] using integral_max_cartanKernel_le f R β
-  refine Integrable.congr ((h_int_Term1.const_mul 2).sub h_int_Term2) ?_
-  exact Filter.Eventually.of_forall fun β ↦ by
-    simpa [μ] using (integral_norm_cartanKernel_eq f R β).symm
+        apply mul_nonneg (by linarith [two_pi_pos])
+        apply add_nonneg posLog_nonneg (log_nonneg (by norm_num))
+      rw [norm_of_nonneg h_int_nonneg, norm_of_nonneg h_bound_nonneg]
+      exact integral_max_cartanKernel_le f R β
+  exact Integrable.congr ((h_int_Term1.const_mul 2).sub h_int_Term2)
+    (Filter.Eventually.of_forall fun β ↦ (integral_norm_cartanKernel_eq f R β).symm)
 
 lemma integrable_intervalIntegral_cartanKernel_left {f : ℂ → ℂ} {R : ℝ}
-    (h_int :
-      Integrable (fun p : ℝ × ℝ => cartanKernel f R p.1 p.2)
+    (h_int : Integrable (fun p ↦ cartanKernel f R p.1 p.2)
         ((volume.restrict (Set.uIoc 0 (2 * π))).prod
          (volume.restrict (Set.uIoc 0 (2 * π))))) :
-    Integrable (fun α => ∫ β in (0 : ℝ)..2 * π, cartanKernel f R α β)
+    Integrable (∫ β in (0 : ℝ)..2 * π, cartanKernel f R · β)
       (volume.restrict (Set.Ioc 0 (2 * π))) := by
-  have h0_le : (0 : ℝ) ≤ 2 * π := Real.two_pi_pos.le
-  rw [Set.uIoc_of_le h0_le] at h_int
-  simpa [intervalIntegral.integral_of_le h0_le, cartanKernel] using h_int.integral_prod_left
+  rw [Set.uIoc_of_le two_pi_pos.le] at h_int
+  simpa [intervalIntegral.integral_of_le two_pi_pos.le, cartanKernel]
+    using h_int.integral_prod_left
 
 lemma cartan_integrability {f : ℂ → ℂ} (h : Meromorphic f) {R : ℝ} :
-    Integrable (fun p : ℝ × ℝ => cartanKernel f R p.1 p.2)
+    Integrable (fun p ↦ cartanKernel f R p.1 p.2)
       ((volume.restrict (Set.uIoc 0 (2 * π))).prod
        (volume.restrict (Set.uIoc 0 (2 * π)))) := by
-  have hIoc : Set.uIoc 0 (2 * π) = Set.Ioc 0 (2 * π) := Set.uIoc_of_le Real.two_pi_pos.le
-  simp only [hIoc]
-  let μ : Measure ℝ := volume.restrict (Set.Ioc 0 (2 * π))
-  have h_sm_K : StronglyMeasurable (fun p : ℝ × ℝ => cartanKernel f R p.1 p.2) :=
-    (measurable_cartanKernel h.measurable).stronglyMeasurable
-  have h_aesm_K :
-      AEStronglyMeasurable (fun p : ℝ × ℝ => cartanKernel f R p.1 p.2) (μ.prod μ) :=
-    h_sm_K.aestronglyMeasurable
-  refine (integrable_prod_iff' h_aesm_K).2 ?_
-  refine ⟨Filter.Eventually.of_forall ?_, ?_⟩
-  · intro β
-    simpa [μ] using integrable_cartanKernel_in_alpha f R β
-  · simpa [μ] using integrable_integral_norm_cartanKernel h (R := R)
+  simpa [Set.uIoc_of_le Real.two_pi_pos.le] using (integrable_prod_iff'
+    (measurable_cartanKernel h.measurable).stronglyMeasurable.aestronglyMeasurable).2
+    ⟨Filter.Eventually.of_forall (integrable_cartanKernel_in_alpha f R),
+      integrable_integral_norm_cartanKernel h⟩
 
 /-- Auxiliary Fubini step used in the proof of Cartan's formula. -/
 lemma cartan_swap_averages {f : ℂ → ℂ} (h : Meromorphic f) {R : ℝ} :
