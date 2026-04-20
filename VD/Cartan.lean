@@ -46,7 +46,7 @@ lemma circleAverage_add_const {f : ℂ → ℝ} {c : ℂ} {R : ℝ} {x : ℝ}
 
 /-- Circle integrability of `a ↦ logCounting f a R` follows from the one-variable Cartan identity
 once the logarithmic trailing-coefficient term is known to be circle integrable. -/
-lemma circleIntegrable_logCounting_of_trailing {f : ℂ → ℂ} (h : MeromorphicOn f ⊤)
+lemma circleIntegrable_logCounting_of_trailing {f : ℂ → ℂ} (h : Meromorphic f)
     {R : ℝ}
     (htrailing : CircleIntegrable
       (fun a ↦ Real.log ‖meromorphicTrailingCoeffAt (f · - a) 0‖) 0 1) :
@@ -72,12 +72,12 @@ lemma circleIntegrable_logCounting_of_trailing {f : ℂ → ℂ} (h : Meromorphi
 in the value variable along the unit circle. -/
 theorem circleIntegrable_logCounting {f : ℂ → ℂ} (h : Meromorphic f) {R : ℝ} :
     CircleIntegrable (fun a : ℂ ↦ logCounting f (a : WithTop ℂ) R) 0 1 :=
-  circleIntegrable_logCounting_of_trailing h.meromorphicOn
+  circleIntegrable_logCounting_of_trailing h
     (Cartan.circleIntegrable_log_trailingCoeff_of_meromorphic h)
 
 /-- Auxiliary form of Cartan's identity with the trailing-coefficient average left explicit. -/
 theorem characteristic_top_eq_circleAverage_logCounting_add_circleAverage_log_trailingCoeff_aux
-    {r : ℝ} {f : ℂ → ℂ} (hr : r ≠ 0) (h : MeromorphicOn f ⊤)
+    {r : ℝ} {f : ℂ → ℂ} (hr : r ≠ 0) (h : Meromorphic f)
     (hci_trailing : CircleIntegrable
       (fun a ↦ Real.log ‖meromorphicTrailingCoeffAt (f · - a) 0‖) 0 1) :
     characteristic f ⊤ r =
@@ -121,7 +121,7 @@ theorem characteristic_top_eq_circleAverage_logCounting_add_circleAverage_log_tr
       circleAverage (logCounting f · r) 0 1
         + circleAverage (fun a ↦ Real.log ‖meromorphicTrailingCoeffAt (f · - a) 0‖) 0 1 := by
   exact characteristic_top_eq_circleAverage_logCounting_add_circleAverage_log_trailingCoeff_aux
-    hr h.meromorphicOn (Cartan.circleIntegrable_log_trailingCoeff_of_meromorphic h)
+    hr h (Cartan.circleIntegrable_log_trailingCoeff_of_meromorphic h)
 
 /-- Cartan's formula in the zero case `0 < meromorphicOrderAt f 0`. -/
 theorem characteristic_top_eq_circleAverage_logCounting_of_meromorphicOrderAt_pos
@@ -134,7 +134,7 @@ theorem characteristic_top_eq_circleAverage_logCounting_of_meromorphicOrderAt_po
             + circleAverage (fun a ↦ Real.log ‖meromorphicTrailingCoeffAt (fun z ↦ f z - a) 0‖) 0 1 :=
           characteristic_top_eq_circleAverage_logCounting_add_circleAverage_log_trailingCoeff hr h
     _ = circleAverage (logCounting f · r) 0 1 := by
-      simp [Cartan.circleAverage_log_trailingCoeff_eq_zero h.meromorphicOn h₂]
+      simp [Cartan.circleAverage_log_trailingCoeff_eq_zero h h₂]
 
 /-- Qualitative Cartan formula: away from `0`, the difference between `characteristic f ⊤` and
 `circleAverage (logCounting f · ·) 0 1` is constant. -/

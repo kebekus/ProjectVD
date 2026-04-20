@@ -75,7 +75,7 @@ lemma circleIntegrable_of_const_on_sphere
 
 /-- Auxiliary wrapper phrased in terms of `z - a`. -/
 lemma circleIntegrable_log_norm_sub (z c : ℂ) (R : ℝ) :
-    CircleIntegrable (fun a ↦ Real.log ‖z - a‖) c R := by
+    CircleIntegrable (fun a ↦ log ‖z - a‖) c R := by
   convert circleIntegrable_log_norm_sub_const (a := z) (c := c) (r := R) using 1
   funext a
   rw [norm_sub_rev]
@@ -114,79 +114,41 @@ end IntervalIntegralSwap
 
 /-! ### Cartan kernel integrability -/
 
-/-- A meromorphic function on `ℂ` is measurable. -/
-lemma meromorphicOn_measurable_of_univ {f : ℂ → ℂ} (hf : MeromorphicOn f ⊤) :
-    Measurable f := by
-  apply measurable_of_isOpen
-  intro U hU
-  have h_analytic_open : IsOpen {x | AnalyticAt ℂ f x} := isOpen_analyticAt ℂ f
-  have h_open_part : IsOpen {x | AnalyticAt ℂ f x ∧ f x ∈ U} := by
-    have h_eq : {x | AnalyticAt ℂ f x ∧ f x ∈ U} = {x | AnalyticAt ℂ f x} ∩ f ⁻¹' U := by
-      ext x
-      simp [Set.mem_inter_iff, Set.mem_preimage]
-    rw [h_eq]
-    have h_cont : ContinuousOn f {x | AnalyticAt ℂ f x} := by
-      intro x hx
-      exact hx.continuousAt.continuousWithinAt
-    exact h_cont.isOpen_inter_preimage h_analytic_open hU
-  have h_poles_countable : Set.Countable {x | ¬AnalyticAt ℂ f x} := by
-    have hf' : Meromorphic f := by
-      rw [← meromorphicOn_univ]
-      simpa using hf
-    simpa [Set.mem_setOf_eq] using hf'.countable_compl_analyticAt
-  have h_poles_U_countable : Set.Countable {x | ¬AnalyticAt ℂ f x ∧ f x ∈ U} :=
-    h_poles_countable.mono fun x hx => hx.1
-  have h_decomp :
-      f ⁻¹' U = {x | AnalyticAt ℂ f x ∧ f x ∈ U} ∪ {x | ¬AnalyticAt ℂ f x ∧ f x ∈ U} := by
-    ext x
-    simp only [Set.mem_preimage, Set.mem_union, Set.mem_setOf_eq]
-    tauto
-  rw [h_decomp]
-  exact h_open_part.measurableSet.union h_poles_U_countable.measurableSet
-
 noncomputable def cartanKernel (f : ℂ → ℂ) (R : ℝ) (α β : ℝ) : ℝ :=
-  Real.log ‖f (circleMap 0 R β) - circleMap 0 1 α‖
+  log ‖f (circleMap 0 R β) - circleMap 0 1 α‖
 
 lemma intervalIntegrable_cartanKernel_in_alpha (f : ℂ → ℂ) (R : ℝ) (β : ℝ) :
-    IntervalIntegrable (fun α => cartanKernel f R α β) volume 0 (2 * Real.pi) := by
-  simp only [cartanKernel]
-  have h_eq : (fun α => Real.log ‖f (circleMap 0 R β) - circleMap 0 1 α‖) =
-      fun α => Real.log ‖circleMap 0 1 α - f (circleMap 0 R β)‖ := by
-    funext α
+    IntervalIntegrable (fun α => cartanKernel f R α β) volume 0 (2 * π) := by
+  have h_eq : (log ‖f (circleMap 0 R β) - circleMap 0 1 ·‖) =
+      (log ‖circleMap 0 1 · - f (circleMap 0 R β)‖) := by
+    ext α
     rw [norm_sub_rev]
-  rw [h_eq]
-  have := circleIntegrable_log_norm_sub_const (a := f (circleMap 0 R β)) (c := 0) (r := 1)
-  simpa [CircleIntegrable] using this
+  simpa [cartanKernel, h_eq, CircleIntegrable] using circleIntegrable_log_norm_sub_const 1
 
 lemma integrable_cartanKernel_in_alpha (f : ℂ → ℂ) (R : ℝ) (β : ℝ) :
-    Integrable (fun α ↦ cartanKernel f R α β)
-      (volume.restrict (Set.Ioc 0 (2 * Real.pi))) := by
-  have h0_le : (0 : ℝ) ≤ 2 * Real.pi := Real.two_pi_pos.le
-  have h_int :
-      IntegrableOn (fun α ↦ cartanKernel f R α β) (Set.Ioc 0 (2 * Real.pi)) volume :=
-    (intervalIntegrable_iff_integrableOn_Ioc_of_le h0_le).1
-      (intervalIntegrable_cartanKernel_in_alpha f R β)
-  simpa [IntegrableOn] using h_int
+    Integrable (cartanKernel f R · β)
+      (volume.restrict (Set.Ioc 0 (2 * π))) :=
+  (intervalIntegrable_iff_integrableOn_Ioc_of_le two_pi_pos.le).1
+    (intervalIntegrable_cartanKernel_in_alpha f R β)
 
-lemma integrable_posLog_norm_circleMap {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) {R : ℝ} :
+lemma integrable_posLog_norm_circleMap {f : ℂ → ℂ} (h : Meromorphic f) {R : ℝ} :
     Integrable (fun β ↦ log⁺ ‖f (circleMap 0 R β)‖)
-      (volume.restrict (Set.Ioc 0 (2 * Real.pi))) := by
-  have h0_le : (0 : ℝ) ≤ 2 * Real.pi := Real.two_pi_pos.le
-  have h_circle : CircleIntegrable (fun z ↦ log⁺ ‖f z‖) 0 R :=
-    MeromorphicOn.circleIntegrable_posLog_norm (fun x _ ↦ h x trivial)
+      (volume.restrict (Set.Ioc 0 (2 * π))) := by
+  have h_circle : CircleIntegrable (log⁺ ‖f ·‖) 0 R :=
+    h.meromorphicOn.circleIntegrable_posLog_norm
   unfold CircleIntegrable at h_circle
-  rwa [intervalIntegrable_iff_integrableOn_Ioc_of_le h0_le] at h_circle
+  rwa [intervalIntegrable_iff_integrableOn_Ioc_of_le two_pi_pos.le] at h_circle
 
 lemma max_cartanKernel_le (f : ℂ → ℂ) (R α β : ℝ) :
-    max (cartanKernel f R α β) 0 ≤ log⁺ ‖f (circleMap 0 R β)‖ + Real.log 2 := by
-  calc
-    max (cartanKernel f R α β) 0 = log⁺ ‖f (circleMap 0 R β) - circleMap 0 1 α‖ := by
+    max (cartanKernel f R α β) 0 ≤ log⁺ ‖f (circleMap 0 R β)‖ + log 2 := by
+  calc max (cartanKernel f R α β) 0
+    _ = log⁺ ‖f (circleMap 0 R β) - circleMap 0 1 α‖ := by
       simp [cartanKernel, Real.posLog_def, max_comm]
     _ = log⁺ ‖f (circleMap 0 R β) + (-circleMap 0 1 α)‖ := by
       rw [sub_eq_add_neg]
-    _ ≤ log⁺ ‖f (circleMap 0 R β)‖ + log⁺ ‖-circleMap 0 1 α‖ + Real.log 2 := by
+    _ ≤ log⁺ ‖f (circleMap 0 R β)‖ + log⁺ ‖-circleMap 0 1 α‖ + log 2 := by
       simpa using posLog_norm_add_le (f (circleMap 0 R β)) (-circleMap 0 1 α)
-    _ = log⁺ ‖f (circleMap 0 R β)‖ + Real.log 2 := by
+    _ = log⁺ ‖f (circleMap 0 R β)‖ + log 2 := by
       simp [norm_circleMap_zero, add_comm]
 
 lemma integral_norm_eq_two_mul_integral_max_sub
@@ -207,18 +169,18 @@ lemma integral_norm_eq_two_mul_integral_max_sub
   · exact hg
 
 lemma intervalIntegral_cartanKernel_eq_two_pi_mul_posLog (f : ℂ → ℂ) (R β : ℝ) :
-    ∫ α in (0 : ℝ)..2 * Real.pi, cartanKernel f R α β =
-      (2 * Real.pi) * log⁺ ‖f (circleMap 0 R β)‖ := by
+    ∫ α in (0 : ℝ)..2 * π, cartanKernel f R α β =
+      (2 * π) * log⁺ ‖f (circleMap 0 R β)‖ := by
   let z := f (circleMap 0 R β)
-  have h_avg : circleAverage (fun a ↦ Real.log ‖z - a‖) 0 1 = log⁺ ‖z‖ := by
-    have h_eq : (fun a ↦ Real.log ‖z - a‖) = fun a ↦ Real.log ‖a - z‖ := by
+  have h_avg : circleAverage (fun a ↦ log ‖z - a‖) 0 1 = log⁺ ‖z‖ := by
+    have h_eq : (fun a ↦ log ‖z - a‖) = fun a ↦ log ‖a - z‖ := by
       funext a
       rw [norm_sub_rev]
     rw [h_eq]
     exact circleAverage_log_norm_sub_const_eq_posLog (a := z)
   rw [Real.circleAverage_def] at h_avg
   simp only [smul_eq_mul] at h_avg
-  have h_two_pi : (2 * Real.pi) ≠ 0 := by positivity
+  have h_two_pi : (2 * π) ≠ 0 := by positivity
   field_simp [h_two_pi] at h_avg
   simpa [z, cartanKernel] using h_avg
 
@@ -233,19 +195,19 @@ lemma measurable_cartanKernel {f : ℂ → ℂ} (hf : Measurable f) {R : ℝ} :
 
 /-- Bound on the positive part of an angular slice of the Cartan kernel. -/
 lemma integral_max_cartanKernel_le (f : ℂ → ℂ) (R β : ℝ) :
-    ∫ α, max (cartanKernel f R α β) 0 ∂(volume.restrict (Set.Ioc 0 (2 * Real.pi))) ≤
-      (2 * Real.pi) * (log⁺ ‖f (circleMap 0 R β)‖ + Real.log 2) := by
+    ∫ α, max (cartanKernel f R α β) 0 ∂(volume.restrict (Set.Ioc 0 (2 * π))) ≤
+      (2 * π) * (log⁺ ‖f (circleMap 0 R β)‖ + log 2) := by
   let z := f (circleMap 0 R β)
   have h_int_le :
-      ∫ α, max (cartanKernel f R α β) 0 ∂(volume.restrict (Set.Ioc 0 (2 * Real.pi))) ≤
-        ∫ _ : ℝ, log⁺ ‖z‖ + Real.log 2 ∂(volume.restrict (Set.Ioc 0 (2 * Real.pi))) := by
+      ∫ α, max (cartanKernel f R α β) 0 ∂(volume.restrict (Set.Ioc 0 (2 * π))) ≤
+        ∫ _, log⁺ ‖z‖ + log 2 ∂(volume.restrict (Set.Ioc 0 (2 * π))) := by
     apply integral_mono_of_nonneg
     · exact Filter.Eventually.of_forall fun _ => le_max_right _ _
     · exact integrable_const _
     · exact Filter.Eventually.of_forall fun α ↦ by simpa [z] using max_cartanKernel_le f R α β
   have h_int_const :
-      ∫ _ : ℝ, log⁺ ‖z‖ + Real.log 2 ∂(volume.restrict (Set.Ioc 0 (2 * Real.pi))) =
-        (log⁺ ‖z‖ + Real.log 2) * (2 * Real.pi) := by
+      ∫ _, log⁺ ‖z‖ + log 2 ∂(volume.restrict (Set.Ioc 0 (2 * π))) =
+        (log⁺ ‖z‖ + log 2) * (2 * π) := by
     rw [integral_const, smul_eq_mul, mul_comm, measureReal_restrict_apply_univ,
       Real.volume_real_Ioc_of_le Real.two_pi_pos.le, sub_zero]
   rw [h_int_const] at h_int_le
@@ -253,26 +215,23 @@ lemma integral_max_cartanKernel_le (f : ℂ → ℂ) (R β : ℝ) :
 
 /-- Formula for the `L¹` norm of an angular slice of the Cartan kernel. -/
 lemma integral_norm_cartanKernel_eq (f : ℂ → ℂ) (R β : ℝ) :
-    ∫ α, ‖cartanKernel f R α β‖ ∂(volume.restrict (Set.Ioc 0 (2 * Real.pi))) =
-      2 * (∫ α, max (cartanKernel f R α β) 0 ∂(volume.restrict (Set.Ioc 0 (2 * Real.pi)))) -
-        (2 * Real.pi) * log⁺ ‖f (circleMap 0 R β)‖ := by
-  let μ : Measure ℝ := volume.restrict (Set.Ioc 0 (2 * Real.pi))
-  change ∫ α, ‖cartanKernel f R α β‖ ∂μ =
-    2 * (∫ α, max (cartanKernel f R α β) 0 ∂μ) - (2 * Real.pi) * log⁺ ‖f (circleMap 0 R β)‖
-  have h_slice : Integrable (fun α ↦ cartanKernel f R α β) μ := by
+    ∫ α, ‖cartanKernel f R α β‖ ∂(volume.restrict (Set.Ioc 0 (2 * π))) =
+      2 * (∫ α, max (cartanKernel f R α β) 0 ∂(volume.restrict (Set.Ioc 0 (2 * π)))) -
+        (2 * π) * log⁺ ‖f (circleMap 0 R β)‖ := by
+  let μ : Measure ℝ := volume.restrict (Set.Ioc 0 (2 * π))
+  have h_slice : Integrable (cartanKernel f R · β) μ := by
     simpa [μ] using integrable_cartanKernel_in_alpha f R β
-  have h_slice_max : Integrable (fun α ↦ max (cartanKernel f R α β) 0) μ :=
+  have h_slice_max : Integrable (max (cartanKernel f R · β) 0) μ :=
     h_slice.sup (integrable_const 0)
   have h_kernel :
-      ∫ α, cartanKernel f R α β ∂μ = (2 * Real.pi) * log⁺ ‖f (circleMap 0 R β)‖ := by
-    calc
-      ∫ α, cartanKernel f R α β ∂μ
-          = ∫ α in (0 : ℝ)..2 * Real.pi, cartanKernel f R α β := by
-              simpa [μ] using
-                integral_restrict_Ioc_eq_intervalIntegral
-                  (f := fun α ↦ cartanKernel f R α β) Real.two_pi_pos.le
-      _ = (2 * Real.pi) * log⁺ ‖f (circleMap 0 R β)‖ :=
-            intervalIntegral_cartanKernel_eq_two_pi_mul_posLog f R β
+      ∫ α, cartanKernel f R α β ∂μ = (2 * π) * log⁺ ‖f (circleMap 0 R β)‖ := by
+    calc ∫ α, cartanKernel f R α β ∂μ
+      _ = ∫ α in (0 : ℝ)..2 * π, cartanKernel f R α β := by
+        simpa [μ] using
+          integral_restrict_Ioc_eq_intervalIntegral
+            (f := fun α ↦ cartanKernel f R α β) Real.two_pi_pos.le
+      _ = (2 * π) * log⁺ ‖f (circleMap 0 R β)‖ :=
+        intervalIntegral_cartanKernel_eq_two_pi_mul_posLog f R β
   calc
     ∫ α, ‖cartanKernel f R α β‖ ∂μ
         = 2 * (∫ α, max (cartanKernel f R α β) 0 ∂μ) - ∫ α, cartanKernel f R α β ∂μ := by
@@ -280,70 +239,60 @@ lemma integral_norm_cartanKernel_eq (f : ℂ → ℂ) (R β : ℝ) :
               integral_norm_eq_two_mul_integral_max_sub
                 (g := fun α ↦ cartanKernel f R α β) h_slice h_slice_max
     _ = 2 * (∫ α, max (cartanKernel f R α β) 0 ∂μ) -
-          (2 * Real.pi) * log⁺ ‖f (circleMap 0 R β)‖ := by
+          (2 * π) * log⁺ ‖f (circleMap 0 R β)‖ := by
             rw [h_kernel]
 
 /-- The `L¹` norms of the angular slices of the Cartan kernel form an integrable family. -/
-lemma integrable_integral_norm_cartanKernel {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) {R : ℝ} :
+lemma integrable_integral_norm_cartanKernel {f : ℂ → ℂ} (h : Meromorphic f) {R : ℝ} :
     Integrable
-      (fun β ↦ ∫ α, ‖cartanKernel f R α β‖ ∂(volume.restrict (Set.Ioc 0 (2 * Real.pi))))
-      (volume.restrict (Set.Ioc 0 (2 * Real.pi))) := by
-  let μ : Measure ℝ := volume.restrict (Set.Ioc 0 (2 * Real.pi))
+      (∫ α, ‖cartanKernel f R α ·‖ ∂(volume.restrict (Set.Ioc 0 (2 * π))))
+      (volume.restrict (Set.Ioc 0 (2 * π))) := by
+  let μ : Measure ℝ := volume.restrict (Set.Ioc 0 (2 * π))
   have h_meas_K : Measurable (fun p : ℝ × ℝ => cartanKernel f R p.1 p.2) :=
-    measurable_cartanKernel (meromorphicOn_measurable_of_univ h)
+    measurable_cartanKernel h.measurable
   have h_int_posLog : Integrable (fun β ↦ log⁺ ‖f (circleMap 0 R β)‖) μ := by
     simpa [μ] using integrable_posLog_norm_circleMap h (R := R)
-  have h_int_Term2 : Integrable (fun β ↦ (2 * Real.pi) * log⁺ ‖f (circleMap 0 R β)‖) μ :=
-    h_int_posLog.const_mul (2 * Real.pi)
-  have h_int_Bound : Integrable (fun β ↦ log⁺ ‖f (circleMap 0 R β)‖ + Real.log 2) μ :=
-    h_int_posLog.add (integrable_const (Real.log 2))
+  have h_int_Term2 : Integrable (fun β ↦ (2 * π) * log⁺ ‖f (circleMap 0 R β)‖) μ :=
+    h_int_posLog.const_mul (2 * π)
+  have h_int_Bound : Integrable (fun β ↦ log⁺ ‖f (circleMap 0 R β)‖ + log 2) μ :=
+    h_int_posLog.add (integrable_const (log 2))
   have h_int_Term1 : Integrable (fun β ↦ ∫ α, max (cartanKernel f R α β) 0 ∂μ) μ := by
-    refine Integrable.mono (h_int_Bound.const_mul (2 * Real.pi)) ?_ ?_
+    refine Integrable.mono (h_int_Bound.const_mul (2 * π)) ?_ ?_
     · exact
         (h_meas_K.max measurable_const).stronglyMeasurable.integral_prod_left'.aestronglyMeasurable
     · filter_upwards with β
       have h_int_nonneg : 0 ≤ ∫ α, max (cartanKernel f R α β) 0 ∂μ :=
         integral_nonneg fun _ => le_max_right _ _
-      have h_bound_nonneg : 0 ≤ (2 * Real.pi) * (log⁺ ‖f (circleMap 0 R β)‖ + Real.log 2) := by
+      have h_bound_nonneg : 0 ≤ (2 * π) * (log⁺ ‖f (circleMap 0 R β)‖ + log 2) := by
         apply mul_nonneg (by linarith [Real.two_pi_pos])
         apply add_nonneg Real.posLog_nonneg
-        exact Real.log_nonneg (by norm_num)
+        exact log_nonneg (by norm_num)
       rw [Real.norm_of_nonneg h_int_nonneg, Real.norm_of_nonneg h_bound_nonneg]
       simpa [μ] using integral_max_cartanKernel_le f R β
   refine Integrable.congr ((h_int_Term1.const_mul 2).sub h_int_Term2) ?_
   exact Filter.Eventually.of_forall fun β ↦ by
     simpa [μ] using (integral_norm_cartanKernel_eq f R β).symm
 
-lemma circleAverage_eq_integral_cartanKernel_left (f : ℂ → ℂ) (R α : ℝ) :
-    circleAverage (fun z ↦ Real.log ‖f z - circleMap 0 1 α‖) 0 R =
-      (2 * Real.pi)⁻¹ * ∫ β in (0 : ℝ)..2 * Real.pi, cartanKernel f R α β := by
-  simp [Real.circleAverage, cartanKernel]
-
-lemma integral_cartanKernel_eq_circleAverage_right (f : ℂ → ℂ) (R β : ℝ) :
-    (2 * Real.pi)⁻¹ * ∫ α in (0 : ℝ)..2 * Real.pi, cartanKernel f R α β =
-      circleAverage (fun a : ℂ ↦ Real.log ‖f (circleMap 0 R β) - a‖) 0 1 := by
-  simp [Real.circleAverage, cartanKernel]
-
 lemma integrable_intervalIntegral_cartanKernel_left {f : ℂ → ℂ} {R : ℝ}
     (h_int :
       Integrable (fun p : ℝ × ℝ => cartanKernel f R p.1 p.2)
-        ((volume.restrict (Set.uIoc 0 (2 * Real.pi))).prod
-         (volume.restrict (Set.uIoc 0 (2 * Real.pi))))) :
-    Integrable (fun α => ∫ β in (0 : ℝ)..2 * Real.pi, cartanKernel f R α β)
-      (volume.restrict (Set.Ioc 0 (2 * Real.pi))) := by
-  have h0_le : (0 : ℝ) ≤ 2 * Real.pi := Real.two_pi_pos.le
+        ((volume.restrict (Set.uIoc 0 (2 * π))).prod
+         (volume.restrict (Set.uIoc 0 (2 * π))))) :
+    Integrable (fun α => ∫ β in (0 : ℝ)..2 * π, cartanKernel f R α β)
+      (volume.restrict (Set.Ioc 0 (2 * π))) := by
+  have h0_le : (0 : ℝ) ≤ 2 * π := Real.two_pi_pos.le
   rw [Set.uIoc_of_le h0_le] at h_int
   simpa [intervalIntegral.integral_of_le h0_le, cartanKernel] using h_int.integral_prod_left
 
-lemma cartan_integrability {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) {R : ℝ} :
+lemma cartan_integrability {f : ℂ → ℂ} (h : Meromorphic f) {R : ℝ} :
     Integrable (fun p : ℝ × ℝ => cartanKernel f R p.1 p.2)
-      ((volume.restrict (Set.uIoc 0 (2 * Real.pi))).prod
-       (volume.restrict (Set.uIoc 0 (2 * Real.pi)))) := by
-  have hIoc : Set.uIoc 0 (2 * Real.pi) = Set.Ioc 0 (2 * Real.pi) := Set.uIoc_of_le Real.two_pi_pos.le
+      ((volume.restrict (Set.uIoc 0 (2 * π))).prod
+       (volume.restrict (Set.uIoc 0 (2 * π)))) := by
+  have hIoc : Set.uIoc 0 (2 * π) = Set.Ioc 0 (2 * π) := Set.uIoc_of_le Real.two_pi_pos.le
   simp only [hIoc]
-  let μ : Measure ℝ := volume.restrict (Set.Ioc 0 (2 * Real.pi))
+  let μ : Measure ℝ := volume.restrict (Set.Ioc 0 (2 * π))
   have h_sm_K : StronglyMeasurable (fun p : ℝ × ℝ => cartanKernel f R p.1 p.2) :=
-    (measurable_cartanKernel (meromorphicOn_measurable_of_univ h)).stronglyMeasurable
+    (measurable_cartanKernel h.measurable).stronglyMeasurable
   have h_aesm_K :
       AEStronglyMeasurable (fun p : ℝ × ℝ => cartanKernel f R p.1 p.2) (μ.prod μ) :=
     h_sm_K.aestronglyMeasurable
@@ -353,84 +302,60 @@ lemma cartan_integrability {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) {R : ℝ}
     simpa [μ] using integrable_cartanKernel_in_alpha f R β
   · simpa [μ] using integrable_integral_norm_cartanKernel h (R := R)
 
-lemma cartan_swap_averages_aux
-    {f : ℂ → ℂ} {R : ℝ}
-    (h_int_kernel :
-      Integrable (fun p : ℝ × ℝ => cartanKernel f R p.1 p.2)
-        ((volume.restrict (Set.uIoc 0 (2 * Real.pi))).prod
-         (volume.restrict (Set.uIoc 0 (2 * Real.pi))))) :
-    circleAverage (fun a ↦ circleAverage (fun z ↦ Real.log ‖f z - a‖) 0 R) 0 1 =
-      circleAverage (fun z ↦ log⁺ ‖f z‖) 0 R := by
-  let F : ℝ → ℝ → ℝ := cartanKernel f R
-  have h0_le : (0 : ℝ) ≤ 2 * Real.pi := Real.two_pi_pos.le
-  have h_swap :
-      ∫ α in 0..2 * Real.pi, ∫ β in 0..2 * Real.pi, F α β =
-        ∫ β in 0..2 * Real.pi, ∫ α in 0..2 * Real.pi, F α β :=
-    intervalIntegral_swap h0_le h0_le (by simpa [F, cartanKernel] using h_int_kernel)
-  calc
-    circleAverage (fun a ↦ circleAverage (fun z ↦ Real.log ‖f z - a‖) 0 R) 0 1
-        = (2 * Real.pi)⁻¹ * (2 * Real.pi)⁻¹ *
-            ∫ α in 0..2 * Real.pi, ∫ β in 0..2 * Real.pi, F α β := by
-            simp [Real.circleAverage, F, mul_comm, mul_left_comm, mul_assoc]
-            aesop
-    _ = (2 * Real.pi)⁻¹ * (2 * Real.pi)⁻¹ *
-          ∫ β in 0..2 * Real.pi, ∫ α in 0..2 * Real.pi, F α β := by
-            rw [h_swap]
-    _ = (2 * Real.pi)⁻¹ *
-          ∫ β in 0..2 * Real.pi, ((2 * Real.pi)⁻¹ * ∫ α in 0..2 * Real.pi, F α β) := by
-            simp [mul_comm, mul_left_comm, mul_assoc]
-    _ = (2 * Real.pi)⁻¹ * ∫ β in 0..2 * Real.pi, log⁺ ‖f (circleMap 0 R β)‖ := by
-          congr 1
-          apply intervalIntegral.integral_congr
-          intro β hβ
-          calc
-            (2 * Real.pi)⁻¹ * ∫ α in 0..2 * Real.pi, F α β
-                = circleAverage (fun a : ℂ ↦ Real.log ‖f (circleMap 0 R β) - a‖) 0 1 := by
-                    simpa [F] using integral_cartanKernel_eq_circleAverage_right f R β
-            _ = log⁺ ‖f (circleMap 0 R β)‖ := by
-                  have h_eq :
-                      (fun a ↦ Real.log ‖f (circleMap 0 R β) - a‖) =
-                        fun a ↦ Real.log ‖a - f (circleMap 0 R β)‖ := by
-                    funext a
-                    rw [norm_sub_rev]
-                  rw [h_eq]
-                  exact
-                    circleAverage_log_norm_sub_const_eq_posLog (a := f (circleMap 0 R β))
-    _ = circleAverage (fun z ↦ log⁺ ‖f z‖) 0 R := by
-          simp [Real.circleAverage, intervalIntegral.integral_of_le Real.two_pi_pos.le]
-
 /-- Auxiliary Fubini step used in the proof of Cartan's formula. -/
-lemma cartan_swap_averages {f : ℂ → ℂ} (h : MeromorphicOn f ⊤) {R : ℝ} :
-    circleAverage (fun a ↦ circleAverage (fun z ↦ Real.log ‖f z - a‖) 0 R) 0 1 =
-      circleAverage (fun z ↦ log⁺ ‖f z‖) 0 R :=
-  cartan_swap_averages_aux (cartan_integrability h)
+lemma cartan_swap_averages {f : ℂ → ℂ} (h : Meromorphic f) {R : ℝ} :
+    circleAverage (fun a ↦ circleAverage (log ‖f · - a‖) 0 R) 0 1 =
+      circleAverage (log⁺ ‖f ·‖) 0 R :=
+  let F : ℝ → ℝ → ℝ := cartanKernel f R
+  calc circleAverage (fun a ↦ circleAverage (log ‖f · - a‖) 0 R) 0 1
+    _ = (2 * π)⁻¹ * (2 * π)⁻¹ * ∫ α in 0..2 * π, ∫ β in 0..2 * π, F α β := by
+      simp only [circleAverage, mul_comm, mul_inv_rev, smul_eq_mul, mul_assoc,
+        intervalIntegral.integral_const_mul, mul_left_comm, mul_eq_mul_left_iff, inv_eq_zero,
+        OfNat.ofNat_ne_zero, or_false, pi_ne_zero, F]
+      aesop
+    _ = (2 * π)⁻¹ * (2 * π)⁻¹ * ∫ β in 0..2 * π, ∫ α in 0..2 * π, F α β := by
+      rw [intervalIntegral_swap two_pi_pos.le two_pi_pos.le (by simpa [F, cartanKernel]
+        using (cartan_integrability h))]
+    _ = (2 * π)⁻¹ * ∫ β in 0..2 * π, ((2 * π)⁻¹ * ∫ α in 0..2 * π, F α β) := by
+      simp [mul_comm, mul_left_comm, mul_assoc]
+    _ = (2 * π)⁻¹ * ∫ β in 0..2 * π, log⁺ ‖f (circleMap 0 R β)‖ := by
+      congr 1
+      apply intervalIntegral.integral_congr
+      intro β hβ
+      calc (2 * π)⁻¹ * ∫ α in 0..2 * π, F α β
+        _ = circleAverage (fun a ↦ log ‖f (circleMap 0 R β) - a‖) 0 1 := by
+          simp [F, Real.circleAverage, cartanKernel]
+        _ = log⁺ ‖f (circleMap 0 R β)‖ := by
+          simp [norm_sub_rev]
+    _ = circleAverage (log⁺ ‖f ·‖) 0 R := by
+      simp [Real.circleAverage, intervalIntegral.integral_of_le Real.two_pi_pos.le]
 
 /-- Auxiliary circle-integrability statement used to average Cartan's identity in the value
 variable. -/
 lemma circleIntegrable_circleAverage_log_norm_sub_unit {f : ℂ → ℂ}
-    (h : MeromorphicOn f ⊤) {R : ℝ} :
-    CircleIntegrable (fun a ↦ circleAverage (fun z ↦ Real.log ‖f z - a‖) 0 R) 0 1 := by
+    (h : Meromorphic f) {R : ℝ} :
+    CircleIntegrable (fun a ↦ circleAverage (log ‖f · - a‖) 0 R) 0 1 := by
   by_cases hR : R = 0
   · subst hR
-    have h_eq : (fun a ↦ circleAverage (fun z ↦ Real.log ‖f z - a‖) 0 0) =
-        fun a ↦ Real.log ‖f 0 - a‖ := by
+    have h_eq : (fun a ↦ circleAverage (log ‖f · - a‖) 0 0) =
+        fun a ↦ log ‖f 0 - a‖ := by
       funext a
       simp [circleAverage_zero]
     rw [h_eq]
     exact circleIntegrable_log_norm_sub (f 0) 0 1
-  have h0_le : (0 : ℝ) ≤ 2 * Real.pi := Real.two_pi_pos.le
+  have h0_le : (0 : ℝ) ≤ 2 * π := Real.two_pi_pos.le
   have h_int :
-      Integrable (fun p : ℝ × ℝ => cartanKernel f R p.1 p.2)
-        ((volume.restrict (Set.uIoc 0 (2 * Real.pi))).prod
-         (volume.restrict (Set.uIoc 0 (2 * Real.pi)))) :=
+      Integrable (fun p ↦ cartanKernel f R p.1 p.2)
+        ((volume.restrict (Set.uIoc 0 (2 * π))).prod
+         (volume.restrict (Set.uIoc 0 (2 * π)))) :=
     cartan_integrability (f := f) (R := R) h
   unfold CircleIntegrable
   rw [intervalIntegrable_iff_integrableOn_Ioc_of_le h0_le]
   apply IntegrableOn.congr_fun
-    ((integrable_intervalIntegral_cartanKernel_left (f := f) (R := R) h_int).const_mul (2 * Real.pi)⁻¹)
+    ((integrable_intervalIntegral_cartanKernel_left (f := f) (R := R) h_int).const_mul (2 * π)⁻¹)
     _ measurableSet_Ioc
   intro α _
-  exact (circleAverage_eq_integral_cartanKernel_left f R α).symm
+  simp [Real.circleAverage, cartanKernel]
 
 end Cartan
 end ValueDistribution
