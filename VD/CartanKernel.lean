@@ -210,22 +210,20 @@ lemma cartan_swap_averages {f : ℂ → ℂ} (h : Meromorphic f) {R : ℝ} :
         OfNat.ofNat_ne_zero, or_false, pi_ne_zero, F]
       aesop
     _ = (2 * π)⁻¹ * (2 * π)⁻¹ * ∫ β in 0..2 * π, ∫ α in 0..2 * π, F α β := by
-      have intervalIntegral_swap {f : ℝ → ℝ → ℝ}
-        (h_int : Integrable (Function.uncurry f)
-            ((volume.restrict (Set.uIoc 0 (2 * π))).prod (volume.restrict (Set.uIoc 0 (2 * π))))) :
-        ∫ x in 0..2 * π, ∫ y in 0..2 * π, f x y = ∫ y in 0..2 * π, ∫ x in 0..2 * π, f x y := by
-        set μ := volume.restrict (Set.Ioc 0 (2 * π))
-        set ν := volume.restrict (Set.Ioc 0 (2 * π))
-        calc ∫ x in 0..2 * π, ∫ y in 0..2 * π, f x y
-          _ = ∫ x, ∫ y, f x y ∂ν ∂μ := by
-            simp [μ, ν, intervalIntegral.integral_of_le two_pi_pos.le]
-          _ = ∫ y, ∫ x, f x y ∂μ ∂ν := by
-            apply MeasureTheory.integral_integral_swap
-            simpa [μ, ν, Set.uIoc_of_le two_pi_pos.le] using h_int
-          _ = ∫ y in 0..2 * π, ∫ x in 0..2 * π, f x y := by
-            simp [μ, ν, intervalIntegral.integral_of_le two_pi_pos.le]
-      rw [intervalIntegral_swap (by simpa [F, cartanKernel]
-        using (cartan_integrability h))]
+      congr 1
+      set μ := volume.restrict (Set.Ioc 0 (2 * π))
+      calc ∫ x in 0..2 * π, ∫ y in 0..2 * π, F x y
+        _ = ∫ x, ∫ y, F x y ∂μ ∂μ := by
+          simp [μ, intervalIntegral.integral_of_le two_pi_pos.le]
+        _ = ∫ y, ∫ x, F x y ∂μ ∂μ := by
+          have h_int : Integrable (Function.uncurry F)
+              ((volume.restrict (Set.uIoc 0 (2 * π))).prod
+                (volume.restrict (Set.uIoc 0 (2 * π)))) := by
+            simpa [F, cartanKernel] using (cartan_integrability h)
+          apply MeasureTheory.integral_integral_swap
+          simpa [μ, Set.uIoc_of_le two_pi_pos.le] using h_int
+        _ = ∫ y in 0..2 * π, ∫ x in 0..2 * π, F x y := by
+          simp [μ, intervalIntegral.integral_of_le two_pi_pos.le]
     _ = (2 * π)⁻¹ * ∫ β in 0..2 * π, ((2 * π)⁻¹ * ∫ α in 0..2 * π, F α β) := by
       simp [mul_comm, mul_left_comm, mul_assoc]
     _ = (2 * π)⁻¹ * ∫ β in 0..2 * π, log⁺ ‖f (circleMap 0 R β)‖ := by
