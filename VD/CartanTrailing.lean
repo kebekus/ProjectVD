@@ -40,6 +40,34 @@ trailing-coefficient averages that appear in `VD/Cartan.lean`.
 Cartan, Nevanlinna theory, trailing coefficient, log counting
 -/
 
+
+/-! ### Circle-integrability wrappers -/
+
+section CircleIntegrabilityLemmas
+
+/-- Auxiliary criterion for circle integrability from constancy on the circle. -/
+private lemma circleIntegrable_of_const_on_sphere
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
+    {f : ℂ → E} {c : ℂ} {R : ℝ} {C : E}
+    (h_eq : ∀ a ∈ Metric.sphere c |R|, f a = C) :
+    CircleIntegrable f c R := by
+  have h_param_eq : ∀ θ, f (circleMap c R θ) = C := by
+    intro θ
+    apply h_eq
+    simp [mem_sphere_iff_norm, circleMap_sub_center]
+  unfold CircleIntegrable
+  simp [h_param_eq, intervalIntegrable_const]
+
+/-- Auxiliary wrapper phrased in terms of `z - a`. -/
+private lemma circleIntegrable_log_norm_sub (z c : ℂ) (R : ℝ) :
+    CircleIntegrable (fun a ↦ log ‖z - a‖) c R := by
+  convert circleIntegrable_log_norm_sub_const (a := z) (c := c) (r := R) using 1
+  funext a
+  rw [norm_sub_rev]
+
+end CircleIntegrabilityLemmas
+
+
 namespace ValueDistribution
 
 /-- Jensen-type identity relating zeros and poles: for a meromorphic `f` on the plane, the
