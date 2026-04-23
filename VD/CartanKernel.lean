@@ -121,7 +121,7 @@ lemma integral_norm_eq_two_mul_integral_max_sub
     integral_const_mul]
 
 lemma measurable_cartanKernel {f : ℂ → ℂ} (hf : Measurable f) {R : ℝ} :
-    Measurable (fun p : ℝ × ℝ => cartanKernel f R p.1 p.2) := by
+    Measurable (fun p : ℝ × ℝ ↦ cartanKernel f R p.1 p.2) := by
   apply measurable_log.comp (continuous_norm.measurable.comp _)
   exact (hf.comp ((continuous_circleMap 0 R).measurable.comp measurable_snd)).sub
     ((continuous_circleMap 0 1).measurable.comp measurable_fst)
@@ -166,26 +166,25 @@ lemma integrable_integral_norm_cartanKernel {f : ℂ → ℂ} (h : Meromorphic f
       h.meromorphicOn.circleIntegrable_posLog_norm
     rwa [CircleIntegrable, intervalIntegrable_iff_integrableOn_Ioc_of_le two_pi_pos.le] at this
   have h_int_Bound : Integrable (fun β ↦ log⁺ ‖f (circleMap 0 R β)‖ + log 2) μ :=
-    h_int_posLog.add (integrable_const (log 2))
+    h_int_posLog.add (integrable_const _)
   have h_int_Term1 : Integrable (fun β ↦ ∫ α, max (cartanKernel f R α β) 0 ∂μ) μ := by
-    refine Integrable.mono (h_int_Bound.const_mul (2 * π)) ?_ ?_
-    · exact
-        (h_meas_K.max measurable_const).stronglyMeasurable.integral_prod_left'.aestronglyMeasurable
-    · filter_upwards with β
-      have h_int_nonneg : 0 ≤ ∫ α, max (cartanKernel f R α β) 0 ∂μ :=
-        integral_nonneg fun _ ↦ le_max_right _ _
-      have h_bound_nonneg : 0 ≤ (2 * π) * (log⁺ ‖f (circleMap 0 R β)‖ + log 2) := by
-        apply mul_nonneg (by linarith [two_pi_pos])
-        apply add_nonneg posLog_nonneg (log_nonneg (by norm_num))
-      rw [norm_of_nonneg h_int_nonneg, norm_of_nonneg h_bound_nonneg]
-      have : ∫ α, max (cartanKernel f R α β) 0 ∂(volume.restrict (Set.Ioc 0 (2 * π))) ≤
-          ∫ _, log⁺ ‖f (circleMap 0 R β)‖ + log 2 ∂(volume.restrict (Set.Ioc 0 (2 * π))) := by
-        apply integral_mono_of_nonneg
-        · exact Filter.Eventually.of_forall fun _ ↦ le_max_right _ _
-        · exact integrable_const _
-        · exact Filter.Eventually.of_forall (max_cartanKernel_le f R · β)
-      rwa [integral_const, smul_eq_mul, mul_comm, measureReal_restrict_apply_univ,
-        mul_comm, volume_real_Ioc_of_le two_pi_pos.le, sub_zero] at this
+    apply Integrable.mono (h_int_Bound.const_mul (2 * π))
+      (h_meas_K.max measurable_const).stronglyMeasurable.integral_prod_left'.aestronglyMeasurable
+    filter_upwards with β
+    have h_int_nonneg : 0 ≤ ∫ α, max (cartanKernel f R α β) 0 ∂μ :=
+      integral_nonneg fun _ ↦ le_max_right _ _
+    have h_bound_nonneg : 0 ≤ (2 * π) * (log⁺ ‖f (circleMap 0 R β)‖ + log 2) := by
+      apply mul_nonneg two_pi_pos.le
+      apply add_nonneg posLog_nonneg (log_nonneg one_le_two)
+    rw [norm_of_nonneg h_int_nonneg, norm_of_nonneg h_bound_nonneg]
+    have : ∫ α, max (cartanKernel f R α β) 0 ∂(volume.restrict (Set.Ioc 0 (2 * π))) ≤
+        ∫ _, log⁺ ‖f (circleMap 0 R β)‖ + log 2 ∂(volume.restrict (Set.Ioc 0 (2 * π))) := by
+      apply integral_mono_of_nonneg
+      · exact Filter.Eventually.of_forall fun _ ↦ le_max_right _ _
+      · exact integrable_const _
+      · exact Filter.Eventually.of_forall (max_cartanKernel_le f R · β)
+    rwa [integral_const, smul_eq_mul, mul_comm, measureReal_restrict_apply_univ,
+      mul_comm, volume_real_Ioc_of_le two_pi_pos.le, sub_zero] at this
   exact Integrable.congr ((h_int_Term1.const_mul 2).sub (h_int_posLog.const_mul (2 * π)))
     (Filter.Eventually.of_forall fun β ↦ (integral_norm_cartanKernel_eq f R β).symm)
 
