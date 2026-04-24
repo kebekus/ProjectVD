@@ -7,6 +7,7 @@ Authors: Matteo Cipollina, Stefan Kebekus
 module
 
 public import VD.CartanKernel
+public import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 
 public section
 

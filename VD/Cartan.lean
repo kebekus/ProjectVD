@@ -57,7 +57,7 @@ lemma circleIntegrable_logCounting_of_trailing {f : ℂ → ℂ} (h : Meromorphi
   let H1 := fun a ↦ circleAverage (Real.log ‖f · - a‖) 0 R + logCounting f ⊤ R
   let H2 := fun a ↦ Real.log ‖meromorphicTrailingCoeffAt (f · - a) 0‖
   have hH1_int : CircleIntegrable H1 0 1 := by
-    exact (Cartan.circleIntegrable_circleAverage_log_norm_sub_unit (R := R) h).add
+    exact (circleIntegrable_circleAverage_log_norm_sub h).add
       (circleIntegrable_const (logCounting f ⊤ R) 0 1)
   have h_eq : (fun a : ℂ ↦ logCounting f (a : WithTop ℂ) R) = H1 - H2 := by
     funext a
@@ -87,14 +87,14 @@ theorem characteristic_top_eq_circleAverage_logCounting_add_circleAverage_log_tr
     circleIntegrable_logCounting_of_trailing h (R := r) hci_trailing
   have hci_inner : CircleIntegrable
       (fun a ↦ circleAverage (fun z ↦ Real.log ‖f z - a‖) 0 r) 0 1 :=
-    Cartan.circleIntegrable_circleAverage_log_norm_sub_unit (R := r) h
+    circleIntegrable_circleAverage_log_norm_sub h
   calc
     characteristic f ⊤ r
         = circleAverage (fun z ↦ log⁺ ‖f z‖) 0 r + logCounting f ⊤ r := by
             simp [ValueDistribution.characteristic, ValueDistribution.proximity]
     _ = circleAverage (fun a ↦ circleAverage (fun z ↦ Real.log ‖f z - a‖) 0 r) 0 1
           + logCounting f ⊤ r := by
-            rw [Cartan.cartan_swap_averages (R := r) h]
+            rw [← proximity_top, ← proximity_top_eq_circleAverage_circleAverage h]
     _ = circleAverage
           (fun a ↦ circleAverage (fun z ↦ Real.log ‖f z - a‖) 0 r + logCounting f ⊤ r) 0 1 := by
             rw [← circleAverage_add_const hci_inner]

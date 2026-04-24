@@ -7,6 +7,7 @@ open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --
 ## Additional Material
 -/
 
+
 theorem meromorphicNFAt_comp_iff_of_deriv_ne_zero {x : ℂ} {f g : ℂ → ℂ} (hg : AnalyticAt ℂ g x) (hg' : deriv g x ≠ 0) :
     MeromorphicNFAt (f ∘ g) x ↔ MeromorphicNFAt f (g x) := by
   simp [meromorphicNFAt_iff_analyticAt_or, analyticAt_comp_iff_of_deriv_ne_zero hg hg',

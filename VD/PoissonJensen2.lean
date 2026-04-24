@@ -8,7 +8,7 @@ open Filter Function MeromorphicOn Metric Real Set Classical Topology
 
 
 
-theorem meromorphicNFAt_comp_iff_of_deriv_ne_zero {x : ℂ} {f g : ℂ → ℂ} (hg : AnalyticAt ℂ g x) (hg' : deriv g x ≠ 0) :
+theorem meromorphicNFAt_comp_iff_of_deriv_ne_zero' {x : ℂ} {f g : ℂ → ℂ} (hg : AnalyticAt ℂ g x) (hg' : deriv g x ≠ 0) :
     MeromorphicNFAt (f ∘ g) x ↔ MeromorphicNFAt f (g x) := by
   simp [meromorphicNFAt_iff_analyticAt_or, analyticAt_comp_iff_of_deriv_ne_zero hg hg',
     meromorphicAt_comp_iff_of_deriv_ne_zero hg hg',
@@ -21,7 +21,7 @@ theorem finprod_ne_zero {ι : Type*} {M₀ : Type*} [CommMonoidWithZero M₀] [N
   · grind [finprod_eq_prod f h₂, Finset.prod_ne_zero_iff]
   · simp [finprod_of_infinite_mulSupport h₂]
 
-theorem MeromorphicOn.codiscreteWithin_setOf_meromorphicOrderAt_eq_zero_or_top {U : Set ℂ} {f : ℂ → ℂ}
+theorem MeromorphicOn.codiscreteWithin_setOf_meromorphicOrderAt_eq_zero_or_top' {U : Set ℂ} {f : ℂ → ℂ}
     (h₁f : MeromorphicOn f U)
     (h₂f : ∀ u ∈ U, meromorphicOrderAt f u ≠ ⊤) :
     {u ∈ U | meromorphicOrderAt f u = 0 ∨ meromorphicOrderAt f u = ⊤} ∈ codiscreteWithin U := by
@@ -29,16 +29,16 @@ theorem MeromorphicOn.codiscreteWithin_setOf_meromorphicOrderAt_eq_zero_or_top {
     h₁f.codiscrete_setOf_meromorphicOrderAt_eq_zero_or_top
   aesop
 
-theorem MeromorphicOn.codiscreteWithin_setOf_ne_zero {U : Set ℂ} {f : ℂ → ℂ}
+theorem MeromorphicOn.codiscreteWithin_setOf_ne_zero' {U : Set ℂ} {f : ℂ → ℂ}
     (h₁f : MeromorphicOn f U)
     (h₂f : ∀ u ∈ U, meromorphicOrderAt f u ≠ ⊤) :
     ∀ᶠ x in codiscreteWithin U, f x ≠ 0 := by
   filter_upwards [h₁f.analyticAt_mem_codiscreteWithin,
-    h₁f.codiscreteWithin_setOf_meromorphicOrderAt_eq_zero_or_top h₂f] with x h₁x h₂x
+    h₁f.codiscreteWithin_setOf_meromorphicOrderAt_eq_zero_or_top' h₂f] with x h₁x h₂x
   have := h₂f x h₂x.1
   simp_all [← h₁x.analyticOrderAt_eq_zero, h₁x.meromorphicOrderAt_eq]
 
-theorem PoissonJensen_aux₀ {w c : ℂ} {R : ℝ} {f : ℂ → ℂ}
+theorem PoissonJensen_aux₀a {w c : ℂ} {R : ℝ} {f : ℂ → ℂ}
     (h₁f : MeromorphicOn f (closedBall 0 R))
     (h₂f : ∀ u : (closedBall (0 : ℂ) R), meromorphicOrderAt f u ≠ ⊤)
     (hw : w ∈ ball c R) :
@@ -62,7 +62,7 @@ theorem PoissonJensen_aux₀ {w c : ℂ} {R : ℝ} {f : ℂ → ℂ}
   simp_rw [abs_of_pos (pos_of_mem_ball hw)]
   filter_upwards [h₃g.filter_mono (Filter.codiscreteWithin.mono sphere_subset_closedBall),
     Filter.self_mem_codiscreteWithin _,
-    h₅g.codiscreteWithin_setOf_ne_zero h₆g] with x h₁x h₂x h₃x
+    h₅g.codiscreteWithin_setOf_ne_zero' h₆g] with x h₁x h₂x h₃x
   have : ‖(∏ᶠ (u : ℂ), (Complex.canonicalFactor R u ^ (divisor f (ball 0 R)) u)⁻¹) x‖ = 1 := by
     by_cases hf : Set.Finite
         (fun u ↦ (Complex.canonicalFactor R u ^ (divisor f (ball 0 R)) u)⁻¹).mulSupport
@@ -74,7 +74,7 @@ theorem PoissonJensen_aux₀ {w c : ℂ} {R : ℝ} {f : ℂ → ℂ}
     · simp [finprod_of_infinite_mulSupport (Set.not_finite.mp hf)]
   simp_all
 
-theorem PoissonJensen_aux₁ {w c : ℂ} {R : ℝ} {g : ℂ → ℂ}
+theorem PoissonJensen_aux₁a {w c : ℂ} {R : ℝ} {g : ℂ → ℂ}
     (hw : w ∈ ball c R)
     (h₁g : MeromorphicNFOn g (closedBall (0 : ℂ) R))
     (h₂g : ∀ u ∈ ball (0 : ℂ) R, g u ≠ 0) :
@@ -153,7 +153,7 @@ theorem PoissonJensen_aux₁ {w c : ℂ} {R : ℝ} {g : ℂ → ℂ}
   · simp [h₂h ⟨x, sphere_subset_closedBall h₂x⟩]
 
 set_option backward.isDefEq.respectTransparency false in
-theorem PoissonJensen_aux₂ {w : ℂ} {R : ℝ} {g h : ℂ → ℂ}
+theorem PoissonJensen_aux₂a {w : ℂ} {R : ℝ} {g h : ℂ → ℂ}
     (hw : w ∈ ball 0 R)
     (h₁g : MeromorphicNFOn g (closedBall (0 : ℂ) R))
     (h₂g : ∀ u ∈ ball (0 : ℂ) R, g u ≠ 0)
@@ -276,7 +276,7 @@ theorem PoissonJensen_aux₂ {w : ℂ} {R : ℝ} {g h : ℂ → ℂ}
   · -- CircleIntegrable (Complex.re ∘ herglotzRieszKernel 0 w • fun x ↦ log ‖h x‖) 0 R
     exact η₀
 
-theorem PoissonJensen_aux₃ {w : ℂ} {R : ℝ} {f : ℂ → ℂ}
+theorem PoissonJensen_aux₃a {w : ℂ} {R : ℝ} {f : ℂ → ℂ}
     (h₁f : MeromorphicOn f (closedBall 0 R))
     (h₂f : ∀ u : (closedBall (0 : ℂ) R), meromorphicOrderAt f u ≠ ⊤)
     (hw : w ∈ ball (0 : ℂ) R) :
@@ -288,7 +288,7 @@ theorem PoissonJensen_aux₃ {w : ℂ} {R : ℝ} {f : ℂ → ℂ}
           * ((∏ᶠ (u : ℂ), (fun x ↦ x - u) ^ (divisor f (sphere 0 R)) u) * h)
       ∧ circleAverage (Complex.re ∘ herglotzRieszKernel 0 w • fun x ↦ log ‖f x‖) 0 R =
         ∑ᶠ (x : ℂ), (divisor f (sphere 0 R)) x • log ‖w - x‖ + log ‖h w‖ := by
-  obtain ⟨g, h₁g, h₂g, h₃g, h₄g⟩ := PoissonJensen_aux₀ h₁f h₂f hw
+  obtain ⟨g, h₁g, h₂g, h₃g, h₄g⟩ := PoissonJensen_aux₀a h₁f h₂f hw
   have h₅g {u : ℂ}: (divisor g (closedBall 0 R)) u = (divisor f (sphere 0 R)) u := by
     apply divisor_congr_codiscreteWitin_closedBall_prod_canonicalFactor_smul
     exact pos_of_mem_ball hw
@@ -299,9 +299,9 @@ theorem PoissonJensen_aux₃ {w : ℂ} {R : ℝ} {f : ℂ → ℂ}
   have h₆g : (∏ᶠ (u : ℂ), (fun x ↦ x - u) ^ (divisor g (closedBall 0 R)) u)
       = (∏ᶠ (u : ℂ), (fun x ↦ x - u) ^ (divisor f (sphere 0 R)) u) := by
     simp_rw [h₅g]
-  obtain ⟨h, h₁h, h₂h, h₃h, h₄h⟩ := PoissonJensen_aux₁ hw h₁g h₂g
+  obtain ⟨h, h₁h, h₂h, h₃h, h₄h⟩ := PoissonJensen_aux₁a hw h₁g h₂g
   rw [← h₄g] at h₄h
-  rw [PoissonJensen_aux₂ hw h₁g h₂g h₁h h₂h] at h₄h
+  rw [PoissonJensen_aux₂a hw h₁g h₂g h₁h h₂h] at h₄h
   simp_rw [h₅g] at h₄h
   use h
   simp_all
@@ -311,7 +311,7 @@ theorem PoissonJensen_aux₃ {w : ℂ} {R : ℝ} {f : ℂ → ℂ}
   rw [h₂a]
   simp
 
-theorem PoissonJensen_aux₃₁ {w : ℂ} {R : ℝ} {f h : ℂ → ℂ}
+theorem PoissonJensen_aux₃₁a {w : ℂ} {R : ℝ} {f h : ℂ → ℂ}
     (h₁f : MeromorphicOn f (closedBall 0 R))
     (h₂f : ∀ u : (closedBall (0 : ℂ) R), meromorphicOrderAt f u ≠ ⊤)
     (hw : w ∈ ball (0 : ℂ) R)
@@ -335,7 +335,7 @@ theorem PoissonJensen_aux₃₁ {w : ℂ} {R : ℝ} {f h : ℂ → ℂ}
 
   sorry
 
-theorem PoissonJensen_aux₄ {w : ℂ} {R : ℝ} {f h : ℂ → ℂ}
+theorem PoissonJensen_aux₄a {w : ℂ} {R : ℝ} {f h : ℂ → ℂ}
     (h₁f : MeromorphicOn f (closedBall 0 R))
     (h₂f : ∀ u : (closedBall (0 : ℂ) R), meromorphicOrderAt f u ≠ ⊤)
     (hw : w ∈ ball (0 : ℂ) R)

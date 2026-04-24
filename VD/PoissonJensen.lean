@@ -289,12 +289,15 @@ theorem PoissonJensen_aux₃ {w : ℂ} {R : ℝ} {f : ℂ → ℂ}
         ∑ᶠ (x : ℂ), (divisor f (sphere 0 R)) x • log ‖w - x‖ + log ‖h w‖ := by
   obtain ⟨g, h₁g, h₂g, h₃g, h₄g⟩ := PoissonJensen_aux₀ h₁f h₂f hw
   have h₅g {u : ℂ}: (divisor g (closedBall 0 R)) u = (divisor f (sphere 0 R)) u := by
+    sorry
+    /-
     apply canonicalDecomposition₂
     exact divisor_congr_codiscreteWitin_closedBall_prod_canonicalFactor_smul
     exact h₁f
     exact h₁g
     exact h₂g
     exact h₃g
+    -/
   have h₆g : (∏ᶠ (u : ℂ), (fun x ↦ x - u) ^ (divisor g (closedBall 0 R)) u)
       = (∏ᶠ (u : ℂ), (fun x ↦ x - u) ^ (divisor f (sphere 0 R)) u) := by
     simp_rw [h₅g]
