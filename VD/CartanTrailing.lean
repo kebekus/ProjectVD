@@ -46,25 +46,11 @@ Cartan, Nevanlinna theory, trailing coefficient, log counting
 
 section CircleIntegrabilityLemmas
 
-/-- Auxiliary criterion for circle integrability from constancy on the circle. -/
-private lemma circleIntegrable_of_const_on_sphere
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
-    {f : ℂ → E} {c : ℂ} {R : ℝ} {C : E}
-    (h_eq : ∀ a ∈ Metric.sphere c |R|, f a = C) :
-    CircleIntegrable f c R := by
-  have h_param_eq : ∀ θ, f (circleMap c R θ) = C := by
-    intro θ
-    apply h_eq
-    simp [mem_sphere_iff_norm, circleMap_sub_center]
-  unfold CircleIntegrable
-  simp [h_param_eq, intervalIntegrable_const]
-
 /-- Auxiliary wrapper phrased in terms of `z - a`. -/
 private lemma circleIntegrable_log_norm_sub (z c : ℂ) (R : ℝ) :
     CircleIntegrable (fun a ↦ log ‖z - a‖) c R := by
   convert circleIntegrable_log_norm_sub_const (a := z) (c := c) (r := R) using 1
-  funext a
-  rw [norm_sub_rev]
+  simp_rw [norm_sub_rev]
 
 end CircleIntegrabilityLemmas
 
@@ -259,7 +245,7 @@ private lemma circleIntegrable_log_trailingCoeff_of_meromorphicOrderAt_neg {f : 
     (h : Meromorphic f) (hneg : meromorphicOrderAt f 0 < 0) :
     CircleIntegrable
       (fun a ↦ log ‖meromorphicTrailingCoeffAt (f · - a) 0‖) 0 1 := by
-  apply circleIntegrable_of_const_on_sphere (C := log ‖meromorphicTrailingCoeffAt f 0‖)
+  apply (crcleIntegrable_congr _).2 (circleIntegrable_const (log ‖meromorphicTrailingCoeffAt f 0‖) 0 1)
   exact log_trailingCoeff_eq_const_on_unitSphere_of_meromorphicOrderAt_neg h hneg
 
 /-- If `f` has meromorphic order `0` at the origin, then the Cartan trailing-coefficient
@@ -278,7 +264,7 @@ private lemma circleIntegrable_log_trailingCoeff {f : ℂ → ℂ} (h : Meromorp
     (h₂ : 0 < meromorphicOrderAt f 0) :
     CircleIntegrable
       (fun a ↦ log ‖meromorphicTrailingCoeffAt (f · - a) 0‖) 0 1 := by
-  apply circleIntegrable_of_const_on_sphere (C := 0)
+  apply (crcleIntegrable_congr _).2 (circleIntegrable_const 0 0 1)
   exact log_trailingCoeff_eq_zero_on_unitSphere h h₂
 
 /-- Auxiliary integrability statement for the trailing-coefficient term in Cartan's formula. -/
