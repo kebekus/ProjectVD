@@ -6,7 +6,7 @@ Authors: Matteo Cipollina, Stefan Kebekus
 
 module
 
-public import VD.CartanTrailing
+public import VD.MathlibSubmitted.Cartan
 public import VD.MathlibSubmitted.ProximityIntegral
 public import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 
@@ -132,7 +132,7 @@ in the value variable along the unit circle. -/
 theorem circleIntegrable_logCounting {f : ℂ → ℂ} (h : Meromorphic f) {R : ℝ} :
     CircleIntegrable (fun a : ℂ ↦ logCounting f (a : WithTop ℂ) R) 0 1 :=
   circleIntegrable_logCounting_of_trailing h
-    (Cartan.circleIntegrable_log_trailingCoeff_of_meromorphic h)
+    circleIntegrable_log_trailingCoeff_of_meromorphic
 
 /-- Auxiliary form of Cartan's identity with the trailing-coefficient average left explicit. -/
 theorem characteristic_top_eq_circleAverage_logCounting_add_circleAverage_log_trailingCoeff_aux
@@ -180,7 +180,7 @@ theorem characteristic_top_eq_circleAverage_logCounting_add_circleAverage_log_tr
       circleAverage (logCounting f · r) 0 1
         + circleAverage (fun a ↦ Real.log ‖meromorphicTrailingCoeffAt (f · - a) 0‖) 0 1 := by
   exact characteristic_top_eq_circleAverage_logCounting_add_circleAverage_log_trailingCoeff_aux
-    hr h (Cartan.circleIntegrable_log_trailingCoeff_of_meromorphic h)
+    hr h circleIntegrable_log_trailingCoeff_of_meromorphic
 
 /-- Cartan's formula in the zero case `0 < meromorphicOrderAt f 0`. -/
 theorem characteristic_top_eq_circleAverage_logCounting_of_meromorphicOrderAt_pos
@@ -193,7 +193,7 @@ theorem characteristic_top_eq_circleAverage_logCounting_of_meromorphicOrderAt_po
             + circleAverage (fun a ↦ Real.log ‖meromorphicTrailingCoeffAt (fun z ↦ f z - a) 0‖) 0 1 :=
           characteristic_top_eq_circleAverage_logCounting_add_circleAverage_log_trailingCoeff hr h
     _ = circleAverage (logCounting f · r) 0 1 := by
-      simp [Cartan.circleAverage_log_trailingCoeff_eq_zero h h₂]
+      simp [circleAverage_log_norm_trailingCoeff_of_pos_meromorphicOrderAt h₂]
 
 /-- Qualitative Cartan formula: away from `0`, the difference between `characteristic f ⊤` and
 `circleAverage (logCounting f · ·) 0 1` is constant. -/
