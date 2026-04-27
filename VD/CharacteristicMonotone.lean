@@ -38,10 +38,8 @@ Since the proximity function is not monotone in general, this is a nontrivial co
 theorem characteristic_monotoneOn {f : ℂ → ℂ} (h : Meromorphic f) :
     MonotoneOn (characteristic f ⊤) (Set.Ioi 0) := by
   intro a ha b hb hab
-  rw [characteristic_top_eq_circleAverage_logCounting_add_circleAverage_log_trailingCoeff
-      ha.ne' h]
-  rw [characteristic_top_eq_circleAverage_logCounting_add_circleAverage_log_trailingCoeff
-      hb.ne' h]
+  rw [characteristic_top_eq_circleAverage_logCounting_add_circleAverage_log_trailingCoeff ha.ne' h,
+    characteristic_top_eq_circleAverage_logCounting_add_circleAverage_log_trailingCoeff hb.ne' h]
   gcongr
   · apply circleIntegrable_logCounting h
   · apply circleIntegrable_logCounting h

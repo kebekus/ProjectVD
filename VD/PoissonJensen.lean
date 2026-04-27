@@ -7,6 +7,10 @@ open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --
 ## Additional Material
 -/
 
+@[fun_prop]
+lemma meromorphicAt_canonicalFactor {R : ℝ} {x w : ℂ} : MeromorphicAt (canonicalFactor R w) x := by
+  rw [canonicalFactor_def]
+  fun_prop
 
 theorem meromorphicNFAt_comp_iff_of_deriv_ne_zero {x : ℂ} {f g : ℂ → ℂ} (hg : AnalyticAt ℂ g x) (hg' : deriv g x ≠ 0) :
     MeromorphicNFAt (f ∘ g) x ↔ MeromorphicNFAt f (g x) := by
@@ -201,11 +205,17 @@ lemma yy
       rw [MeromorphicAt.meromorphicTrailingCoeffAt_mul]
       rw [meromorphicTrailingCoeffAt_prod]
       rw [meromorphicTrailingCoeffAt_prod]
-      --
+      conv =>
+        left; arg 1; arg 1; arg 2
+        intro n
+        rw [MeromorphicAt.meromorphicTrailingCoeffAt_zpow (by fun_prop)]
+      conv =>
+        left; arg 1; arg 2; arg 2
+        intro n
+        rw [MeromorphicAt.meromorphicTrailingCoeffAt_zpow (by fun_prop)]
+      rw [(h₁h w (ball_subset_closedBall hw)).meromorphicTrailingCoeffAt_of_ne_zero
+        (h₂h w (ball_subset_closedBall hw))]
       sorry
-      sorry
-      sorry
-      sorry
-      sorry
-      sorry
+      all_goals
+      · fun_prop
   sorry

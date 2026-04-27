@@ -48,29 +48,24 @@ private theorem logCounting_zero_sub_logCounting_top_eq_circleAverage_sub_log_tr
     logCounting f 0 R - logCounting f ⊤ R =
       circleAverage (log ‖f ·‖) 0 R - log ‖meromorphicTrailingCoeffAt f 0‖ := by
   have h_eval :
-      circleAverage (log ‖f ·‖) 0 R
-        - (MeromorphicOn.divisor f Set.univ).logCounting R =
-        log ‖meromorphicTrailingCoeffAt f 0‖ := by
-    exact
-      (congrArg (fun F ↦ F R)
-          (ValueDistribution.characteristic_sub_characteristic_inv (f := f) (h := hf))).symm.trans
-        (ValueDistribution.characteristic_sub_characteristic_inv_of_ne_zero
-          (f := f) (hf := hf) (hR := hR))
+      circleAverage (log ‖f ·‖) 0 R - (MeromorphicOn.divisor f Set.univ).logCounting R
+        = log ‖meromorphicTrailingCoeffAt f 0‖ := by
+    exact (congrArg (· R) (ValueDistribution.characteristic_sub_characteristic_inv (f := f) (h := hf))).symm.trans
+        (ValueDistribution.characteristic_sub_characteristic_inv_of_ne_zero (f := f) (hf := hf) (hR := hR))
   have h_div :
       (MeromorphicOn.divisor f Set.univ).logCounting R = logCounting f 0 R - logCounting f ⊤ R :=
     congrArg (fun F ↦ F R) (ValueDistribution.log_counting_zero_sub_logCounting_top (f := f))
-  calc
-    logCounting f 0 R - logCounting f ⊤ R
-        = (MeromorphicOn.divisor f Set.univ).logCounting R := by
-          simpa using h_div.symm
-    _ = circleAverage (fun z ↦ log ‖f z‖) 0 R - log ‖meromorphicTrailingCoeffAt f 0‖ := by
-          linarith
+  calc logCounting f 0 R - logCounting f ⊤ R
+    _ = (MeromorphicOn.divisor f Set.univ).logCounting R := by
+      simpa using h_div.symm
+    _ = circleAverage (log ‖f ·‖) 0 R - log ‖meromorphicTrailingCoeffAt f 0‖ := by
+      linarith
 
 /-- Specialized version of the Jensen-type identity for `g := f - a`. -/
 lemma Cartan.logCounting_add_log_trailingCoeff_eq_circleAverage_add_logCounting_top
     {f : ℂ → ℂ} (h : Meromorphic f) {R : ℝ} (hR : R ≠ 0) (a : ℂ) :
     logCounting f a R + log ‖meromorphicTrailingCoeffAt (f · - a) 0‖ =
-      circleAverage (fun z ↦ log ‖f z - a‖) 0 R + logCounting f ⊤ R := by
+      circleAverage (log ‖f · - a‖) 0 R + logCounting f ⊤ R := by
   have hg : Meromorphic (f · - a) := h.sub (Meromorphic.const a)
   have h_meromorphic : Meromorphic f := by
     rw [← meromorphicOn_univ]
@@ -78,43 +73,36 @@ lemma Cartan.logCounting_add_log_trailingCoeff_eq_circleAverage_add_logCounting_
   have hg' : Meromorphic (f · - a) := by
     rw [← meromorphicOn_univ]
     simpa using hg
-  have h_zero :
-      logCounting (f · - a) 0 = logCounting f (a : WithTop ℂ) := by
+  have h_zero : logCounting (f · - a) 0 = logCounting f (a : WithTop ℂ) := by
     simpa using
       (ValueDistribution.logCounting_coe_eq_logCounting_sub_const_zero (f := f) (a₀ := a)).symm
-  have h_top :
-      logCounting (f · - a) ⊤ = logCounting f ⊤ :=
+  have h_top : logCounting (f · - a) ⊤ = logCounting f ⊤ :=
     ValueDistribution.logCounting_sub_const (f := f) (a₀ := a) (hf := h_meromorphic)
   have hJ :
-      logCounting f a R - logCounting f ⊤ R =
-        circleAverage (fun z ↦ log ‖f z - a‖) 0 R -
-          log ‖meromorphicTrailingCoeffAt (f · - a) 0‖ := by
+      logCounting f a R - logCounting f ⊤ R = circleAverage (log ‖f · - a‖) 0 R
+        - log ‖meromorphicTrailingCoeffAt (f · - a) 0‖ := by
     simpa [h_zero, h_top] using
       (logCounting_zero_sub_logCounting_top_eq_circleAverage_sub_log_trailingCoeff
         (f := fun z ↦ f z - a) (hf := hg') (R := R) hR)
   linarith
 
-
-
 lemma circleAverage_add_const {f : ℂ → ℝ} {c : ℂ} {R : ℝ} {x : ℝ}
     (hf : CircleIntegrable f c R) :
     circleAverage (f · + x) c R = circleAverage f c R + x := by
-  simpa [Pi.add_apply] using
-    (Real.circleAverage_add (c := c) (R := R) (f₁ := f) (f₂ := fun _ : ℂ ↦ x) hf
-      (circleIntegrable_const x c R)).trans (by rw [Real.circleAverage_const])
+  exact (circleAverage_add (c := c) (R := R) (f₁ := f) (f₂ := fun _ : ℂ ↦ x) hf
+    (circleIntegrable_const x c R)).trans (by rw [circleAverage_const])
 
 /-- Circle integrability of `a ↦ logCounting f a R` follows from the one-variable Cartan identity
 once the logarithmic trailing-coefficient term is known to be circle integrable. -/
 lemma circleIntegrable_logCounting_of_trailing {f : ℂ → ℂ} (h : Meromorphic f)
     {R : ℝ}
-    (htrailing : CircleIntegrable
-      (fun a ↦ Real.log ‖meromorphicTrailingCoeffAt (f · - a) 0‖) 0 1) :
+    (htrailing : CircleIntegrable (fun a ↦ log ‖meromorphicTrailingCoeffAt (f · - a) 0‖) 0 1) :
     CircleIntegrable (fun a : ℂ ↦ logCounting f (a : WithTop ℂ) R) 0 1 := by
   by_cases hR_ne : R = 0
   · simp [hR_ne, ValueDistribution.logCounting_eval_zero]
   have hR : R ≠ 0 := hR_ne
-  let H1 := fun a ↦ circleAverage (Real.log ‖f · - a‖) 0 R + logCounting f ⊤ R
-  let H2 := fun a ↦ Real.log ‖meromorphicTrailingCoeffAt (f · - a) 0‖
+  let H1 := fun a ↦ circleAverage (log ‖f · - a‖) 0 R + logCounting f ⊤ R
+  let H2 := fun a ↦ log ‖meromorphicTrailingCoeffAt (f · - a) 0‖
   have hH1_int : CircleIntegrable H1 0 1 := by
     exact (circleIntegrable_circleAverage_log_norm_sub h).add
       (circleIntegrable_const (logCounting f ⊤ R) 0 1)
@@ -137,40 +125,32 @@ theorem circleIntegrable_logCounting {f : ℂ → ℂ} (h : Meromorphic f) {R : 
 /-- Auxiliary form of Cartan's identity with the trailing-coefficient average left explicit. -/
 theorem characteristic_top_eq_circleAverage_logCounting_add_circleAverage_log_trailingCoeff_aux
     {r : ℝ} {f : ℂ → ℂ} (hr : r ≠ 0) (h : Meromorphic f)
-    (hci_trailing : CircleIntegrable
-      (fun a ↦ Real.log ‖meromorphicTrailingCoeffAt (f · - a) 0‖) 0 1) :
-    characteristic f ⊤ r =
-      circleAverage (logCounting f · r) 0 1
-        + circleAverage (fun a ↦ Real.log ‖meromorphicTrailingCoeffAt (f · - a) 0‖) 0 1 := by
+    (hci_trailing : CircleIntegrable (fun a ↦ log ‖meromorphicTrailingCoeffAt (f · - a) 0‖) 0 1) :
+    characteristic f ⊤ r
+      = circleAverage (logCounting f · r) 0 1 + circleAverage (fun a ↦ log ‖meromorphicTrailingCoeffAt (f · - a) 0‖) 0 1 := by
   have hci_counting : CircleIntegrable (fun a : ℂ ↦ logCounting f (a : WithTop ℂ) r) 0 1 :=
     circleIntegrable_logCounting_of_trailing h (R := r) hci_trailing
-  have hci_inner : CircleIntegrable
-      (fun a ↦ circleAverage (fun z ↦ Real.log ‖f z - a‖) 0 r) 0 1 :=
+  have hci_inner : CircleIntegrable (fun a ↦ circleAverage (log ‖f · - a‖) 0 r) 0 1 :=
     circleIntegrable_circleAverage_log_norm_sub h
-  calc
-    characteristic f ⊤ r
-        = circleAverage (fun z ↦ log⁺ ‖f z‖) 0 r + logCounting f ⊤ r := by
-            simp [ValueDistribution.characteristic, ValueDistribution.proximity]
-    _ = circleAverage (fun a ↦ circleAverage (fun z ↦ Real.log ‖f z - a‖) 0 r) 0 1
-          + logCounting f ⊤ r := by
-            rw [← proximity_top, ← proximity_top_eq_circleAverage_circleAverage h]
-    _ = circleAverage
-          (fun a ↦ circleAverage (fun z ↦ Real.log ‖f z - a‖) 0 r + logCounting f ⊤ r) 0 1 := by
-            rw [← circleAverage_add_const hci_inner]
-    _ = circleAverage
-          (fun a : ℂ ↦ logCounting f (a : WithTop ℂ) r
-            + Real.log ‖meromorphicTrailingCoeffAt (fun z ↦ f z - a) 0‖) 0 1 := by
-            apply circleAverage_congr_sphere
-            intro a ha
-            simp [Cartan.logCounting_add_log_trailingCoeff_eq_circleAverage_add_logCounting_top h hr a]
+  calc characteristic f ⊤ r
+    _ = circleAverage (log⁺ ‖f ·‖) 0 r + logCounting f ⊤ r := by
+      simp [ValueDistribution.characteristic, ValueDistribution.proximity]
+    _ = circleAverage (fun a ↦ circleAverage (log ‖f · - a‖) 0 r) 0 1 + logCounting f ⊤ r := by
+      rw [← proximity_top, ← proximity_top_eq_circleAverage_circleAverage h]
+    _ = circleAverage (fun a ↦ circleAverage (log ‖f · - a‖) 0 r + logCounting f ⊤ r) 0 1 := by
+      rw [← circleAverage_add_const hci_inner]
+    _ = circleAverage (fun a : ℂ ↦ logCounting f (a : WithTop ℂ) r
+          + log ‖meromorphicTrailingCoeffAt (f · - a) 0‖) 0 1 := by
+      apply circleAverage_congr_sphere
+      intro a ha
+      simp [Cartan.logCounting_add_log_trailingCoeff_eq_circleAverage_add_logCounting_top h hr a]
     _ = circleAverage (logCounting f · r) 0 1
-          + circleAverage (fun a ↦ Real.log ‖meromorphicTrailingCoeffAt (fun z ↦ f z - a) 0‖) 0 1 := by
-            simpa [Pi.add_apply] using
-              (Real.circleAverage_add
-                (c := 0) (R := 1)
-                (f₁ := fun a : ℂ ↦ logCounting f (a : WithTop ℂ) r)
-                (f₂ := fun a ↦ Real.log ‖meromorphicTrailingCoeffAt (fun z ↦ f z - a) 0‖)
-                hci_counting hci_trailing)
+          + circleAverage (fun a ↦ log ‖meromorphicTrailingCoeffAt (f · - a) 0‖) 0 1 := by
+      exact circleAverage_add
+          (c := 0) (R := 1)
+          (f₁ := fun a : ℂ ↦ logCounting f (a : WithTop ℂ) r)
+          (f₂ := fun a ↦ log ‖meromorphicTrailingCoeffAt (f · - a) 0‖)
+          hci_counting hci_trailing
 
 /-- Cartan's formula with the additive constant written explicitly as a circle average of the
 logarithm of the first nonzero Laurent coefficient of `f - a` at the origin. -/
@@ -178,7 +158,7 @@ theorem characteristic_top_eq_circleAverage_logCounting_add_circleAverage_log_tr
     {r : ℝ} {f : ℂ → ℂ} (hr : r ≠ 0) (h : Meromorphic f) :
     characteristic f ⊤ r =
       circleAverage (logCounting f · r) 0 1
-        + circleAverage (fun a ↦ Real.log ‖meromorphicTrailingCoeffAt (f · - a) 0‖) 0 1 := by
+        + circleAverage (fun a ↦ log ‖meromorphicTrailingCoeffAt (f · - a) 0‖) 0 1 := by
   exact characteristic_top_eq_circleAverage_logCounting_add_circleAverage_log_trailingCoeff_aux
     hr h circleIntegrable_log_trailingCoeff_of_meromorphic
 
@@ -187,11 +167,10 @@ theorem characteristic_top_eq_circleAverage_logCounting_of_meromorphicOrderAt_po
     {r : ℝ} {f : ℂ → ℂ} (hr : r ≠ 0) (h : Meromorphic f)
     (h₂ : 0 < meromorphicOrderAt f 0) :
     characteristic f ⊤ r = circleAverage (logCounting f · r) 0 1 := by
-  calc
-    characteristic f ⊤ r
-        = circleAverage (logCounting f · r) 0 1
-            + circleAverage (fun a ↦ Real.log ‖meromorphicTrailingCoeffAt (fun z ↦ f z - a) 0‖) 0 1 :=
-          characteristic_top_eq_circleAverage_logCounting_add_circleAverage_log_trailingCoeff hr h
+  calc characteristic f ⊤ r
+    _ = circleAverage (logCounting f · r) 0 1
+          + circleAverage (fun a ↦ log ‖meromorphicTrailingCoeffAt (f · - a) 0‖) 0 1 :=
+      characteristic_top_eq_circleAverage_logCounting_add_circleAverage_log_trailingCoeff hr h
     _ = circleAverage (logCounting f · r) 0 1 := by
       simp [circleAverage_log_norm_trailingCoeff_of_pos_meromorphicOrderAt h₂]
 
@@ -199,11 +178,9 @@ theorem characteristic_top_eq_circleAverage_logCounting_of_meromorphicOrderAt_po
 `circleAverage (logCounting f · ·) 0 1` is constant. -/
 theorem characteristic_top_eq_circleAverage_logCounting_add_const {f : ℂ → ℂ} (h : Meromorphic f) :
     ∃ const, ∀ r ≠ 0, characteristic f ⊤ r = circleAverage (logCounting f · r) 0 1 + const := by
-  refine ⟨circleAverage
-      (fun a ↦ Real.log ‖meromorphicTrailingCoeffAt (fun z ↦ f z - a) 0‖) 0 1, ?_⟩
+  refine ⟨circleAverage (fun a ↦ log ‖meromorphicTrailingCoeffAt (f · - a) 0‖) 0 1, ?_⟩
   intro r hr
-  simpa using
-    characteristic_top_eq_circleAverage_logCounting_add_circleAverage_log_trailingCoeff
+  exact characteristic_top_eq_circleAverage_logCounting_add_circleAverage_log_trailingCoeff
       (r := r) hr h
 
 end ValueDistribution
