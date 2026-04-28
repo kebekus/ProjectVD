@@ -15,27 +15,6 @@ public section
 open Real
 open scoped Real MeasureTheory Metric
 
-/-!
-# Cartan's Formula
-
-This file assembles the support results from `VD/CartanKernel` and `VD/CartanTrailing`
-into Cartan's formula for meromorphic functions on `ℂ`.
-
-For a meromorphic function `f`, the difference between `characteristic f ⊤ r` and
-`circleAverage (logCounting f · r) 0 1` is independent of `r ≠ 0` and can be written
-explicitly as a circle average of logarithmic trailing coefficients. The preceding file
-`VD/CartanTrailing` supplies the one-variable Jensen / First Main Theorem identity for `f - a`;
-this file averages that identity over `|a| = 1` to obtain Cartan's formula. When `f` has a zero
-at the origin, the trailing-coefficient term vanishes.
-
-## Main statements
-
-- `ValueDistribution.circleIntegrable_logCounting`
-- `ValueDistribution.characteristic_top_eq_circleAverage_logCounting_add_circleAverage_log_trailingCoeff`
-- `ValueDistribution.characteristic_top_eq_circleAverage_logCounting_of_meromorphicOrderAt_pos`
-- `ValueDistribution.characteristic_top_eq_circleAverage_logCounting_add_const`
-
--/
 
 namespace ValueDistribution
 
@@ -45,21 +24,8 @@ the first nonzero Laurent coefficient at `0`. This is the one-variable input use
 Cartan's formula. -/
 private theorem logCounting_zero_sub_logCounting_top_eq_circleAverage_sub_log_trailingCoeff
     {f : ℂ → ℂ} (hf : Meromorphic f) {R : ℝ} (hR : R ≠ 0) :
-    logCounting f 0 R - logCounting f ⊤ R =
-      circleAverage (log ‖f ·‖) 0 R - log ‖meromorphicTrailingCoeffAt f 0‖ := by
-  have h_eval :
-      circleAverage (log ‖f ·‖) 0 R - (MeromorphicOn.divisor f Set.univ).logCounting R
-        = log ‖meromorphicTrailingCoeffAt f 0‖ := by
-    exact (congrArg (· R) (ValueDistribution.characteristic_sub_characteristic_inv (f := f) (h := hf))).symm.trans
-        (ValueDistribution.characteristic_sub_characteristic_inv_of_ne_zero (f := f) (hf := hf) (hR := hR))
-  have h_div :
-      (MeromorphicOn.divisor f Set.univ).logCounting R = logCounting f 0 R - logCounting f ⊤ R :=
-    congrArg (fun F ↦ F R) (ValueDistribution.log_counting_zero_sub_logCounting_top (f := f))
-  calc logCounting f 0 R - logCounting f ⊤ R
-    _ = (MeromorphicOn.divisor f Set.univ).logCounting R := by
-      simpa using h_div.symm
-    _ = circleAverage (log ‖f ·‖) 0 R - log ‖meromorphicTrailingCoeffAt f 0‖ := by
-      linarith
+    logCounting f 0 R - logCounting f ⊤ R = circleAverage (log ‖f ·‖) 0 R - log ‖meromorphicTrailingCoeffAt f 0‖ := by
+  apply logCounting_zero_sub_logCounting_top_eq_circleAverage_sub_const hf hR
 
 /-- Specialized version of the Jensen-type identity for `g := f - a`. -/
 lemma Cartan.logCounting_add_log_trailingCoeff_eq_circleAverage_add_logCounting_top
