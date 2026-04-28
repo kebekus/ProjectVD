@@ -18,38 +18,16 @@ open scoped Real MeasureTheory Metric
 
 namespace ValueDistribution
 
-/-- Jensen-type identity relating zeros and poles: for a meromorphic `f` on the plane, the
-difference of counting functions at `0` and at `⊤` equals a circle average minus the logarithm of
-the first nonzero Laurent coefficient at `0`. This is the one-variable input used later in
-Cartan's formula. -/
-private theorem logCounting_zero_sub_logCounting_top_eq_circleAverage_sub_log_trailingCoeff
-    {f : ℂ → ℂ} (hf : Meromorphic f) {R : ℝ} (hR : R ≠ 0) :
-    logCounting f 0 R - logCounting f ⊤ R = circleAverage (log ‖f ·‖) 0 R - log ‖meromorphicTrailingCoeffAt f 0‖ := by
-  apply logCounting_zero_sub_logCounting_top_eq_circleAverage_sub_const hf hR
-
 /-- Specialized version of the Jensen-type identity for `g := f - a`. -/
 lemma Cartan.logCounting_add_log_trailingCoeff_eq_circleAverage_add_logCounting_top
     {f : ℂ → ℂ} (h : Meromorphic f) {R : ℝ} (hR : R ≠ 0) (a : ℂ) :
     logCounting f a R + log ‖meromorphicTrailingCoeffAt (f · - a) 0‖ =
       circleAverage (log ‖f · - a‖) 0 R + logCounting f ⊤ R := by
-  have hg : Meromorphic (f · - a) := h.sub (Meromorphic.const a)
-  have h_meromorphic : Meromorphic f := by
-    rw [← meromorphicOn_univ]
-    simpa using h
-  have hg' : Meromorphic (f · - a) := by
-    rw [← meromorphicOn_univ]
-    simpa using hg
-  have h_zero : logCounting (f · - a) 0 = logCounting f (a : WithTop ℂ) := by
-    simpa using
-      (ValueDistribution.logCounting_coe_eq_logCounting_sub_const_zero (f := f) (a₀ := a)).symm
-  have h_top : logCounting (f · - a) ⊤ = logCounting f ⊤ :=
-    ValueDistribution.logCounting_sub_const (f := f) (a₀ := a) (hf := h_meromorphic)
   have hJ :
       logCounting f a R - logCounting f ⊤ R = circleAverage (log ‖f · - a‖) 0 R
         - log ‖meromorphicTrailingCoeffAt (f · - a) 0‖ := by
-    simpa [h_zero, h_top] using
-      (logCounting_zero_sub_logCounting_top_eq_circleAverage_sub_log_trailingCoeff
-        (f := fun z ↦ f z - a) (hf := hg') (R := R) hR)
+    rw [logCounting_coe_eq_logCounting_sub_const_zero, ← logCounting_sub_const h]
+    exact logCounting_zero_sub_logCounting_top_eq_circleAverage_sub_const (by fun_prop) hR
   linarith
 
 lemma circleAverage_add_const {f : ℂ → ℝ} {c : ℂ} {R : ℝ} {x : ℝ}
