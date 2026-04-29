@@ -1,5 +1,5 @@
 import Mathlib.Analysis.Complex.CanonicalDecomposition
-import VD.MathlibSubmitted.Poisson_log_affine
+import Mathlib.Analysis.Complex.JensenFormula
 
 open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --ValueDistribution
 
@@ -158,8 +158,9 @@ lemma xx
       congr 1
       apply Finset.sum_congr rfl
       intro x hx
-      rw [cast_smul, circleAverage_smul, circleAverage_re_herglotzRieszKernel_mul_log
-        ((divisor f (sphere 0 R)).supportWithinDomain (h₂f.mem_toFinset.1 hx)) hw, smul_eq_mul, zsmul_eq_mul]
+      rw [cast_smul, circleAverage_smul, smul_eq_mul, smul_eq_mul]
+      rw [circleAverage_re_herglotzRieszKernel_mul_log
+        ((divisor f (sphere 0 R)).supportWithinDomain (h₂f.mem_toFinset.1 hx)) hw, zsmul_eq_mul]
 
 lemma yy
     {f h : ℂ → ℂ}
