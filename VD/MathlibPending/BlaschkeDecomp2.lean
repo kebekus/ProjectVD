@@ -98,10 +98,9 @@ equal, up to modification over a discrete set, to a product of a non-vanishing
 analytic function, canonical factors and meromorphic functions of the form `(x -
 const) ^ n` where `const` is on the circumference of the disk.
 -/
-
 theorem congr_codiscreteWitin_closedBall_prod_canonicalFactor_mul_prod_smul {f : ℂ → E}
-    (hw : w ∈ ball c R)
-    (h₁f : MeromorphicOn f (closedBall (0 : ℂ) R))
+    (hw : w ∈ ball c R) -- WRONG!! w is unused
+    (h₁f : MeromorphicOn f (closedBall 0 R))
     (h₂f : ∀ u : (closedBall (0 : ℂ) R), meromorphicOrderAt f u ≠ ⊤) :
     ∃ h : ℂ → E, AnalyticOnNhd ℂ h (closedBall 0 R)
       ∧ (∀ u ∈ (closedBall 0 R), h u ≠ 0)
