@@ -107,7 +107,6 @@ const) ^ n` where `const` is on the circumference of the disk.
 theorem congr_codiscreteWitin_closedBall_prod_canonicalFactor_mul_prod_smul {f : ℂ → E}
     (h₁f : MeromorphicOn f (closedBall 0 R))
     (h₂f : ∀ u : (closedBall (0 : ℂ) R), meromorphicOrderAt f u ≠ ⊤) :
-    --(hR : w ∈ ball c R) :
     ∃ h : ℂ → E, AnalyticOnNhd ℂ h (closedBall 0 R)
       ∧ (∀ u ∈ (closedBall 0 R), h u ≠ 0)
       ∧ f =ᶠ[codiscreteWithin (closedBall 0 R)]

@@ -36,11 +36,11 @@ private lemma logCounting_add_log_trailingCoeff_eq_circleAverage_add_logCounting
   linarith
 
 /--
-Circle integrability of the term `fun a ↦ logCounting f a R` that appears in
-Cartan's formula.
+Circle integrability of the term `logCounting f · R` that appears in Cartan's
+formula.
 -/
 theorem circleIntegrable_logCounting (h : Meromorphic f) :
-    CircleIntegrable (fun a ↦ logCounting f a R) 0 1 := by
+    CircleIntegrable (logCounting f · R) 0 1 := by
   by_cases hR : R = 0
   · simp [hR, ValueDistribution.logCounting_eval_zero]
   let H1 := fun a ↦ circleAverage (log ‖f · - a‖) 0 R + logCounting f ⊤ R
