@@ -1,5 +1,6 @@
 import Mathlib.Analysis.Complex.CanonicalDecomposition
 import Mathlib.Analysis.Complex.JensenFormula
+import VD.MathlibSubmitted.BlaschkeDecomp
 
 open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --ValueDistribution
 
@@ -116,8 +117,67 @@ lemma zz
   rw [finprod_eq_prod_of_mulSupport_subset (s := h₂f.toFinset) _ (by aesop)]
   rw [finprod_eq_prod_of_mulSupport_subset (s := h₃f.toFinset) _ (by aesop)]
   rw [finprod_eq_prod_of_mulSupport_subset (s := h₂f.toFinset) _ (by aesop)]
-
-
+  rw [smul_eq_mul, smul_eq_mul]
+  have {a b c d e : ℂ} : (a * b) * ((c * d) * e) = (a * c) * (b * d) * e := by
+    ring
+  rw [this]
+  rw [← Finset.prod_mul_distrib, ← Finset.prod_mul_distrib]
+  rw [Finset.prod_eq_one, Finset.prod_eq_one]
   simp
+  --
+  intro x hx
+  rw [← zpow_add₀]
+  simp
+  by_contra h
+  rw [sub_eq_zero] at h
+  subst h
+  have : w ∈ (divisor f (sphere 0 R)).support := by
+    aesop
+  have := (divisor f (sphere 0 R)).supportWithinDomain this
+  aesop
+  --
+  intro x hx
+  rw [← zpow_add₀]
+  simp
+  apply MeromorphicAt.meromorphicTrailingCoeffAt_ne_zero
+  fun_prop
+  apply meromorphicOrderAt_canonicalFactor_ne_top
+  exact pos_of_mem_ball hw
 
-  sorry
+lemma zz'
+    {f h : ℂ → ℂ}
+    (hw : w ∈ ball 0 R)
+    (h₁w : meromorphicOrderAt f w = 0)
+    (h₀f : MeromorphicOn f (closedBall 0 R)) -- can be deduced
+    (h₁h : AnalyticOnNhd ℂ h (closedBall 0 R))
+    (h₂h : ∀ u ∈ (closedBall 0 R), h u ≠ 0)
+    (h₁f : f =ᶠ[codiscreteWithin (closedBall 0 R)]
+      ((∏ᶠ u, (canonicalFactor R u) ^ (-divisor f (ball 0 R) u))
+        * (∏ᶠ u, (· - u) ^ (divisor f (sphere 0 R)) u)) • h) :
+    h w = ((∏ᶠ i, (canonicalFactor R i w) ^ (divisor f (ball 0 R) i))
+          * (∏ᶠ i, (w - i) ^ (-divisor f (sphere 0 R)) i))
+          • meromorphicTrailingCoeffAt f w := by
+  rw [zz hw h₀f h₁h h₂h h₁f]
+  congr
+  ext x
+  by_cases h : x = w
+  · subst h
+    rw [divisor_apply]
+    simp_all
+    intro z hz
+    apply h₀f z
+    apply ball_subset_closedBall hz
+    exact hw
+  by_cases h₁ : (divisor f (ball 0 R)) x = 0
+  · simp_all
+
+  rw [AnalyticAt.meromorphicTrailingCoeffAt_of_ne_zero]
+  apply Complex.analyticOnNhd_canonicalFactor
+  aesop
+  apply Complex.canonicalFactor_ne_zero
+
+  have : x ∈ (divisor f (ball 0 R)).support := by aesop
+  exact (divisor f (ball 0 R)).supportWithinDomain this
+  --
+  exact ball_subset_closedBall hw
+  tauto
