@@ -29,7 +29,7 @@ variable
   {R : ℝ} {x c w : ℂ}
 
 lemma zz
-    {f h : ℂ → ℂ}
+    {f h : ℂ → E}
     (hw : w ∈ ball 0 R)
     (h₀f : MeromorphicOn f (closedBall 0 R)) -- can be deduced
     (h₁h : AnalyticOnNhd ℂ h (closedBall 0 R))
@@ -80,14 +80,14 @@ lemma zz
       rw [MeromorphicAt.meromorphicTrailingCoeffAt_zpow (by fun_prop)]
   --
   rw [this]
+  rw [smul_smul]
   rw [finprod_eq_prod_of_mulSupport_subset (s := h₃f.toFinset) _ (by aesop)]
   rw [finprod_eq_prod_of_mulSupport_subset (s := h₂f.toFinset) _ (by aesop)]
   rw [finprod_eq_prod_of_mulSupport_subset (s := h₃f.toFinset) _ (by aesop)]
   rw [finprod_eq_prod_of_mulSupport_subset (s := h₂f.toFinset) _ (by aesop)]
-  rw [smul_eq_mul, smul_eq_mul]
-  have {a b c d e : ℂ} : (a * b) * ((c * d) * e) = (a * c) * (b * d) * e := by
+  have {a b c d : ℂ} : (a * b) * (c * d) = (a * c) * (b * d) := by
     ring
-  rw [this]
+  rw [← this]
   rw [← Finset.prod_mul_distrib, ← Finset.prod_mul_distrib]
   rw [Finset.prod_eq_one, Finset.prod_eq_one]
   simp
@@ -107,7 +107,7 @@ lemma zz
   exact pos_of_mem_ball hw
 
 lemma zz'
-    {f h : ℂ → ℂ}
+    {f h : ℂ → E}
     (hw : w ∈ ball 0 R)
     (h₁w : meromorphicOrderAt f w = 0)
     (h₀f : MeromorphicOn f (closedBall 0 R)) -- can be deduced
