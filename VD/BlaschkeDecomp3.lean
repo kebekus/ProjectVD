@@ -39,11 +39,10 @@ lemma zz
   have h₃f : (divisor f (ball 0 R)).support.Finite := by
     apply ((divisor f (closedBall 0 R)).finiteSupport (isCompact_closedBall 0 R)).subset
     intro b hb
-    have h₂b := hb
-    rw [mem_support, ne_eq, divisor_apply (fun c hc ↦ h₀f c (ball_subset_closedBall hc))
-      ((divisor f (ball 0 R)).supportWithinDomain hb)] at h₂b
-    rwa [mem_support, ne_eq, divisor_apply h₀f
+    rw [mem_support, ne_eq, divisor_apply h₀f
       (ball_subset_closedBall ((divisor f (ball 0 R)).supportWithinDomain hb))]
+    rwa [mem_support, ne_eq, divisor_apply (fun c hc ↦ h₀f c (ball_subset_closedBall hc))
+      ((divisor f (ball 0 R)).supportWithinDomain hb)] at hb
   --
   have : meromorphicTrailingCoeffAt f w
       = ((∏ᶠ i, meromorphicTrailingCoeffAt (canonicalFactor R i) w ^ (-(divisor f (ball 0 R)) i)) *
