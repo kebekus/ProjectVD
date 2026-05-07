@@ -27,13 +27,6 @@ variable
 # Generic Material
 -/
 
-theorem finprod_ne_zero {ι : Type*} {M₀ : Type*} [CommMonoidWithZero M₀] [Nontrivial M₀] [NoZeroDivisors M₀]
-  {f : ι → M₀} (h : ∀ i, f i ≠ 0) :
-    ∏ᶠ i, f i ≠ 0 := by
-  by_cases h₂ : f.mulSupport.Finite
-  · grind [finprod_eq_prod f h₂, Finset.prod_ne_zero_iff]
-  · simp [finprod_of_infinite_mulSupport h₂]
-
 theorem finprod_apply_ne_zero {ι : Type*} {N₀ M₀ : Type*} [CommMonoidWithZero M₀] [Nontrivial M₀] [NoZeroDivisors M₀] {n : N₀}
   {f : ι → N₀ → M₀} (h : ∀ i, f i n ≠ 0) :
     (∏ᶠ i, f i) n ≠ 0 := by
@@ -42,6 +35,7 @@ theorem finprod_apply_ne_zero {ι : Type*} {N₀ M₀ : Type*} [CommMonoidWithZe
     grind [Finset.prod_apply, Finset.prod_ne_zero_iff]
   · simp [finprod_of_infinite_mulSupport h₂]
 
+-- Wait for kebekus/Cartan.2 to be merged, then this will no longer be necessary
 @[simp] theorem mem_codiscreteWithin_subsingleton {X : Type*} [TopologicalSpace X] [T1Space X]
     {s t : Set X} (h : Set.Subsingleton t) :
     s ∈ codiscreteWithin t := by
