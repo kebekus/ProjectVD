@@ -1,22 +1,12 @@
 import Mathlib.Analysis.Complex.CanonicalDecomposition
 import Mathlib.Analysis.Complex.JensenFormula
+import VD.BlaschkeDecomp3
 
 open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --ValueDistribution
 
 /-!
 ## Additional Material
 -/
-
-@[fun_prop]
-lemma meromorphicAt_canonicalFactor {R : ℝ} {x w : ℂ} : MeromorphicAt (canonicalFactor R w) x := by
-  rw [canonicalFactor_def]
-  fun_prop
-
-theorem meromorphicNFAt_comp_iff_of_deriv_ne_zero {x : ℂ} {f g : ℂ → ℂ} (hg : AnalyticAt ℂ g x) (hg' : deriv g x ≠ 0) :
-    MeromorphicNFAt (f ∘ g) x ↔ MeromorphicNFAt f (g x) := by
-  simp [meromorphicNFAt_iff_analyticAt_or, analyticAt_comp_iff_of_deriv_ne_zero hg hg',
-    meromorphicAt_comp_iff_of_deriv_ne_zero hg hg',
-    meromorphicOrderAt_comp_of_deriv_ne_zero hg hg']
 
 
 /-!
@@ -25,7 +15,7 @@ theorem meromorphicNFAt_comp_iff_of_deriv_ne_zero {x : ℂ} {f g : ℂ → ℂ} 
 
 variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
-  {R : ℝ} {x c w : ℂ}
+  {R : ℝ} {x c w : ℂ} {f h : ℂ → ℂ}
 
 set_option backward.isDefEq.respectTransparency false in
 lemma xx
@@ -60,7 +50,7 @@ lemma xx
     tauto
   have cast_smul {x : ℂ} {φ : ℂ → ℝ} :
       (divisor f (sphere 0 R)) x • φ = ((divisor f (sphere 0 R)) x : ℝ) • φ := by aesop
-  -- Regularity properties of functions used in the calculatoin below
+  -- Regularity properties of functions used in the calculation below
   have ρ₁ : ContinuousOn (fun x ↦ (re ∘ herglotzRieszKernel 0 w) (circleMap 0 R x)) (uIcc 0 (2 * π)) := by
     unfold herglotzRieszKernel
     apply Continuous.continuousOn
@@ -135,6 +125,6 @@ lemma xx
       congr 1
       apply Finset.sum_congr rfl
       intro x hx
-      rw [cast_smul, circleAverage_smul, smul_eq_mul, smul_eq_mul]
-      rw [circleAverage_re_herglotzRieszKernel_mul_log
-        ((divisor f (sphere 0 R)).supportWithinDomain (h₂f.mem_toFinset.1 hx)) hw]
+      rw [cast_smul, circleAverage_smul, smul_eq_mul, smul_eq_mul,
+        circleAverage_re_herglotzRieszKernel_mul_log
+          ((divisor f (sphere 0 R)).supportWithinDomain (h₂f.mem_toFinset.1 hx)) hw]

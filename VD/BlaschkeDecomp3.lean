@@ -13,9 +13,6 @@ lemma meromorphicAt_canonicalFactor {R : ℝ} {x w : ℂ} : MeromorphicAt (canon
   rw [canonicalFactor_def]
   fun_prop
 
-variable {𝕜 𝕜' : Type*} [NontriviallyNormedField 𝕜] [NontriviallyNormedField 𝕜']
-  [NormedAlgebra 𝕜 𝕜'] {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] {U : Set 𝕜}
-
 /-!
 ## Formula goes here
 -/
@@ -114,3 +111,83 @@ lemma AnalyticOnNhd.eq_smul_meromorphicTrailingCoeffAt_of_eventuallyEq_of_meromo
     by_cases h : x = w
     · simp_all [meromorphicTrailingCoeffAt_id_sub_const, divisor_def]
     grind [meromorphicTrailingCoeffAt_id_sub_const]
+
+
+lemma AnalyticOnNhd.eq_smul_meromorphicTrailingCoeffAt_of_eventuallyEq_of_meromorphicOrderAt'
+    (h₁h : AnalyticOnNhd ℂ h (closedBall 0 R)) (h₂h : ∀ u ∈ (closedBall 0 R), h u ≠ 0)
+    (h₁f : MeromorphicOn f (closedBall 0 R))
+    (h₂f : f =ᶠ[codiscreteWithin (closedBall 0 R)]
+      ((∏ᶠ u, (canonicalFactor R u) ^ (-divisor f (ball 0 R) u))
+        * (∏ᶠ u, (· - u) ^ (divisor f (sphere 0 R)) u)) • h)
+    (h₁w : w ∈ closedBall 0 R)
+    (h₂w : meromorphicOrderAt f w = 0)
+    (hR : 0 < R) :
+    Real.log ‖h w‖ = ((∑ᶠ i, (divisor f (ball 0 R) i) * Real.log ‖canonicalFactor R i w‖)
+          + (∑ᶠ i, (-divisor f (sphere 0 R) i) * Real.log ‖w - i‖))
+          + Real.log ‖meromorphicTrailingCoeffAt f w‖ := by
+  have h₃f : (divisor f (sphere 0 R)).support.Finite :=
+    (divisor f (sphere 0 R)).finiteSupport (isCompact_sphere 0 R)
+  have h₄f : (divisor f (ball 0 R)).support.Finite := by
+    apply ((divisor f (closedBall 0 R)).finiteSupport (isCompact_closedBall 0 R)).subset
+    intro b hb
+    rw [mem_support, ne_eq, divisor_apply h₁f
+      (ball_subset_closedBall ((divisor f (ball 0 R)).supportWithinDomain hb))]
+    rwa [mem_support, ne_eq, divisor_apply (fun c hc ↦ h₁f c (ball_subset_closedBall hc))
+      ((divisor f (ball 0 R)).supportWithinDomain hb)] at hb
+  have η₀ : ∀ x ∈ h₃f.toFinset, ‖w - x‖ ^ (-divisor f (sphere 0 R)) x ≠ 0 := by
+    intro x hx
+    apply zpow_ne_zero
+    rw [ne_eq, norm_eq_zero]
+    by_contra hCon
+    rw [sub_eq_zero] at hCon
+    subst hCon
+    rw [Finite.mem_toFinset, mem_support, ne_eq] at hx
+    rw [divisor_apply] at hx
+    aesop
+    · apply h₁f.mono_set
+      exact sphere_subset_closedBall
+    · have := (divisor f (sphere 0 R)).supportWithinDomain
+      aesop
+  have η₁ : ∀ x ∈ h₄f.toFinset, ‖canonicalFactor R x w‖ ^ (divisor f (ball 0 R)) x ≠ 0 := by
+    intro x hx
+    apply zpow_ne_zero
+    rw [ne_eq, norm_eq_zero]
+    apply canonicalFactor_ne_zero
+    have := (divisor f (ball 0 R)).supportWithinDomain
+    aesop
+    aesop
+    by_contra hCon
+    subst hCon
+    rw [Finite.mem_toFinset, mem_support, ne_eq] at hx
+    rw [divisor_apply] at hx
+    aesop
+    · apply h₁f.mono_set
+      exact ball_subset_closedBall
+    · have := (divisor f (ball 0 R)).supportWithinDomain
+      aesop
+  rw [h₁h.eq_smul_meromorphicTrailingCoeffAt_of_eventuallyEq_of_meromorphicOrderAt h₂h h₁f h₂f h₁w h₂w hR]
+  rw [finprod_eq_prod_of_mulSupport_subset (s := h₄f.toFinset) _ (by aesop)]
+  rw [finprod_eq_prod_of_mulSupport_subset (s := h₃f.toFinset) _ (by aesop)]
+  rw [finsum_eq_sum_of_support_subset (s := h₄f.toFinset) _ (fun _ _ ↦ (by aesop))]
+  rw [finsum_eq_sum_of_support_subset (s := h₃f.toFinset) _ (fun _ _ ↦ (by aesop))]
+  rw [norm_smul, norm_mul, norm_prod, norm_prod]
+  simp_rw [norm_zpow]
+  rw [Real.log_mul, Real.log_mul, Real.log_prod, Real.log_prod]
+  congr
+  · ext i
+    exact log_zpow ‖canonicalFactor R i w‖ ((divisor f (ball 0 R)) i)
+  · ext i
+    rw [log_zpow ‖w - i‖ ((-divisor f (sphere 0 R)) i)]
+    simp
+  · exact η₀
+  · exact η₁
+  · exact Finset.prod_ne_zero_iff.2 η₁
+  · exact Finset.prod_ne_zero_iff.2 η₀
+  · rw [mul_ne_zero_iff]
+    constructor
+    · exact Finset.prod_ne_zero_iff.2 η₁
+    · exact Finset.prod_ne_zero_iff.2 η₀
+  · simp
+    apply MeromorphicAt.meromorphicTrailingCoeffAt_ne_zero
+    · apply h₁f w h₁w
+    · aesop
