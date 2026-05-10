@@ -6,8 +6,8 @@ Authors: Matteo Cipollina, Stefan Kebekus
 
 module
 
-public import VD.MathlibSubmitted.Cartan
 public import VD.MathlibSubmitted.ProximityIntegral
+public import Mathlib.Analysis.Complex.ValueDistribution.Cartan
 public import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 
 public section
@@ -52,7 +52,7 @@ theorem circleIntegrable_logCounting (h : Meromorphic f) :
   rw [this]
   exact CircleIntegrable.sub ((circleIntegrable_circleAverage_log_norm_sub h).add
       (circleIntegrable_const (logCounting f ⊤ R) 0 1))
-    circleIntegrable_log_trailingCoeff_of_meromorphic
+    circleIntegrable_log_meromorphicTrailingCoeffAt
 
 /-!
 ## Cartan's formula
@@ -79,7 +79,7 @@ theorem characteristic_top_eq_circleAverage_add_circleAverage (h : Meromorphic f
     _ = circleAverage (logCounting f · R) 0 1
           + circleAverage (fun a ↦ log ‖meromorphicTrailingCoeffAt (f · - a) 0‖) 0 1 := by
       rw [← circleAverage_add (circleIntegrable_logCounting h)
-        circleIntegrable_log_trailingCoeff_of_meromorphic, circleAverage_congr_sphere]
+        circleIntegrable_log_meromorphicTrailingCoeffAt, circleAverage_congr_sphere]
       intro a ha
       simp [logCounting_add_log_trailingCoeff_eq_circleAverage_add_logCounting_top h hR a]
 
@@ -90,7 +90,7 @@ theorem characteristic_top_eq_circleAverage_of_meromorphicOrderAt_pos
     (h₁f : Meromorphic f) (h₂f : 0 < meromorphicOrderAt f 0) (hR : R ≠ 0) :
     characteristic f ⊤ R = circleAverage (logCounting f · R) 0 1 := by
   rw [characteristic_top_eq_circleAverage_add_circleAverage h₁f hR]
-  simp [circleAverage_log_norm_trailingCoeff_of_pos_meromorphicOrderAt h₂f]
+  simp [circleAverage_log_norm_meromorphicTrailingCoeffAt_of_meromorphicOrderAt_pos h₂f]
 
 /--
 Qualitative version of **Cartan's formula**: Away from `0`, the difference
