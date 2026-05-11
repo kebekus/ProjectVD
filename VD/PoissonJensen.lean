@@ -1,6 +1,7 @@
 import Mathlib.Analysis.Complex.CanonicalDecomposition
 import Mathlib.Analysis.Complex.JensenFormula
 import VD.BlaschkeDecomp3
+import VD.MathlibPending.BlaschkeDecomp2
 
 open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --ValueDistribution
 
@@ -128,3 +129,22 @@ lemma xx
       rw [cast_smul, circleAverage_smul, smul_eq_mul, smul_eq_mul,
         circleAverage_re_herglotzRieszKernel_mul_log
           ((divisor f (sphere 0 R)).supportWithinDomain (h₂f.mem_toFinset.1 hx)) hw]
+
+theorem poissonJensen
+    (h₁w : w ∈ ball 0 R)
+    (h₃w : meromorphicOrderAt f w = 0)
+    (h₁f : MeromorphicOn f (closedBall 0 R))
+    (h₂f : ∀ u : (closedBall (0 : ℂ) R), meromorphicOrderAt f u ≠ ⊤)
+    (hR : 0 < R) :
+    Real.log ‖meromorphicTrailingCoeffAt f w‖
+      = circleAverage (re ∘ herglotzRieszKernel 0 w * (Real.log ‖f ·‖)) 0 R
+        - ∑ᶠ (i : ℂ), (divisor f (ball 0 R) i) * Real.log ‖canonicalFactor R i w‖ := by
+  obtain ⟨h, h₁h, h₂h, h₃h⟩ := congr_codiscreteWitin_closedBall_prod_canonicalFactor_mul_prod_smul h₁f h₂f
+
+  rw [xx h₁w h₁f h₁h h₂h h₃h]
+
+  have h₂w : w ∈ closedBall 0 R := by
+    apply ball_subset_closedBall h₁w
+  rw [h₁h.eq_smul_meromorphicTrailingCoeffAt_of_eventuallyEq_of_meromorphicOrderAt'
+    h₂h h₁f h₃h h₂w h₃w hR]
+  ring_nf
