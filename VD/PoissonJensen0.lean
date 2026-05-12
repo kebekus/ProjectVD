@@ -130,44 +130,20 @@ lemma xx
         circleAverage_re_herglotzRieszKernel_mul_log
           ((divisor f (sphere 0 R)).supportWithinDomain (h₂f.mem_toFinset.1 hx)) hw]
 
-theorem poissonJensen
+theorem poissonJensen₀
     (h₁w : w ∈ ball 0 R)
     (h₃w : meromorphicOrderAt f w = 0)
-    (h₁f : MeromorphicOn f (closedBall 0 R))
-    (h₂f : ∀ u : (closedBall (0 : ℂ) R), meromorphicOrderAt f u ≠ ⊤) -- can be deduced
-    (hR : 0 < R) : -- can be decuced
+    (h₁f : MeromorphicOn f (closedBall 0 R)) :
     Real.log ‖meromorphicTrailingCoeffAt f w‖
       = circleAverage (re ∘ herglotzRieszKernel 0 w * (Real.log ‖f ·‖)) 0 R
         - ∑ᶠ i, (divisor f (ball 0 R) i) * Real.log ‖canonicalFactor R i w‖ := by
+  have h₂w : w ∈ closedBall 0 R := ball_subset_closedBall h₁w
+  have h₂f : ∀ u : (closedBall (0 : ℂ) R), meromorphicOrderAt f u ≠ ⊤ := by
+    apply (h₁f.exists_meromorphicOrderAt_ne_top_iff_forall
+      (isConnected_closedBall (pos_of_mem_ball h₁w).le)).1
+    aesop
   obtain ⟨h, h₁h, h₂h, h₃h⟩ := congr_codiscreteWitin_closedBall_prod_canonicalFactor_mul_prod_smul h₁f h₂f
   rw [xx h₁w h₁f h₁h h₂h h₃h]
-  have h₂w : w ∈ closedBall 0 R := by
-    apply ball_subset_closedBall h₁w
   rw [h₁h.eq_smul_meromorphicTrailingCoeffAt_of_eventuallyEq_of_meromorphicOrderAt'
-    h₂h h₁f h₃h h₂w h₃w hR]
+    h₂h h₁f h₃h h₂w h₃w (pos_of_mem_ball h₁w)]
   ring_nf
-
-
-open ComplexConjugate Metric Real
-
-variable {R : ℝ} {w z : ℂ}
-
-
-/--
-The canonical factor has norm strictly greater than one for points inside the ball.
--/
-theorem norm_canonicalFactor (h : w ∈ ball 0 R) (h₁z : z ∈ ball 0 R) (h₂z : z ≠ w) :
-    ‖canonicalFactor R w z‖ > 1 := by
-  have h_norm : ‖R ^ 2 - conj w * z‖ > R * ‖z - w‖ := by
-    simp_all [Complex.normSq, Complex.norm_def]
-    rw [Real.sqrt_lt'] at *
-    · apply Real.lt_sqrt_of_sq_lt
-      norm_cast
-      rw [mul_pow, Real.sq_sqrt (by nlinarith)]
-      nlinarith
-    · exact lt_of_le_of_lt (Real.sqrt_nonneg _) h
-    · exact lt_of_le_of_lt (Real.sqrt_nonneg _) h
-  by_cases hR : R = 0
-    <;> simp_all [canonicalFactor]
-  rwa [one_lt_div (mul_pos (abs_pos.mpr hR) (norm_pos_iff.mpr (sub_ne_zero.mpr h₂z))),
-    abs_of_pos (lt_of_le_of_lt (norm_nonneg _) h)]
