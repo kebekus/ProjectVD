@@ -78,7 +78,7 @@ theorem η₀
     (h₃w : meromorphicOrderAt f w = 0)
     (h₁f : AnalyticOnNhd ℂ f (closedBall 0 R)) :
     Real.log ‖f w‖
-      ≤ circleAverage (re ∘ herglotzRieszKernel 0 w * (Real.log ‖f ·‖)) 0 R := by
+      ≤ circleAverage (re ∘ herglotzRieszKernel 0 w * (log⁺ ‖f ·‖)) 0 R := by
   have h₄f : (divisor f (ball 0 R)).support.Finite := by
     apply ((divisor f (closedBall 0 R)).finiteSupport (isCompact_closedBall 0 R)).subset
     intro b hb
@@ -101,3 +101,25 @@ theorem η₀
       · simp_all [h₁f.mono ball_subset_closedBall]
       · have := (divisor f (ball 0 R)).supportWithinDomain
         apply log_nonneg (norm_canonicalFactor (by aesop) h₁w (by aesop)).le
+    _ ≤ circleAverage (re ∘ herglotzRieszKernel 0 w * (log⁺ ‖f ·‖)) 0 R := by
+      apply circleAverage_mono
+      · sorry
+      · sorry
+      intro x hx
+      simp
+      unfold herglotzRieszKernel
+      gcongr
+      · trans (R - ‖w - 0‖) / (R + ‖w - 0‖)
+        · simp only [sub_zero]
+          simp only [mem_ball, dist_zero_right] at h₁w
+          apply div_nonneg
+          · apply sub_nonneg.2 h₁w.le
+          · apply add_nonneg
+            · apply (norm_nonneg w).trans h₁w.le
+            · exact norm_nonneg w
+        · apply le_re_herglotzRieszKernel
+          · rwa [abs_of_pos (pos_of_mem_ball h₁w)] at hx
+          · exact h₁w
+      · -- should be simp
+        unfold posLog
+        simp
