@@ -141,8 +141,8 @@ lemma AnalyticOnNhd.eq_smul_meromorphicTrailingCoeffAt_of_eventuallyEq_of_meromo
     by_contra hCon
     rw [sub_eq_zero] at hCon
     subst hCon
-    rw [Finite.mem_toFinset, mem_support, ne_eq] at hx
-    rw [divisor_apply (h₁f.mono_set (sphere_subset_closedBall))] at hx
+    rw [Finite.mem_toFinset, mem_support, ne_eq,
+      divisor_apply (h₁f.mono_set (sphere_subset_closedBall))] at hx
     aesop
     · have := (divisor f (sphere 0 R)).supportWithinDomain
       aesop

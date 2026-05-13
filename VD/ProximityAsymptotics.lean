@@ -60,7 +60,7 @@ variable {R : ℝ} {w z : ℂ}
 The canonical factor has norm strictly greater than one for points inside the ball.
 -/
 theorem norm_canonicalFactor (h : w ∈ ball 0 R) (h₁z : z ∈ ball 0 R) (h₂z : z ≠ w) :
-    ‖canonicalFactor R w z‖ > 1 := by
+    1 < ‖canonicalFactor R w z‖ := by
   have h_norm : ‖R ^ 2 - conj w * z‖ > R * ‖z - w‖ := by
     simp_all [Complex.normSq, Complex.norm_def]
     rw [Real.sqrt_lt' (lt_of_le_of_lt (Real.sqrt_nonneg _) h)] at *
@@ -77,7 +77,7 @@ theorem η₀
     (h₁w : w ∈ ball 0 R)
     (h₃w : meromorphicOrderAt f w = 0)
     (h₁f : AnalyticOnNhd ℂ f (closedBall 0 R)) :
-    Real.log ‖meromorphicTrailingCoeffAt f w‖
+    Real.log ‖f w‖
       ≤ circleAverage (re ∘ herglotzRieszKernel 0 w * (Real.log ‖f ·‖)) 0 R := by
   have h₄f : (divisor f (ball 0 R)).support.Finite := by
     apply ((divisor f (closedBall 0 R)).finiteSupport (isCompact_closedBall 0 R)).subset
@@ -87,12 +87,17 @@ theorem η₀
     rwa [mem_support, ne_eq, divisor_apply
       (fun c hc ↦ (fun x hx ↦ (h₁f x hx).meromorphicAt) c (ball_subset_closedBall hc))
       ((divisor f (ball 0 R)).supportWithinDomain hb)] at hb
-  rw [poissonJensen₀ h₁w h₃w (fun x hx ↦ (h₁f x hx).meromorphicAt)]
-  simp
-  rw [finsum_eq_sum_of_support_subset (s := h₄f.toFinset) _ (fun _ _ ↦ by aesop)]
-  apply Finset.sum_nonneg
-  intro i hi
-  apply mul_nonneg
-  · simp_all [h₁f.mono ball_subset_closedBall]
-  · have := (divisor f (ball 0 R)).supportWithinDomain
-    apply log_nonneg (norm_canonicalFactor (by aesop) h₁w (by aesop)).le
+  calc Real.log ‖f w‖
+    _ = Real.log ‖meromorphicTrailingCoeffAt f w‖ := by
+      rw [AnalyticAt.meromorphicTrailingCoeffAt_of_meromorphicOrderAt_eq_zero
+        (h₁f w (ball_subset_closedBall h₁w)) h₃w]
+    _ ≤ circleAverage (re ∘ herglotzRieszKernel 0 w * (Real.log ‖f ·‖)) 0 R := by
+      rw [poissonJensen₀ h₁w h₃w (fun x hx ↦ (h₁f x hx).meromorphicAt)]
+      simp
+      rw [finsum_eq_sum_of_support_subset (s := h₄f.toFinset) _ (fun _ _ ↦ by aesop)]
+      apply Finset.sum_nonneg
+      intro i hi
+      apply mul_nonneg
+      · simp_all [h₁f.mono ball_subset_closedBall]
+      · have := (divisor f (ball 0 R)).supportWithinDomain
+        apply log_nonneg (norm_canonicalFactor (by aesop) h₁w (by aesop)).le
