@@ -7,5 +7,7 @@ import VD.MathlibPending.BlaschkeDecomp2
 import VD.MathlibPending.Cartan
 import VD.MathlibSubmitted.BlaschkeDecomp
 import VD.MathlibSubmitted.ProximityIntegral
-import VD.PoissonJensen
+import VD.PoissonJensen0
+import VD.PoissonJensen1
+import VD.ProximityAsymptotics
 import VD.leftovers.meromorphicAt_topology

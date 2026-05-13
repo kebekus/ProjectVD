@@ -39,5 +39,3 @@ theorem poissonJensen {c : ℂ}
   · sorry
   · sorry
   · sorry
-  · sorry
-  · sorry
