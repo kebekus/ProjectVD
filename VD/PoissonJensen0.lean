@@ -80,7 +80,7 @@ lemma xx
           * (∏ᶠ u, (· - u) ^ (divisor f (sphere 0 R)) u)) • h) ·‖)) 0 R := by
       apply circleAverage_congr_codiscreteWithin _ hR.ne'
       rw [abs_of_pos hR]
-      filter_upwards [h₁f.filter_mono (codiscreteWithin.mono sphere_subset_closedBall)]
+      filter_upwards [h₁f.filter_mono (codiscreteWithin_mono sphere_subset_closedBall)]
       simp_all
     _ = circleAverage (re ∘ herglotzRieszKernel 0 w •
         (Real.log ‖(((∏ᶠ u, (· - u) ^ (divisor f (sphere 0 R)) u)) • h) ·‖)) 0 R := by
