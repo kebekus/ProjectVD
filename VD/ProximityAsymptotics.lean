@@ -248,6 +248,18 @@ theorem logCounting_isBigO_one_iff_analyticOnNhd (h₁f : AnalyticOnNhd ℂ f un
     ValueDistribution.proximity f ⊤ =O[atTop] (1 : ℝ → ℝ) ↔ f = fun _ ↦ f 0 := by
   constructor
   · intro h
+    have : Bornology.IsBounded (range f) := by
+      obtain ⟨c, hc⟩ := Asymptotics.isBigO_iff.1 h
+      rw [Filter.eventually_atTop] at hc
+      obtain ⟨a, ha⟩ := hc
+      rw [isBounded_iff_forall_norm_le]
+      use c
+      intro x hx
+      simp at hx
+
+
+
+      sorry
 
     sorry
   · intro h₂f
