@@ -1,4 +1,5 @@
 import VD.PoissonJensen0
+import Mathlib.Analysis.Complex.ValueDistribution.Proximity.Basic
 
 open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --ValueDistribution
 
@@ -20,7 +21,77 @@ open ComplexConjugate Metric Real
 
 variable {R : ℝ} {w z : ℂ}
 
+
 -- Proof by Aristotle
+
+theorem analyticOnNhd_herglotzRieszKernel_compl :
+    AnalyticOnNhd ℂ (herglotzRieszKernel c w) {w}ᶜ := by
+  intro x hx
+  unfold herglotzRieszKernel
+  have : x - w ≠ 0 := by grind
+  fun_prop (disch := aesop)
+
+theorem continuousOn_herglotzRieszKernel_sphere (hw : w ∈ ball c R):
+    ContinuousOn (re ∘ herglotzRieszKernel c w) (sphere c |R|) := by
+  intro x hx
+  apply ContinuousAt.continuousWithinAt
+  apply ContinuousAt.comp (by fun_prop) (analyticOnNhd_herglotzRieszKernel_compl x _).continuousAt
+  by_contra h
+  simp only [mem_compl_iff, mem_singleton_iff, not_not] at h
+  rw [← h, ← abs_of_pos (pos_of_mem_ball hw), mem_ball_iff_norm] at hw
+  simp_all
+
+/--
+If `g` is continuous on the circle `sphere c |R|` and `f` is circle integrable,
+then `g • f` is circle integrable.
+-/
+theorem CircleIntegrable.continuousOn_smul
+    {E 𝕜 : Type*} [NormedRing 𝕜]
+    [NormedAddCommGroup E] [Module 𝕜 E] [NormSMulClass 𝕜 E]
+    {f : ℂ → E} {g : ℂ → 𝕜} {c : ℂ} {R : ℝ}
+    (hf : CircleIntegrable f c R)
+    (hg : ContinuousOn g (sphere c |R|)) :
+    CircleIntegrable (g • f) c R :=
+  IntervalIntegrable.continuousOn_smul hf
+    (hg.comp (by fun_prop) (fun x hx ↦ circleMap_mem_sphere' c R x))
+
+/--
+If `g` is continuous on the circle `sphere c |R|` and `f` is circle integrable,
+then `g • f` is circle integrable.
+-/
+theorem CircleIntegrable.continuousOn_fun_smul
+    {E 𝕜 : Type*} [NormedRing 𝕜]
+    [NormedAddCommGroup E] [NormedSpace ℂ E] [Module 𝕜 E] [NormSMulClass 𝕜 E]
+    {f : ℂ → E} {g : ℂ → 𝕜} {c : ℂ} {R : ℝ}
+    (hf : CircleIntegrable f c R)
+    (hg : ContinuousOn g (sphere c |R|)) :
+    CircleIntegrable (fun z ↦ g z • f z) c R :=
+  hf.continuousOn_smul hg
+
+/--
+If `g` is continuous on the circle `sphere c |R|` and `f` is circle integrable,
+then `g * f` is circle integrable.
+-/
+theorem CircleIntegrable.continuousOn_mul
+    {𝕜 : Type*} [NormedRing 𝕜]
+    {f g : ℂ → 𝕜} {c : ℂ} {R : ℝ}
+    (hf : CircleIntegrable f c R)
+    (hg : ContinuousOn g (sphere c |R|)) :
+    CircleIntegrable (g * f) c R :=
+  IntervalIntegrable.continuousOn_mul hf
+    (hg.comp (by fun_prop) (fun x hx ↦ circleMap_mem_sphere' c R x))
+
+/--
+If `g` is continuous on the circle `sphere c |R|` and `f` is circle integrable,
+then `g * f` is circle integrable.
+-/
+theorem CircleIntegrable.continuousOn_fun_mul
+    {𝕜 : Type*} [NormedRing 𝕜]
+    {f g : ℂ → 𝕜} {c : ℂ} {R : ℝ}
+    (hf : CircleIntegrable f c R)
+    (hg : ContinuousOn g (sphere c |R|)) :
+    CircleIntegrable (fun z ↦ g z * f z) c R :=
+  hf.continuousOn_mul hg
 
 @[simp] theorem divisor_eq_zero_of_not_meromorphicOn {U : Set ℂ} {w : ℂ}
     (hf : ¬ MeromorphicOn f U) :
@@ -78,7 +149,7 @@ theorem η₀
     (h₃w : meromorphicOrderAt f w = 0)
     (h₁f : AnalyticOnNhd ℂ f (closedBall 0 R)) :
     Real.log ‖f w‖
-      ≤ circleAverage (re ∘ herglotzRieszKernel 0 w * (log⁺ ‖f ·‖)) 0 R := by
+      ≤ ((R + ‖w‖) / (R - ‖w‖)) * circleAverage (log⁺ ‖f ·‖) 0 R := by
   have h₄f : (divisor f (ball 0 R)).support.Finite := by
     apply ((divisor f (closedBall 0 R)).finiteSupport (isCompact_closedBall 0 R)).subset
     intro b hb
@@ -103,23 +174,89 @@ theorem η₀
         apply log_nonneg (norm_canonicalFactor (by aesop) h₁w (by aesop)).le
     _ ≤ circleAverage (re ∘ herglotzRieszKernel 0 w * (log⁺ ‖f ·‖)) 0 R := by
       apply circleAverage_mono
-      · sorry
-      · sorry
+      · apply CircleIntegrable.continuousOn_mul _ (continuousOn_herglotzRieszKernel_sphere h₁w)
+        apply circleIntegrable_log_norm
+        intro x hx
+        rw [abs_of_pos (pos_of_mem_ball h₁w)] at hx
+        apply (h₁f x (sphere_subset_closedBall hx)).meromorphicAt
+      · apply CircleIntegrable.continuousOn_mul _ (continuousOn_herglotzRieszKernel_sphere h₁w)
+        apply circleIntegrable_posLog_norm
+        intro x hx
+        rw [abs_of_pos (pos_of_mem_ball h₁w)] at hx
+        apply (h₁f x (sphere_subset_closedBall hx)).meromorphicAt
       intro x hx
       simp
       unfold herglotzRieszKernel
       gcongr
       · trans (R - ‖w - 0‖) / (R + ‖w - 0‖)
-        · simp only [sub_zero]
+        · rw [sub_zero]
           simp only [mem_ball, dist_zero_right] at h₁w
-          apply div_nonneg
-          · apply sub_nonneg.2 h₁w.le
-          · apply add_nonneg
-            · apply (norm_nonneg w).trans h₁w.le
-            · exact norm_nonneg w
-        · apply le_re_herglotzRieszKernel
-          · rwa [abs_of_pos (pos_of_mem_ball h₁w)] at hx
-          · exact h₁w
+          apply div_nonneg (sub_nonneg.2 h₁w.le)
+            (add_nonneg ((norm_nonneg w).trans h₁w.le) (norm_nonneg w))
+        · apply le_re_herglotzRieszKernel _ h₁w
+          rwa [abs_of_pos (pos_of_mem_ball h₁w)] at hx
       · -- should be simp
         unfold posLog
         simp
+    _ ≤ circleAverage ( ((R + ‖w‖) / (R - ‖w‖)) • (log⁺ ‖f ·‖)) 0 R := by
+      apply circleAverage_mono
+      · apply CircleIntegrable.continuousOn_mul _ (continuousOn_herglotzRieszKernel_sphere h₁w)
+        apply circleIntegrable_posLog_norm
+        intro x hx
+        rw [abs_of_pos (pos_of_mem_ball h₁w)] at hx
+        apply (h₁f x (sphere_subset_closedBall hx)).meromorphicAt
+      · sorry
+      intro x hx
+      rw [abs_of_pos (pos_of_mem_ball h₁w)] at hx
+      simp
+      gcongr
+      · exact posLog_nonneg
+      · simpa [herglotzRieszKernel] using re_herglotzRieszKernel_le hx h₁w
+    _ = ((R + ‖w‖) / (R - ‖w‖)) * circleAverage (log⁺ ‖f ·‖) 0 R := by
+      apply circleAverage_smul
+
+theorem η₁
+    (h₁f : AnalyticOnNhd ℂ f univ) :
+    Real.log ‖f w‖ ≤ 3 * ValueDistribution.proximity f ⊤ ‖2 * w‖ := by
+  by_cases h₁w : f w = 0
+  · simp_all
+    apply ValueDistribution.proximity_nonneg
+  rw [ValueDistribution.proximity_top]
+  by_cases h₂w : w = 0
+  · simp_all
+    rw [← one_mul (a := Real.log ‖f 0‖), mul_comm, mul_comm (a := 3)]
+    gcongr
+    · exact posLog_nonneg
+    · simp [posLog]
+    · norm_num
+  have h₁w : w ∈ ball 0 (2 * ‖w‖) := by aesop
+  by_cases h₃w : meromorphicOrderAt f w ≠ 0
+  · have : f w = 0 := by
+      have := h₁f w (by tauto)
+      rw [← this.analyticOrderAt_ne_zero]
+      rw [this.meromorphicOrderAt_eq] at h₃w
+      aesop
+    simp_all
+  rw [ne_eq, not_not] at h₃w
+  have h₁f : AnalyticOnNhd ℂ f (closedBall 0 (2 * ‖w‖)) := h₁f.mono (by tauto)
+  convert η₀ h₁w h₃w h₁f using 2
+  · field_simp
+    ring
+  · simp
+
+theorem logCounting_isBigO_one_iff_analyticOnNhd (h₁f : AnalyticOnNhd ℂ f univ) :
+    ValueDistribution.proximity f ⊤ =O[atTop] (1 : ℝ → ℝ) ↔ f = fun _ ↦ f 0 := by
+  constructor
+  · intro h
+
+    sorry
+  · intro h₂f
+    rw [h₂f]
+    -- should be simp
+    rw [ValueDistribution.proximity_top]
+    apply Asymptotics.isBigO_iff.2
+    use ‖posLog ‖f 0‖‖
+    filter_upwards
+    intro a
+    rw [circleAverage_const]
+    simp
