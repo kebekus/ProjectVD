@@ -13,7 +13,7 @@ open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --
 -/
 
 variable
-  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   {R : ℝ} {x c w : ℂ} {f h : ℂ → ℂ}
 
 
@@ -23,6 +23,43 @@ variable {R : ℝ} {w z : ℂ}
 
 
 -- Proof by Aristotle
+
+theorem continuous_posLog : Continuous posLog := by
+  refine' continuous_iff_continuousAt.mpr _;
+  -- Prove that the positive logarithm function is continuous at any point $x$.
+  intro x
+  by_cases hx : x = 0;
+  · refine' ContinuousAt.congr _ _;
+    exact fun x => if |x| ≤ 1 then 0 else Real.log |x|;
+    · rw [ Metric.continuousAt_iff ] ; norm_num [ hx ];
+      exact fun ε hε => ⟨ 1, zero_lt_one, fun x hx => by split_ifs <;> norm_num <;> linarith ⟩;
+    · filter_upwards [ Metric.ball_mem_nhds _ zero_lt_one ] with x hx;
+      grind +suggestions;
+  · refine' ContinuousAt.sup _ _;
+    · exact continuousAt_const;
+    · exact Real.continuousAt_log hx
+
+@[fun_prop] theorem continuous_posLog : Continuous log⁺ := by
+  apply?
+  unfold posLog
+  apply Continuous.max (by fun_prop)
+  sorry
+
+@[fun_prop]
+theorem Real.Continuous.circleAverage {f : ℂ → E}
+    (hf : Continuous f) :
+    Continuous (Real.circleAverage f c) := by
+  apply (intervalIntegral.continuous_parametric_intervalIntegral_of_continuous' _ _ _).const_smul
+  fun_prop
+
+theorem logCounting_isBigO_one_iff_analyticOnNhd (h₁f : Continuous f) :
+    Continuous (ValueDistribution.proximity f ⊤) := by
+  unfold ValueDistribution.proximity
+  simp
+  fun_prop
+  apply Real.Continuous.circleAverage
+  sorry
+
 
 theorem analyticOnNhd_herglotzRieszKernel_compl :
     AnalyticOnNhd ℂ (herglotzRieszKernel c w) {w}ᶜ := by
@@ -205,7 +242,12 @@ theorem η₀
         intro x hx
         rw [abs_of_pos (pos_of_mem_ball h₁w)] at hx
         apply (h₁f x (sphere_subset_closedBall hx)).meromorphicAt
-      · sorry
+      · apply CircleIntegrable.continuousOn_mul
+        · apply circleIntegrable_posLog_norm
+          intro x hx
+          rw [abs_of_pos (pos_of_mem_ball h₁w)] at hx
+          apply (h₁f x (sphere_subset_closedBall hx)).meromorphicAt
+        · fun_prop
       intro x hx
       rw [abs_of_pos (pos_of_mem_ball h₁w)] at hx
       simp
