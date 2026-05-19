@@ -1,4 +1,5 @@
 import VD.PoissonJensen0
+import VD.MathlibSubmitted.CircleAverage
 import Mathlib.Analysis.Complex.ValueDistribution.Proximity.Basic
 
 open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --ValueDistribution
@@ -29,17 +30,10 @@ variable {R : ℝ} {w z : ℂ}
   intro x
   by_cases hx : x = 0
   · apply ContinuousAt.congr (f := fun _ ↦ 0) (by fun_prop)
-    filter_upwards [Metric.ball_mem_nhds _ zero_lt_one ] with y hy
+    filter_upwards [Metric.ball_mem_nhds _ zero_lt_one] with y hy
     rw [eq_comm, posLog_eq_zero_iff y]
     simp_all [le_of_lt]
   unfold posLog
-  fun_prop
-
-@[fun_prop]
-theorem Real.Continuous.circleAverage {f : ℂ → E}
-    (hf : Continuous f) :
-    Continuous (Real.circleAverage f c) := by
-  apply (intervalIntegral.continuous_parametric_intervalIntegral_of_continuous' _ _ _).const_smul
   fun_prop
 
 @[fun_prop]
@@ -66,58 +60,6 @@ theorem continuousOn_herglotzRieszKernel_sphere (hw : w ∈ ball c R):
   simp only [mem_compl_iff, mem_singleton_iff, not_not] at h
   rw [← h, ← abs_of_pos (pos_of_mem_ball hw), mem_ball_iff_norm] at hw
   simp_all
-
-/--
-If `g` is continuous on the circle `sphere c |R|` and `f` is circle integrable,
-then `g • f` is circle integrable.
--/
-theorem CircleIntegrable.continuousOn_smul
-    {E 𝕜 : Type*} [NormedRing 𝕜]
-    [NormedAddCommGroup E] [Module 𝕜 E] [NormSMulClass 𝕜 E]
-    {f : ℂ → E} {g : ℂ → 𝕜} {c : ℂ} {R : ℝ}
-    (hf : CircleIntegrable f c R)
-    (hg : ContinuousOn g (sphere c |R|)) :
-    CircleIntegrable (g • f) c R :=
-  IntervalIntegrable.continuousOn_smul hf
-    (hg.comp (by fun_prop) (fun x hx ↦ circleMap_mem_sphere' c R x))
-
-/--
-If `g` is continuous on the circle `sphere c |R|` and `f` is circle integrable,
-then `g • f` is circle integrable.
--/
-theorem CircleIntegrable.continuousOn_fun_smul
-    {E 𝕜 : Type*} [NormedRing 𝕜]
-    [NormedAddCommGroup E] [NormedSpace ℂ E] [Module 𝕜 E] [NormSMulClass 𝕜 E]
-    {f : ℂ → E} {g : ℂ → 𝕜} {c : ℂ} {R : ℝ}
-    (hf : CircleIntegrable f c R)
-    (hg : ContinuousOn g (sphere c |R|)) :
-    CircleIntegrable (fun z ↦ g z • f z) c R :=
-  hf.continuousOn_smul hg
-
-/--
-If `g` is continuous on the circle `sphere c |R|` and `f` is circle integrable,
-then `g * f` is circle integrable.
--/
-theorem CircleIntegrable.continuousOn_mul
-    {𝕜 : Type*} [NormedRing 𝕜]
-    {f g : ℂ → 𝕜} {c : ℂ} {R : ℝ}
-    (hf : CircleIntegrable f c R)
-    (hg : ContinuousOn g (sphere c |R|)) :
-    CircleIntegrable (g * f) c R :=
-  IntervalIntegrable.continuousOn_mul hf
-    (hg.comp (by fun_prop) (fun x hx ↦ circleMap_mem_sphere' c R x))
-
-/--
-If `g` is continuous on the circle `sphere c |R|` and `f` is circle integrable,
-then `g * f` is circle integrable.
--/
-theorem CircleIntegrable.continuousOn_fun_mul
-    {𝕜 : Type*} [NormedRing 𝕜]
-    {f g : ℂ → 𝕜} {c : ℂ} {R : ℝ}
-    (hf : CircleIntegrable f c R)
-    (hg : ContinuousOn g (sphere c |R|)) :
-    CircleIntegrable (fun z ↦ g z * f z) c R :=
-  hf.continuousOn_mul hg
 
 @[simp] theorem divisor_eq_zero_of_not_meromorphicOn {U : Set ℂ} {w : ℂ}
     (hf : ¬ MeromorphicOn f U) :

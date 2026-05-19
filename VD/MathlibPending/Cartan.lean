@@ -4,22 +4,18 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Matteo Cipollina, Stefan Kebekus
 -/
 
-module
+--module
 
-public import VD.MathlibSubmitted.ProximityIntegral
-public import Mathlib.Analysis.Complex.ValueDistribution.Cartan
-public import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
+import VD.MathlibSubmitted.ProximityIntegral
+import Mathlib.Analysis.Complex.ValueDistribution.Cartan
+import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
+import VD.MathlibSubmitted.CircleAverage
 
 public section
 
 open Real
 
 namespace ValueDistribution
-
-theorem CircleIntegrable.sub {E : Type*} [NormedAddCommGroup E] {f g : ℂ → E} {c : ℂ} {R : ℝ}
-    (hf : CircleIntegrable f c R) (hg : CircleIntegrable g c R) :
-    CircleIntegrable (f - g) c R :=
-  hf.sub hg
 
 variable
   {f : ℂ → ℂ} {R : ℝ}

@@ -230,7 +230,7 @@ theorem congr_codiscreteWitin_closedBall_prod_canonicalFactor_smul
   have h₃g : divisor g (ball 0 R) = 0 := by
     rw [divisor_congr_codiscreteWithin
         ((toMeromorphicNFOn_eqOn_codiscrete hφ).symm.filter_mono
-        (codiscreteWithin.mono ball_subset_closedBall)) isOpen_ball,
+        (codiscreteWithin_mono ball_subset_closedBall)) isOpen_ball,
       divisor_smul _ (fun x hx ↦ h₁f x (ball_subset_closedBall hx))
         (fun z _ ↦ canonicalDecomposition_aux₃ hR)
         (fun z hz ↦ h₂f ⟨z, ball_subset_closedBall hz⟩),
@@ -254,7 +254,7 @@ theorem congr_codiscreteWitin_closedBall_prod_canonicalFactor_smul
   · trans (∏ i ∈ η₀.toFinset, canonicalFactor R i ^ (-(divisor f (ball 0 R)) i)) • φ
     · unfold φ
       rw [finprod_eq_prod_of_mulSupport_subset_of_finite _ _ η₀]
-      filter_upwards [Filter.codiscreteWithin.mono (by tauto) η₀.compl_mem_codiscrete,
+      filter_upwards [codiscreteWithin_mono (by tauto) η₀.compl_mem_codiscrete,
         Filter.self_mem_codiscreteWithin (closedBall 0 R)] with a ha h₂a
       simp only [Pi.smul_apply', Finset.prod_apply, Pi.pow_apply]
       rw [← smul_assoc, ← Finset.prod_smul, Finset.prod_eq_one, one_smul]
