@@ -43,24 +43,6 @@ theorem continuous_proximity (h₁f : Continuous f) :
   simp only [reduceDIte]
   fun_prop
 
-theorem analyticOnNhd_herglotzRieszKernel_compl :
-    AnalyticOnNhd ℂ (herglotzRieszKernel c w) {w}ᶜ := by
-  intro x hx
-  unfold herglotzRieszKernel
-  have : x - w ≠ 0 := by grind
-  fun_prop (disch := aesop)
-
-@[fun_prop]
-theorem continuousOn_herglotzRieszKernel_sphere (hw : w ∈ ball c R):
-    ContinuousOn (re ∘ herglotzRieszKernel c w) (sphere c |R|) := by
-  intro x hx
-  apply ContinuousAt.continuousWithinAt
-  apply ContinuousAt.comp (by fun_prop) (analyticOnNhd_herglotzRieszKernel_compl x _).continuousAt
-  by_contra h
-  simp only [mem_compl_iff, mem_singleton_iff, not_not] at h
-  rw [← h, ← abs_of_pos (pos_of_mem_ball hw), mem_ball_iff_norm] at hw
-  simp_all
-
 @[simp] theorem divisor_eq_zero_of_not_meromorphicOn {U : Set ℂ} {w : ℂ}
     (hf : ¬ MeromorphicOn f U) :
     divisor f U w = 0 := by
@@ -126,6 +108,9 @@ theorem η₀
     rwa [mem_support, ne_eq, divisor_apply
       (fun c hc ↦ (fun x hx ↦ (h₁f x hx).meromorphicAt) c (ball_subset_closedBall hc))
       ((divisor f (ball 0 R)).supportWithinDomain hb)] at hb
+  have h₅f : MeromorphicOn f (sphere 0 |R|) := by
+        rw [abs_of_pos (pos_of_mem_ball h₁w)]
+        exact fun x hx ↦ (h₁f x (sphere_subset_closedBall hx)).meromorphicAt
   calc Real.log ‖f w‖
     _ = Real.log ‖meromorphicTrailingCoeffAt f w‖ := by
       rw [AnalyticAt.meromorphicTrailingCoeffAt_of_meromorphicOrderAt_eq_zero
@@ -141,17 +126,9 @@ theorem η₀
       · have := (divisor f (ball 0 R)).supportWithinDomain
         apply log_nonneg (norm_canonicalFactor (by aesop) h₁w (by aesop)).le
     _ ≤ circleAverage (re ∘ herglotzRieszKernel 0 w * (log⁺ ‖f ·‖)) 0 R := by
-      apply circleAverage_mono
-      · apply CircleIntegrable.continuousOn_mul _ (continuousOn_herglotzRieszKernel_sphere h₁w)
-        apply circleIntegrable_log_norm
-        intro x hx
-        rw [abs_of_pos (pos_of_mem_ball h₁w)] at hx
-        apply (h₁f x (sphere_subset_closedBall hx)).meromorphicAt
-      · apply CircleIntegrable.continuousOn_mul _ (continuousOn_herglotzRieszKernel_sphere h₁w)
-        apply circleIntegrable_posLog_norm
-        intro x hx
-        rw [abs_of_pos (pos_of_mem_ball h₁w)] at hx
-        apply (h₁f x (sphere_subset_closedBall hx)).meromorphicAt
+      apply circleAverage_mono ((circleIntegrable_log_norm h₅f).continuousOn_mul
+        (continuousOn_herglotzRieszKernel_sphere h₁w)) ((circleIntegrable_posLog_norm
+        h₅f).continuousOn_mul (continuousOn_herglotzRieszKernel_sphere h₁w))
       intro x hx
       simp
       unfold herglotzRieszKernel
@@ -167,36 +144,31 @@ theorem η₀
         unfold posLog
         simp
     _ ≤ circleAverage ( ((R + ‖w‖) / (R - ‖w‖)) • (log⁺ ‖f ·‖)) 0 R := by
-      apply circleAverage_mono
-      · apply CircleIntegrable.continuousOn_mul _ (continuousOn_herglotzRieszKernel_sphere h₁w)
+      have : CircleIntegrable (log⁺ ‖f ·‖) 0 R := by
         apply circleIntegrable_posLog_norm
-        intro x hx
-        rw [abs_of_pos (pos_of_mem_ball h₁w)] at hx
-        apply (h₁f x (sphere_subset_closedBall hx)).meromorphicAt
-      · apply CircleIntegrable.continuousOn_mul
-        · apply circleIntegrable_posLog_norm
-          intro x hx
-          rw [abs_of_pos (pos_of_mem_ball h₁w)] at hx
-          apply (h₁f x (sphere_subset_closedBall hx)).meromorphicAt
-        · fun_prop
+        rw [abs_of_pos (pos_of_mem_ball h₁w)]
+        exact fun x hx ↦ (h₁f x (sphere_subset_closedBall hx)).meromorphicAt
+      apply circleAverage_mono (this.circleIntegrable_re_herglotzRieszKernel_smul h₁w)
+        (this.continuousOn_mul (by fun_prop))
       intro x hx
       rw [abs_of_pos (pos_of_mem_ball h₁w)] at hx
-      simp
+      rw [Pi.smul_apply', comp_apply, smul_eq_mul, Pi.mul_apply]
       gcongr
       · exact posLog_nonneg
       · simpa [herglotzRieszKernel] using re_herglotzRieszKernel_le hx h₁w
-    _ = ((R + ‖w‖) / (R - ‖w‖)) * circleAverage (log⁺ ‖f ·‖) 0 R := by
-      apply circleAverage_smul
+    _ = ((R + ‖w‖) / (R - ‖w‖)) * circleAverage (log⁺ ‖f ·‖) 0 R :=
+      circleAverage_smul
 
 theorem η₁
     (h₁f : AnalyticOnNhd ℂ f univ) :
     Real.log ‖f w‖ ≤ 3 * ValueDistribution.proximity f ⊤ ‖2 * w‖ := by
   by_cases h₁w : f w = 0
-  · simp_all
+  · simp only [h₁w, norm_zero, Real.log_zero, Complex.norm_mul, Complex.norm_ofNat, Nat.ofNat_pos,
+      mul_nonneg_iff_of_pos_left]
     apply ValueDistribution.proximity_nonneg
   rw [ValueDistribution.proximity_top]
   by_cases h₂w : w = 0
-  · simp_all
+  · simp_all only [mul_zero, norm_zero, circleAverage_zero]
     rw [← one_mul (a := Real.log ‖f 0‖), mul_comm, mul_comm (a := 3)]
     gcongr
     · exact posLog_nonneg
@@ -229,11 +201,7 @@ theorem logCounting_isBigO_one_iff_analyticOnNhd (h₁f : AnalyticOnNhd ℂ f un
       use c
       intro x hx
       simp at hx
-
-
-
       sorry
-
     sorry
   · intro h₂f
     rw [h₂f]

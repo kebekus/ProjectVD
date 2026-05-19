@@ -1,4 +1,3 @@
-import VD.PoissonJensen0
 import Mathlib.Analysis.Complex.ValueDistribution.Proximity.Basic
 
 open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --ValueDistribution

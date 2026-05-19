@@ -152,29 +152,24 @@ lemma AnalyticOnNhd.log_norm_eq_smul_meromorphicTrailingCoeffAt_of_eventuallyEq'
     intro x hx
     apply zpow_ne_zero
     rw [ne_eq, norm_eq_zero]
+    have := (divisor f (sphere 0 R)).supportWithinDomain
     by_contra hCon
     rw [sub_eq_zero] at hCon
     subst hCon
     rw [Finite.mem_toFinset, mem_support, ne_eq,
-      divisor_apply (h₁f.mono_set (sphere_subset_closedBall))] at hx
+      divisor_apply (h₁f.mono_set (sphere_subset_closedBall)) (by aesop)] at hx
     aesop
-    · have := (divisor f (sphere 0 R)).supportWithinDomain
-      aesop
   have η₁ : ∀ x ∈ h₄f.toFinset, ‖canonicalFactor R x w‖ ^ (divisor f (ball 0 R)) x ≠ 0 := by
     intro x hx
     apply zpow_ne_zero
     rw [ne_eq, norm_eq_zero]
-    apply canonicalFactor_ne_zero
-    · have := (divisor f (ball 0 R)).supportWithinDomain
-      aesop
-    · aesop
+    have := (divisor f (ball 0 R)).supportWithinDomain
+    apply canonicalFactor_ne_zero (by aesop) (by aesop)
     by_contra hCon
     subst hCon
     rw [Finite.mem_toFinset, mem_support, ne_eq] at hx
-    rw [divisor_apply (h₁f.mono_set ball_subset_closedBall)] at hx
+    rw [divisor_apply (h₁f.mono_set ball_subset_closedBall) (by aesop)] at hx
     aesop
-    · have := (divisor f (ball 0 R)).supportWithinDomain
-      aesop
   rw [h₁h.eq_smul_meromorphicTrailingCoeffAt_of_eventuallyEq'
     h₂h h₁f h₂f h₁w h₂w hR, finprod_eq_prod_of_mulSupport_subset (s := h₄f.toFinset) _ (by aesop),
     finprod_eq_prod_of_mulSupport_subset (s := h₃f.toFinset) _ (by aesop),

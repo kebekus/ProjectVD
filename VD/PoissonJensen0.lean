@@ -1,7 +1,8 @@
 import Mathlib.Analysis.Complex.CanonicalDecomposition
 import Mathlib.Analysis.Complex.JensenFormula
-import VD.BlaschkeDecomp3
 import VD.MathlibPending.BlaschkeDecomp2
+import VD.MathlibPending.BlaschkeDecomp3
+import VD.MathlibSubmitted.CircleAverage
 
 open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --ValueDistribution
 
@@ -9,6 +10,31 @@ open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --
 ## Additional Material
 -/
 
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+
+theorem analyticOnNhd_herglotzRieszKernel_compl {c w : ℂ} :
+    AnalyticOnNhd ℂ (herglotzRieszKernel c w) {w}ᶜ := by
+  intro x hx
+  unfold herglotzRieszKernel
+  have : x - w ≠ 0 := by grind
+  fun_prop (disch := aesop)
+
+@[fun_prop]
+theorem continuousOn_herglotzRieszKernel_sphere {c w : ℂ} {R : ℝ} (hw : w ∈ ball c R):
+    ContinuousOn (re ∘ herglotzRieszKernel c w) (sphere c |R|) := by
+  intro x hx
+  apply ContinuousAt.continuousWithinAt
+  apply ContinuousAt.comp (by fun_prop) (analyticOnNhd_herglotzRieszKernel_compl x _).continuousAt
+  by_contra h
+  simp only [mem_compl_iff, mem_singleton_iff, not_not] at h
+  rw [← h, ← abs_of_pos (pos_of_mem_ball hw), mem_ball_iff_norm] at hw
+  simp_all
+
+theorem CircleIntegrable.circleIntegrable_re_herglotzRieszKernel_smul {c w : ℂ} {R : ℝ} {f : ℂ → E}
+    (hw : w ∈ ball c R)
+    (hf : CircleIntegrable f c R) :
+    CircleIntegrable (re ∘ herglotzRieszKernel c w • f) c R := by
+  apply hf.continuousOn_smul (by fun_prop)
 
 /-!
 ## Formula goes here
@@ -46,27 +72,16 @@ lemma xx
   have cast_smul {x : ℂ} {φ : ℂ → ℝ} :
       (divisor f (sphere 0 R)) x • φ = ((divisor f (sphere 0 R)) x : ℝ) • φ := by aesop
   -- Regularity properties of functions used in the calculation below
-  have ρ₁ : ContinuousOn (fun x ↦ (re ∘ herglotzRieszKernel 0 w) (circleMap 0 R x)) (uIcc 0 (2 * π)) := by
-    unfold herglotzRieszKernel
-    apply Continuous.continuousOn
-    have {x : ℝ} : circleMap 0 R x - w ≠ 0 := by
-      by_contra h
-      rw [← (sub_eq_zero.1 h), mem_ball, dist_zero_right, norm_circleMap_zero] at hw
-      grind
-    fun_prop (disch := aesop)
   have ρ₂ : CircleIntegrable (Complex.re ∘ herglotzRieszKernel 0 w • (Real.log ‖h ·‖)) 0 R := by
-    apply IntervalIntegrable.continuousOn_mul _ ρ₁
-    apply (AnalyticOnNhd.meromorphicOn _).intervalIntegrable_log_norm
-    intro x hx
-    apply AnalyticAt.comp' _ (analyticOnNhd_circleMap 0 R x (by tauto))
-    apply AnalyticAt.restrictScalars (𝕜' := ℂ) (h₁h (circleMap 0 R x) _)
-    simp [abs_of_nonneg hR.le]
+    apply CircleIntegrable.circleIntegrable_re_herglotzRieszKernel_smul hw
+    apply circleIntegrable_log_norm (h₁h.meromorphicOn.mono_set _)
+    simpa [abs_of_pos (pos_of_mem_ball hw)] using sphere_subset_closedBall
   have ρ₃ : ∀ i ∈ h₂f.toFinset, CircleIntegrable ((divisor f (sphere 0 R)) i • re ∘ herglotzRieszKernel 0 w • (Real.log ‖· - i‖)) 0 R := by
     intro i hi
     rw [cast_smul]
-    apply (IntervalIntegrable.continuousOn_mul _ ρ₁).const_mul
-    apply (AnalyticOnNhd.meromorphicOn _).intervalIntegrable_log_norm
-    exact AnalyticOnNhd.sub (fun x _ ↦ analyticOnNhd_circleMap 0 R x (mem_univ x)) (fun _ _ ↦ by fun_prop)
+    apply CircleIntegrable.const_smul
+    apply CircleIntegrable.circleIntegrable_re_herglotzRieszKernel_smul hw
+    apply circleIntegrable_log_norm (fun x hx ↦ by fun_prop)
   -- Proof of the main claim by calculation
   calc circleAverage (re ∘ herglotzRieszKernel 0 w • (Real.log ‖f ·‖)) 0 R
     _ = circleAverage (re ∘ herglotzRieszKernel 0 w •
