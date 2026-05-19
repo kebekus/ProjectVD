@@ -13,6 +13,29 @@ lemma meromorphicAt_canonicalFactor {R : ℝ} {x w : ℂ} : MeromorphicAt (canon
   rw [canonicalFactor_def]
   fun_prop
 
+variable
+  {𝕜 : Type*} [NontriviallyNormedField 𝕜] {U V : Set 𝕜} {z : 𝕜}
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+
+lemma divisor_sphere_finiteSupport [ProperSpace 𝕜] {f : 𝕜 → E} {R : ℝ} {c : 𝕜} :
+    (divisor f (sphere c R)).support.Finite :=
+    (divisor f (sphere c R)).finiteSupport (isCompact_sphere c R)
+
+lemma MeromorphicOn.divisor_subset_finiteSupport {f : 𝕜 → E}
+    (hf : MeromorphicOn f U) (hU : IsCompact U) (hV : V ⊆ U) :
+    (divisor f V).support.Finite := by
+  apply ((divisor f U).finiteSupport hU).subset
+  intro b hb
+  rw [mem_support, ne_eq, divisor_apply hf (hV ((divisor f V).supportWithinDomain hb))]
+  rwa [mem_support, ne_eq, divisor_apply (fun x hx ↦ hf x (hV hx))
+    ((divisor f V).supportWithinDomain hb)] at hb
+
+lemma MeromorphicOn.divisor_ball_finiteSupport [ProperSpace 𝕜] {f : 𝕜 → E} {R : ℝ} {c : 𝕜}
+    (hf : MeromorphicOn f (closedBall c R)) :
+    (divisor f (ball c R)).support.Finite :=
+  hf.divisor_subset_finiteSupport (isCompact_closedBall c R) ball_subset_closedBall
+
+
 /-!
 ## Formula goes here
 -/
@@ -39,15 +62,8 @@ lemma AnalyticOnNhd.eq_smul_meromorphicTrailingCoeffAt_of_eventuallyEq
           * (∏ᶠ i, meromorphicTrailingCoeffAt (· - i) w ^ (-divisor f (sphere 0 R)) i))
           • meromorphicTrailingCoeffAt f w := by
   -- Finiteness properties and side results used throughout the proof
-  have h₃f : (divisor f (sphere 0 R)).support.Finite :=
-    (divisor f (sphere 0 R)).finiteSupport (isCompact_sphere 0 R)
-  have h₄f : (divisor f (ball 0 R)).support.Finite := by
-    apply ((divisor f (closedBall 0 R)).finiteSupport (isCompact_closedBall 0 R)).subset
-    intro b hb
-    rw [mem_support, ne_eq, divisor_apply h₁f
-      (ball_subset_closedBall ((divisor f (ball 0 R)).supportWithinDomain hb))]
-    rwa [mem_support, ne_eq, divisor_apply (fun c hc ↦ h₁f c (ball_subset_closedBall hc))
-      ((divisor f (ball 0 R)).supportWithinDomain hb)] at hb
+  have h₃f : (divisor f (sphere 0 R)).support.Finite := divisor_sphere_finiteSupport
+  have h₄f : (divisor f (ball 0 R)).support.Finite := h₁f.divisor_ball_finiteSupport
   have := (h₁h w hw).meromorphicAt
   -- Proof body: Substitute `f` using `h₁f` and compute
   rw [meromorphicTrailingCoeffAt_congr_nhdsNE
@@ -80,9 +96,9 @@ lemma AnalyticOnNhd.eq_smul_meromorphicTrailingCoeffAt_of_eventuallyEq
 Companion lemma to
 `congr_codiscreteWitin_closedBall_prod_canonicalFactor_mul_prod_smul`: In the
 setting of the extended canonical decomposition, write the function `h` entirely
-in terms of `f`.
+in terms of `f`, under the assumption that `f` has order zero.
 -/
-lemma AnalyticOnNhd.eq_smul_meromorphicTrailingCoeffAt_of_eventuallyEq_of_meromorphicOrderAt
+lemma AnalyticOnNhd.eq_smul_meromorphicTrailingCoeffAt_of_eventuallyEq'
     (h₁h : AnalyticOnNhd ℂ h (closedBall 0 R)) (h₂h : ∀ u ∈ (closedBall 0 R), h u ≠ 0)
     (h₁f : MeromorphicOn f (closedBall 0 R))
     (h₂f : f =ᶠ[codiscreteWithin (closedBall 0 R)]
@@ -112,8 +128,13 @@ lemma AnalyticOnNhd.eq_smul_meromorphicTrailingCoeffAt_of_eventuallyEq_of_meromo
     · simp_all [meromorphicTrailingCoeffAt_id_sub_const, divisor_def]
     grind [meromorphicTrailingCoeffAt_id_sub_const]
 
-
-lemma AnalyticOnNhd.eq_smul_meromorphicTrailingCoeffAt_of_eventuallyEq_of_meromorphicOrderAt'
+/--
+Companion lemma to
+`congr_codiscreteWitin_closedBall_prod_canonicalFactor_mul_prod_smul`: In the
+setting of the extended canonical decomposition, write the function `log ‖h‖`
+entirely in terms of `f`, under the assumption that `f` has order zero.
+-/
+lemma AnalyticOnNhd.log_norm_eq_smul_meromorphicTrailingCoeffAt_of_eventuallyEq'
     (h₁h : AnalyticOnNhd ℂ h (closedBall 0 R)) (h₂h : ∀ u ∈ (closedBall 0 R), h u ≠ 0)
     (h₁f : MeromorphicOn f (closedBall 0 R))
     (h₂f : f =ᶠ[codiscreteWithin (closedBall 0 R)]
@@ -125,15 +146,8 @@ lemma AnalyticOnNhd.eq_smul_meromorphicTrailingCoeffAt_of_eventuallyEq_of_meromo
     Real.log ‖h w‖ = ((∑ᶠ i, (divisor f (ball 0 R) i) * Real.log ‖canonicalFactor R i w‖)
           - (∑ᶠ i, (divisor f (sphere 0 R) i) * Real.log ‖w - i‖))
           + Real.log ‖meromorphicTrailingCoeffAt f w‖ := by
-  have h₃f : (divisor f (sphere 0 R)).support.Finite :=
-    (divisor f (sphere 0 R)).finiteSupport (isCompact_sphere 0 R)
-  have h₄f : (divisor f (ball 0 R)).support.Finite := by
-    apply ((divisor f (closedBall 0 R)).finiteSupport (isCompact_closedBall 0 R)).subset
-    intro b hb
-    rw [mem_support, ne_eq, divisor_apply h₁f
-      (ball_subset_closedBall ((divisor f (ball 0 R)).supportWithinDomain hb))]
-    rwa [mem_support, ne_eq, divisor_apply (fun c hc ↦ h₁f c (ball_subset_closedBall hc))
-      ((divisor f (ball 0 R)).supportWithinDomain hb)] at hb
+  have h₃f : (divisor f (sphere 0 R)).support.Finite := divisor_sphere_finiteSupport
+  have h₄f : (divisor f (ball 0 R)).support.Finite := h₁f.divisor_ball_finiteSupport
   have η₀ : ∀ x ∈ h₃f.toFinset, ‖w - x‖ ^ (-divisor f (sphere 0 R)) x ≠ 0 := by
     intro x hx
     apply zpow_ne_zero
@@ -161,7 +175,7 @@ lemma AnalyticOnNhd.eq_smul_meromorphicTrailingCoeffAt_of_eventuallyEq_of_meromo
     aesop
     · have := (divisor f (ball 0 R)).supportWithinDomain
       aesop
-  rw [h₁h.eq_smul_meromorphicTrailingCoeffAt_of_eventuallyEq_of_meromorphicOrderAt
+  rw [h₁h.eq_smul_meromorphicTrailingCoeffAt_of_eventuallyEq'
     h₂h h₁f h₂f h₁w h₂w hR, finprod_eq_prod_of_mulSupport_subset (s := h₄f.toFinset) _ (by aesop),
     finprod_eq_prod_of_mulSupport_subset (s := h₃f.toFinset) _ (by aesop),
     finsum_eq_sum_of_support_subset (s := h₄f.toFinset) _ (fun _ _ ↦ (by aesop)),

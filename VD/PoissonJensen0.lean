@@ -32,14 +32,8 @@ lemma xx
         ∑ᶠ x, (divisor f (sphere 0 R)) x * Real.log ‖w - x‖ + Real.log ‖h w‖ := by
   -- Facts used in the calculation below
   have hR : 0 < R := pos_of_mem_ball hw
-  have h₂f : (divisor f (sphere 0 R)).support.Finite :=
-    (divisor f (sphere 0 R)).finiteSupport (isCompact_sphere 0 R)
-  have h₃f : (divisor f (ball 0 R)).support.Finite := by
-    apply ((divisor f (closedBall 0 R)).finiteSupport (isCompact_closedBall 0 R)).subset
-    intro b hb
-    have h₂b := hb
-    rw [mem_support, ne_eq, divisor_apply (fun c hc ↦ h₀f c (ball_subset_closedBall hc)) ((divisor f (ball 0 R)).supportWithinDomain hb)] at h₂b
-    rwa [mem_support, ne_eq, divisor_apply h₀f (ball_subset_closedBall ((divisor f (ball 0 R)).supportWithinDomain hb))]
+  have h₂f : (divisor f (sphere 0 R)).support.Finite := divisor_sphere_finiteSupport
+  have h₃f : (divisor f (ball 0 R)).support.Finite := h₀f.divisor_ball_finiteSupport
   have h₄f {a : ℂ} (ha : (divisor f (sphere 0 R)) a = 0) : ∀ b ∈ h₂f.toFinset, ‖a - b‖ ^ (divisor f (sphere 0 R)) b ≠ 0 := by
     intro b hb
     apply zpow_ne_zero
@@ -144,6 +138,6 @@ theorem poissonJensen₀
     aesop
   obtain ⟨h, h₁h, h₂h, h₃h⟩ := congr_codiscreteWitin_closedBall_prod_canonicalFactor_mul_prod_smul h₁f h₂f
   rw [xx h₁w h₁f h₁h h₂h h₃h]
-  rw [h₁h.eq_smul_meromorphicTrailingCoeffAt_of_eventuallyEq_of_meromorphicOrderAt'
+  rw [h₁h.log_norm_eq_smul_meromorphicTrailingCoeffAt_of_eventuallyEq'
     h₂h h₁f h₃h h₂w h₃w (pos_of_mem_ball h₁w)]
   ring_nf
