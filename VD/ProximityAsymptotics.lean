@@ -24,26 +24,16 @@ variable {R : ℝ} {w z : ℂ}
 
 -- Proof by Aristotle
 
-theorem continuous_posLog : Continuous posLog := by
-  refine' continuous_iff_continuousAt.mpr _;
-  -- Prove that the positive logarithm function is continuous at any point $x$.
-  intro x
-  by_cases hx : x = 0;
-  · refine' ContinuousAt.congr _ _;
-    exact fun x => if |x| ≤ 1 then 0 else Real.log |x|;
-    · rw [ Metric.continuousAt_iff ] ; norm_num [ hx ];
-      exact fun ε hε => ⟨ 1, zero_lt_one, fun x hx => by split_ifs <;> norm_num <;> linarith ⟩;
-    · filter_upwards [ Metric.ball_mem_nhds _ zero_lt_one ] with x hx;
-      grind +suggestions;
-  · refine' ContinuousAt.sup _ _;
-    · exact continuousAt_const;
-    · exact Real.continuousAt_log hx
-
 @[fun_prop] theorem continuous_posLog : Continuous log⁺ := by
-  apply?
+  rw [continuous_iff_continuousAt]
+  intro x
+  by_cases hx : x = 0
+  · apply ContinuousAt.congr (f := fun _ ↦ 0) (by fun_prop)
+    filter_upwards [Metric.ball_mem_nhds _ zero_lt_one ] with y hy
+    rw [eq_comm, posLog_eq_zero_iff y]
+    simp_all [le_of_lt]
   unfold posLog
-  apply Continuous.max (by fun_prop)
-  sorry
+  fun_prop
 
 @[fun_prop]
 theorem Real.Continuous.circleAverage {f : ℂ → E}
@@ -52,14 +42,12 @@ theorem Real.Continuous.circleAverage {f : ℂ → E}
   apply (intervalIntegral.continuous_parametric_intervalIntegral_of_continuous' _ _ _).const_smul
   fun_prop
 
-theorem logCounting_isBigO_one_iff_analyticOnNhd (h₁f : Continuous f) :
+@[fun_prop]
+theorem continuous_proximity (h₁f : Continuous f) :
     Continuous (ValueDistribution.proximity f ⊤) := by
   unfold ValueDistribution.proximity
-  simp
+  simp only [reduceDIte]
   fun_prop
-  apply Real.Continuous.circleAverage
-  sorry
-
 
 theorem analyticOnNhd_herglotzRieszKernel_compl :
     AnalyticOnNhd ℂ (herglotzRieszKernel c w) {w}ᶜ := by
@@ -68,6 +56,7 @@ theorem analyticOnNhd_herglotzRieszKernel_compl :
   have : x - w ≠ 0 := by grind
   fun_prop (disch := aesop)
 
+@[fun_prop]
 theorem continuousOn_herglotzRieszKernel_sphere (hw : w ∈ ball c R):
     ContinuousOn (re ∘ herglotzRieszKernel c w) (sphere c |R|) := by
   intro x hx
