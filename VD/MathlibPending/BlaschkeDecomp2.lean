@@ -92,6 +92,13 @@ theorem divisor_congr_codiscreteWitin_closedBall_prod_canonicalFactor_smul {f g 
   · have : x ∉ sphere (0 : ℂ) R := by aesop
     simp_all
 
+theorem CanonicalDecomposition.divisor_eq_divisor {f g : ℂ → E}
+    (D : CanonicalDecomp f g R)
+    (hR : 0 < R) :
+    divisor g (closedBall 0 R) x = divisor f (sphere 0 R) x := by
+  apply divisor_congr_codiscreteWitin_closedBall_prod_canonicalFactor_smul
+    D.f_meromorphicOn D.g_meromorphicNFOn D.g_ne_zero D.eventuallyEq hR
+
 /--
 **Extended canonical decomposition:** A meromorphic function on a closed disk is
 equal, up to modification over a discrete set, to a product of a non-vanishing

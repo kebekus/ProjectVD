@@ -19,17 +19,19 @@ variable
   {R : ℝ} {c w : ℂ}
 
 
-/-- A function with locally finite support within `U` is a triple as specified below. -/
+/--
+Given functions `f`, `g` and a real number `R`, the following convenience
+structure packs the information relevant in the canonical decomposition.
+-/
 structure CanonicalDecomp (f g : ℂ → E) (R : ℝ) where
-  /--
-  A proof that `g` is meromorphic in normal form on `closedBall 0 R`.
-  -/
-  normalForm : MeromorphicNFOn g (closedBall 0 R)
+  /-- A proof that `f` is meromorphic on `closedBall 0 R`. -/
+  f_meromorphicOn : MeromorphicOn f (closedBall 0 R)
 
-  /--
-  A proof that `g` does not vanish in the interior of the ball.
-  -/
-  nonvanish : ∀ u ∈ (ball 0 R), g u ≠ 0
+  /-- A proof that `g` is meromorphic in normal form on `closedBall 0 R`. -/
+  g_meromorphicNFOn : MeromorphicNFOn g (closedBall 0 R)
+
+  /-- A proof that `g` does not vanish in the interior of the ball. -/
+  g_ne_zero : ∀ u ∈ (ball 0 R), g u ≠ 0
 
   /--
   A proof that `f` is equal, up to modification over a discrete set, to a
@@ -303,8 +305,9 @@ theorem canonicalDecomp
   obtain ⟨g, h₁g, h₂g, h₃g⟩ := congr_codiscreteWitin_closedBall_prod_canonicalFactor_smul h₁f h₂f
   use g
   exact {
-    normalForm := h₁g
-    nonvanish := h₂g
+    f_meromorphicOn := h₁f
+    g_meromorphicNFOn := h₁g
+    g_ne_zero := h₂g
     eventuallyEq := h₃g
   }
 
