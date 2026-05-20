@@ -18,6 +18,27 @@ variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
   {R : ℝ} {c w : ℂ}
 
+
+/-- A function with locally finite support within `U` is a triple as specified below. -/
+structure CanonicalDecomp (f g : ℂ → E) (R : ℝ) where
+  /--
+  A proof that `g` is meromorphic in normal form on `closedBall 0 R`.
+  -/
+  normalForm : MeromorphicNFOn g (closedBall 0 R)
+
+  /--
+  A proof that `g` does not vanish in the interior of the ball.
+  -/
+  nonvanish : ∀ u ∈ (ball 0 R), g u ≠ 0
+
+  /--
+  A proof that `f` is equal, up to modification over a discrete set, to a
+  product of `g` and canonical factors prescribed by the divisor of `f`.
+  -/
+  eventuallyEq : f =ᶠ[codiscreteWithin (closedBall 0 R)]
+    (∏ᶠ u, (canonicalFactor R u) ^ (-MeromorphicOn.divisor f (ball 0 R) u)) • g
+
+
 /-!
 ## Other Material
 -/
@@ -274,5 +295,18 @@ theorem congr_codiscreteWitin_closedBall_prod_canonicalFactor_smul
         simp_all
     · filter_upwards [toMeromorphicNFOn_eqOn_codiscrete hφ] with z hz
       simp_all [g]
+
+theorem canonicalDecomp
+    (h₁f : MeromorphicOn f (closedBall 0 R))
+    (h₂f : ∀ u : (closedBall (0 : ℂ) R), meromorphicOrderAt f u ≠ ⊤) :
+    ∃ g : ℂ → E, CanonicalDecomp f g R := by
+  obtain ⟨g, h₁g, h₂g, h₃g⟩ := congr_codiscreteWitin_closedBall_prod_canonicalFactor_smul h₁f h₂f
+  use g
+  exact {
+    normalForm := h₁g
+    nonvanish := h₂g
+    eventuallyEq := h₃g
+  }
+
 
 end MeromorphicOn
