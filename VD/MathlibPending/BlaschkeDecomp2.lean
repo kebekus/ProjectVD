@@ -90,6 +90,29 @@ theorem _root_.CanonicalDecomp.divisor_eq_divisor {f g : ℂ → E} (D : Canonic
     simp_all
 
 /--
+Given functions `f`, `g` and a real number `R`, the following convenience structure packs the
+information relevant in the canonical decomposition.  The condition "`g` is without zeros or poles"
+is formulated by saying that `g` is meromorphic in normal form and `g ≠ 0`.
+-/
+structure ExtCanonicalDecomp (f h : ℂ → E) (R : ℝ) where
+  /-- A proof that `f` is meromorphic on `closedBall 0 R`. -/
+  f_meromorphicOn : MeromorphicOn f (closedBall 0 R)
+
+  /-- A proof that `g` is meromorphic in normal form on `closedBall 0 R`. -/
+  h_meromorphicNFOn : AnalyticOnNhd ℂ h (closedBall 0 R)
+
+  /-- A proof that `g` does not vanish in the interior of the ball. -/
+  g_ne_zero : ∀ u ∈ (ball 0 R), h u ≠ 0
+
+  /--
+  A proof that `f` is equal, up to modification over a discrete set, to a product of `g` and
+  canonical factors prescribed by the divisor of `f`.
+  -/
+  eventuallyEq : f =ᶠ[codiscreteWithin (closedBall 0 R)]
+    ((∏ᶠ u, (canonicalFactor R u) ^ (-divisor f (ball 0 R) u)) * (∏ᶠ u, (· - u) ^ (divisor f (sphere 0 R)) u)) • h
+
+
+/--
 **Extended canonical decomposition:** A meromorphic function on a closed disk is
 equal, up to modification over a discrete set, to a product of a non-vanishing
 analytic function, canonical factors and meromorphic functions of the form `(x -
