@@ -1,5 +1,4 @@
 import VD.PoissonJensen0
-import VD.MathlibSubmitted.CircleAverage
 import Mathlib.Analysis.Complex.ValueDistribution.Proximity.Basic
 
 open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --ValueDistribution
@@ -126,9 +125,9 @@ theorem η₀
       · have := (divisor f (ball 0 R)).supportWithinDomain
         apply log_nonneg (norm_canonicalFactor (by aesop) h₁w (by aesop)).le
     _ ≤ circleAverage (re ∘ herglotzRieszKernel 0 w * (log⁺ ‖f ·‖)) 0 R := by
-      apply circleAverage_mono ((circleIntegrable_log_norm h₅f).continuousOn_mul
+      apply circleAverage_mono ((circleIntegrable_log_norm h₅f).mul_of_continuousOn
         (continuousOn_herglotzRieszKernel_sphere h₁w)) ((circleIntegrable_posLog_norm
-        h₅f).continuousOn_mul (continuousOn_herglotzRieszKernel_sphere h₁w))
+        h₅f).mul_of_continuousOn (continuousOn_herglotzRieszKernel_sphere h₁w))
       intro x hx
       simp
       unfold herglotzRieszKernel
@@ -149,7 +148,7 @@ theorem η₀
         rw [abs_of_pos (pos_of_mem_ball h₁w)]
         exact fun x hx ↦ (h₁f x (sphere_subset_closedBall hx)).meromorphicAt
       apply circleAverage_mono (this.circleIntegrable_re_herglotzRieszKernel_smul h₁w)
-        (this.continuousOn_mul (by fun_prop))
+        (this.mul_of_continuousOn (by fun_prop))
       intro x hx
       rw [abs_of_pos (pos_of_mem_ball h₁w)] at hx
       rw [Pi.smul_apply', comp_apply, smul_eq_mul, Pi.mul_apply]

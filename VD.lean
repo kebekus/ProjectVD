@@ -6,7 +6,6 @@ import VD.MathlibPending.BlaschkeDecomp2
 import VD.MathlibPending.BlaschkeDecomp3
 import VD.MathlibPending.Cartan
 import VD.MathlibSubmitted.BlaschkeDecomp
-import VD.MathlibSubmitted.CircleAverage
 import VD.MathlibSubmitted.ProximityIntegral
 import VD.PoissonJensen0
 import VD.PoissonJensen1

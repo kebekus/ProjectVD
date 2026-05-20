@@ -2,7 +2,6 @@ import Mathlib.Analysis.Complex.CanonicalDecomposition
 import Mathlib.Analysis.Complex.JensenFormula
 import VD.MathlibPending.BlaschkeDecomp2
 import VD.MathlibPending.BlaschkeDecomp3
-import VD.MathlibSubmitted.CircleAverage
 
 open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --ValueDistribution
 
@@ -34,7 +33,7 @@ theorem CircleIntegrable.circleIntegrable_re_herglotzRieszKernel_smul {c w : ℂ
     (hw : w ∈ ball c R)
     (hf : CircleIntegrable f c R) :
     CircleIntegrable (re ∘ herglotzRieszKernel c w • f) c R := by
-  apply hf.continuousOn_smul (by fun_prop)
+  apply hf.smul_of_continuousOn (by fun_prop)
 
 /-!
 ## Formula goes here

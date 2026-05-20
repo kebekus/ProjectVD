@@ -9,7 +9,6 @@ Authors: Matteo Cipollina, Stefan Kebekus
 import VD.MathlibSubmitted.ProximityIntegral
 import Mathlib.Analysis.Complex.ValueDistribution.Cartan
 import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
-import VD.MathlibSubmitted.CircleAverage
 
 public section
 
