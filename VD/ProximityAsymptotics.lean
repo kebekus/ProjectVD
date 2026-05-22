@@ -7,6 +7,55 @@ open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --
 ## Additional Material
 -/
 
+/-!
+# Bounded range and asymptotic boundedness for continuous functions
+We prove that a continuous function `f : ℝ → ℝ` has bounded range if and only if it is
+`O(1)` at both `atTop` and `atBot`. As a corollary, for even functions, bounded range
+is equivalent to `f =O[atTop] 1` alone.
+## Main results
+* `Continuous.isBounded_range_iff_isBigO_atTop_atBot`: For continuous `f : ℝ → ℝ`,
+  `IsBounded (range f) ↔ f =O[atTop] 1 ∧ f =O[atBot] 1`.
+* `Continuous.isBounded_range_iff_isBigO_atTop_of_even`: For continuous even `f : ℝ → ℝ`,
+  `IsBounded (range f) ↔ f =O[atTop] 1`.
+## Tags
+bounded range, asymptotic, big O, even function
+-/
+open Filter Asymptotics Bornology Set
+/-! ### General equivalence -/
+/-- A continuous function `f : ℝ → ℝ` has bounded range if and only if it is `O(1)` at both
+`atTop` and `atBot`. This generalizes the statement for even functions, where the `atBot`
+condition is redundant. -/
+theorem Continuous.isBounded_range_iff_isBigO_atTop_atBot {f : ℝ → ℝ} (hf : Continuous f) :
+    IsBounded (range f) ↔ f =O[atTop] (1 : ℝ → ℝ) ∧ f =O[atBot] (1 : ℝ → ℝ) := by
+  constructor <;> intro H
+  · constructor <;> rw [Asymptotics.isBigO_iff]
+    · rcases H.exists_pos_norm_le with ⟨C, hC⟩; use C; aesop
+    · rcases H.exists_pos_norm_le with ⟨C, hC⟩; use C; aesop
+  · obtain ⟨C1, M1, hC1⟩ : ∃ C1 M1, ∀ x ≥ M1, |f x| ≤ C1 := by
+      simp_all +decide [Asymptotics.isBigO_iff]
+    obtain ⟨C2, M2, hC2⟩ : ∃ C2 M2, ∀ x ≤ M2, |f x| ≤ C2 := by
+      simp_all +decide [Asymptotics.isBigO_iff]
+    obtain ⟨C3, hC3⟩ : ∃ C3, ∀ x ∈ Icc M2 M1, |f x| ≤ C3 :=
+      IsCompact.exists_bound_of_continuousOn isCompact_Icc hf.continuousOn
+    exact isBounded_iff_forall_norm_le.mpr ⟨max C1 (max C2 C3),
+      forall_mem_range.mpr fun x => by cases le_total x M1 <;> cases le_total x M2 <;> aesop⟩
+
+/-! ### Even function corollary -/
+/-- An even function that is `O(1)` at `atTop` is also `O(1)` at `atBot`. -/
+theorem Function.Even.isBigO_atBot_of_isBigO_atTop {f : ℝ → ℝ} (heven : Function.Even f)
+    (h : f =O[atTop] (1 : ℝ → ℝ)) : f =O[atBot] (1 : ℝ → ℝ) := by
+  simp_all +decide [Asymptotics.isBigO_iff]
+  obtain ⟨c, a, h⟩ := h
+  exact ⟨c, -a, fun b hb => by simpa [heven b] using h (-b) (by linarith)⟩
+/-- For a continuous even function `f : ℝ → ℝ`, `f` has bounded range if and only if
+`f =O[atTop] 1`. The key point is that evenness propagates the `atTop` bound to `atBot`,
+and continuity gives boundedness on compact sets, yielding global boundedness. -/
+theorem Continuous.isBounded_range_iff_isBigO_atTop_of_even {f : ℝ → ℝ} (hf : Continuous f)
+    (heven : Function.Even f) :
+    IsBounded (range f) ↔ f =O[atTop] (1 : ℝ → ℝ) :=
+  ⟨fun h => (hf.isBounded_range_iff_isBigO_atTop_atBot.mp h).1,
+   fun h => hf.isBounded_range_iff_isBigO_atTop_atBot.mpr ⟨h, heven.isBigO_atBot_of_isBigO_atTop h⟩⟩
+
 
 /-!
 ## Formula goes here
@@ -187,6 +236,10 @@ theorem η₁
   · field_simp
     ring
   · simp
+
+
+
+
 
 theorem logCounting_isBigO_one_iff_analyticOnNhd (h₁f : AnalyticOnNhd ℂ f univ) :
     ValueDistribution.proximity f ⊤ =O[atTop] (1 : ℝ → ℝ) ↔ f = fun _ ↦ f 0 := by
