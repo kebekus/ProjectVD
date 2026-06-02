@@ -136,7 +136,10 @@ theorem congr_codiscreteWitin_closedBall_prod_canonicalFactor_mul_prod_smul {f :
       <;> simp_all
     simp_all
     use fun _ ↦ meromorphicTrailingCoeffAt f 0, fun _ _ ↦ by fun_prop
-    simpa [hR.symm, he] using mem_codiscreteWithin_subsingleton subsingleton_singleton
+    simp only [hR.symm, norm_le_zero_iff, he, not_false_eq_true, implies_true, closedBall_zero,
+      ball_zero, mem_empty_iff_false, locallyFinsuppWithin.apply_eq_zero_of_notMem, zpow_zero,
+      inv_one, finprod_one, one_mul, true_and]
+    apply mem_codiscreteWithin_subsingleton subsingleton_singleton
   obtain ⟨g, D⟩ := h₁f.canonicalDecomp h₂f
   have h₄g : ∀ (u : closedBall (0 : ℂ) R), meromorphicOrderAt g u ≠ ⊤ := by
     rw [← D.g_meromorphicNFOn.meromorphicOn.exists_meromorphicOrderAt_ne_top_iff_forall

@@ -55,12 +55,10 @@ lemma lieBracket_apply (v₁ v₂ : E → E) :
   simp
   --have := iteratedFDeriv_two_apply
   have := fderiv_clm_apply (c := fun e ↦ fderiv ℝ f e) (u := fun e ↦ v₂ e) (x := e)
-  simp at this
   rw [this]
   clear this
 
   have := fderiv_clm_apply (c := fun e ↦ fderiv ℝ f e) (u := fun e ↦ v₁ e) (x := e)
-  simp at this
   rw [this]
   clear this
 
