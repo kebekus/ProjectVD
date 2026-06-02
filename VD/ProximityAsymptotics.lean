@@ -1,4 +1,5 @@
 import VD.PoissonJensen0
+import Mathlib.Analysis.Complex.Liouville
 import Mathlib.Analysis.Complex.ValueDistribution.Proximity.Basic
 
 open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --ValueDistribution
@@ -198,10 +199,8 @@ theorem η₀
         unfold posLog
         simp
     _ ≤ circleAverage ( ((R + ‖w‖) / (R - ‖w‖)) • (log⁺ ‖f ·‖)) 0 R := by
-      have : CircleIntegrable (log⁺ ‖f ·‖) 0 R := by
-        apply circleIntegrable_posLog_norm
-        rw [abs_of_pos (pos_of_mem_ball h₁w)]
-        exact fun x hx ↦ (h₁f x (sphere_subset_closedBall hx)).meromorphicAt
+      have : CircleIntegrable (log⁺ ‖f ·‖) 0 R :=
+        circleIntegrable_posLog_norm h₅f
       apply circleAverage_mono (this.circleIntegrable_re_herglotzRieszKernel_smul h₁w)
         (this.mul_of_continuousOn (by fun_prop))
       intro x hx
@@ -252,14 +251,25 @@ theorem logCounting_isBigO_one_iff_analyticOnNhd (h₁f : AnalyticOnNhd ℂ f un
     have : Bornology.IsBounded (range f) := by
       rw [isBounded_iff_forall_norm_le] at *
       obtain ⟨C, hC⟩ := h
-      use C
+      use exp (3 * C)
       intro x hx
       simp_all
       obtain ⟨y, hy⟩ := hx
       subst hy
-
-      sorry
-    sorry
+      by_cases h : f y = 0
+      · rw [h, norm_zero]
+        positivity
+      rw [← log_le_log_iff (by aesop) (exp_pos (3 * C))]
+      trans (3 * ValueDistribution.proximity f ⊤ ‖2 * y‖)
+      · apply η₁ h₁f
+      · simp
+        grind
+    have α₀ : Differentiable ℂ f := by
+      intro x
+      apply (h₁f x (mem_univ x)).differentiableAt
+    have α := Differentiable.apply_eq_apply_of_bounded α₀ this
+    ext x
+    exact α x 0
   · intro h₂f
     rw [h₂f]
     -- should be simp
