@@ -94,7 +94,7 @@ Given functions `f`, `g` and a real number `R`, the following convenience
 structure packs the information relevant in the extended canonical
 decomposition.
 -/
-structure ECanonicalDecomp (f h : ℂ → E) (R : ℝ) where
+structure _root_.ECanonicalDecomp (f h : ℂ → E) (R : ℝ) where
   /-- A proof that `f` is meromorphic on `closedBall 0 R`. -/
   meromorphicOn : MeromorphicOn f (closedBall 0 R)
 
@@ -120,43 +120,6 @@ equal, up to modification over a discrete set, to a product of a non-vanishing
 analytic function, canonical factors and meromorphic functions of the form `(x -
 const) ^ n` where `const` is on the circumference of the disk.
 -/
-theorem congr_codiscreteWitin_closedBall_prod_canonicalFactor_mul_prod_smul {f : ℂ → E}
-    (h₁f : MeromorphicOn f (closedBall 0 R))
-    (h₂f : ∀ u : (closedBall (0 : ℂ) R), meromorphicOrderAt f u ≠ ⊤) :
-    ∃ h : ℂ → E, AnalyticOnNhd ℂ h (closedBall 0 R)
-      ∧ (∀ u ∈ (closedBall 0 R), h u ≠ 0)
-      ∧ f =ᶠ[codiscreteWithin (closedBall 0 R)]
-          ((∏ᶠ u, (canonicalFactor R u) ^ (-divisor f (ball 0 R) u))
-            * (∏ᶠ u, (· - u) ^ (divisor f (sphere 0 R)) u)) • h := by
-  rcases gt_trichotomy 0 R with hR | hR | hR
-  · simp_all
-    use fun _ ↦ f 0
-    filter_upwards [Filter.self_mem_codiscreteWithin ∅] with a ha
-    tauto
-  · have he : meromorphicTrailingCoeffAt f 0 ≠ 0 := by
-      apply MeromorphicAt.meromorphicTrailingCoeffAt_ne_zero (h₁f 0 _) _
-      <;> simp_all
-    simp_all
-    use fun _ ↦ meromorphicTrailingCoeffAt f 0, fun _ _ ↦ by fun_prop
-    simp only [hR.symm, norm_le_zero_iff, he, not_false_eq_true, implies_true, closedBall_zero,
-      ball_zero, mem_empty_iff_false, locallyFinsuppWithin.apply_eq_zero_of_notMem, zpow_zero,
-      inv_one, finprod_one, one_mul, true_and]
-    apply mem_codiscreteWithin_subsingleton subsingleton_singleton
-  obtain ⟨g, D⟩ := h₁f.canonicalDecomp h₂f
-  have h₄g : ∀ (u : closedBall (0 : ℂ) R), meromorphicOrderAt g u ≠ ⊤ := by
-    rw [← D.g_meromorphicNFOn.meromorphicOn.exists_meromorphicOrderAt_ne_top_iff_forall
-      (isConnected_closedBall hR.le)]
-    have s₁ : (0 : ℂ) ∈ closedBall 0 R := by simp [hR.le]
-    use ⟨0, s₁⟩
-    rw [(D.g_meromorphicNFOn s₁).meromorphicOrderAt_eq_zero_iff.2 (D.g_ne_zero 0 (by simp [hR]))]
-    simp only [ne_eq, LinearOrderedAddCommGroupWithTop.zero_ne_top, not_false_eq_true]
-  obtain ⟨h, h₁h, h₂h, h₃h⟩ := D.g_meromorphicNFOn.meromorphicOn.extract_zeros_poles h₄g
-    ((divisor g (closedBall 0 R)).finiteSupport (isCompact_closedBall 0 R))
-  use h, h₁h, (h₂h ⟨·, ·⟩)
-  filter_upwards [D.eventuallyEq, h₃h] with a h₁a h₂a
-  simp_rw [← D.divisor_eq_divisor hR]
-  simp_all [← smul_assoc]
-
 theorem exists_ecanonicalDecomp {f : ℂ → E} (h₁f : MeromorphicOn f (closedBall 0 R))
     (h₂f : ∀ u : (closedBall (0 : ℂ) R), meromorphicOrderAt f u ≠ ⊤) :
     ∃ h, ECanonicalDecomp f h R := by

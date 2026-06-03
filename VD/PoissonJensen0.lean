@@ -150,8 +150,10 @@ theorem poissonJensen₀
     apply (h₁f.exists_meromorphicOrderAt_ne_top_iff_forall
       (isConnected_closedBall (pos_of_mem_ball h₁w).le)).1
     aesop
-  obtain ⟨h, h₁h, h₂h, h₃h⟩ := congr_codiscreteWitin_closedBall_prod_canonicalFactor_mul_prod_smul h₁f h₂f
+  obtain ⟨h, h₀h⟩ := h₁f.exists_ecanonicalDecomp h₂f
+  have h₁h := h₀h.analyticOnNhd
+  have h₂h := h₀h.ne_zero
+  have h₃h := h₀h.eventuallyEq
   rw [xx h₁w h₁f h₁h h₂h h₃h]
-  rw [h₁h.log_norm_eq_smul_meromorphicTrailingCoeffAt_of_eventuallyEq'
-    h₂h h₁f h₃h h₂w h₃w (pos_of_mem_ball h₁w)]
+  rw [h₀h.log_norm_eq h₂w h₃w (pos_of_mem_ball h₁w)]
   ring_nf

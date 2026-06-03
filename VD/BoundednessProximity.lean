@@ -1,5 +1,5 @@
 import VD.MathlibPending.Cartan
-import Mathlib
+import VD.ProximityAsymptotics
 
 open Asymptotics Filter Function Metric Real Set Classical Topology ValueDistribution
 
@@ -15,7 +15,7 @@ only if `f` is bounded and hence constant.
 
 namespace ValueDistribution
 
-theorem proximity_bounded_iff_constant [NormedSpace ℂ E] {f : ℂ → E} (h : AnalyticOnNhd ℂ f Set.univ) :
+theorem proximity_bounded_iff_constant {f : ℂ → ℂ} (h : AnalyticOnNhd ℂ f Set.univ) :
     (∃ c, f = fun _ ↦ c) ↔ proximity f ⊤ =O[atTop] (1 : ℝ → ℝ) := by
   constructor
   · intro h
@@ -23,7 +23,9 @@ theorem proximity_bounded_iff_constant [NormedSpace ℂ E] {f : ℂ → E} (h : 
     simp_rw [isBigO_iff, eventually_atTop]
     use posLog ‖c‖
     simp [hc, proximity_const, abs_of_nonneg posLog_nonneg]
-  · sorry
+  · intro h₁
+    rw [logCounting_isBigO_one_iff_analyticOnNhd h] at h₁
+    tauto
 
 theorem proximity_bounded_if_eventuallyConstant {f : ℂ → E} (h : EventuallyConst f (codiscrete ℂ)) :
     proximity f ⊤ =O[atTop] (1 : ℝ → ℝ) := by

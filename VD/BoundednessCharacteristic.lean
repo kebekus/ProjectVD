@@ -56,7 +56,7 @@ lemma proximity_eq_proximity_toMeromorphiNFOn {a : WithTop E} (h : MeromorphicOn
   rw [proximity_congr_codiscrete _ (by linarith)]
   exact toMeromorphicNFOn_eqOn_codiscrete h
 
-theorem characteristic_isBigO_one_iff_constant (h : MeromorphicOn f Set.univ) :
+theorem characteristic_isBigO_one_iff_constant {f : ℂ → ℂ} (h : MeromorphicOn f Set.univ) :
     EventuallyConst f (codiscrete ℂ) ↔ characteristic f ⊤ =O[atTop] (1 : ℝ → ℝ) := by
   constructor
   · intro hf
