@@ -49,8 +49,8 @@ theorem finprod_apply_ne_zero {ι : Type*} {N₀ M₀ : Type*} [CommMonoidWithZe
 
 /--
 In the setting of `congr_codiscreteWitin_closedBall_prod_canonicalFactor_smul`,
-the function associated with the divisor of `g` is the divisor of `f`, seen as a
-meromorphic function on the sphere.
+the function associated with the divisor of `g` equals the function associated
+with the divisor of `f`, seen as a meromorphic function on the sphere.
 -/
 theorem _root_.CanonicalDecomp.divisor_eq_divisor {f g : ℂ → E} (D : CanonicalDecomp f g R)
     (hR : 0 < R) :
@@ -90,23 +90,25 @@ theorem _root_.CanonicalDecomp.divisor_eq_divisor {f g : ℂ → E} (D : Canonic
     simp_all
 
 /--
-Given functions `f`, `g` and a real number `R`, the following convenience structure packs the
-information relevant in the canonical decomposition.  The condition "`g` is without zeros or poles"
-is formulated by saying that `g` is meromorphic in normal form and `g ≠ 0`.
+Given functions `f`, `g` and a real number `R`, the following convenience
+structure packs the information relevant in the extended canonical
+decomposition.
 -/
-structure ExtCanonicalDecomp (f h : ℂ → E) (R : ℝ) where
+structure ECanonicalDecomp (f h : ℂ → E) (R : ℝ) where
   /-- A proof that `f` is meromorphic on `closedBall 0 R`. -/
-  f_meromorphicOn : MeromorphicOn f (closedBall 0 R)
+  meromorphicOn : MeromorphicOn f (closedBall 0 R)
 
-  /-- A proof that `g` is meromorphic in normal form on `closedBall 0 R`. -/
-  h_meromorphicNFOn : AnalyticOnNhd ℂ h (closedBall 0 R)
+  /-- A proof that `g` is analytin in a neighborhood of `closedBall 0 R`. -/
+  analyticOnNhd : AnalyticOnNhd ℂ h (closedBall 0 R)
 
-  /-- A proof that `g` does not vanish in the interior of the ball. -/
-  g_ne_zero : ∀ u ∈ (ball 0 R), h u ≠ 0
+  /-- A proof that `g` does not vanish on the closed ball. -/
+  ne_zero : ∀ u ∈ (closedBall 0 R), h u ≠ 0
 
   /--
-  A proof that `f` is equal, up to modification over a discrete set, to a product of `g` and
-  canonical factors prescribed by the divisor of `f`.
+  A proof that `f` is equal, up to modification over a discrete set, to a
+  product of `g`, canonical factors prescribed by the divisor of `f`, and a
+  factorized rational function with poles and zeros only on the boundary of the
+  ball.
   -/
   eventuallyEq : f =ᶠ[codiscreteWithin (closedBall 0 R)]
     ((∏ᶠ u, (canonicalFactor R u) ^ (-divisor f (ball 0 R) u)) * (∏ᶠ u, (· - u) ^ (divisor f (sphere 0 R)) u)) • h
@@ -154,5 +156,51 @@ theorem congr_codiscreteWitin_closedBall_prod_canonicalFactor_mul_prod_smul {f :
   filter_upwards [D.eventuallyEq, h₃h] with a h₁a h₂a
   simp_rw [← D.divisor_eq_divisor hR]
   simp_all [← smul_assoc]
+
+theorem exists_ecanonicalDecomp {f : ℂ → E} (h₁f : MeromorphicOn f (closedBall 0 R))
+    (h₂f : ∀ u : (closedBall (0 : ℂ) R), meromorphicOrderAt f u ≠ ⊤) :
+    ∃ h, ECanonicalDecomp f h R := by
+  rcases gt_trichotomy 0 R with hR | hR | hR
+  · use fun _ ↦ f 0
+    exact {
+      meromorphicOn := by simp_all
+      analyticOnNhd := by simp_all
+      ne_zero := by simp_all
+      eventuallyEq := by
+        simp_all only [closedBall_of_neg]
+        filter_upwards [Filter.self_mem_codiscreteWithin ∅] with a ha
+        tauto
+    }
+  · use fun _ ↦ meromorphicTrailingCoeffAt f 0
+    exact {
+      meromorphicOn := by simp_all
+      analyticOnNhd _ _ := by fun_prop
+      ne_zero := by
+        simp only [hR.symm, closedBall_zero, mem_singleton_iff, ne_eq, forall_eq]
+        apply MeromorphicAt.meromorphicTrailingCoeffAt_ne_zero (h₁f 0 _) _
+        <;> simp_all
+      eventuallyEq := by
+        simp only [hR.symm, closedBall_zero]
+        apply mem_codiscreteWithin_subsingleton subsingleton_singleton
+    }
+  obtain ⟨g, D⟩ := h₁f.canonicalDecomp h₂f
+  have h₄g : ∀ (u : closedBall (0 : ℂ) R), meromorphicOrderAt g u ≠ ⊤ := by
+    rw [← D.g_meromorphicNFOn.meromorphicOn.exists_meromorphicOrderAt_ne_top_iff_forall
+      (isConnected_closedBall hR.le)]
+    have s₁ : (0 : ℂ) ∈ closedBall 0 R := by simp [hR.le]
+    use ⟨0, s₁⟩
+    simp [(D.g_meromorphicNFOn s₁).meromorphicOrderAt_eq_zero_iff.2 (D.g_ne_zero 0 (by simp [hR]))]
+  obtain ⟨h, h₁h, h₂h, h₃h⟩ := D.g_meromorphicNFOn.meromorphicOn.extract_zeros_poles h₄g
+    ((divisor g (closedBall 0 R)).finiteSupport (isCompact_closedBall 0 R))
+  use h
+  exact {
+    meromorphicOn := h₁f
+    analyticOnNhd := h₁h
+    ne_zero := (h₂h ⟨·, ·⟩)
+    eventuallyEq := by
+      filter_upwards [D.eventuallyEq, h₃h] with a h₁a h₂a
+      simp_rw [← D.divisor_eq_divisor hR]
+      simp_all [← smul_assoc]
+    }
 
 end MeromorphicOn
