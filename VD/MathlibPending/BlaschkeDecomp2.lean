@@ -6,7 +6,7 @@ Authors: Stefan Kebekus
 --module
 
 import Mathlib.Analysis.Normed.Module.Connected
-import VD.MathlibSubmitted.BlaschkeDecomp
+import Mathlib.Analysis.Complex.CanonicalDecomposition
 
 open Complex ComplexConjugate Filter Function Metric Set Topology Real
 
@@ -52,13 +52,13 @@ In the setting of `congr_codiscreteWitin_closedBall_prod_canonicalFactor_smul`,
 the function associated with the divisor of `g` equals the function associated
 with the divisor of `f`, seen as a meromorphic function on the sphere.
 -/
-theorem _root_.CanonicalDecomp.divisor_eq_divisor {f g : ℂ → E} (D : CanonicalDecomp f g R)
+theorem _root_.Complex.CanonicalDecomp.divisor_eq_divisor {f g : ℂ → E} (D : CanonicalDecomp f g R)
     (hR : 0 < R) :
     divisor g (closedBall 0 R) x = divisor f (sphere 0 R) x := by
   rcases lt_trichotomy ‖x‖ R with h|h|h
   · have : x ∉ sphere (0 : ℂ) R := by aesop
-    have := (D.g_meromorphicNFOn (mem_closedBall_zero_iff.mpr h.le)).meromorphicOrderAt_eq_zero_iff.2 (D.g_ne_zero x (by aesop))
-    rw [divisor_apply D.g_meromorphicNFOn.meromorphicOn (mem_closedBall_zero_iff.mpr h.le)]
+    have := (D.meromorphicNFOn (mem_closedBall_zero_iff.mpr h.le)).meromorphicOrderAt_eq_zero_iff.2 (D.ne_zero x (by aesop))
+    rw [divisor_apply D.meromorphicNFOn.meromorphicOn (mem_closedBall_zero_iff.mpr h.le)]
     simp_all
   · have η₁ : AnalyticAt ℂ (∏ᶠ u, canonicalFactor R u ^ (-(divisor f (ball 0 R)) u)) x := by
       apply analyticAt_finprod
@@ -67,13 +67,13 @@ theorem _root_.CanonicalDecomp.divisor_eq_divisor {f g : ℂ → E} (D : Canonic
       · exact AnalyticAt.zpow (analyticOnNhd_canonicalFactor _ _ _ (by aesop))
           (canonicalFactor_ne_zero ha (by aesop) (by aesop))
       · have := D.eventuallyEq
-        have := D.g_ne_zero
+        have := D.ne_zero
         simp_all only [mem_ball, dist_zero_right, ne_eq, zpow_neg, not_lt,
           locallyFinsuppWithin.apply_eq_zero_of_notMem, neg_zero, zpow_zero]
         exact analyticAt_const
     have η₀ : f =ᶠ[𝓝[≠] x] (∏ᶠ u, canonicalFactor R u ^ (-(divisor f (ball 0 R)) u)) • g := by
       apply MeromorphicAt.eventuallyEq_nhdsNE_of_eventuallyEq_codiscreteWithin_preperfect (U := closedBall 0 R)
-        (D.f_meromorphicOn x (by aesop)) (η₁.meromorphicAt.smul (D.g_meromorphicNFOn.meromorphicOn x (by aesop))) (by aesop) _ D.eventuallyEq
+        (D.meromorphicOn x (by aesop)) (η₁.meromorphicAt.smul (D.meromorphicNFOn.meromorphicOn x (by aesop))) (by aesop) _ D.eventuallyEq
       rw [← closure_ball 0 hR.ne']
       exact isOpen_ball.perfect_closure.2
     have : meromorphicOrderAt (∏ᶠ u, canonicalFactor R u ^ (-(divisor f (ball 0 R)) u)) x = 0 := by
@@ -82,9 +82,9 @@ theorem _root_.CanonicalDecomp.divisor_eq_divisor {f g : ℂ → E} (D : Canonic
       by_cases ha : a ∈ ball 0 R
       · exact zpow_ne_zero _ (canonicalFactor_ne_zero ha (by aesop) (by aesop))
       · simp_all
-    rw [divisor_apply (D.f_meromorphicOn.mono_set sphere_subset_closedBall) (by aesop),
-      divisor_apply D.g_meromorphicNFOn.meromorphicOn (by aesop), meromorphicOrderAt_congr η₀,
-      meromorphicOrderAt_smul η₁.meromorphicAt (D.g_meromorphicNFOn (by aesop)).meromorphicAt]
+    rw [divisor_apply (D.meromorphicOn.mono_set sphere_subset_closedBall) (by aesop),
+      divisor_apply D.meromorphicNFOn.meromorphicOn (by aesop), meromorphicOrderAt_congr η₀,
+      meromorphicOrderAt_smul η₁.meromorphicAt (D.meromorphicNFOn (by aesop)).meromorphicAt]
     simp_all
   · have : x ∉ sphere (0 : ℂ) R := by aesop
     simp_all
@@ -146,14 +146,14 @@ theorem exists_ecanonicalDecomp {f : ℂ → E} (h₁f : MeromorphicOn f (closed
         simp only [hR.symm, closedBall_zero]
         apply mem_codiscreteWithin_subsingleton subsingleton_singleton
     }
-  obtain ⟨g, D⟩ := h₁f.canonicalDecomp h₂f
+  obtain ⟨g, D⟩ := h₁f.exists_canonicalDecomp h₂f
   have h₄g : ∀ (u : closedBall (0 : ℂ) R), meromorphicOrderAt g u ≠ ⊤ := by
-    rw [← D.g_meromorphicNFOn.meromorphicOn.exists_meromorphicOrderAt_ne_top_iff_forall
+    rw [← D.meromorphicNFOn.meromorphicOn.exists_meromorphicOrderAt_ne_top_iff_forall
       (isConnected_closedBall hR.le)]
     have s₁ : (0 : ℂ) ∈ closedBall 0 R := by simp [hR.le]
     use ⟨0, s₁⟩
-    simp [(D.g_meromorphicNFOn s₁).meromorphicOrderAt_eq_zero_iff.2 (D.g_ne_zero 0 (by simp [hR]))]
-  obtain ⟨h, h₁h, h₂h, h₃h⟩ := D.g_meromorphicNFOn.meromorphicOn.extract_zeros_poles h₄g
+    simp [(D.meromorphicNFOn s₁).meromorphicOrderAt_eq_zero_iff.2 (D.ne_zero 0 (by simp [hR]))]
+  obtain ⟨h, h₁h, h₂h, h₃h⟩ := D.meromorphicNFOn.meromorphicOn.extract_zeros_poles h₄g
     ((divisor g (closedBall 0 R)).finiteSupport (isCompact_closedBall 0 R))
   use h
   exact {
