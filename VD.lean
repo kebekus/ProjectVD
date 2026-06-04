@@ -2,9 +2,9 @@ import VD.BoundednessCharacteristic
 import VD.BoundednessProximity
 import VD.LinearDiffOp.Basic
 import VD.LinearDiffOp.Regularity
-import VD.MathlibPending.BlaschkeDecomp2
 import VD.MathlibPending.BlaschkeDecomp3
 import VD.MathlibPending.Cartan
+import VD.MathlibSubmitted.BlaschkeDecomp2
 import VD.MathlibSubmitted.ProximityIntegral
 import VD.PoissonJensen0
 import VD.PoissonJensen1
