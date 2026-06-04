@@ -1,6 +1,6 @@
 import Mathlib.Analysis.Complex.CanonicalDecomposition
 import Mathlib.Analysis.Complex.JensenFormula
-import VD.MathlibPending.BlaschkeDecomp2
+import VD.MathlibSubmitted.BlaschkeDecomp2
 import VD.MathlibPending.BlaschkeDecomp3
 
 open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --ValueDistribution
@@ -57,8 +57,8 @@ lemma xx
         ∑ᶠ x, (divisor f (sphere 0 R)) x * Real.log ‖w - x‖ + Real.log ‖h w‖ := by
   -- Facts used in the calculation below
   have hR : 0 < R := pos_of_mem_ball hw
-  have h₂f : (divisor f (sphere 0 R)).support.Finite := divisor_sphere_finiteSupport
-  have h₃f : (divisor f (ball 0 R)).support.Finite := h₀f.divisor_ball_finiteSupport
+  have h₂f : (divisor f (sphere 0 R)).support.Finite := divisor_sphere_support_finite
+  have h₃f : (divisor f (ball 0 R)).support.Finite := h₀f.divisor_ball_support_finite
   have h₄f {a : ℂ} (ha : (divisor f (sphere 0 R)) a = 0) : ∀ b ∈ h₂f.toFinset, ‖a - b‖ ^ (divisor f (sphere 0 R)) b ≠ 0 := by
     intro b hb
     apply zpow_ne_zero

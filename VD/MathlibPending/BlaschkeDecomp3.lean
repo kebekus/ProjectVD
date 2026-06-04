@@ -1,6 +1,6 @@
 import Mathlib.Analysis.Complex.CanonicalDecomposition
 import Mathlib.Analysis.Complex.JensenFormula
-import VD.MathlibPending.BlaschkeDecomp2
+import VD.MathlibSubmitted.BlaschkeDecomp2
 
 open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --ValueDistribution
 
@@ -16,25 +16,6 @@ lemma meromorphicAt_canonicalFactor {R : ℝ} {x w : ℂ} : MeromorphicAt (canon
 variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜] {U V : Set 𝕜} {z : 𝕜}
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-
-lemma divisor_sphere_finiteSupport [ProperSpace 𝕜] {f : 𝕜 → E} {R : ℝ} {c : 𝕜} :
-    (divisor f (sphere c R)).support.Finite :=
-    (divisor f (sphere c R)).finiteSupport (isCompact_sphere c R)
-
-lemma MeromorphicOn.divisor_subset_finiteSupport {f : 𝕜 → E}
-    (hf : MeromorphicOn f U) (hU : IsCompact U) (hV : V ⊆ U) :
-    (divisor f V).support.Finite := by
-  apply ((divisor f U).finiteSupport hU).subset
-  intro b hb
-  rw [mem_support, ne_eq, divisor_apply hf (hV ((divisor f V).supportWithinDomain hb))]
-  rwa [mem_support, ne_eq, divisor_apply (fun x hx ↦ hf x (hV hx))
-    ((divisor f V).supportWithinDomain hb)] at hb
-
-lemma MeromorphicOn.divisor_ball_finiteSupport [ProperSpace 𝕜] {f : 𝕜 → E} {R : ℝ} {c : 𝕜}
-    (hf : MeromorphicOn f (closedBall c R)) :
-    (divisor f (ball c R)).support.Finite :=
-  hf.divisor_subset_finiteSupport (isCompact_closedBall c R) ball_subset_closedBall
-
 
 /-!
 ## Formula goes here
@@ -57,8 +38,8 @@ lemma _root_.ECanonicalDecomp.eq_smul_meromorphicTrailingCoeffAt
           * (∏ᶠ i, meromorphicTrailingCoeffAt (· - i) w ^ (-divisor f (sphere 0 R)) i))
           • meromorphicTrailingCoeffAt f w := by
   -- Finiteness properties and side results used throughout the proof
-  have h₃f : (divisor f (sphere 0 R)).support.Finite := divisor_sphere_finiteSupport
-  have h₄f : (divisor f (ball 0 R)).support.Finite := D.meromorphicOn.divisor_ball_finiteSupport
+  have h₃f : (divisor f (sphere 0 R)).support.Finite := divisor_sphere_support_finite
+  have h₄f : (divisor f (ball 0 R)).support.Finite := D.meromorphicOn.divisor_ball_support_finite
   have := (D.analyticOnNhd w hw).meromorphicAt
   -- Proof body: Substitute `f` using `h₁f` and compute
   rw [meromorphicTrailingCoeffAt_congr_nhdsNE
@@ -130,8 +111,8 @@ lemma _root_.ECanonicalDecomp.log_norm_eq
     Real.log ‖h w‖ = ((∑ᶠ i, (divisor f (ball 0 R) i) * Real.log ‖canonicalFactor R i w‖)
           - (∑ᶠ i, (divisor f (sphere 0 R) i) * Real.log ‖w - i‖))
           + Real.log ‖meromorphicTrailingCoeffAt f w‖ := by
-  have h₃f : (divisor f (sphere 0 R)).support.Finite := divisor_sphere_finiteSupport
-  have h₄f : (divisor f (ball 0 R)).support.Finite := D.meromorphicOn.divisor_ball_finiteSupport
+  have h₃f : (divisor f (sphere 0 R)).support.Finite := divisor_sphere_support_finite
+  have h₄f : (divisor f (ball 0 R)).support.Finite := D.meromorphicOn.divisor_ball_support_finite
   have η₀ : ∀ x ∈ h₃f.toFinset, ‖w - x‖ ^ (-divisor f (sphere 0 R)) x ≠ 0 := by
     intro x hx
     apply zpow_ne_zero
