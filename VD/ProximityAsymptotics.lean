@@ -17,8 +17,10 @@ variable {𝕜 E F G : Type*}
 variable [NontriviallyNormedField 𝕜] [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   [NormedAddCommGroup F] [NormedSpace 𝕜 F] [NormedAddCommGroup G] [NormedSpace 𝕜 G]
 
-@[fun_prop] theorem AnalyticOnNhd.continuous' {f : E → F} (fa : AnalyticOnNhd 𝕜 f univ) : Continuous f := by
-  rw [← continuousOn_univ]; exact fa.continuousOn
+@[fun_prop] theorem AnalyticOnNhd.continuous' {f : E → F} (fa : AnalyticOnNhd 𝕜 f univ) :
+    Continuous f := by
+  rw [← continuousOn_univ]
+  exact fa.continuousOn
 
 
 /--
@@ -92,8 +94,7 @@ variable {R : ℝ} {w z : ℂ}
   unfold posLog
   fun_prop
 
-@[fun_prop]
-theorem continuous_proximity (h₁f : Continuous f) :
+@[fun_prop] theorem continuous_proximity_top (hf : Continuous f) :
     Continuous (ValueDistribution.proximity f ⊤) := by
   simp only [ValueDistribution.proximity, reduceDIte]
   fun_prop
@@ -242,6 +243,11 @@ theorem η₁
     ring
   · simp
 
+omit [NormedSpace ℝ E] in
+@[simp] lemma proximity_const' {c : E} :
+    ValueDistribution.proximity (fun _ ↦ c) ⊤ = fun _ ↦ log⁺ ‖c‖ := by
+  aesop
+
 theorem logCounting_isBigO_one_iff_analyticOnNhd (h₁f : AnalyticOnNhd ℂ f univ) :
     ValueDistribution.proximity f ⊤ =O[atTop] (1 : ℝ → ℝ) ↔ f = fun _ ↦ f 0 := by
   constructor
@@ -264,20 +270,15 @@ theorem logCounting_isBigO_one_iff_analyticOnNhd (h₁f : AnalyticOnNhd ℂ f un
       · apply η₁ h₁f
       · simp
         grind
-    have α₀ : Differentiable ℂ f := by
-      intro x
-      apply (h₁f x (mem_univ x)).differentiableAt
-    have α := Differentiable.apply_eq_apply_of_bounded α₀ this
+    have α₀ : Differentiable ℂ f :=
+      fun x ↦ (h₁f x (mem_univ x)).differentiableAt
     ext x
-    exact α x 0
+    exact (α₀.apply_eq_apply_of_bounded this) x 0
   · intro h₂f
     rw [h₂f]
-    -- should be simp
-    --rw [ValueDistribution.proximity_const]
-    rw [ValueDistribution.proximity_top]
+    simp
+    -- Should be simp
     apply Asymptotics.isBigO_iff.2
     use ‖posLog ‖f 0‖‖
     filter_upwards
-    intro a
-    rw [circleAverage_const]
     simp
