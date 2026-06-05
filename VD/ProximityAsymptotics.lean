@@ -152,7 +152,7 @@ theorem norm_canonicalFactor (h : w ∈ ball 0 R) (h₁z : z ∈ ball 0 R) (h₂
 
 theorem η₀
     (h₁w : w ∈ ball 0 R)
-    (h₃w : meromorphicOrderAt f w = 0)
+    (h₃w : meromorphicOrderAt f w = 0) -- Assumption probably unnecessary
     (h₁f : AnalyticOnNhd ℂ f (closedBall 0 R)) :
     Real.log ‖f w‖
       ≤ ((R + ‖w‖) / (R - ‖w‖)) * circleAverage (log⁺ ‖f ·‖) 0 R := by
