@@ -11,7 +11,7 @@ variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
   {x : 𝕜}
 
-@[simp] theorem meromorphicAt_fun_comp_add_const_iff_meromorphicAt {c : 𝕜} {f : 𝕜 → E} :
+@[simp] theorem meromorphicAt_comp_add_const_iff_meromorphicAt {c : 𝕜} {f : 𝕜 → E} :
     MeromorphicAt (f ∘ fun z ↦ (z + c)) (x - c) ↔ MeromorphicAt f x := by
   constructor
   · intro h
@@ -21,19 +21,20 @@ variable
     rw [(by ring : x = (x - c) + c)] at h
     exact h.comp_analyticAt (g := fun z ↦ z + c) (by fun_prop)
 
-@[simp] theorem meromorphicAt_comp_add_const_iff_meromorphicAt {c : 𝕜} {f : 𝕜 → E} :
+@[simp] theorem meromorphicAt_fun_comp_add_const_iff_meromorphicAt {c : 𝕜} {f : 𝕜 → E} :
     MeromorphicAt (fun z ↦ f (z + c)) (x - c) ↔ MeromorphicAt f x :=
-  meromorphicAt_fun_comp_add_const_iff_meromorphicAt
-
-@[simp] theorem meromorphicAt_fun_comp_sub_const_iff_meromorphicAt {c : 𝕜} {f : 𝕜 → E} :
-    MeromorphicAt (f ∘ fun z ↦ (z - c)) (x + c) ↔ MeromorphicAt f x := by
-  simp [← meromorphicAt_fun_comp_add_const_iff_meromorphicAt (f := f) (c := -c), sub_eq_add_neg]
+  meromorphicAt_comp_add_const_iff_meromorphicAt
 
 @[simp] theorem meromorphicAt_comp_sub_const_iff_meromorphicAt {c : 𝕜} {f : 𝕜 → E} :
-    MeromorphicAt (fun z ↦ f (z - c)) (x + c) ↔ MeromorphicAt f x :=
-  meromorphicAt_fun_comp_sub_const_iff_meromorphicAt
+    MeromorphicAt (f ∘ fun z ↦ (z - c)) (x + c) ↔ MeromorphicAt f x := by
+  simp [← meromorphicAt_fun_comp_add_const_iff_meromorphicAt (f := f) (c := -c), ← sub_eq_add_neg]
+  rfl
 
-@[simp] theorem meromorphicOn_fun_comp_add_const_iff_meromorphicOn {c : 𝕜} {U : Set 𝕜} {f : 𝕜 → E} :
+@[simp] theorem meromorphicAt_fun_comp_sub_const_iff_meromorphicAt {c : 𝕜} {f : 𝕜 → E} :
+    MeromorphicAt (fun z ↦ f (z - c)) (x + c) ↔ MeromorphicAt f x :=
+  meromorphicAt_comp_sub_const_iff_meromorphicAt
+
+@[simp] theorem meromorphicOn_comp_add_const_iff_meromorphicOn {c : 𝕜} {U : Set 𝕜} {f : 𝕜 → E} :
     MeromorphicOn (f ∘ fun z ↦ (z + c)) {x | x + c ∈ U} ↔ MeromorphicOn f U := by
   constructor
   · intro h y hy
@@ -41,9 +42,70 @@ variable
     apply h
     aesop
   · intro h y hy
-    rw [← meromorphicAt_fun_comp_sub_const_iff_meromorphicAt (c := c),
+    rw [← meromorphicAt_comp_sub_const_iff_meromorphicAt (c := c),
       (by aesop : ((f ∘ fun z ↦ z + c) ∘ fun z ↦ z - c) = f)]
     exact h (y + c) (mem_preimage.mp hy)
+
+@[simp] theorem meromorphicOn_fun_comp_add_const_iff_meromorphicOn {c : 𝕜} {U : Set 𝕜} {f : 𝕜 → E} :
+    MeromorphicOn (fun z ↦ f (z + c)) {x | x + c ∈ U} ↔ MeromorphicOn f U :=
+  meromorphicOn_comp_add_const_iff_meromorphicOn
+
+@[simp] theorem meromorphicOn_comp_sub_const_iff_meromorphicOn {c : 𝕜} {U : Set 𝕜} {f : 𝕜 → E} :
+    MeromorphicOn (f ∘ fun z ↦ (z - c)) {x | x - c ∈ U} ↔ MeromorphicOn f U := by
+  simp [← meromorphicOn_comp_add_const_iff_meromorphicOn (f := f) (c := -c), ← sub_eq_add_neg]
+
+@[simp] theorem meromorphicOn_fun_comp_sub_const_iff_meromorphicOn {c : 𝕜} {U : Set 𝕜} {f : 𝕜 → E} :
+    MeromorphicOn (fun z ↦ f (z - c)) {x | x - c ∈ U} ↔ MeromorphicOn f U :=
+  meromorphicOn_comp_sub_const_iff_meromorphicOn
+
+@[simp] theorem meromorphicOn_ball_comp_sub_const_iff_meromorphicOn_ball {c : 𝕜} {R : ℝ} {f : 𝕜 → E} :
+    MeromorphicOn (f ∘ fun z ↦ (z - c)) (Metric.ball c R) ↔ MeromorphicOn f (Metric.ball 0 R) := by
+  convert meromorphicOn_comp_sub_const_iff_meromorphicOn
+  ext x
+  rw [mem_ball_iff_norm]
+  simp
+
+@[simp] theorem meromorphicOn_ball_fun_comp_sub_const_iff_meromorphicOn_ball {c : 𝕜} {R : ℝ} {f : 𝕜 → E} :
+    MeromorphicOn (fun z ↦ f (z - c)) (Metric.ball c R) ↔ MeromorphicOn f (Metric.ball 0 R) :=
+  meromorphicOn_ball_comp_sub_const_iff_meromorphicOn_ball
+
+@[simp] theorem meromorphicOn_closedBall_comp_sub_const_iff_meromorphicOn_closedBall {c : 𝕜} {R : ℝ} {f : 𝕜 → E} :
+    MeromorphicOn (f ∘ fun z ↦ (z - c)) (Metric.closedBall c R) ↔ MeromorphicOn f (Metric.closedBall 0 R) := by
+  convert meromorphicOn_comp_sub_const_iff_meromorphicOn
+  ext x
+  rw [mem_closedBall_iff_norm]
+  simp
+
+@[simp] theorem meromorphicOn_closedBall_fun_comp_sub_const_iff_meromorphicOn_closedBall {c : 𝕜} {R : ℝ} {f : 𝕜 → E} :
+    MeromorphicOn (fun z ↦ f (z - c)) (Metric.closedBall c R) ↔ MeromorphicOn f (Metric.closedBall 0 R) :=
+  meromorphicOn_closedBall_comp_sub_const_iff_meromorphicOn_closedBall
+
+@[simp] theorem meromorphicOn_sphere_comp_sub_const_iff_meromorphicOn_sphere {c : 𝕜} {R : ℝ} {f : 𝕜 → E} :
+    MeromorphicOn (f ∘ fun z ↦ (z - c)) (Metric.sphere c R) ↔ MeromorphicOn f (Metric.sphere 0 R) := by
+  convert meromorphicOn_comp_sub_const_iff_meromorphicOn
+  ext x
+  rw [mem_sphere_iff_norm]
+  simp
+
+@[simp] theorem meromorphicOn_sphere_fun_comp_sub_const_iff_meromorphicOn_sphere {c : 𝕜} {R : ℝ} {f : 𝕜 → E} :
+    MeromorphicOn (fun z ↦ f (z - c)) (Metric.sphere c R) ↔ MeromorphicOn f (Metric.sphere 0 R) :=
+  meromorphicOn_sphere_comp_sub_const_iff_meromorphicOn_sphere
+
+--
+@[simp] theorem analyticOrderAt_affineMonomial {z₀ : 𝕜} : analyticOrderAt (· - z₀) z₀ = 1 := by
+    convert analyticOrderAt_centeredMonomial (z₀ := z₀) (n := 1) using 2
+    rw [pow_one]
+
+@[simp] theorem meromorphicOrderAt_comp_add_const_eq_meromorphicOrderAt {c : 𝕜} {f : 𝕜 → E} :
+    meromorphicOrderAt (f ∘ fun z ↦ (z + c)) (x - c) = meromorphicOrderAt f x := by
+  by_cases h : ¬ MeromorphicAt f x
+  · simp_all
+  rw [MeromorphicAt.meromorphicOrderAt_comp (by simp_all) (by fun_prop)]
+  · have {a b c : 𝕜} : a + b - c = a - (c - b) := by ring
+    simp [this]
+  · have {a b c : 𝕜} : a + b - (c - b + b) = a - (c - b) := by ring
+    simp_rw [eventuallyConst_iff_analyticOrderAt_sub_eq_top, this]
+    simp
 
 /-!
 ## Formula goes here
@@ -82,7 +144,6 @@ theorem poissonJensen {c : ℂ}
     congr 2
     -- should be simp
     rw [divisor_def, divisor_def]
-    grind
     sorry
   · sorry
   · sorry
