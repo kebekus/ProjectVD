@@ -4,6 +4,8 @@ open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --
 
 /-!
 ## Additional Material
+
+Partially by Aristotle AI
 -/
 
 variable
@@ -106,6 +108,63 @@ variable
   · have {a b c : 𝕜} : a + b - (c - b + b) = a - (c - b) := by ring
     simp_rw [eventuallyConst_iff_analyticOrderAt_sub_eq_top, this]
     simp
+
+@[simp] theorem meromorphicOrderAt_fun_comp_add_const_eq_meromorphicOrderAt {c : 𝕜} {f : 𝕜 → E} :
+    meromorphicOrderAt (fun z ↦ f (z + c)) (x - c) = meromorphicOrderAt f x :=
+  meromorphicOrderAt_comp_add_const_eq_meromorphicOrderAt
+
+@[simp] theorem meromorphicOrderAt_comp_sub_const_eq_meromorphicOrderAt {c : 𝕜} {f : 𝕜 → E} :
+    meromorphicOrderAt (f ∘ fun z ↦ (z - c)) (x + c) = meromorphicOrderAt f x := by
+  simp [← meromorphicOrderAt_comp_add_const_eq_meromorphicOrderAt (f := f) (c := -c), ← sub_eq_add_neg]
+
+@[simp] theorem meromorphicOrderAt_fun_comp_sub_const_eq_meromorphicOrderAt {c : 𝕜} {f : 𝕜 → E} :
+    meromorphicOrderAt (fun z ↦ f (z - c)) (x + c) = meromorphicOrderAt f x :=
+  meromorphicOrderAt_comp_sub_const_eq_meromorphicOrderAt
+
+variable
+  {𝕜 : Type*} [NontriviallyNormedField 𝕜]
+  {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+  {f : 𝕜 → E} {g : 𝕜 → 𝕜} {x : 𝕜}
+
+/--
+If `g` is analytic at `x` and not locally constant, and `f` is meromorphic at `g
+x`, then the trailing coefficient of `f ∘ g` at `x` is the trailing coefficient
+of `g · - g x` raised to the meromorphic order of `f` at `g x`, and smul'd with
+the trailing coefficient of `f` at `g x`.
+-/
+theorem MeromorphicAt.meromorphicTrailingCoeffAt_comp
+    (hf : MeromorphicAt f (g x)) (hg : AnalyticAt 𝕜 g x) (hg_nc : ¬EventuallyConst g (𝓝 x)) :
+    meromorphicTrailingCoeffAt (f ∘ g) x =
+      (meromorphicTrailingCoeffAt (g · - g x) x) ^ (meromorphicOrderAt f (g x)).untop₀ •
+      meromorphicTrailingCoeffAt f (g x) := by
+  by_cases h : meromorphicOrderAt f ( g x ) = ⊤
+  · have : meromorphicTrailingCoeffAt (f ∘ g) x = 0 := by
+      apply MeromorphicAt.meromorphicTrailingCoeffAt_of_order_eq_top
+      rw [meromorphicOrderAt_eq_top_iff] at *
+      exact (hg.map_nhdsNE hg_nc) h
+    aesop
+  · set r := (meromorphicOrderAt f (g x)).untop₀
+    obtain ⟨F, h₁F, h₂F, h₃F⟩ := (meromorphicOrderAt_ne_top_iff hf).1 h
+    have h₁ : meromorphicTrailingCoeffAt (f ∘ g) x
+        = meromorphicTrailingCoeffAt ((g · - g x) ^ r • (F ∘ g)) x := by
+      apply meromorphicTrailingCoeffAt_congr_nhdsNE
+      apply Filter.Tendsto.eventually (hg.map_nhdsNE hg_nc) h₃F
+    have h₂ : meromorphicTrailingCoeffAt ((g · - g x) ^ r • (F ∘ g)) x
+        = meromorphicTrailingCoeffAt (g · - g x) x ^ r
+          • meromorphicTrailingCoeffAt (F ∘ g) x := by
+      convert MeromorphicAt.meromorphicTrailingCoeffAt_smul _ _ using 1
+      · rw [MeromorphicAt.meromorphicTrailingCoeffAt_zpow]
+        exact hg.meromorphicAt.sub (by fun_prop)
+      · apply_rules [MeromorphicAt.zpow, hg.meromorphicAt.sub, analyticAt_const.meromorphicAt]
+      · exact (h₁F.comp hg).meromorphicAt
+    rw [h₁, h₂, (h₁F.comp hg).meromorphicTrailingCoeffAt_of_ne_zero h₂F,
+      h₁F.meromorphicTrailingCoeffAt_of_ne_zero_of_eq_nhdsNE h₂F h₃F]
+    simp_all
+
+@[simp] theorem meromorphicTrailingCoeffAt_comp_add_const_eq_meromorphicTrailingCoeffAt {c : 𝕜} {f : 𝕜 → E} :
+    meromorphicTrailingCoeffAt (f ∘ fun z ↦ (z + c)) (x - c) = meromorphicTrailingCoeffAt f x := by
+  sorry
+
 
 /-!
 ## Formula goes here
