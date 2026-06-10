@@ -145,15 +145,22 @@ If `f : ℂ → ℂ` is meromorphic, then the Cartan kernel of integration is
 integrable, as a function in the two variables `α` and `β`.
 -/
 private lemma integrable_cartanKernel (h : Meromorphic f) :
-    Integrable (fun p ↦ cartanKernel f R p.1 p.2)
-      ((volume.restrict (uIoc 0 (2 * π))).prod
-       (volume.restrict (uIoc 0 (2 * π)))) := by
+    IntegrableOn (fun p ↦ cartanKernel f R p.1 p.2) (uIoc 0 (2 * π) ×ˢ uIoc 0 (2 * π)) := by
+  rw [IntegrableOn, Measure.volume_eq_prod, ← Measure.prod_restrict]
   simpa [uIoc_of_le two_pi_pos.le] using (integrable_prod_iff'
     (measurable_cartanKernel h.measurable).stronglyMeasurable.aestronglyMeasurable).2
     ⟨Eventually.of_forall (integrable_cartanKernel_in_alpha f R),
       integrable_integral_norm_cartanKernel h⟩
 
 end Cartan
+
+lemma MeasureTheory.intervalIntegral_intervalIntegral_swap {F : ℝ → ℝ → ℝ} {a b c d : ℝ}
+    (h : IntegrableOn F.uncurry (uIoc a b ×ˢ uIoc c d)) :
+    ∫ x in a..b, ∫ y in c..d, F x y = ∫ y in c..d, ∫ x in a..b, F x y := by
+  rw [intervalIntegral.intervalIntegral_eq_integral_uIoc, ← intervalIntegral_integral_swap,
+    ← intervalIntegral.integral_smul]
+  simp_rw [intervalIntegral.intervalIntegral_eq_integral_uIoc]
+  rwa [← integrable_swap_iff, Measure.prod_restrict, ← Measure.volume_eq_prod, ← IntegrableOn]
 
 /--
 Presentation of the proximity function as iterated circle averages.
@@ -170,17 +177,11 @@ theorem proximity_top_eq_circleAverage_circleAverage (h : Meromorphic f) :
         OfNat.ofNat_ne_zero, or_false, pi_ne_zero, F]
       aesop
     _ = (2 * π)⁻¹ * (2 * π)⁻¹ * ∫ β in 0..2 * π, ∫ α in 0..2 * π, F α β := by
-      congr 1
-      set μ := volume.restrict (Ioc 0 (2 * π))
-      calc ∫ x in 0..2 * π, ∫ y in 0..2 * π, F x y
-        _ = ∫ x, ∫ y, F x y ∂μ ∂μ := by
-          simp [μ, intervalIntegral.integral_of_le two_pi_pos.le]
-        _ = ∫ y, ∫ x, F x y ∂μ ∂μ := by
-          apply MeasureTheory.integral_integral_swap
-          simp [F, μ, ← uIoc_of_le two_pi_pos.le]
-          exact Cartan.integrable_cartanKernel h
-        _ = ∫ y in 0..2 * π, ∫ x in 0..2 * π, F x y := by
-          simp [μ, intervalIntegral.integral_of_le two_pi_pos.le]
+      rw [MeasureTheory.intervalIntegral_intervalIntegral_swap]
+      have := Cartan.integrable_cartanKernel h (R := R)
+      rw [IntegrableOn]
+      rw [Measure.volume_eq_prod, ← Measure.prod_restrict]
+      exact this
     _ = (2 * π)⁻¹ * ∫ β in 0..2 * π, ((2 * π)⁻¹ * ∫ α in 0..2 * π, F α β) := by
       simp [mul_comm, mul_left_comm, mul_assoc]
     _ = (2 * π)⁻¹ * ∫ β in 0..2 * π, log⁺ ‖f (circleMap 0 R β)‖ := by
@@ -209,8 +210,8 @@ theorem circleIntegrable_circleAverage_log_norm_sub
         (volume.restrict (Ioc 0 (2 * π))) := by
     have h_int := Cartan.integrable_cartanKernel (R := R) h
     rw [uIoc_of_le two_pi_pos.le] at h_int
-    simpa [intervalIntegral.integral_of_le two_pi_pos.le, Cartan.cartanKernel]
-      using h_int.integral_prod_left
+    simp [intervalIntegral.integral_of_le two_pi_pos.le, Cartan.cartanKernel]
+    have := h_int.integrable.integral_prod_left
   unfold CircleIntegrable
   rw [intervalIntegrable_iff_integrableOn_Ioc_of_le two_pi_pos.le]
   apply IntegrableOn.congr_fun
