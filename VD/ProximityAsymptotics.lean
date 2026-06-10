@@ -52,7 +52,7 @@ An even function that is `O(1)` at `atTop` is also `O(1)` at `atBot`.
 theorem Function.Even.isBigO_atBot_of_isBigO_atTop {f : ℝ → ℝ} (heven : Function.Even f)
     (h : f =O[atTop] (1 : ℝ → ℝ)) : f =O[atBot] (1 : ℝ → ℝ) := by
   simp_all only [isBigO_iff, norm_eq_abs, Pi.one_apply, norm_one, mul_one, eventually_atTop,
-    ge_iff_le, eventually_atBot]
+    eventually_atBot]
   obtain ⟨c, a, h⟩ := h
   exact ⟨c, -a, fun b hb ↦ by simpa [heven b] using h (-b) (by linarith)⟩
 
@@ -82,22 +82,6 @@ variable {R : ℝ} {w z : ℂ}
 
 
 -- Proof by Aristotle
-
-@[fun_prop] theorem continuous_posLog : Continuous log⁺ := by
-  rw [continuous_iff_continuousAt]
-  intro x
-  by_cases hx : x = 0
-  · apply ContinuousAt.congr (f := fun _ ↦ 0) (by fun_prop)
-    filter_upwards [Metric.ball_mem_nhds _ zero_lt_one] with y hy
-    rw [eq_comm, posLog_eq_zero_iff y]
-    simp_all [le_of_lt]
-  unfold posLog
-  fun_prop
-
-@[fun_prop] theorem continuous_proximity_top (hf : Continuous f) :
-    Continuous (ValueDistribution.proximity f ⊤) := by
-  simp only [ValueDistribution.proximity, reduceDIte]
-  fun_prop
 
 @[simp] theorem divisor_eq_zero_of_not_meromorphicOn {U : Set ℂ} {w : ℂ}
     (hf : ¬ MeromorphicOn f U) :
