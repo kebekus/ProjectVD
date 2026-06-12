@@ -239,37 +239,66 @@ Linear differential operators commute with negation.
     simp [iteratedFDerivWithin_neg_apply hs he]
   simp_all [linearDiffOp_applyWithin]
 
-/--
-For sufficiently regular functions, linear differential operators commute with scalar
-multiplication.
+/-!
+### Auxiliary: Scalar Multiplication and Iterated Derivatives
 
-TODO: Check if regularity is actually used.
+Over a field, the iterated (Fréchet) derivative commutes with multiplication by a constant scalar,
+*without* any regularity assumption on the function: the scalar is either zero or invertible, and in
+the latter case scalar multiplication is a continuous linear equivalence, to which
+`ContinuousLinearEquiv.iteratedFDerivWithin_comp_left` applies unconditionally. This strengthens
+`iteratedFDerivWithin_const_smul_apply`, which assumes `ContDiffWithinAt`.
 -/
-@[simp, to_fun] lemma linearDiffOp_apply_const_smul {μ : 𝕜} {f : E → F} (h : ContDiffAt 𝕜 n f e)
+
+/--
+Over a field, the iterated derivative within a set commutes with multiplication by a constant
+scalar, with no regularity assumption on `f`.
+-/
+theorem iteratedFDerivWithin_const_smul_apply_field {f : E → F} {μ : 𝕜} {i : ℕ}
+    (hs : UniqueDiffOn 𝕜 s) (he : e ∈ s) :
+    iteratedFDerivWithin 𝕜 i (μ • f) s e = μ • iteratedFDerivWithin 𝕜 i f s e := by
+  rcases eq_or_ne μ 0 with rfl | hμ
+  · simp
+  · lift μ to 𝕜ˣ using IsUnit.mk0 μ hμ
+    have hcomp : (μ : 𝕜) • f = (ContinuousLinearEquiv.smulLeft μ : F ≃L[𝕜] F) ∘ f := by
+      ext y
+      simp [ContinuousLinearEquiv.smulLeft_apply_apply, Units.smul_def]
+    rw [hcomp, (ContinuousLinearEquiv.smulLeft μ).iteratedFDerivWithin_comp_left f hs he i]
+    ext m
+    simp [ContinuousLinearEquiv.smulLeft_apply_apply, Units.smul_def]
+
+/--
+Over a field, the iterated derivative commutes with multiplication by a constant scalar, with no
+regularity assumption on `f`.
+-/
+theorem iteratedFDeriv_const_smul_apply_field {f : E → F} {μ : 𝕜} {i : ℕ} {x : E} :
+    iteratedFDeriv 𝕜 i (μ • f) x = μ • iteratedFDeriv 𝕜 i f x := by
+  simp only [← iteratedFDerivWithin_univ]
+  exact iteratedFDerivWithin_const_smul_apply_field uniqueDiffOn_univ (mem_univ x)
+
+/--
+Linear differential operators commute with scalar multiplication.
+-/
+@[simp, to_fun] lemma linearDiffOp_apply_const_smul {μ : 𝕜} {f : E → F}
     (D : LinearDiffOp 𝕜 E F G n) :
     D (μ • f) e = μ • D f e := by
   have : (fun (x : Fin (n + 1)) ↦ ftaylorSeries 𝕜 (μ • f) e ↑x)
       = μ • (fun (x : Fin (n + 1)) ↦ ftaylorSeries 𝕜 f e ↑x) := by
     ext m v
     unfold ftaylorSeries
-    rw [iteratedFDeriv_const_smul_apply (h.of_le (by norm_cast; grind)), Pi.smul_apply]
+    rw [iteratedFDeriv_const_smul_apply_field, Pi.smul_apply]
   simp_all [_root_.linearDiffOp_coe_apply]
 
 /--
-For sufficiently regular functions, linear differential operators commute with scalar
-multiplication.
-
-TODO: Check if regularity is actually used.
+Linear differential operators commute with scalar multiplication.
 -/
 @[simp, to_fun] lemma linearDiffOp_applyWithin_const_smul {μ : 𝕜} {f : E → F}
-    (hs : UniqueDiffOn 𝕜 s) (he : e ∈ s) (h : ContDiffWithinAt 𝕜 n f s e)
-    (D : LinearDiffOp 𝕜 E F G n) :
+    (hs : UniqueDiffOn 𝕜 s) (he : e ∈ s) (D : LinearDiffOp 𝕜 E F G n) :
     D.applyWithin s (μ • f) e = μ • D.applyWithin s f e := by
   have : (fun (x : Fin (n + 1)) ↦ ftaylorSeriesWithin 𝕜 (μ • f) s e ↑x)
       = μ • (fun (x : Fin (n + 1)) ↦ ftaylorSeriesWithin 𝕜 f s e ↑x) := by
     ext m v
     unfold ftaylorSeriesWithin
-    rw [iteratedFDerivWithin_const_smul_apply (h.of_le (by norm_cast; grind)) hs he, Pi.smul_apply]
+    rw [iteratedFDerivWithin_const_smul_apply_field hs he, Pi.smul_apply]
   simp_all [linearDiffOp_applyWithin]
 
 /--
