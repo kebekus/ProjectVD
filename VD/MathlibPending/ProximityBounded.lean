@@ -3,7 +3,7 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import VD.PoissonJensen
+import VD.MathlibPending.PoissonJensen
 import Mathlib.Analysis.Complex.Liouville
 import Mathlib.Analysis.Complex.ValueDistribution.Proximity.Basic
 

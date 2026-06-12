@@ -5,7 +5,7 @@ Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
 import Mathlib.Analysis.Complex.ValueDistribution.LogCounting.Asymptotic
-import VD.ProximityBounded
+import VD.MathlibPending.ProximityBounded
 
 /-!
 # Asymptotic Behavior of the Characteristic Function

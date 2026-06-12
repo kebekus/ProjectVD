@@ -1,12 +1,11 @@
-import VD.BoundednessCharacteristic
-import VD.ProximityBounded
 import VD.LinearDiffOp.Basic
 import VD.LinearDiffOp.Regularity
 import VD.MathlibPending.BlaschkeDecomp3
+import VD.MathlibPending.BoundednessCharacteristic
 import VD.MathlibPending.Cartan
+import VD.MathlibPending.PoissonJensen
+import VD.MathlibPending.ProximityBounded
 import VD.MathlibSubmitted.BlaschkeDecomp2
 import VD.MathlibSubmitted.ProximityIntegral
 import VD.MathlibSubmitted.Translation
 import VD.MathlibSubmitted.meromorphicAt_topology
-import VD.PoissonJensen
-import VD.leftovers.meromorphicAt_topology
