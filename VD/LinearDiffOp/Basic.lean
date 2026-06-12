@@ -8,25 +8,23 @@ import Mathlib.Analysis.Calculus.ContDiff.Operations
 /-!
 # Linear Differential Operators
 
-This file defines linear differential operators, as maps between function spaces
-that depend only on (higher) derivatives. In a nutshell, a linear differential
-operator of order ≤ n is a map `(D : Functions → Function)` such that `D f x` is
-a linear function of the tuple (f x, f' x, f'' x, … up to order n)`.
+This file defines linear differential operators, as maps between function spaces that depend only on
+(higher) derivatives. In a nutshell, a linear differential operator of order ≤ n is a map `(D :
+Functions → Function)` such that `D f x` is a linear function of the tuple `(f x, f' x, f'' x, …)`,
+up to order `n`.
 
 ## TODO
 
 - Algebra structure of differential operators over the ring of functions
 
-- Composition of differentials operators
+- Composition of differential operators
 
-- Notion of "n times continuously differentiable differential operator", loss of
-  regularity when applying the operator.
+- Notion of "n times continuously differentiable differential operator", loss of regularity when
+  applying the operator.
 
 - Leibniz rule
 -/
-open Filter Function Metric Real Set Classical Topology
-
-set_option backward.isDefEq.respectTransparency false
+open Filter Function Metric Real Set Topology
 
 variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜]
@@ -44,61 +42,56 @@ noncomputable section
 
 variable (𝕜 E F G) in
 /--
-**Linear differential operator of order ≤ n** Given normed vector spaces `E`,
-`F` and `G` and a number `n`, we define a linear differential operator as a map
-("tensor field") from `E` into linear maps from tuples `(E [0]→L[𝕜] F, …, E
-[n]→L[𝕜] F)` to `G`. The instance `CoeFun` below defines how this.
+**Linear differential operator of order ≤ n** Given normed vector spaces `E`, `F` and `G` and a
+number `n`, we define a linear differential operator as a map ("tensor field") from `E` into linear
+maps from tuples `(E [0]→L[𝕜] F, …, E [n]→L[𝕜] F)` to `G`. The `CoeFun` instance below describes
+how such an operator acts on functions.
 -/
 @[ext]
 structure LinearDiffOp (n) where
   tensorField : E → (∀ i : Fin (n + 1), E [×i]→L[𝕜] F) →L[𝕜] G
 
 /--
-**Application of linear differential operators to functions** Given a
-differential operator `D : LinearDiffOp 𝕜 E F G n` and a function `f : E → F`,
-construct a function `D f : E → G` by applying the tensor field of `D` to the
-Taylor series of `f`.
+**Application of linear differential operators to functions** Given a differential operator
+`D : LinearDiffOp 𝕜 E F G n` and a function `f : E → F`, construct a function `D f : E → G` by
+applying the tensor field of `D` to the Taylor series of `f`.
 -/
 @[coe] def LinearDiffOp.apply {n} (D : LinearDiffOp 𝕜 E F G n) (f : E → F) :
     E → G := fun e ↦ D.tensorField e ((ftaylorSeries 𝕜 f e) ·)
 
 /--
-Definition of the operation defined by linear differential operators on
-functions.
+Definition of the operation defined by linear differential operators on functions.
 -/
 theorem linearDiffOp_apply (D : LinearDiffOp 𝕜 E F G n) (f : E → F) :
     D.apply f = fun e ↦ D.tensorField e ((ftaylorSeries 𝕜 f e) ·) := rfl
 
 /--
-Establish linear differential operators as instance of `CoeFun`, mapping maps `E
-→ F` to `E → G`. This allows writing `D f` as a shorthand for `D.apply f`.
+Establish linear differential operators as instance of `CoeFun`, mapping maps `E → F` to `E → G`.
+This allows writing `D f` as a shorthand for `D.apply f`.
 
-NOTE: In typical scenarios, the coercion will not be injective. This is because
-not every tensor field appears as the truncated taylor series of a function. The
-multilinear maps appearing in taylor series practise are symmetric,
+NOTE: In typical scenarios, the coercion will not be injective. This is because not every tensor
+field appears as the truncated Taylor series of a function. The multilinear maps appearing in Taylor
+series are, in practice, symmetric.
 -/
 instance (n : ℕ) : CoeFun (LinearDiffOp 𝕜 E F G n) fun _ ↦ (E → F) → (E → G) where
   coe (D f) := D.apply f
 
 /--
-Definition of the operation defined by linear differential operators on
-functions.
+Definition of the operation defined by linear differential operators on functions.
 -/
 theorem linearDiffOp_coe_apply (D : LinearDiffOp 𝕜 E F G n) (f : E → F) :
     D f = fun e ↦ D.tensorField e ((ftaylorSeries 𝕜 f e) ·) := rfl
 
 /--
-**Application of linear differential operators to functions within a set** Given
-a differential operator `D : LinearDiffOp 𝕜 E F G n`, a set `s : Set E` and a
-function `f : E → F`, construct a function `D f : E → G` by applying the tensor
-field of `D` to the Taylor series of `f` within `s`.
+**Application of linear differential operators to functions within a set** Given a differential
+operator `D : LinearDiffOp 𝕜 E F G n`, a set `s : Set E` and a function `f : E → F`, construct a
+function `D f : E → G` by applying the tensor field of `D` to the Taylor series of `f` within `s`.
 -/
 def LinearDiffOp.applyWithin (D : LinearDiffOp 𝕜 E F G n) (s : Set E) (f : E → F) :
     E → G := fun e ↦ D.tensorField e ((ftaylorSeriesWithin 𝕜 f s e) ·)
 
 /--
-Definition of the operation defined by linear differential operators on
-functions within a set.
+Definition of the operation defined by linear differential operators on functions within a set.
 -/
 theorem linearDiffOp_applyWithin (D : LinearDiffOp 𝕜 E F G n) (f : E → F) :
     D.applyWithin s f = fun e ↦ D.tensorField e ((ftaylorSeriesWithin 𝕜 f s e) ·) := rfl
@@ -148,7 +141,8 @@ For sufficiently regular functions, linear differential operators commute with a
 For sufficiently regular functions, linear differential operators commute with addition.
 -/
 @[to_fun] lemma linearDiffOp_applyWithin_add (hs : UniqueDiffOn 𝕜 s) (he : e ∈ s)
-    (h₁ : ContDiffWithinAt 𝕜 n f₁ s e) (h₂ : ContDiffWithinAt 𝕜 n f₂ s e)  (D : LinearDiffOp 𝕜 E F G n) :
+    (h₁ : ContDiffWithinAt 𝕜 n f₁ s e) (h₂ : ContDiffWithinAt 𝕜 n f₂ s e)
+    (D : LinearDiffOp 𝕜 E F G n) :
     D.applyWithin s (f₁ + f₂) e = D.applyWithin s f₁ e + D.applyWithin s f₂ e := by
   have : (fun (x : Fin (n + 1)) ↦ ftaylorSeriesWithin 𝕜 (f₁ + f₂) s e x)
       = (fun (x : Fin (n + 1)) ↦ ftaylorSeriesWithin 𝕜 f₁ s e x)
@@ -170,14 +164,14 @@ For sufficiently regular functions, linear differential operators commute with s
     ext m v
     unfold ftaylorSeries
     rw [iteratedFDeriv_sum_apply]
-    simp only [ContinuousMultilinearMap.sum_apply, Finset.sum_apply]
-    exact fun j hj ↦ (h j hj).of_le (by norm_num; grind)
+    · simp only [ContinuousMultilinearMap.sum_apply, Finset.sum_apply]
+    · exact fun j hj ↦ (h j hj).of_le (by norm_num; grind)
   simp_all [linearDiffOp_coe_apply]
 
 /--
 For sufficiently regular functions, linear differential operators commute with sums.
 -/
-@[to_fun] lemma linearDiffOp_applyWithin_sum  (hs : UniqueDiffOn 𝕜 s) (he : e ∈ s)
+@[to_fun] lemma linearDiffOp_applyWithin_sum (hs : UniqueDiffOn 𝕜 s) (he : e ∈ s)
     (h : ∀ i ∈ I, ContDiffWithinAt 𝕜 n (φ i) s e) (D : LinearDiffOp 𝕜 E F G n) :
     D.applyWithin s (∑ i ∈ I, φ i) e = ∑ i ∈ I, D.applyWithin s (φ i) e := by
   have : (fun (x : Fin (n + 1)) ↦ ftaylorSeriesWithin 𝕜 (∑ i ∈ I, φ i) s e x)
@@ -185,8 +179,8 @@ For sufficiently regular functions, linear differential operators commute with s
     ext m v
     unfold ftaylorSeriesWithin
     rw [iteratedFDerivWithin_sum_apply hs he]
-    simp only [ContinuousMultilinearMap.sum_apply, Finset.sum_apply]
-    exact fun j hj ↦ (h j hj).of_le (by norm_num; grind)
+    · simp only [ContinuousMultilinearMap.sum_apply, Finset.sum_apply]
+    · exact fun j hj ↦ (h j hj).of_le (by norm_num; grind)
   simp_all [linearDiffOp_applyWithin]
 
 /--
@@ -205,7 +199,7 @@ For sufficiently regular functions, linear differential operators commute with s
   simp_all [_root_.linearDiffOp_coe_apply]
 
 /--
-For sufficiently regular functions, linear Differential operators commute with subtraction.
+For sufficiently regular functions, linear differential operators commute with subtraction.
 -/
 @[to_fun] lemma linearDiffOp_applyWithin_sub (hs : UniqueDiffOn 𝕜 s) (he : e ∈ s)
     (h₁ : ContDiffWithinAt 𝕜 n f₁ s e) (h₂ : ContDiffWithinAt 𝕜 n f₂ s e)
@@ -246,7 +240,8 @@ Linear differential operators commute with negation.
   simp_all [linearDiffOp_applyWithin]
 
 /--
-For sufficiently regular functions, linear Differential operators commute with scalar multiplication.
+For sufficiently regular functions, linear differential operators commute with scalar
+multiplication.
 
 TODO: Check if regularity is actually used.
 -/
@@ -261,12 +256,14 @@ TODO: Check if regularity is actually used.
   simp_all [_root_.linearDiffOp_coe_apply]
 
 /--
-For sufficiently regular functions, linear Differential operators commute with scalar multiplication.
+For sufficiently regular functions, linear differential operators commute with scalar
+multiplication.
 
 TODO: Check if regularity is actually used.
 -/
-@[simp, to_fun] lemma linearDiffOp_applyWithin_const_smul {μ : 𝕜} {f : E → F} (hs : UniqueDiffOn 𝕜 s) (he : e ∈ s)
-    (h : ContDiffWithinAt 𝕜 n f s e) (D : LinearDiffOp 𝕜 E F G n) :
+@[simp, to_fun] lemma linearDiffOp_applyWithin_const_smul {μ : 𝕜} {f : E → F}
+    (hs : UniqueDiffOn 𝕜 s) (he : e ∈ s) (h : ContDiffWithinAt 𝕜 n f s e)
+    (D : LinearDiffOp 𝕜 E F G n) :
     D.applyWithin s (μ • f) e = μ • D.applyWithin s f e := by
   have : (fun (x : Fin (n + 1)) ↦ ftaylorSeriesWithin 𝕜 (μ • f) s e ↑x)
       = μ • (fun (x : Fin (n + 1)) ↦ ftaylorSeriesWithin 𝕜 f s e ↑x) := by
