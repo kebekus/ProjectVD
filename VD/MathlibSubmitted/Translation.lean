@@ -1,12 +1,22 @@
+/-
+Copyright (c) 2026 Stefan Kebekus. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Stefan Kebekus
+-/
 import VD.PoissonJensen0
 
-open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --ValueDistribution
-
 /-!
-## Additional Material
+# Translation Invariance of Meromorphic Notions
+
+This file collects lemmas showing that `MeromorphicAt`, `MeromorphicOn`,
+`Meromorphic`, `meromorphicOrderAt`, `meromorphicTrailingCoeffAt`, and `divisor`
+are invariant under translation, including specializations to balls, closed
+balls, and spheres.
 
 Partially by Aristotle AI
 -/
+
+open Complex Filter Function MeromorphicOn Metric Real Set Topology --ValueDistribution
 
 variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜]
@@ -93,7 +103,8 @@ theorem sphere_eq_setOf_sub_mem_sphere {c : E} {R : ℝ} :
 `MeromorphicOn` is invariant under translation, special case where the set is a
 ball.
 -/
-@[simp] theorem meromorphicOn_ball_comp_sub_const_iff_meromorphicOn_ball {c : 𝕜} {R : ℝ} {f : 𝕜 → E} :
+@[simp] theorem meromorphicOn_ball_comp_sub_const_iff_meromorphicOn_ball
+    {c : 𝕜} {R : ℝ} {f : 𝕜 → E} :
     MeromorphicOn (f ∘ (· - c)) (Metric.ball c R) ↔ MeromorphicOn f (Metric.ball 0 R) := by
   convert meromorphicOn_comp_sub_const_iff_meromorphicOn
   rw [ball_eq_setOf_sub_mem_ball]
@@ -102,7 +113,8 @@ ball.
 `MeromorphicOn` is invariant under translation, special case where the set is a
 ball.
 -/
-@[simp] theorem meromorphicOn_ball_fun_comp_sub_const_iff_meromorphicOn_ball {c : 𝕜} {R : ℝ} {f : 𝕜 → E} :
+@[simp] theorem meromorphicOn_ball_fun_comp_sub_const_iff_meromorphicOn_ball
+    {c : 𝕜} {R : ℝ} {f : 𝕜 → E} :
     MeromorphicOn (fun z ↦ f (z - c)) (Metric.ball c R) ↔ MeromorphicOn f (Metric.ball 0 R) :=
   meromorphicOn_ball_comp_sub_const_iff_meromorphicOn_ball
 
@@ -110,8 +122,10 @@ ball.
 `MeromorphicOn` is invariant under translation, special case where the set is a
 closed ball.
 -/
-@[simp] theorem meromorphicOn_closedBall_comp_sub_const_iff_meromorphicOn_closedBall {c : 𝕜} {R : ℝ} {f : 𝕜 → E} :
-    MeromorphicOn (f ∘ (· - c)) (Metric.closedBall c R) ↔ MeromorphicOn f (Metric.closedBall 0 R) := by
+@[simp] theorem meromorphicOn_closedBall_comp_sub_const_iff_meromorphicOn_closedBall
+    {c : 𝕜} {R : ℝ} {f : 𝕜 → E} :
+    MeromorphicOn (f ∘ (· - c)) (Metric.closedBall c R)
+      ↔ MeromorphicOn f (Metric.closedBall 0 R) := by
   convert meromorphicOn_comp_sub_const_iff_meromorphicOn
   rw [closedBall_eq_setOf_sub_mem_closedBall]
 
@@ -119,15 +133,18 @@ closed ball.
 `MeromorphicOn` is invariant under translation, special case where the set is a
 closed ball.
 -/
-@[simp] theorem meromorphicOn_closedBall_fun_comp_sub_const_iff_meromorphicOn_closedBall {c : 𝕜} {R : ℝ} {f : 𝕜 → E} :
-    MeromorphicOn (fun z ↦ f (z - c)) (Metric.closedBall c R) ↔ MeromorphicOn f (Metric.closedBall 0 R) :=
+@[simp] theorem meromorphicOn_closedBall_fun_comp_sub_const_iff_meromorphicOn_closedBall
+    {c : 𝕜} {R : ℝ} {f : 𝕜 → E} :
+    MeromorphicOn (fun z ↦ f (z - c)) (Metric.closedBall c R)
+      ↔ MeromorphicOn f (Metric.closedBall 0 R) :=
   meromorphicOn_closedBall_comp_sub_const_iff_meromorphicOn_closedBall
 
 /--
 `MeromorphicOn` is invariant under translation, special case where the set is a
 sphere.
 -/
-@[simp] theorem meromorphicOn_sphere_comp_sub_const_iff_meromorphicOn_sphere {c : 𝕜} {R : ℝ} {f : 𝕜 → E} :
+@[simp] theorem meromorphicOn_sphere_comp_sub_const_iff_meromorphicOn_sphere
+    {c : 𝕜} {R : ℝ} {f : 𝕜 → E} :
     MeromorphicOn (f ∘ (· - c)) (Metric.sphere c R) ↔ MeromorphicOn f (Metric.sphere 0 R) := by
   convert meromorphicOn_comp_sub_const_iff_meromorphicOn
   rw [sphere_eq_setOf_sub_mem_sphere]
@@ -136,7 +153,8 @@ sphere.
 `MeromorphicOn` is invariant under translation, special case where the set is a
 sphere.
 -/
-@[simp] theorem meromorphicOn_sphere_fun_comp_sub_const_iff_meromorphicOn_sphere {c : 𝕜} {R : ℝ} {f : 𝕜 → E} :
+@[simp] theorem meromorphicOn_sphere_fun_comp_sub_const_iff_meromorphicOn_sphere
+    {c : 𝕜} {R : ℝ} {f : 𝕜 → E} :
     MeromorphicOn (fun z ↦ f (z - c)) (Metric.sphere c R) ↔ MeromorphicOn f (Metric.sphere 0 R) :=
   meromorphicOn_sphere_comp_sub_const_iff_meromorphicOn_sphere
 
@@ -168,11 +186,12 @@ sphere.
     Meromorphic (fun z ↦ f (z - c)) ↔ Meromorphic f :=
   meromorphic_comp_sub_const_iff_meromorphic
 
+open scoped Classical in
 /--
 The analytic order of the function `(· - c)` at `x` is one if `x = c` and zero
 otherwise.
 -/
-@[simp] theorem analyticOrderAt_id_sub_const {c x : 𝕜}:
+@[simp] theorem analyticOrderAt_id_sub_const {c x : 𝕜} :
     analyticOrderAt (· - c) x = if x = c then 1 else 0 := by
   by_cases h : x = c
   · have := analyticOrderAt_centeredMonomial (n := 1) (z₀ := x)
@@ -201,7 +220,8 @@ otherwise.
 /-- `meromorphicOrderAt` is invariant under translation. -/
 @[simp] theorem meromorphicOrderAt_comp_sub_const_eq_meromorphicOrderAt {c : 𝕜} {f : 𝕜 → E} :
     meromorphicOrderAt (f ∘ (· - c)) (x + c) = meromorphicOrderAt f x := by
-  simp [← meromorphicOrderAt_comp_add_const_eq_meromorphicOrderAt (f := f) (c := -c), ← sub_eq_add_neg]
+  simp [← meromorphicOrderAt_comp_add_const_eq_meromorphicOrderAt (f := f) (c := -c),
+    ← sub_eq_add_neg]
 
 /-- `meromorphicOrderAt` is invariant under translation. -/
 @[simp] theorem meromorphicOrderAt_fun_comp_sub_const_eq_meromorphicOrderAt {c : 𝕜} {f : 𝕜 → E} :
@@ -240,22 +260,26 @@ theorem MeromorphicAt.meromorphicTrailingCoeffAt_comp (hf : MeromorphicAt f (g x
     simp_all only [ne_eq, comp_apply, not_false_eq_true, smul_left_inj]
     apply MeromorphicAt.meromorphicTrailingCoeffAt_zpow (by fun_prop)
 
+open scoped Classical in
 /-- `meromorphicTrailingCoefficientAt` is invariant under translation. -/
-@[simp] theorem meromorphicTrailingCoeffAt_comp_add_const_eq_meromorphicTrailingCoeffAt {c : 𝕜} {f : 𝕜 → E} :
+@[simp] theorem meromorphicTrailingCoeffAt_comp_add_const_eq_meromorphicTrailingCoeffAt
+    {c : 𝕜} {f : 𝕜 → E} :
     meromorphicTrailingCoeffAt (f ∘ (· + c)) (x - c) = meromorphicTrailingCoeffAt f x := by
   by_cases h : ¬ MeromorphicAt f x
   · simp_all
   rw [not_not] at h
-  rw [MeromorphicAt.meromorphicTrailingCoeffAt_comp (by rwa [sub_add_cancel]) (by fun_prop), sub_add_cancel]
-  have {a b c : 𝕜} : a + b - c = a - (c - b) := by ring
-  simp [this, meromorphicTrailingCoeffAt_id_sub_const] -- simp only should be enough!
+  rw [MeromorphicAt.meromorphicTrailingCoeffAt_comp (by rwa [sub_add_cancel]) (by fun_prop),
+    sub_add_cancel]
+  · have {a b c : 𝕜} : a + b - c = a - (c - b) := by ring
+    simp [this, meromorphicTrailingCoeffAt_id_sub_const] -- simp only should be enough!
   · rw [eventuallyConst_iff_analyticOrderAt_sub_eq_top]
     have {a b c : 𝕜} : a + c - (b - c + c) = a - (b - c) := by ring
     simp_rw [this]
     simp
 
 /-- `meromorphicTrailingCoefficientAt` is invariant under translation. -/
-@[simp] theorem meromorphicTrailingCoeffAt_fun_comp_add_const_eq_meromorphicTrailingCoeffAt {c : 𝕜} {f : 𝕜 → E} :
+@[simp] theorem meromorphicTrailingCoeffAt_fun_comp_add_const_eq_meromorphicTrailingCoeffAt
+    {c : 𝕜} {f : 𝕜 → E} :
     meromorphicTrailingCoeffAt (fun z ↦ f (z + c)) (x - c) = meromorphicTrailingCoeffAt f x :=
   meromorphicTrailingCoeffAt_comp_add_const_eq_meromorphicTrailingCoeffAt
 
@@ -308,16 +332,20 @@ The divisor of a function `f` evaluates to zero if `f` is not meromorphic.
   divisor_ball_comp_add_const_eq_divisor_ball
 
 /-- Divisors are invariant under translation, special case where the set is a closed ball. -/
-@[simp] theorem divisor_closedBall_comp_add_const_eq_divisor_closedBall {c x : 𝕜} {R : ℝ} {f : 𝕜 → E} :
-    divisor (f ∘ (· - c)) (Metric.closedBall c R) (x + c) = divisor f (Metric.closedBall 0 R) x := by
+@[simp] theorem divisor_closedBall_comp_add_const_eq_divisor_closedBall
+    {c x : 𝕜} {R : ℝ} {f : 𝕜 → E} :
+    divisor (f ∘ (· - c)) (Metric.closedBall c R) (x + c)
+      = divisor f (Metric.closedBall 0 R) x := by
   nth_rw 2 [← divisor_comp_sub_const_eq_divisor (c := c)]
   congr
   all_goals
     rw [closedBall_eq_setOf_sub_mem_closedBall]
 
 /-- Divisors are invariant under translation, special case where the set is a closed ball. -/
-@[simp] theorem divisor_closedBall_fun_comp_add_const_eq_divisor_closedBall {c x : 𝕜} {R : ℝ} {f : 𝕜 → E} :
-    divisor (fun z ↦ f (z - c)) (Metric.closedBall c R) (x + c) = divisor f (Metric.closedBall 0 R) x :=
+@[simp] theorem divisor_closedBall_fun_comp_add_const_eq_divisor_closedBall
+    {c x : 𝕜} {R : ℝ} {f : 𝕜 → E} :
+    divisor (fun z ↦ f (z - c)) (Metric.closedBall c R) (x + c)
+      = divisor f (Metric.closedBall 0 R) x :=
   divisor_closedBall_comp_add_const_eq_divisor_closedBall
 
 /-- Divisors are invariant under translation, special case where the set is a sphere. -/

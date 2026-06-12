@@ -7,7 +7,15 @@ import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.Analysis.Complex.HasPrimitives
 import VD.LinearDiffOp.Basic
 
-open Filter Function Metric Real Set Classical Topology
+/-!
+# Lie derivatives and regularity of linear differential operators
+
+This file defines the Lie derivative of a function with respect to a vector field as a linear
+differential operator, the associated Lie bracket of vector fields, and the Wirtinger operators
+`∂/∂z` and `∂/∂z̄` for complex-valued functions on the complex plane.
+-/
+
+open Filter Function Metric Real Set Topology
 
 set_option backward.isDefEq.respectTransparency false
 
@@ -50,23 +58,19 @@ lemma lieBracket_apply (v₁ v₂ : E → E) :
     lieDerivative E v₁ ∘ lieDerivative E v₂ - lieDerivative E v₂ ∘ lieDerivative E v₁
       = (lieDerivative E (lieBracket v₁ v₂)) := by
   ext f : 1
-  simp [lieDerivative_apply, lieBracket]
+  simp only [lieDerivative_apply, Pi.sub_apply, comp_apply, lieBracket, map_sub]
   ext e
-  simp
+  simp only [Pi.sub_apply]
   --have := iteratedFDeriv_two_apply
-  have := fderiv_clm_apply (c := fun e ↦ fderiv ℝ f e) (u := fun e ↦ v₂ e) (x := e)
-  rw [this]
-  clear this
-
-  have := fderiv_clm_apply (c := fun e ↦ fderiv ℝ f e) (u := fun e ↦ v₁ e) (x := e)
-  rw [this]
-  clear this
-
+  rw [fderiv_clm_apply (c := fun e ↦ fderiv ℝ f e) (u := fun e ↦ v₂ e) (x := e)]
+  rotate_left
+  · sorry
+  · sorry
+  rw [fderiv_clm_apply (c := fun e ↦ fderiv ℝ f e) (u := fun e ↦ v₁ e) (x := e)]
+  rotate_left
+  · sorry
+  · sorry
   simp
-  sorry
-  sorry
-  sorry
-  sorry
   sorry
 
 

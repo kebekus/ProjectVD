@@ -3,18 +3,20 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
---module
-
 import Mathlib.Analysis.Normed.Module.Connected
 import Mathlib.Analysis.Complex.CanonicalDecomposition
 
-open Complex ComplexConjugate Filter Function Metric Set Topology Real
-
-set_option backward.isDefEq.respectTransparency false
-
 /-!
-## Material starts here
+# Extended Canonical Decomposition
+
+This file establishes the extended canonical decomposition of a meromorphic
+function on a closed disk, writing it (up to modification over a discrete set) as
+a product of a non-vanishing analytic function, canonical factors, and
+meromorphic functions of the form `(x - const) ^ n` with `const` on the boundary
+circle.
 -/
+
+open Complex ComplexConjugate Filter Function Metric Set Topology Real
 
 namespace MeromorphicOn
 
@@ -27,8 +29,8 @@ variable
 # Generic Material
 -/
 
-theorem finprod_apply_ne_zero {ι : Type*} {N₀ M₀ : Type*} [CommMonoidWithZero M₀] [Nontrivial M₀] [NoZeroDivisors M₀] {n : N₀}
-  {f : ι → N₀ → M₀} (h : ∀ i, f i n ≠ 0) :
+theorem finprod_apply_ne_zero {ι : Type*} {N₀ M₀ : Type*} [CommMonoidWithZero M₀] [Nontrivial M₀]
+  [NoZeroDivisors M₀] {n : N₀} {f : ι → N₀ → M₀} (h : ∀ i, f i n ≠ 0) :
     (∏ᶠ i, f i) n ≠ 0 := by
   by_cases h₂ : f.mulSupport.Finite
   · rw [finprod_eq_prod f h₂]
@@ -57,7 +59,8 @@ theorem _root_.Complex.CanonicalDecomp.divisor_eq_divisor {f g : ℂ → E} (D :
     divisor g (closedBall 0 R) x = divisor f (sphere 0 R) x := by
   rcases lt_trichotomy ‖x‖ R with h|h|h
   · have : x ∉ sphere (0 : ℂ) R := by aesop
-    have := (D.meromorphicNFOn (mem_closedBall_zero_iff.mpr h.le)).meromorphicOrderAt_eq_zero_iff.2 (D.ne_zero x (by aesop))
+    have := (D.meromorphicNFOn (mem_closedBall_zero_iff.mpr h.le)).meromorphicOrderAt_eq_zero_iff.2
+      (D.ne_zero x (by aesop))
     rw [divisor_apply D.meromorphicNFOn.meromorphicOn (mem_closedBall_zero_iff.mpr h.le)]
     simp_all
   · have η₁ : AnalyticAt ℂ (∏ᶠ u, canonicalFactor R u ^ (-(divisor f (ball 0 R)) u)) x := by
@@ -111,7 +114,8 @@ structure _root_.ECanonicalDecomp (f h : ℂ → E) (R : ℝ) where
   ball.
   -/
   eventuallyEq : f =ᶠ[codiscreteWithin (closedBall 0 R)]
-    ((∏ᶠ u, (canonicalFactor R u) ^ (-divisor f (ball 0 R) u)) * (∏ᶠ u, (· - u) ^ (divisor f (sphere 0 R)) u)) • h
+    ((∏ᶠ u, (canonicalFactor R u) ^ (-divisor f (ball 0 R) u))
+      * (∏ᶠ u, (· - u) ^ (divisor f (sphere 0 R)) u)) • h
 
 
 /--

@@ -1,12 +1,21 @@
+/-
+Copyright (c) 2026 Stefan Kebekus. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Stefan Kebekus
+-/
 import Mathlib.Analysis.Complex.CanonicalDecomposition
 import Mathlib.Analysis.Complex.JensenFormula
 import VD.MathlibSubmitted.BlaschkeDecomp2
 
-open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --ValueDistribution
-
 /-!
-## Additional Material
+# Additional Material on the Extended Canonical Decomposition
+
+This file provides companion lemmas to the extended canonical decomposition,
+expressing the function `h` (and `log ‖h‖`) entirely in terms of `f`, including
+the case where `f` has order zero.
 -/
+
+open Complex Filter Function MeromorphicOn Metric Real Set Topology --ValueDistribution
 
 @[fun_prop]
 lemma meromorphicAt_canonicalFactor {R : ℝ} {x w : ℂ} : MeromorphicAt (canonicalFactor R w) x := by
@@ -49,10 +58,12 @@ lemma _root_.ECanonicalDecomp.eq_smul_meromorphicTrailingCoeffAt
     finprod_eq_prod_of_mulSupport_subset (s := h₃f.toFinset) _ (by aesop),
     finprod_eq_prod_of_mulSupport_subset (s := h₄f.toFinset) _ (by aesop),
     finprod_eq_prod_of_mulSupport_subset (s := h₃f.toFinset) _ (by aesop),
-    MeromorphicAt.meromorphicTrailingCoeffAt_smul (by fun_prop) (D.analyticOnNhd w hw).meromorphicAt,
+    MeromorphicAt.meromorphicTrailingCoeffAt_smul (by fun_prop)
+      (D.analyticOnNhd w hw).meromorphicAt,
     MeromorphicAt.meromorphicTrailingCoeffAt_mul (by fun_prop) (by fun_prop),
     meromorphicTrailingCoeffAt_prod (by fun_prop), meromorphicTrailingCoeffAt_prod (by fun_prop),
-    (D.analyticOnNhd w hw).meromorphicTrailingCoeffAt_of_ne_zero (D.ne_zero w hw), smul_smul, mul_mul_mul_comm,
+    (D.analyticOnNhd w hw).meromorphicTrailingCoeffAt_of_ne_zero (D.ne_zero w hw), smul_smul,
+    mul_mul_mul_comm,
     ← Finset.prod_mul_distrib, ← Finset.prod_mul_distrib, Finset.prod_eq_one, Finset.prod_eq_one,
     mul_one, one_smul]
   · intro x hx
@@ -75,8 +86,8 @@ setting of the extended canonical decomposition, write the function `h` entirely
 in terms of `f`, under the assumption that `f` has order zero.
 -/
 lemma _root_.ECanonicalDecomp.eq_smul_meromorphicTrailingCoeffAt'
-    {f h : ℂ → E} (D : ECanonicalDecomp f h R) (h₁w : w ∈ closedBall 0 R) (h₂w : meromorphicOrderAt f w = 0)
-    (hR : 0 < R) :
+    {f h : ℂ → E} (D : ECanonicalDecomp f h R) (h₁w : w ∈ closedBall 0 R)
+    (h₂w : meromorphicOrderAt f w = 0) (hR : 0 < R) :
     h w = ((∏ᶠ i, (canonicalFactor R i w) ^ (divisor f (ball 0 R) i))
           * (∏ᶠ i, (w - i) ^ (-divisor f (sphere 0 R)) i))
           • meromorphicTrailingCoeffAt f w := by
@@ -145,13 +156,13 @@ lemma _root_.ECanonicalDecomp.log_norm_eq
   rw [Real.log_mul (mul_ne_zero_iff.2 ⟨Finset.prod_ne_zero_iff.2 η₁, Finset.prod_ne_zero_iff.2 η₀⟩),
     Real.log_mul (Finset.prod_ne_zero_iff.2 η₁) (Finset.prod_ne_zero_iff.2 η₀), Real.log_prod η₁,
     Real.log_prod η₀]
-  congr
-  · ext i
-    exact log_zpow ‖canonicalFactor R i w‖ ((divisor f (ball 0 R)) i)
-  · rw [← Finset.sum_neg_distrib]
-    apply Finset.sum_congr rfl
-    intro i hi
-    rw [log_zpow ‖w - i‖ ((-divisor f (sphere 0 R)) i)]
-    simp
+  · congr
+    · ext i
+      exact log_zpow ‖canonicalFactor R i w‖ ((divisor f (ball 0 R)) i)
+    · rw [← Finset.sum_neg_distrib]
+      apply Finset.sum_congr rfl
+      intro i hi
+      rw [log_zpow ‖w - i‖ ((-divisor f (sphere 0 R)) i)]
+      simp
   · rw [ne_eq, norm_eq_zero]
     apply (D.meromorphicOn w h₁w).meromorphicTrailingCoeffAt_ne_zero (by aesop)

@@ -3,14 +3,9 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
---module
-
 import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
 import Mathlib.Analysis.Complex.ValueDistribution.LogCounting.Asymptotic
 import VD.BoundednessProximity
-
-open Filter Function Metric Real Set Classical Topology ValueDistribution
-set_option backward.isDefEq.respectTransparency false
 
 /-!
 # Asymptotic Behavior of the Characteristic Function
@@ -25,6 +20,8 @@ detailed discussion.
 Establish the analogous characterization of rational functions, as functions
 whose logarithmic counting function big-O of `log`.
 -/
+
+open Filter Function Metric Real Set Topology ValueDistribution
 
 namespace ValueDistribution
 

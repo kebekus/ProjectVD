@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(lake build *)",
+      "Bash(awk 'length > 100 {print NR\": \"$0}' VD/MathlibSubmitted/Translation.lean)",
+      "Bash(awk 'length > 100 {print NR\": \\(\"length\"\\) \"$0}' VD/MathlibSubmitted/Translation.lean)"
+    ]
+  }
+}

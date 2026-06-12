@@ -1,15 +1,22 @@
+/-
+Copyright (c) 2026 Stefan Kebekus. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Stefan Kebekus
+-/
 import VD.MathlibPending.Cartan
 import VD.ProximityAsymptotics
 
-open Asymptotics Filter Function Metric Real Set Classical Topology ValueDistribution
+/-!
+# Boundedness of the Proximity Function
+
+This file proves that the proximity function of an analytic function `f` is bounded if and only if
+`f` is bounded and hence constant.
+-/
+
+open Asymptotics Filter Function Metric Real Set Topology ValueDistribution
 
 variable
   {E : Type*} [NormedAddCommGroup E]
-
-/-
-Prove that the proximity function of an analytic function `f` is bounded if and
-only if `f` is bounded and hence constant.
--/
 
 @[simp] theorem posLog_nonneg' {x : ℝ} : 0 ≤ log⁺ x := by simp [posLog]
 

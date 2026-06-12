@@ -10,6 +10,15 @@ import VD.MathlibSubmitted.ProximityIntegral
 import Mathlib.Analysis.Complex.ValueDistribution.Cartan
 import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 
+/-!
+# Cartan's Formula
+
+This file proves Cartan's formula, which expresses the characteristic function
+of a meromorphic function `f` at `⊤` as a circle average of the logarithmic
+counting function. As an application, it establishes that the characteristic
+function is monotone on `(0, ∞)`.
+-/
+
 public section
 
 open Real

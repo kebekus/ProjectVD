@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2026 Stefan Kebekus. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Stefan Kebekus
+-/
 import VD.PoissonJensen0
 import VD.MathlibSubmitted.Translation
 import Mathlib.Analysis.Complex.Liouville
@@ -20,7 +25,7 @@ Along the way this file also collects a few supporting results:
 -/
 
 open Asymptotics Bornology Complex ComplexConjugate Filter Function MeromorphicOn Metric Real Set
-open scoped Classical Topology
+open scoped Topology
 
 variable {f : ℂ → ℂ} {U : Set ℂ} {x z w : ℂ} {R : ℝ}
 
@@ -92,14 +97,17 @@ point `z` of the open ball `ball 0 R` other than its pole `w`. -/
 theorem one_lt_norm_canonicalFactor (hw : w ∈ ball 0 R) (hz : z ∈ ball 0 R) (hzw : z ≠ w) :
     1 < ‖canonicalFactor R w z‖ := by
   have h_norm : R * ‖z - w‖ < ‖R ^ 2 - conj w * z‖ := by
-    simp_all [Complex.normSq, Complex.norm_def]
+    simp_all only [mem_ball, dist_zero_right, norm_def, normSq, MonoidWithZeroHom.coe_mk,
+      ZeroHom.coe_mk, ne_eq, sub_re, sub_im, mul_re, conj_re, conj_im, neg_mul, sub_neg_eq_add,
+      mul_im]
     rw [Real.sqrt_lt' (lt_of_le_of_lt (Real.sqrt_nonneg _) hw)] at *
     apply Real.lt_sqrt_of_sq_lt
     norm_cast
     rw [mul_pow, Real.sq_sqrt (by nlinarith)]
     nlinarith
   by_cases hR : R = 0
-    <;> simp_all [canonicalFactor]
+    <;> simp_all only [ball_zero, mem_empty_iff_false, mem_ball, dist_zero_right, ne_eq,
+      canonicalFactor, Complex.norm_div, Complex.norm_mul, norm_real, norm_eq_abs, gt_iff_lt]
   rwa [one_lt_div (mul_pos (abs_pos.mpr hR) (norm_pos_iff.mpr (sub_ne_zero.mpr hzw))),
     abs_of_pos (lt_of_le_of_lt (norm_nonneg _) hw)]
 

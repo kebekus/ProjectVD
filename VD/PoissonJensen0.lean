@@ -1,13 +1,23 @@
+/-
+Copyright (c) 2026 Stefan Kebekus. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Stefan Kebekus
+-/
 import Mathlib.Analysis.Complex.CanonicalDecomposition
 import Mathlib.Analysis.Complex.JensenFormula
 import VD.MathlibSubmitted.BlaschkeDecomp2
 import VD.MathlibPending.BlaschkeDecomp3
 
-open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --ValueDistribution
-
 /-!
-## Additional Material
+# The Poisson–Jensen Formula
+
+This file establishes the Poisson–Jensen formula `poissonJensen₀`, expressing the
+logarithm of the leading coefficient of a meromorphic function `f` at a point `w`
+in terms of a circle average and the divisor of `f`, together with auxiliary
+integrability results for the Herglotz–Riesz kernel.
 -/
+
+open Complex Filter Function MeromorphicOn Metric Real Set Topology --ValueDistribution
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
@@ -19,7 +29,7 @@ theorem analyticOnNhd_herglotzRieszKernel_compl {c w : ℂ} :
   fun_prop (disch := aesop)
 
 @[fun_prop]
-theorem continuousOn_herglotzRieszKernel_sphere {c w : ℂ} {R : ℝ} (hw : w ∈ ball c R):
+theorem continuousOn_herglotzRieszKernel_sphere {c w : ℂ} {R : ℝ} (hw : w ∈ ball c R) :
     ContinuousOn (re ∘ herglotzRieszKernel c w) (sphere c |R|) := by
   intro x hx
   apply ContinuousAt.continuousWithinAt
@@ -111,9 +121,11 @@ theorem poissonJensen₀
           norm_inv, norm_prod, norm_zpow, inv_eq_one]
         apply Finset.prod_eq_one
         intro b hb
-        simp [norm_canonicalFactor_eval_circle_eq_one ((divisor f (ball 0 R)).supportWithinDomain (h₃f.mem_toFinset.1 hb)) ha]
+        simp [norm_canonicalFactor_eval_circle_eq_one
+          ((divisor f (ball 0 R)).supportWithinDomain (h₃f.mem_toFinset.1 hb)) ha]
       _ = circleAverage (re ∘ herglotzRieszKernel 0 w • fun x ↦
-          ∑ u ∈ h₂f.toFinset, (divisor f (sphere 0 R) u) * Real.log ‖x - u‖ + Real.log ‖h x‖) 0 R := by
+          ∑ u ∈ h₂f.toFinset, (divisor f (sphere 0 R) u) * Real.log ‖x - u‖
+            + Real.log ‖h x‖) 0 R := by
         apply circleAverage_congr_codiscreteWithin _ hR.ne'
         rw [abs_of_pos hR]
         filter_upwards [(divisor f (sphere 0 R)).eq_zero_codiscreteWithin,
@@ -122,10 +134,12 @@ theorem poissonJensen₀
         left
         rw [finprod_eq_prod_of_mulSupport_subset (s := h₂f.toFinset) _ (by aesop)]
         simp only [Finset.prod_apply, Pi.pow_apply, norm_prod, norm_zpow]
-        rw [Real.log_mul (Finset.prod_ne_zero_iff.2 (h₄f ha)) (by simp [h₂h a (Std.le_of_eq h₂a)]), Real.log_prod (h₄f ha)]
+        rw [Real.log_mul (Finset.prod_ne_zero_iff.2 (h₄f ha))
+            (by simp [h₂h a (Std.le_of_eq h₂a)]), Real.log_prod (h₄f ha)]
         congr 1
         exact Finset.sum_congr rfl (fun i hi ↦ log_zpow ‖a - i‖ ((divisor f (sphere 0 R)) i))
-      _ = circleAverage ((∑ u ∈ h₂f.toFinset, (divisor f (sphere 0 R) u) • re ∘ herglotzRieszKernel 0 w • (Real.log ‖· - u‖))
+      _ = circleAverage ((∑ u ∈ h₂f.toFinset,
+              (divisor f (sphere 0 R) u) • re ∘ herglotzRieszKernel 0 w • (Real.log ‖· - u‖))
             + re ∘ herglotzRieszKernel 0 w • (Real.log ‖h ·‖)) 0 R := by
         apply circleAverage_congr_sphere
         intro b hb
