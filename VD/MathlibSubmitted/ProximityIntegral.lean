@@ -9,10 +9,6 @@ module
 public import Mathlib.Analysis.Complex.ValueDistribution.Proximity.Basic
 public import Mathlib.Analysis.SpecialFunctions.Integrals.PosLogEqCircleAverage
 
-public section
-
-open Filter MeasureTheory Real Set
-
 /-!
 # Integral Presentation of the Proximity Function
 
@@ -25,6 +21,10 @@ characteristic function.
 See Section VI.2 of [Lang, *Introduction to Complex Hyperbolic
 Spaces*][MR886677] for a detailed discussion.
 -/
+
+public section
+
+open Filter MeasureTheory Real Set
 
 namespace ValueDistribution
 
@@ -159,8 +159,8 @@ lemma MeasureTheory.intervalIntegral_intervalIntegral_swap {F : ℝ → ℝ → 
     ∫ x in a..b, ∫ y in c..d, F x y = ∫ y in c..d, ∫ x in a..b, F x y := by
   rw [intervalIntegral.intervalIntegral_eq_integral_uIoc, ← intervalIntegral_integral_swap,
     ← intervalIntegral.integral_smul]
-  simp_rw [intervalIntegral.intervalIntegral_eq_integral_uIoc]
-  rwa [← integrable_swap_iff, Measure.prod_restrict, ← Measure.volume_eq_prod, ← IntegrableOn]
+  · simp_rw [intervalIntegral.intervalIntegral_eq_integral_uIoc]
+  · rwa [← integrable_swap_iff, Measure.prod_restrict, ← Measure.volume_eq_prod, ← IntegrableOn]
 
 /--
 Presentation of the proximity function as iterated circle averages.
