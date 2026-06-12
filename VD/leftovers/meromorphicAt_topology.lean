@@ -1,7 +1,18 @@
+/-
+Copyright (c) 2026 Stefan Kebekus. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Stefan Kebekus
+-/
 import Mathlib.Analysis.Meromorphic.Order
 
+/-!
+# Topological Characterization of Non-Negative Meromorphic Order
+
+This file characterizes the meromorphic functions of non-negative order at a point in terms of the
+existence of continuous (equivalently, analytic) extensions across that point.
+-/
+
 open Filter Topology
-set_option backward.isDefEq.respectTransparency false
 
 lemma tendsto_nhdsWithin_of_tendsto_nhds' {α β : Type*}
     [TopologicalSpace α] [TopologicalSpace β] {a : α} {f : α → β}
@@ -20,7 +31,7 @@ theorem MeromorphicAt.order_nonneg_if_exists_continuous_extension (hf : Meromorp
   push Not at h₀
   set n := (meromorphicOrderAt f z₀).untop (by exact LT.lt.ne_top h₀) with h₁
   have h₁ : meromorphicOrderAt f z₀ = n := by simp [n]
-  simp [h₁] at h₀
+  simp only [h₁, WithTop.coe_lt_zero] at h₀
   have nneg : 0 < -n := by linarith
   obtain ⟨a, ha⟩ := Int.eq_succ_of_zero_lt nneg
   obtain ⟨g, hg, hfg⟩ := h
@@ -42,7 +53,8 @@ theorem MeromorphicAt.order_nonneg_if_exists_continuous_extension (hf : Meromorp
     rw [← hh₂]
     apply tendsto_nhdsWithin_of_tendsto_nhds' (hh₁.pow a.succ).tendsto
     intro x hx h
-    simp [sub_eq_zero] at h
+    simp only [sub_self, Nat.succ_eq_add_one, ne_eq, Nat.add_eq_zero_iff, one_ne_zero, and_false,
+      not_false_eq_true, zero_pow, Set.mem_singleton_iff, pow_eq_zero_iff, sub_eq_zero] at h
     apply hx h
   apply h₄.atTop_mul_pos (norm_pos_iff.mpr hh₂)
   apply tendsto_nhdsWithin_of_tendsto_nhds
@@ -61,9 +73,9 @@ theorem MeromorphicAt.exists_analytic_extension_if_order_nonneg (hf : Meromorphi
     use (fun z ↦ (z - z₀) ^ n • g z)
     constructor
     · apply AnalyticAt.smul _ hg
-      · simp [h₀] at nneg
+      · simp only [h₀, WithTop.coe_nonneg] at nneg
         obtain ⟨a, ha⟩ := Int.eq_ofNat_of_zero_le nneg
-        simp [ha]
+        simp only [ha, zpow_natCast]
         apply (analyticAt_id.sub analyticAt_const).pow
     · exact hfg.2
 
