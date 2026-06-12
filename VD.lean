@@ -1,5 +1,6 @@
 import VD.LinearDiffOp.Basic
 import VD.LinearDiffOp.Regularity
+import VD.LinearDiffOp.Wirtinger
 import VD.MathlibPending.BlaschkeDecomp3
 import VD.MathlibPending.BoundednessCharacteristic
 import VD.MathlibPending.Cartan
