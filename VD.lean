@@ -6,6 +6,7 @@ import VD.MathlibPending.BlaschkeDecomp3
 import VD.MathlibPending.Cartan
 import VD.MathlibSubmitted.BlaschkeDecomp2
 import VD.MathlibSubmitted.ProximityIntegral
+import VD.MathlibSubmitted.Translation
 import VD.PoissonJensen0
 import VD.PoissonJensen1
 import VD.ProximityAsymptotics

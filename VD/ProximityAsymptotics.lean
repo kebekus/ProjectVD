@@ -1,4 +1,5 @@
 import VD.PoissonJensen0
+import VD.MathlibSubmitted.Translation
 import Mathlib.Analysis.Complex.Liouville
 import Mathlib.Analysis.Complex.ValueDistribution.Proximity.Basic
 
@@ -82,12 +83,6 @@ variable {R : ℝ} {w z : ℂ}
 
 
 -- Proof by Aristotle
-
-@[simp] theorem divisor_eq_zero_of_not_meromorphicOn {U : Set ℂ} {w : ℂ}
-    (hf : ¬ MeromorphicOn f U) :
-    divisor f U w = 0 := by
-  unfold divisor
-  aesop
 
 @[simp] theorem divisor_eq_zero_of_meromorphicOrderAt_eq_zero {U : Set ℂ} {w : ℂ}
     (hf : meromorphicOrderAt f w = 0) :

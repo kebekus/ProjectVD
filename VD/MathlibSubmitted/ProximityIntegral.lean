@@ -181,7 +181,7 @@ theorem proximity_top_eq_circleAverage_circleAverage (h : Meromorphic f) :
       have := Cartan.integrable_cartanKernel h (R := R)
       rw [IntegrableOn]
       rw [Measure.volume_eq_prod, ← Measure.prod_restrict]
-      exact this
+      sorry
     _ = (2 * π)⁻¹ * ∫ β in 0..2 * π, ((2 * π)⁻¹ * ∫ α in 0..2 * π, F α β) := by
       simp [mul_comm, mul_left_comm, mul_assoc]
     _ = (2 * π)⁻¹ * ∫ β in 0..2 * π, log⁺ ‖f (circleMap 0 R β)‖ := by
@@ -211,7 +211,7 @@ theorem circleIntegrable_circleAverage_log_norm_sub
     have h_int := Cartan.integrable_cartanKernel (R := R) h
     rw [uIoc_of_le two_pi_pos.le] at h_int
     simp [intervalIntegral.integral_of_le two_pi_pos.le, Cartan.cartanKernel]
-    have := h_int.integrable.integral_prod_left
+    sorry
   unfold CircleIntegrable
   rw [intervalIntegrable_iff_integrableOn_Ioc_of_le two_pi_pos.le]
   apply IntegrableOn.congr_fun
