@@ -5,7 +5,7 @@ Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
 import Mathlib.Analysis.Complex.ValueDistribution.LogCounting.Asymptotic
-import VD.BoundednessProximity
+import VD.ProximityBounded
 
 /-!
 # Asymptotic Behavior of the Characteristic Function
@@ -57,7 +57,7 @@ theorem characteristic_isBigO_one_iff_constant {f : ℂ → ℂ} (h : Meromorphi
     EventuallyConst f (codiscrete ℂ) ↔ characteristic f ⊤ =O[atTop] (1 : ℝ → ℝ) := by
   constructor
   · intro hf
-    apply Asymptotics.IsBigO.add (proximity_bounded_if_eventuallyConstant hf)
+    apply Asymptotics.IsBigO.add (proximity_isBigO_one_of_eventuallyConst hf)
     obtain ⟨c, hc⟩ := eventuallyConst_iff_exists_eventuallyEq.1 hf
     simp [logCounting_congr_codiscrete hc, Asymptotics.isBigO_of_le' (c := 0)]
   · intro hf
@@ -67,7 +67,7 @@ theorem characteristic_isBigO_one_iff_constant {f : ℂ → ℂ} (h : Meromorphi
       rwa [Asymptotics.isBigO_congr (proximity_eq_proximity_toMeromorphiNFOn h).symm
         (Eq.eventuallyEq rfl)]
     rw [eventuallyConst_iff_exists_eventuallyEq]
-    obtain ⟨c, hc⟩ := (proximity_bounded_iff_constant hf₂).2 this
+    obtain ⟨c, hc⟩ := (proximity_isBigO_one_iff_exists_eq_const hf₂).mp this
     use c
     filter_upwards [toMeromorphicNFOn_eqOn_codiscrete h] using by aesop
 

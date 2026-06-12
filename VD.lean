@@ -1,5 +1,5 @@
 import VD.BoundednessCharacteristic
-import VD.BoundednessProximity
+import VD.ProximityBounded
 import VD.LinearDiffOp.Basic
 import VD.LinearDiffOp.Regularity
 import VD.MathlibPending.BlaschkeDecomp3
@@ -9,5 +9,4 @@ import VD.MathlibSubmitted.ProximityIntegral
 import VD.MathlibSubmitted.Translation
 import VD.MathlibSubmitted.meromorphicAt_topology
 import VD.PoissonJensen
-import VD.ProximityAsymptotics
 import VD.leftovers.meromorphicAt_topology

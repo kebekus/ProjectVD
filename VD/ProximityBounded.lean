@@ -8,14 +8,16 @@ import Mathlib.Analysis.Complex.Liouville
 import Mathlib.Analysis.Complex.ValueDistribution.Proximity.Basic
 
 /-!
-# Boundedness of the proximity function of an entire function
+# Boundedness of the Proximity Function
 
-For an entire function `f : ℂ → ℂ`, the Nevanlinna proximity function `proximity f ⊤`
-(the circle average of `log⁺ ‖f ·‖`) is `O(1)` along `atTop` if and only if `f` is
-constant. This is a value-distribution-theoretic form of Liouville's theorem.
+For an entire function `f : ℂ → ℂ`, the Nevanlinna proximity function `proximity f ⊤` (the circle
+average of `log⁺ ‖f ·‖`) is `O(1)` along `atTop` if and only if `f` is constant. This is a
+value-distribution-theoretic form of Liouville's theorem,
+`ValueDistribution.proximity_isBigO_one_iff_exists_eq_const`.
 
-The proof rests on a Poisson–Jensen estimate bounding `log ‖f w‖` by a fixed multiple of
-the proximity function, combined with Liouville's theorem.
+The proof rests on a Poisson–Jensen estimate bounding `log ‖f w‖` by a fixed multiple of the
+proximity function (the private lemmas `log_norm_le_circleAverage_posLog_norm` and
+`log_norm_le_three_mul_proximity`), combined with Liouville's theorem.
 
 Along the way this file also collects a few supporting results:
 * equivalences between bounded range and `IsBigO` asymptotics for functions `ℝ → ℝ`;
@@ -29,7 +31,7 @@ open scoped Topology
 variable {f : ℂ → ℂ} {U : Set ℂ} {x z w : ℂ} {R : ℝ}
 
 /-!
-## Bounded range versus `IsBigO` asymptotics
+## Bounded Range Versus `IsBigO` Asymptotics
 -/
 
 /-- A continuous function `f : ℝ → ℝ` has bounded range if and only if it is `O(1)`
@@ -66,7 +68,7 @@ theorem Continuous.isBounded_range_iff_isBigO_atTop_of_even {f : ℝ → ℝ} (h
    fun h ↦ hf.isBounded_range_iff_isBigO_atTop_atBot.mpr ⟨h, heven.isBigO_atBot_of_isBigO_atTop h⟩⟩
 
 /-!
-## Divisors and trailing coefficients
+## Divisors and Trailing Coefficients
 -/
 
 /-- A meromorphic function whose order vanishes at `w` has trivial divisor at `w`. -/
@@ -88,7 +90,7 @@ is just the value `f x`. -/
   simp_all
 
 /-!
-## The canonical factor on the open ball
+## The Canonical Factor on the Open Ball
 -/
 
 /-- The canonical factor `canonicalFactor R w` has norm strictly greater than one at every
@@ -111,11 +113,10 @@ theorem one_lt_norm_canonicalFactor (hw : w ∈ ball 0 R) (hz : z ∈ ball 0 R) 
     abs_of_pos (lt_of_le_of_lt (norm_nonneg _) hw)]
 
 /-!
-## Boundedness of the proximity function
+## Boundedness of the Proximity Function
 
 The technical estimates `log_norm_le_circleAverage_posLog_norm` and
-`log_norm_le_three_mul_proximity` are auxiliary to the main result
-`proximity_isBigO_one_iff_eq_const` and are kept `private`.
+`log_norm_le_three_mul_proximity` are auxiliary to the main results and are kept `private`.
 -/
 
 namespace ValueDistribution
@@ -212,11 +213,22 @@ private theorem log_norm_le_three_mul_proximity (h₁f : AnalyticOnNhd ℂ f uni
     ring
   · simp
 
-/-- An entire function `f : ℂ → ℂ` has bounded Nevanlinna proximity function, in the sense
-that `proximity f ⊤ =O[atTop] 1`, if and only if `f` is constant. This is a value
+/-- If a function is eventually constant on a codiscrete subset of `ℂ`, then its Nevanlinna
+proximity function is `O(1)` at `atTop`. -/
+theorem proximity_isBigO_one_of_eventuallyConst {E : Type*} [NormedAddCommGroup E] {f : ℂ → E}
+    (h : EventuallyConst f (codiscrete ℂ)) :
+    proximity f ⊤ =O[atTop] (1 : ℝ → ℝ) := by
+  rw [eventuallyConst_iff_exists_eventuallyEq] at h
+  obtain ⟨c, hc⟩ := h
+  simp_rw [isBigO_iff, eventually_atTop]
+  exact ⟨log⁺ ‖c‖, 1, fun _ _ ↦ by
+    simp [proximity_congr_codiscrete hc (by linarith), abs_of_nonneg posLog_nonneg]⟩
+
+/-- An entire function `f : ℂ → ℂ` has bounded Nevanlinna proximity function, in the sense that
+`proximity f ⊤ =O[atTop] 1`, if and only if `f` is constant. This is a value
 distribution-theoretic form of Liouville's theorem. -/
-theorem proximity_isBigO_one_iff_eq_const (h₁f : AnalyticOnNhd ℂ f univ) :
-    proximity f ⊤ =O[atTop] (1 : ℝ → ℝ) ↔ f = fun _ ↦ f 0 := by
+theorem proximity_isBigO_one_iff_exists_eq_const (h₁f : AnalyticOnNhd ℂ f univ) :
+    proximity f ⊤ =O[atTop] (1 : ℝ → ℝ) ↔ ∃ c, f = fun _ ↦ c := by
   have hcont : Continuous f := h₁f.continuous
   constructor
   · intro h
@@ -237,18 +249,9 @@ theorem proximity_isBigO_one_iff_eq_const (h₁f : AnalyticOnNhd ℂ f univ) :
           rw [Real.norm_of_nonneg (proximity_nonneg ‖2 * y‖)] at hmem
           linarith
     have hdiff : Differentiable ℂ f := fun x ↦ (h₁f x (mem_univ x)).differentiableAt
-    ext x
-    exact hdiff.apply_eq_apply_of_bounded hbdd x 0
-  · intro h₂f
-    rw [h₂f, show proximity (fun _ ↦ f 0) ⊤ = fun _ ↦ log⁺ ‖f 0‖ from
-      funext fun _ ↦ proximity_const]
+    exact ⟨f 0, funext fun x ↦ hdiff.apply_eq_apply_of_bounded hbdd x 0⟩
+  · rintro ⟨c, hc⟩
+    rw [hc, show proximity (fun _ ↦ c) ⊤ = fun _ ↦ log⁺ ‖c‖ from funext fun _ ↦ proximity_const]
     exact isBigO_const_const _ one_ne_zero atTop
 
 end ValueDistribution
-
-/-- Backwards-compatibility alias under the previous (non-Mathlib) name, kept so that the
-remaining files of this project continue to compile. It is not intended to be part of the
-Mathlib PR: the downstream references should be updated to
-`ValueDistribution.proximity_isBigO_one_iff_eq_const` and this alias removed. -/
-alias logCounting_isBigO_one_iff_analyticOnNhd :=
-  ValueDistribution.proximity_isBigO_one_iff_eq_const
