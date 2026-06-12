@@ -3,53 +3,50 @@ import VD.MathlibSubmitted.Translation
 import Mathlib.Analysis.Complex.Liouville
 import Mathlib.Analysis.Complex.ValueDistribution.Proximity.Basic
 
-open Complex Filter Function MeromorphicOn Metric Real Set Classical Topology --ValueDistribution
+/-!
+# Boundedness of the proximity function of an entire function
+
+For an entire function `f : ℂ → ℂ`, the Nevanlinna proximity function `proximity f ⊤`
+(the circle average of `log⁺ ‖f ·‖`) is `O(1)` along `atTop` if and only if `f` is
+constant. This is a value-distribution-theoretic form of Liouville's theorem.
+
+The proof rests on a Poisson–Jensen estimate bounding `log ‖f w‖` by a fixed multiple of
+the proximity function, combined with Liouville's theorem.
+
+Along the way this file also collects a few supporting results:
+* equivalences between bounded range and `IsBigO` asymptotics for functions `ℝ → ℝ`;
+* lemmas on divisors and trailing coefficients of meromorphic functions;
+* a lower bound for the norm of the canonical factor on the open ball.
+-/
+
+open Asymptotics Bornology Complex ComplexConjugate Filter Function MeromorphicOn Metric Real Set
+open scoped Classical Topology
+
+variable {f : ℂ → ℂ} {U : Set ℂ} {x z w : ℂ} {R : ℝ}
 
 /-!
-## Additional Material
+## Bounded range versus `IsBigO` asymptotics
 -/
 
-
-open Filter Asymptotics Bornology Set
-
-
-variable {𝕜 E F G : Type*}
-
-variable [NontriviallyNormedField 𝕜] [NormedAddCommGroup E] [NormedSpace 𝕜 E]
-  [NormedAddCommGroup F] [NormedSpace 𝕜 F] [NormedAddCommGroup G] [NormedSpace 𝕜 G]
-
-@[fun_prop] theorem AnalyticOnNhd.continuous' {f : E → F} (fa : AnalyticOnNhd 𝕜 f univ) :
-    Continuous f := by
-  rw [← continuousOn_univ]
-  exact fa.continuousOn
-
-
-/--
-A continuous function `f : ℝ → ℝ` has bounded range if and only if it is `O(1)`
-at both `atTop` and `atBot`.
--/
+/-- A continuous function `f : ℝ → ℝ` has bounded range if and only if it is `O(1)`
+at both `atTop` and `atBot`. -/
 theorem Continuous.isBounded_range_iff_isBigO_atTop_atBot {f : ℝ → ℝ} (hf : Continuous f) :
     IsBounded (range f) ↔ f =O[atTop] (1 : ℝ → ℝ) ∧ f =O[atBot] (1 : ℝ → ℝ) := by
   constructor <;> intro H
   · constructor
     all_goals
-    · rw [Asymptotics.isBigO_iff]
+    · rw [isBigO_iff]
       obtain ⟨C, hC⟩ := H.exists_pos_norm_le
-      use C
-      aesop
-  · obtain ⟨C1, M1, hC1⟩ : ∃ C1 M1, ∀ x ≥ M1, |f x| ≤ C1 := by simp_all [Asymptotics.isBigO_iff]
-    obtain ⟨C2, M2, hC2⟩ : ∃ C2 M2, ∀ x ≤ M2, |f x| ≤ C2 := by simp_all [Asymptotics.isBigO_iff]
-    obtain ⟨C3, hC3⟩ : ∃ C3, ∀ x ∈ Icc M2 M1, |f x| ≤ C3 :=
-      IsCompact.exists_bound_of_continuousOn isCompact_Icc hf.continuousOn
+      exact ⟨C, by aesop⟩
+  · obtain ⟨C₁, M₁, hC₁⟩ : ∃ C₁ M₁, ∀ x ≥ M₁, |f x| ≤ C₁ := by simp_all [isBigO_iff]
+    obtain ⟨C₂, M₂, hC₂⟩ : ∃ C₂ M₂, ∀ x ≤ M₂, |f x| ≤ C₂ := by simp_all [isBigO_iff]
+    obtain ⟨C₃, hC₃⟩ : ∃ C₃, ∀ x ∈ Icc M₂ M₁, |f x| ≤ C₃ :=
+      isCompact_Icc.exists_bound_of_continuousOn hf.continuousOn
     rw [isBounded_iff_forall_norm_le]
-    use max C1 (max C2 C3)
-    rw [forall_mem_range]
-    intro x
-    cases le_total x M1 <;> cases le_total x M2 <;> aesop
+    refine ⟨max C₁ (max C₂ C₃), forall_mem_range.2 fun x ↦ ?_⟩
+    rcases le_total x M₁ with hx₁ | hx₁ <;> rcases le_total x M₂ with hx₂ | hx₂ <;> aesop
 
-/--
-An even function that is `O(1)` at `atTop` is also `O(1)` at `atBot`.
--/
+/-- An even function that is `O(1)` at `atTop` is also `O(1)` at `atBot`. -/
 theorem Function.Even.isBigO_atBot_of_isBigO_atTop {f : ℝ → ℝ} (heven : Function.Even f)
     (h : f =O[atTop] (1 : ℝ → ℝ)) : f =O[atBot] (1 : ℝ → ℝ) := by
   simp_all only [isBigO_iff, norm_eq_abs, Pi.one_apply, norm_one, mul_one, eventually_atTop,
@@ -57,52 +54,27 @@ theorem Function.Even.isBigO_atBot_of_isBigO_atTop {f : ℝ → ℝ} (heven : Fu
   obtain ⟨c, a, h⟩ := h
   exact ⟨c, -a, fun b hb ↦ by simpa [heven b] using h (-b) (by linarith)⟩
 
-/--
-A continuous even function `f : ℝ → ℝ` has bounded range if and only if `f
-=O[atTop] 1`.
--/
+/-- A continuous even function `f : ℝ → ℝ` has bounded range if and only if `f =O[atTop] 1`. -/
 theorem Continuous.isBounded_range_iff_isBigO_atTop_of_even {f : ℝ → ℝ} (hf : Continuous f)
     (heven : Function.Even f) :
     IsBounded (range f) ↔ f =O[atTop] (1 : ℝ → ℝ) :=
   ⟨fun h ↦ (hf.isBounded_range_iff_isBigO_atTop_atBot.mp h).1,
    fun h ↦ hf.isBounded_range_iff_isBigO_atTop_atBot.mpr ⟨h, heven.isBigO_atBot_of_isBigO_atTop h⟩⟩
 
-
 /-!
-## Formula goes here
+## Divisors and trailing coefficients
 -/
 
-variable
-  {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  {R : ℝ} {x c w : ℂ} {f h : ℂ → ℂ}
-
-
-open ComplexConjugate Metric Real
-
-variable {R : ℝ} {w z : ℂ}
-
-
--- Proof by Aristotle
-
-@[simp] theorem divisor_eq_zero_of_meromorphicOrderAt_eq_zero {U : Set ℂ} {w : ℂ}
+/-- A meromorphic function whose order vanishes at `w` has trivial divisor at `w`. -/
+@[simp] theorem divisor_eq_zero_of_meromorphicOrderAt_eq_zero
     (hf : meromorphicOrderAt f w = 0) :
     divisor f U w = 0 := by
   by_cases h₁f : MeromorphicOn f U
-  · by_cases hw : w ∈ U
-    <;> simp_all
-  simp_all
+  · by_cases hw : w ∈ U <;> simp_all
+  · simp_all
 
-@[simp] theorem divisor_nonneg_of_analyticOnNhd {U : Set ℂ}
-    (hf : AnalyticOnNhd ℂ f U) :
-    0 ≤ divisor f U := by
-  intro x
-  by_cases hx : x ∈ U
-  <;> simp_all [hf.divisor_apply]
-
-@[simp] theorem divisor_nonneg_apply {U : Set ℂ} {w : ℂ}
-    (hf : 0 ≤ divisor f U) :
-    0 ≤ divisor f U w := hf w
-
+/-- At a point where `f` is analytic and its order vanishes, the trailing coefficient of `f`
+is just the value `f x`. -/
 @[simp] lemma AnalyticAt.meromorphicTrailingCoeffAt_of_meromorphicOrderAt_eq_zero
     (h₁ : AnalyticAt ℂ f x) (h₂ : meromorphicOrderAt f x = 0) :
     meromorphicTrailingCoeffAt f x = f x := by
@@ -111,30 +83,43 @@ variable {R : ℝ} {w z : ℂ}
   have := analyticOrderAt_eq_zero.1 h₂
   simp_all
 
-
-/--
-The canonical factor has norm strictly greater than one for points inside the ball.
+/-!
+## The canonical factor on the open ball
 -/
-theorem norm_canonicalFactor (h : w ∈ ball 0 R) (h₁z : z ∈ ball 0 R) (h₂z : z ≠ w) :
+
+/-- The canonical factor `canonicalFactor R w` has norm strictly greater than one at every
+point `z` of the open ball `ball 0 R` other than its pole `w`. -/
+theorem one_lt_norm_canonicalFactor (hw : w ∈ ball 0 R) (hz : z ∈ ball 0 R) (hzw : z ≠ w) :
     1 < ‖canonicalFactor R w z‖ := by
-  have h_norm : ‖R ^ 2 - conj w * z‖ > R * ‖z - w‖ := by
+  have h_norm : R * ‖z - w‖ < ‖R ^ 2 - conj w * z‖ := by
     simp_all [Complex.normSq, Complex.norm_def]
-    rw [Real.sqrt_lt' (lt_of_le_of_lt (Real.sqrt_nonneg _) h)] at *
+    rw [Real.sqrt_lt' (lt_of_le_of_lt (Real.sqrt_nonneg _) hw)] at *
     apply Real.lt_sqrt_of_sq_lt
     norm_cast
     rw [mul_pow, Real.sq_sqrt (by nlinarith)]
     nlinarith
   by_cases hR : R = 0
     <;> simp_all [canonicalFactor]
-  rwa [one_lt_div (mul_pos (abs_pos.mpr hR) (norm_pos_iff.mpr (sub_ne_zero.mpr h₂z))),
-    abs_of_pos (lt_of_le_of_lt (norm_nonneg _) h)]
+  rwa [one_lt_div (mul_pos (abs_pos.mpr hR) (norm_pos_iff.mpr (sub_ne_zero.mpr hzw))),
+    abs_of_pos (lt_of_le_of_lt (norm_nonneg _) hw)]
 
-theorem η₀
-    (h₁w : w ∈ ball 0 R)
-    (h₃w : meromorphicOrderAt f w = 0) -- Assumption probably unnecessary
+/-!
+## Boundedness of the proximity function
+
+The technical estimates `log_norm_le_circleAverage_posLog_norm` and
+`log_norm_le_three_mul_proximity` are auxiliary to the main result
+`proximity_isBigO_one_iff_eq_const` and are kept `private`.
+-/
+
+namespace ValueDistribution
+
+/-- Poisson–Jensen estimate: if `f` is analytic on `closedBall 0 R` and its order vanishes
+at `w ∈ ball 0 R`, then `log ‖f w‖` is bounded by `(R + ‖w‖) / (R - ‖w‖)` times the circle
+average of `log⁺ ‖f‖`. -/
+private theorem log_norm_le_circleAverage_posLog_norm
+    (h₁w : w ∈ ball 0 R) (h₃w : meromorphicOrderAt f w = 0)
     (h₁f : AnalyticOnNhd ℂ f (closedBall 0 R)) :
-    Real.log ‖f w‖
-      ≤ ((R + ‖w‖) / (R - ‖w‖)) * circleAverage (log⁺ ‖f ·‖) 0 R := by
+    Real.log ‖f w‖ ≤ ((R + ‖w‖) / (R - ‖w‖)) * circleAverage (log⁺ ‖f ·‖) 0 R := by
   have h₄f : (divisor f (ball 0 R)).support.Finite := by
     apply ((divisor f (closedBall 0 R)).finiteSupport (isCompact_closedBall 0 R)).subset
     intro b hb
@@ -144,120 +129,117 @@ theorem η₀
       (fun c hc ↦ (fun x hx ↦ (h₁f x hx).meromorphicAt) c (ball_subset_closedBall hc))
       ((divisor f (ball 0 R)).supportWithinDomain hb)] at hb
   have h₅f : MeromorphicOn f (sphere 0 |R|) := by
-        rw [abs_of_pos (pos_of_mem_ball h₁w)]
-        exact fun x hx ↦ (h₁f x (sphere_subset_closedBall hx)).meromorphicAt
+    rw [abs_of_pos (pos_of_mem_ball h₁w)]
+    exact fun x hx ↦ (h₁f x (sphere_subset_closedBall hx)).meromorphicAt
   calc Real.log ‖f w‖
     _ = Real.log ‖meromorphicTrailingCoeffAt f w‖ := by
       rw [AnalyticAt.meromorphicTrailingCoeffAt_of_meromorphicOrderAt_eq_zero
         (h₁f w (ball_subset_closedBall h₁w)) h₃w]
     _ ≤ circleAverage (re ∘ herglotzRieszKernel 0 w * (Real.log ‖f ·‖)) 0 R := by
       rw [poissonJensen₀ h₁w h₃w (fun x hx ↦ (h₁f x hx).meromorphicAt)]
-      simp
+      apply sub_le_self
       rw [finsum_eq_sum_of_support_subset (s := h₄f.toFinset) _ (fun _ _ ↦ by aesop)]
-      apply Finset.sum_nonneg
-      intro i hi
-      apply mul_nonneg
-      · simp_all [h₁f.mono ball_subset_closedBall]
+      refine Finset.sum_nonneg fun i hi ↦ mul_nonneg ?_ ?_
+      · exact_mod_cast (h₁f.mono ball_subset_closedBall).divisor_nonneg i
       · have := (divisor f (ball 0 R)).supportWithinDomain
-        apply log_nonneg (norm_canonicalFactor (by aesop) h₁w (by aesop)).le
+        exact log_nonneg (one_lt_norm_canonicalFactor (by aesop) h₁w (by aesop)).le
     _ ≤ circleAverage (re ∘ herglotzRieszKernel 0 w * (log⁺ ‖f ·‖)) 0 R := by
       apply circleAverage_mono ((circleIntegrable_log_norm h₅f).mul_of_continuousOn
         (continuousOn_herglotzRieszKernel_sphere h₁w)) ((circleIntegrable_posLog_norm
         h₅f).mul_of_continuousOn (continuousOn_herglotzRieszKernel_sphere h₁w))
       intro x hx
-      simp
-      unfold herglotzRieszKernel
+      simp only [Pi.mul_apply, comp_apply]
       gcongr
       · trans (R - ‖w - 0‖) / (R + ‖w - 0‖)
         · rw [sub_zero]
           simp only [mem_ball, dist_zero_right] at h₁w
-          apply div_nonneg (sub_nonneg.2 h₁w.le)
+          exact div_nonneg (sub_nonneg.2 h₁w.le)
             (add_nonneg ((norm_nonneg w).trans h₁w.le) (norm_nonneg w))
         · apply le_re_herglotzRieszKernel _ h₁w
           rwa [abs_of_pos (pos_of_mem_ball h₁w)] at hx
-      · -- should be simp
-        unfold posLog
-        simp
-    _ ≤ circleAverage ( ((R + ‖w‖) / (R - ‖w‖)) • (log⁺ ‖f ·‖)) 0 R := by
-      have : CircleIntegrable (log⁺ ‖f ·‖) 0 R :=
-        circleIntegrable_posLog_norm h₅f
-      apply circleAverage_mono (this.circleIntegrable_re_herglotzRieszKernel_smul h₁w)
-        (this.mul_of_continuousOn (by fun_prop))
+      · rw [posLog_apply]
+        exact le_max_right _ _
+    _ ≤ circleAverage (((R + ‖w‖) / (R - ‖w‖)) • (log⁺ ‖f ·‖)) 0 R := by
+      have hint : CircleIntegrable (log⁺ ‖f ·‖) 0 R := circleIntegrable_posLog_norm h₅f
+      apply circleAverage_mono (hint.circleIntegrable_re_herglotzRieszKernel_smul h₁w)
+        (hint.mul_of_continuousOn (by fun_prop))
       intro x hx
       rw [abs_of_pos (pos_of_mem_ball h₁w)] at hx
       rw [Pi.smul_apply', comp_apply, smul_eq_mul, Pi.mul_apply]
       gcongr
       · exact posLog_nonneg
       · simpa [herglotzRieszKernel] using re_herglotzRieszKernel_le hx h₁w
-    _ = ((R + ‖w‖) / (R - ‖w‖)) * circleAverage (log⁺ ‖f ·‖) 0 R :=
-      circleAverage_smul
+    _ = ((R + ‖w‖) / (R - ‖w‖)) * circleAverage (log⁺ ‖f ·‖) 0 R := circleAverage_smul
 
-theorem η₁
-    (h₁f : AnalyticOnNhd ℂ f univ) :
-    Real.log ‖f w‖ ≤ 3 * ValueDistribution.proximity f ⊤ ‖2 * w‖ := by
-  by_cases h₁w : f w = 0
-  · simp only [h₁w, norm_zero, Real.log_zero, Complex.norm_mul, Complex.norm_ofNat, Nat.ofNat_pos,
+/-- For an entire function `f`, `log ‖f w‖` is bounded by three times the proximity function
+evaluated at `‖2 * w‖`. -/
+private theorem log_norm_le_three_mul_proximity (h₁f : AnalyticOnNhd ℂ f univ) :
+    Real.log ‖f w‖ ≤ 3 * proximity f ⊤ ‖2 * w‖ := by
+  by_cases hfw : f w = 0
+  · simp only [hfw, norm_zero, Real.log_zero, Complex.norm_mul, Complex.norm_ofNat, Nat.ofNat_pos,
       mul_nonneg_iff_of_pos_left]
-    apply ValueDistribution.proximity_nonneg
-  rw [ValueDistribution.proximity_top]
-  by_cases h₂w : w = 0
-  · simp_all only [mul_zero, norm_zero, circleAverage_zero]
+    apply proximity_nonneg
+  rw [proximity_top]
+  by_cases hw : w = 0
+  · simp only [hw, mul_zero, norm_zero, circleAverage_zero]
     rw [← one_mul (a := Real.log ‖f 0‖), mul_comm, mul_comm (a := 3)]
     gcongr
     · exact posLog_nonneg
     · simp [posLog]
     · norm_num
-  have h₁w : w ∈ ball 0 (2 * ‖w‖) := by aesop
-  by_cases h₃w : meromorphicOrderAt f w ≠ 0
-  · have : f w = 0 := by
-      have := h₁f w (by tauto)
-      rw [← this.analyticOrderAt_ne_zero]
-      rw [this.meromorphicOrderAt_eq] at h₃w
+  have hwmem : w ∈ ball 0 (2 * ‖w‖) := by aesop
+  by_cases hord : meromorphicOrderAt f w ≠ 0
+  · have hfw' : f w = 0 := by
+      have hmem := h₁f w (mem_univ w)
+      rw [← hmem.analyticOrderAt_ne_zero]
+      rw [hmem.meromorphicOrderAt_eq] at hord
       aesop
-    simp_all
-  rw [ne_eq, not_not] at h₃w
-  have h₁f : AnalyticOnNhd ℂ f (closedBall 0 (2 * ‖w‖)) := h₁f.mono (by tauto)
-  convert η₀ h₁w h₃w h₁f using 2
+    exact absurd hfw' hfw
+  rw [ne_eq, not_not] at hord
+  have hwn : ‖w‖ ≠ 0 := norm_ne_zero_iff.2 hw
+  have h₁f' : AnalyticOnNhd ℂ f (closedBall 0 (2 * ‖w‖)) := h₁f.mono (by tauto)
+  convert log_norm_le_circleAverage_posLog_norm hwmem hord h₁f' using 2
   · field_simp
     ring
   · simp
 
-omit [NormedSpace ℝ E] in
-@[simp] lemma proximity_const' {c : E} :
-    ValueDistribution.proximity (fun _ ↦ c) ⊤ = fun _ ↦ log⁺ ‖c‖ := by
-  aesop
-
-theorem logCounting_isBigO_one_iff_analyticOnNhd (h₁f : AnalyticOnNhd ℂ f univ) :
-    ValueDistribution.proximity f ⊤ =O[atTop] (1 : ℝ → ℝ) ↔ f = fun _ ↦ f 0 := by
+/-- An entire function `f : ℂ → ℂ` has bounded Nevanlinna proximity function, in the sense
+that `proximity f ⊤ =O[atTop] 1`, if and only if `f` is constant. This is a value
+distribution-theoretic form of Liouville's theorem. -/
+theorem proximity_isBigO_one_iff_eq_const (h₁f : AnalyticOnNhd ℂ f univ) :
+    proximity f ⊤ =O[atTop] (1 : ℝ → ℝ) ↔ f = fun _ ↦ f 0 := by
+  have hcont : Continuous f := h₁f.continuous
   constructor
   · intro h
-    rw [← Continuous.isBounded_range_iff_isBigO_atTop_of_even (by fun_prop)
-      ValueDistribution.proximity_even] at h
-    have : Bornology.IsBounded (range f) := by
-      rw [isBounded_iff_forall_norm_le] at *
+    rw [← Continuous.isBounded_range_iff_isBigO_atTop_of_even (by fun_prop) proximity_even] at h
+    have hbdd : IsBounded (range f) := by
+      rw [isBounded_iff_forall_norm_le] at h ⊢
       obtain ⟨C, hC⟩ := h
-      use exp (3 * C)
-      intro x hx
-      simp_all
-      obtain ⟨y, hy⟩ := hx
-      subst hy
-      by_cases h : f y = 0
-      · rw [h, norm_zero]
+      refine ⟨exp (3 * C), ?_⟩
+      rintro _ ⟨y, rfl⟩
+      by_cases hy : f y = 0
+      · rw [hy, norm_zero]
         positivity
-      rw [← log_le_log_iff (by aesop) (exp_pos (3 * C))]
-      trans (3 * ValueDistribution.proximity f ⊤ ‖2 * y‖)
-      · apply η₁ h₁f
-      · simp
-        grind
-    have α₀ : Differentiable ℂ f :=
-      fun x ↦ (h₁f x (mem_univ x)).differentiableAt
+      rw [← Real.log_le_log_iff (norm_pos_iff.2 hy) (Real.exp_pos _), Real.log_exp]
+      calc Real.log ‖f y‖
+        _ ≤ 3 * proximity f ⊤ ‖2 * y‖ := log_norm_le_three_mul_proximity h₁f
+        _ ≤ 3 * C := by
+          have hmem := hC (proximity f ⊤ ‖2 * y‖) ⟨‖2 * y‖, rfl⟩
+          rw [Real.norm_of_nonneg (proximity_nonneg ‖2 * y‖)] at hmem
+          linarith
+    have hdiff : Differentiable ℂ f := fun x ↦ (h₁f x (mem_univ x)).differentiableAt
     ext x
-    exact (α₀.apply_eq_apply_of_bounded this) x 0
+    exact hdiff.apply_eq_apply_of_bounded hbdd x 0
   · intro h₂f
-    rw [h₂f]
-    simp
-    -- Should be simp
-    apply Asymptotics.isBigO_iff.2
-    use ‖posLog ‖f 0‖‖
-    filter_upwards
-    simp
+    rw [h₂f, show proximity (fun _ ↦ f 0) ⊤ = fun _ ↦ log⁺ ‖f 0‖ from
+      funext fun _ ↦ proximity_const]
+    exact isBigO_const_const _ one_ne_zero atTop
+
+end ValueDistribution
+
+/-- Backwards-compatibility alias under the previous (non-Mathlib) name, kept so that the
+remaining files of this project continue to compile. It is not intended to be part of the
+Mathlib PR: the downstream references should be updated to
+`ValueDistribution.proximity_isBigO_one_iff_eq_const` and this alias removed. -/
+alias logCounting_isBigO_one_iff_analyticOnNhd :=
+  ValueDistribution.proximity_isBigO_one_iff_eq_const
