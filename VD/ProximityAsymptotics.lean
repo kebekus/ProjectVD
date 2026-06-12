@@ -3,8 +3,7 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import VD.PoissonJensen0
-import VD.MathlibSubmitted.Translation
+import VD.PoissonJensen
 import Mathlib.Analysis.Complex.Liouville
 import Mathlib.Analysis.Complex.ValueDistribution.Proximity.Basic
 
@@ -144,7 +143,9 @@ private theorem log_norm_le_circleAverage_posLog_norm
       rw [AnalyticAt.meromorphicTrailingCoeffAt_of_meromorphicOrderAt_eq_zero
         (h₁f w (ball_subset_closedBall h₁w)) h₃w]
     _ ≤ circleAverage (re ∘ herglotzRieszKernel 0 w * (Real.log ‖f ·‖)) 0 R := by
-      rw [poissonJensen₀ h₁w h₃w (fun x hx ↦ (h₁f x hx).meromorphicAt)]
+      rw [MeromorphicOn.log_norm_meromorphicTrailingCoeffAt
+        (fun x hx ↦ (h₁f x hx).meromorphicAt) h₁w h₃w]
+      simp only [sub_zero]
       apply sub_le_self
       rw [finsum_eq_sum_of_support_subset (s := h₄f.toFinset) _ (fun _ _ ↦ by aesop)]
       refine Finset.sum_nonneg fun i hi ↦ mul_nonneg ?_ ?_
@@ -169,7 +170,7 @@ private theorem log_norm_le_circleAverage_posLog_norm
         exact le_max_right _ _
     _ ≤ circleAverage (((R + ‖w‖) / (R - ‖w‖)) • (log⁺ ‖f ·‖)) 0 R := by
       have hint : CircleIntegrable (log⁺ ‖f ·‖) 0 R := circleIntegrable_posLog_norm h₅f
-      apply circleAverage_mono (hint.circleIntegrable_re_herglotzRieszKernel_smul h₁w)
+      apply circleAverage_mono (hint.re_herglotzRieszKernel_smul h₁w)
         (hint.mul_of_continuousOn (by fun_prop))
       intro x hx
       rw [abs_of_pos (pos_of_mem_ball h₁w)] at hx

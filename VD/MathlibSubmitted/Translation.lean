@@ -3,7 +3,8 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import VD.PoissonJensen0
+import Mathlib.Analysis.Meromorphic.Divisor
+import Mathlib.Analysis.Meromorphic.TrailingCoefficient
 
 /-!
 # Translation Invariance of Meromorphic Notions
