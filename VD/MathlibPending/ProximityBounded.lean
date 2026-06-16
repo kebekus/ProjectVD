@@ -75,9 +75,7 @@ theorem Continuous.isBounded_range_iff_isBigO_atTop_of_even {f : ℝ → ℝ} (h
 @[simp] theorem divisor_eq_zero_of_meromorphicOrderAt_eq_zero
     (hf : meromorphicOrderAt f w = 0) :
     divisor f U w = 0 := by
-  by_cases h₁f : MeromorphicOn f U
-  · by_cases hw : w ∈ U <;> simp_all
-  · simp_all
+  simp [divisor_def, hf]
 
 /-- At a point where `f` is analytic and its order vanishes, the trailing coefficient of `f`
 is just the value `f x`. -/
@@ -85,9 +83,7 @@ is just the value `f x`. -/
     (h₁ : AnalyticAt ℂ f x) (h₂ : meromorphicOrderAt f x = 0) :
     meromorphicTrailingCoeffAt f x = f x := by
   apply h₁.meromorphicTrailingCoeffAt_of_ne_zero
-  rw [h₁.meromorphicOrderAt_eq, ENat.map_natCast_eq_zero] at h₂
-  have := analyticOrderAt_eq_zero.1 h₂
-  simp_all
+  rwa [h₁.meromorphicOrderAt_eq, ENat.map_natCast_eq_zero, h₁.analyticOrderAt_eq_zero] at h₂
 
 /-!
 ## The Canonical Factor on the Open Ball
@@ -106,11 +102,11 @@ theorem one_lt_norm_canonicalFactor (hw : w ∈ ball 0 R) (hz : z ∈ ball 0 R) 
     norm_cast
     rw [mul_pow, Real.sq_sqrt (by nlinarith)]
     nlinarith
-  by_cases hR : R = 0
-    <;> simp_all only [ball_zero, mem_empty_iff_false, mem_ball, dist_zero_right, ne_eq,
-      canonicalFactor, Complex.norm_div, Complex.norm_mul, norm_real, norm_eq_abs, gt_iff_lt]
-  rwa [one_lt_div (mul_pos (abs_pos.mpr hR) (norm_pos_iff.mpr (sub_ne_zero.mpr hzw))),
-    abs_of_pos (lt_of_le_of_lt (norm_nonneg _) hw)]
+  have hR : 0 < R := pos_of_mem_ball hw
+  simp_all only [mem_ball, dist_zero_right, ne_eq,
+    canonicalFactor, Complex.norm_div, Complex.norm_mul, norm_real, norm_eq_abs, gt_iff_lt]
+  rwa [one_lt_div (mul_pos (abs_pos.mpr hR.ne') (norm_pos_iff.mpr (sub_ne_zero.mpr hzw))),
+    abs_of_pos hR]
 
 /-!
 ## Boundedness of the Proximity Function
@@ -125,10 +121,10 @@ namespace ValueDistribution
 at `w ∈ ball 0 R`, then `log ‖f w‖` is bounded by `(R + ‖w‖) / (R - ‖w‖)` times the circle
 average of `log⁺ ‖f‖`. -/
 private theorem log_norm_le_circleAverage_posLog_norm
-    (h₁w : w ∈ ball 0 R) (h₃w : meromorphicOrderAt f w = 0)
+    (h₁w : w ∈ ball 0 R) (h₂w : meromorphicOrderAt f w = 0)
     (h₁f : AnalyticOnNhd ℂ f (closedBall 0 R)) :
     Real.log ‖f w‖ ≤ ((R + ‖w‖) / (R - ‖w‖)) * circleAverage (log⁺ ‖f ·‖) 0 R := by
-  have h₄f : (divisor f (ball 0 R)).support.Finite := by
+  have h₂f : (divisor f (ball 0 R)).support.Finite := by
     apply ((divisor f (closedBall 0 R)).finiteSupport (isCompact_closedBall 0 R)).subset
     intro b hb
     rw [mem_support, ne_eq, divisor_apply (fun x hx ↦ (h₁f x hx).meromorphicAt)
@@ -136,27 +132,27 @@ private theorem log_norm_le_circleAverage_posLog_norm
     rwa [mem_support, ne_eq, divisor_apply
       (fun c hc ↦ (fun x hx ↦ (h₁f x hx).meromorphicAt) c (ball_subset_closedBall hc))
       ((divisor f (ball 0 R)).supportWithinDomain hb)] at hb
-  have h₅f : MeromorphicOn f (sphere 0 |R|) := by
+  have h₃f : MeromorphicOn f (sphere 0 |R|) := by
     rw [abs_of_pos (pos_of_mem_ball h₁w)]
     exact fun x hx ↦ (h₁f x (sphere_subset_closedBall hx)).meromorphicAt
   calc Real.log ‖f w‖
     _ = Real.log ‖meromorphicTrailingCoeffAt f w‖ := by
       rw [AnalyticAt.meromorphicTrailingCoeffAt_of_meromorphicOrderAt_eq_zero
-        (h₁f w (ball_subset_closedBall h₁w)) h₃w]
+        (h₁f w (ball_subset_closedBall h₁w)) h₂w]
     _ ≤ circleAverage (re ∘ herglotzRieszKernel 0 w * (Real.log ‖f ·‖)) 0 R := by
       rw [MeromorphicOn.log_norm_meromorphicTrailingCoeffAt
-        (fun x hx ↦ (h₁f x hx).meromorphicAt) h₁w h₃w]
+        (fun x hx ↦ (h₁f x hx).meromorphicAt) h₁w h₂w]
       simp only [sub_zero]
       apply sub_le_self
-      rw [finsum_eq_sum_of_support_subset (s := h₄f.toFinset) _ (fun _ _ ↦ by aesop)]
+      rw [finsum_eq_sum_of_support_subset (s := h₂f.toFinset) _ (fun _ _ ↦ by aesop)]
       refine Finset.sum_nonneg fun i hi ↦ mul_nonneg ?_ ?_
       · exact_mod_cast (h₁f.mono ball_subset_closedBall).divisor_nonneg i
       · have := (divisor f (ball 0 R)).supportWithinDomain
         exact log_nonneg (one_lt_norm_canonicalFactor (by aesop) h₁w (by aesop)).le
     _ ≤ circleAverage (re ∘ herglotzRieszKernel 0 w * (log⁺ ‖f ·‖)) 0 R := by
-      apply circleAverage_mono ((circleIntegrable_log_norm h₅f).mul_of_continuousOn
+      apply circleAverage_mono ((circleIntegrable_log_norm h₃f).mul_of_continuousOn
         (continuousOn_herglotzRieszKernel_sphere h₁w)) ((circleIntegrable_posLog_norm
-        h₅f).mul_of_continuousOn (continuousOn_herglotzRieszKernel_sphere h₁w))
+        h₃f).mul_of_continuousOn (continuousOn_herglotzRieszKernel_sphere h₁w))
       intro x hx
       simp only [Pi.mul_apply, comp_apply]
       gcongr
@@ -170,7 +166,7 @@ private theorem log_norm_le_circleAverage_posLog_norm
       · rw [posLog_apply]
         exact le_max_right _ _
     _ ≤ circleAverage (((R + ‖w‖) / (R - ‖w‖)) • (log⁺ ‖f ·‖)) 0 R := by
-      have hint : CircleIntegrable (log⁺ ‖f ·‖) 0 R := circleIntegrable_posLog_norm h₅f
+      have hint : CircleIntegrable (log⁺ ‖f ·‖) 0 R := circleIntegrable_posLog_norm h₃f
       apply circleAverage_mono (hint.re_herglotzRieszKernel_smul h₁w)
         (hint.mul_of_continuousOn (by fun_prop))
       intro x hx
@@ -198,14 +194,10 @@ private theorem log_norm_le_three_mul_proximity (h₁f : AnalyticOnNhd ℂ f uni
     · simp [posLog]
     · norm_num
   have hwmem : w ∈ ball 0 (2 * ‖w‖) := by aesop
-  by_cases hord : meromorphicOrderAt f w ≠ 0
-  · have hfw' : f w = 0 := by
-      have hmem := h₁f w (mem_univ w)
-      rw [← hmem.analyticOrderAt_ne_zero]
-      rw [hmem.meromorphicOrderAt_eq] at hord
-      aesop
-    exact absurd hfw' hfw
-  rw [ne_eq, not_not] at hord
+  have hord : meromorphicOrderAt f w = 0 := by
+    have hmem := h₁f w (mem_univ w)
+    rw [hmem.meromorphicOrderAt_eq, ENat.map_natCast_eq_zero, hmem.analyticOrderAt_eq_zero]
+    exact hfw
   have hwn : ‖w‖ ≠ 0 := norm_ne_zero_iff.2 hw
   have h₁f' : AnalyticOnNhd ℂ f (closedBall 0 (2 * ‖w‖)) := h₁f.mono (by tauto)
   convert log_norm_le_circleAverage_posLog_norm hwmem hord h₁f' using 2
