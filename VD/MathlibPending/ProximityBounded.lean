@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import VD.MathlibPending.PoissonJensen
+import VD.MathlibSubmitted.BoundedRangeIsBigO
 import Mathlib.Analysis.Complex.Liouville
 import Mathlib.Analysis.Complex.ValueDistribution.Proximity.Basic
 
@@ -20,52 +21,17 @@ proximity function (the private lemmas `log_norm_le_circleAverage_posLog_norm` a
 `log_norm_le_three_mul_proximity`), combined with Liouville's theorem.
 
 Along the way this file also collects a few supporting results:
-* equivalences between bounded range and `IsBigO` asymptotics for functions `ℝ → ℝ`;
 * lemmas on divisors and trailing coefficients of meromorphic functions;
 * a lower bound for the norm of the canonical factor on the open ball.
+
+The equivalences between bounded range and `IsBigO` asymptotics for functions `ℝ → ℝ` used in the
+final argument live in `VD.MathlibSubmitted.BoundedRangeIsBigO`.
 -/
 
 open Asymptotics Bornology Complex ComplexConjugate Filter Function MeromorphicOn Metric Real Set
 open scoped Topology
 
 variable {f : ℂ → ℂ} {U : Set ℂ} {x z w : ℂ} {R : ℝ}
-
-/-!
-## Bounded Range Versus `IsBigO` Asymptotics
--/
-
-/-- A continuous function `f : ℝ → ℝ` has bounded range if and only if it is `O(1)`
-at both `atTop` and `atBot`. -/
-theorem Continuous.isBounded_range_iff_isBigO_atTop_atBot {f : ℝ → ℝ} (hf : Continuous f) :
-    IsBounded (range f) ↔ f =O[atTop] (1 : ℝ → ℝ) ∧ f =O[atBot] (1 : ℝ → ℝ) := by
-  constructor <;> intro H
-  · constructor
-    all_goals
-    · rw [isBigO_iff]
-      obtain ⟨C, hC⟩ := H.exists_pos_norm_le
-      exact ⟨C, by aesop⟩
-  · obtain ⟨C₁, M₁, hC₁⟩ : ∃ C₁ M₁, ∀ x ≥ M₁, |f x| ≤ C₁ := by simp_all [isBigO_iff]
-    obtain ⟨C₂, M₂, hC₂⟩ : ∃ C₂ M₂, ∀ x ≤ M₂, |f x| ≤ C₂ := by simp_all [isBigO_iff]
-    obtain ⟨C₃, hC₃⟩ : ∃ C₃, ∀ x ∈ Icc M₂ M₁, |f x| ≤ C₃ :=
-      isCompact_Icc.exists_bound_of_continuousOn hf.continuousOn
-    rw [isBounded_iff_forall_norm_le]
-    refine ⟨max C₁ (max C₂ C₃), forall_mem_range.2 fun x ↦ ?_⟩
-    rcases le_total x M₁ with hx₁ | hx₁ <;> rcases le_total x M₂ with hx₂ | hx₂ <;> aesop
-
-/-- An even function that is `O(1)` at `atTop` is also `O(1)` at `atBot`. -/
-theorem Function.Even.isBigO_atBot_of_isBigO_atTop {f : ℝ → ℝ} (heven : Function.Even f)
-    (h : f =O[atTop] (1 : ℝ → ℝ)) : f =O[atBot] (1 : ℝ → ℝ) := by
-  simp_all only [isBigO_iff, norm_eq_abs, Pi.one_apply, norm_one, mul_one, eventually_atTop,
-    eventually_atBot]
-  obtain ⟨c, a, h⟩ := h
-  exact ⟨c, -a, fun b hb ↦ by simpa [heven b] using h (-b) (by linarith)⟩
-
-/-- A continuous even function `f : ℝ → ℝ` has bounded range if and only if `f =O[atTop] 1`. -/
-theorem Continuous.isBounded_range_iff_isBigO_atTop_of_even {f : ℝ → ℝ} (hf : Continuous f)
-    (heven : Function.Even f) :
-    IsBounded (range f) ↔ f =O[atTop] (1 : ℝ → ℝ) :=
-  ⟨fun h ↦ (hf.isBounded_range_iff_isBigO_atTop_atBot.mp h).1,
-   fun h ↦ hf.isBounded_range_iff_isBigO_atTop_atBot.mpr ⟨h, heven.isBigO_atBot_of_isBigO_atTop h⟩⟩
 
 /-!
 ## Divisors and Trailing Coefficients
@@ -205,8 +171,10 @@ private theorem log_norm_le_three_mul_proximity (h₁f : AnalyticOnNhd ℂ f uni
     ring
   · simp
 
-/-- If a function is eventually constant on a codiscrete subset of `ℂ`, then its Nevanlinna
-proximity function is `O(1)` at `atTop`. -/
+/--
+If a function is eventually constant on a codiscrete subset of `ℂ`, then its proximity function is
+`O(1)` at `atTop`.
+-/
 theorem proximity_isBigO_one_of_eventuallyConst {E : Type*} [NormedAddCommGroup E] {f : ℂ → E}
     (h : EventuallyConst f (codiscrete ℂ)) :
     proximity f ⊤ =O[atTop] (1 : ℝ → ℝ) := by
@@ -216,9 +184,10 @@ theorem proximity_isBigO_one_of_eventuallyConst {E : Type*} [NormedAddCommGroup 
   exact ⟨log⁺ ‖c‖, 1, fun _ _ ↦ by
     simp [proximity_congr_codiscrete hc (by linarith), abs_of_nonneg posLog_nonneg]⟩
 
-/-- An entire function `f : ℂ → ℂ` has bounded Nevanlinna proximity function, in the sense that
-`proximity f ⊤ =O[atTop] 1`, if and only if `f` is constant. This is a value
-distribution-theoretic form of Liouville's theorem. -/
+/--
+An entire function `ℂ → ℂ` has bounded proximity function if and only if it is constant. This is a
+value distribution-theoretic form of Liouville's theorem.
+-/
 theorem proximity_isBigO_one_iff_exists_eq_const (h₁f : AnalyticOnNhd ℂ f univ) :
     proximity f ⊤ =O[atTop] (1 : ℝ → ℝ) ↔ ∃ c, f = fun _ ↦ c := by
   have hcont : Continuous f := h₁f.continuous
