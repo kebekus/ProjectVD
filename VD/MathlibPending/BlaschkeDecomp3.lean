@@ -94,16 +94,15 @@ lemma _root_.ECanonicalDecomp.eq_smul_meromorphicTrailingCoeffAt'
   rw [D.eq_smul_meromorphicTrailingCoeffAt h₁w hR]
   congr
   · ext x
-    by_cases h₁x : x ∉ ball 0 R
-    · simp_all
-    by_cases h₂x : x = w
-    · subst h₂x
-      simp_all [(D.meromorphicOn.mono_set ball_subset_closedBall).divisor_apply (not_notMem.mp h₁x)]
     by_cases h₃x : (divisor f (ball 0 R)) x = 0
-    · simp_all
+    · simp [h₃x]
+    have h₁x : x ∈ ball 0 R := (divisor f (ball 0 R)).supportWithinDomain h₃x
+    have h₂x : w ≠ x := by
+      rintro rfl
+      exact h₃x (by simp [(D.meromorphicOn.mono_set ball_subset_closedBall).divisor_apply h₁x, h₂w])
     rw [AnalyticAt.meromorphicTrailingCoeffAt_of_ne_zero
-      (Complex.analyticOnNhd_canonicalFactor R x w (by aesop))
-      (Complex.canonicalFactor_ne_zero (by aesop) h₁w (by tauto))]
+      (Complex.analyticOnNhd_canonicalFactor R x w h₂x)
+      (Complex.canonicalFactor_ne_zero h₁x h₁w h₂x)]
   · ext x
     by_cases h : x = w
     · simp_all [meromorphicTrailingCoeffAt_id_sub_const, divisor_def]
@@ -126,26 +125,21 @@ lemma _root_.ECanonicalDecomp.log_norm_eq
   have h₄f : (divisor f (ball 0 R)).support.Finite := D.meromorphicOn.divisor_ball_support_finite
   have η₀ : ∀ x ∈ h₃f.toFinset, ‖w - x‖ ^ (-divisor f (sphere 0 R)) x ≠ 0 := by
     intro x hx
-    apply zpow_ne_zero
-    rw [ne_eq, norm_eq_zero]
-    have := (divisor f (sphere 0 R)).supportWithinDomain
-    by_contra hCon
-    rw [sub_eq_zero] at hCon
-    subst hCon
-    rw [Finite.mem_toFinset, mem_support, ne_eq,
-      divisor_apply (D.meromorphicOn.mono_set (sphere_subset_closedBall)) (by aesop)] at hx
-    aesop
+    rw [Finite.mem_toFinset] at hx
+    refine zpow_ne_zero _ ?_
+    rw [norm_ne_zero_iff, sub_ne_zero]
+    rintro rfl
+    exact hx (by simp [divisor_apply (D.meromorphicOn.mono_set sphere_subset_closedBall)
+      ((divisor f (sphere 0 R)).supportWithinDomain hx), h₂w])
   have η₁ : ∀ x ∈ h₄f.toFinset, ‖canonicalFactor R x w‖ ^ (divisor f (ball 0 R)) x ≠ 0 := by
     intro x hx
-    apply zpow_ne_zero
+    rw [Finite.mem_toFinset] at hx
+    refine zpow_ne_zero _ ?_
     rw [ne_eq, norm_eq_zero]
-    have := (divisor f (ball 0 R)).supportWithinDomain
-    apply canonicalFactor_ne_zero (by aesop) (by aesop)
-    by_contra hCon
-    subst hCon
-    rw [Finite.mem_toFinset, mem_support, ne_eq] at hx
-    rw [divisor_apply (D.meromorphicOn.mono_set ball_subset_closedBall) (by aesop)] at hx
-    aesop
+    have h₁x : x ∈ ball 0 R := (divisor f (ball 0 R)).supportWithinDomain hx
+    refine canonicalFactor_ne_zero h₁x h₁w ?_
+    rintro rfl
+    exact hx (by simp [divisor_apply (D.meromorphicOn.mono_set ball_subset_closedBall) h₁x, h₂w])
   rw [D.eq_smul_meromorphicTrailingCoeffAt'
     h₁w h₂w hR, finprod_eq_prod_of_mulSupport_subset (s := h₄f.toFinset) _ (by aesop),
     finprod_eq_prod_of_mulSupport_subset (s := h₃f.toFinset) _ (by aesop),
