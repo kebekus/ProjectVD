@@ -71,18 +71,17 @@ variable {R : ℝ} {c w : ℂ} {f : ℂ → ℂ}
 The Poisson–Jensen formula in the special case where the disc is centred at the origin. This is an
 auxiliary result; the general statement is `MeromorphicOn.log_norm_meromorphicTrailingCoeffAt`.
 -/
-private theorem poissonJensen₀ (h₁w : w ∈ ball 0 R) (h₃w : meromorphicOrderAt f w = 0)
+private theorem poissonJensen₀ (h₁w : w ∈ ball 0 R) (h₂w : meromorphicOrderAt f w = 0)
     (h₁f : MeromorphicOn f (closedBall 0 R)) :
     Real.log ‖meromorphicTrailingCoeffAt f w‖
       = circleAverage (re ∘ herglotzRieszKernel 0 w * (Real.log ‖f ·‖)) 0 R
         - ∑ᶠ i, (divisor f (ball 0 R) i) * Real.log ‖canonicalFactor R i w‖ := by
   have hR : 0 < R := pos_of_mem_ball h₁w
-  have h₂w : w ∈ closedBall 0 R := ball_subset_closedBall h₁w
   -- Write `f = (Blaschke product) • h` with `h` analytic and nowhere zero on the closed
   -- ball, where the Blaschke product collects the zeros and poles of `f`.
   obtain ⟨h, h₀h⟩ := h₁f.exists_ecanonicalDecomp <| by
     apply (h₁f.exists_meromorphicOrderAt_ne_top_iff_forall (isConnected_closedBall hR.le)).1
-    aesop
+    exact ⟨⟨w, ball_subset_closedBall h₁w⟩, by simp [h₂w]⟩
   have h₁h := h₀h.analyticOnNhd
   have h₂h := h₀h.ne_zero
   have h₃h := h₀h.eventuallyEq
@@ -92,20 +91,18 @@ private theorem poissonJensen₀ (h₁w : w ∈ ball 0 R) (h₃w : meromorphicOr
   have h₄f {a : ℂ} (ha : (divisor f (sphere 0 R)) a = 0) :
       ∀ b ∈ h₂f.toFinset, ‖a - b‖ ^ (divisor f (sphere 0 R)) b ≠ 0 := by
     intro b hb
-    apply zpow_ne_zero
-    rw [ne_eq, norm_eq_zero]
-    by_contra hCon
-    rw [sub_eq_zero] at hCon
-    subst hCon
-    rw [Finite.mem_toFinset, mem_support, ne_eq] at hb
-    tauto
+    rw [Finite.mem_toFinset] at hb
+    refine zpow_ne_zero _ ?_
+    rw [norm_ne_zero_iff, sub_ne_zero]
+    rintro rfl
+    exact hb ha
   have cast_smul {x : ℂ} {φ : ℂ → ℝ} :
       (divisor f (sphere 0 R)) x • φ = ((divisor f (sphere 0 R)) x : ℝ) • φ := by aesop
-  have ρ₂ : CircleIntegrable (Complex.re ∘ herglotzRieszKernel 0 w • (Real.log ‖h ·‖)) 0 R := by
+  have ρ₁ : CircleIntegrable (Complex.re ∘ herglotzRieszKernel 0 w • (Real.log ‖h ·‖)) 0 R := by
     apply CircleIntegrable.re_herglotzRieszKernel_smul h₁w
     apply circleIntegrable_log_norm (h₁h.meromorphicOn.mono_set _)
     simpa [abs_of_pos hR] using sphere_subset_closedBall
-  have ρ₃ : ∀ i ∈ h₂f.toFinset, CircleIntegrable ((divisor f (sphere 0 R)) i •
+  have ρ₂ : ∀ i ∈ h₂f.toFinset, CircleIntegrable ((divisor f (sphere 0 R)) i •
       re ∘ herglotzRieszKernel 0 w • (Real.log ‖· - i‖)) 0 R := by
     intro i hi
     rw [cast_smul]
@@ -165,7 +162,7 @@ private theorem poissonJensen₀ (h₁w : w ∈ ball 0 R) (h₃w : meromorphicOr
         ext
         ring
       _ = ∑ᶠ (x : ℂ), (divisor f (sphere 0 R)) x * Real.log ‖w - x‖ + Real.log ‖h w‖ := by
-        rw [circleAverage_add (CircleIntegrable.sum _ ρ₃) ρ₂, circleAverage_sum ρ₃,
+        rw [circleAverage_add (CircleIntegrable.sum _ ρ₂) ρ₁, circleAverage_sum ρ₂,
           InnerProductSpace.HarmonicOnNhd.circleAverage_re_herglotzRieszKernel_smul
             (fun x hx ↦ (h₁h x hx).harmonicAt_log_norm (h₂h x hx)) h₁w,
           finsum_eq_sum_of_support_subset (s := h₂f.toFinset) _ (fun _ _ ↦ (by aesop))]
@@ -178,7 +175,7 @@ private theorem poissonJensen₀ (h₁w : w ∈ ball 0 R) (h₃w : meromorphicOr
   -- Combine the circle-average identity with the value of `log ‖f‖` at `w`.
   rw [show (re ∘ herglotzRieszKernel 0 w * (Real.log ‖f ·‖))
         = re ∘ herglotzRieszKernel 0 w • (Real.log ‖f ·‖) by ext x; simp [smul_eq_mul], key,
-    h₀h.log_norm_eq h₂w h₃w hR]
+    h₀h.log_norm_eq (ball_subset_closedBall h₁w) h₂w hR]
   ring_nf
 
 /-- **The Poisson–Jensen Formula.** If `f` is meromorphic on `closedBall c R` and has vanishing
@@ -190,21 +187,21 @@ This generalises Jensen's formula `MeromorphicOn.circleAverage_log_norm` from th
 arbitrary interior point `w`. -/
 theorem MeromorphicOn.log_norm_meromorphicTrailingCoeffAt
     (h₁f : MeromorphicOn f (closedBall c R)) (h₁w : w ∈ ball c R)
-    (h₃w : meromorphicOrderAt f w = 0) :
+    (h₂w : meromorphicOrderAt f w = 0) :
     Real.log ‖meromorphicTrailingCoeffAt f w‖
       = circleAverage (re ∘ herglotzRieszKernel c w * (Real.log ‖f ·‖)) c R
         - ∑ᶠ i, (divisor f (ball c R) i) * Real.log ‖canonicalFactor R (i - c) (w - c)‖ := by
   -- Reduce to the centred case by translating `f` to `g z = f (z + c)`.
   let g := fun z ↦ f (z + c)
-  have : f = fun z ↦ g (z - c) := by simp [g]
-  repeat rw [this]
+  have hfg : f = fun z ↦ g (z - c) := by simp [g]
+  repeat rw [hfg]
   simp only
-  have : meromorphicTrailingCoeffAt (fun z ↦ g (z - c)) w
+  have htc : meromorphicTrailingCoeffAt (fun z ↦ g (z - c)) w
       = meromorphicTrailingCoeffAt g (w - c) := by
-    rw [← this]
+    rw [← hfg]
     exact (meromorphicTrailingCoeffAt_fun_comp_add_const_eq_meromorphicTrailingCoeffAt
       (f := f) (c := c) (x := w)).symm
-  rw [this, poissonJensen₀ (R := R)]
+  rw [htc, poissonJensen₀ (R := R)]
   · congr 1
     · simp only [← Real.circleAverage_map_add_const (c := c), Pi.mul_apply, comp_apply,
         add_sub_cancel_right]
@@ -220,7 +217,7 @@ theorem MeromorphicOn.log_norm_meromorphicTrailingCoeffAt
     simpa [mem_ball_zero_iff] using h₁w
   · change meromorphicOrderAt (fun z ↦ f (z + c)) (w - c) = 0
     rw [meromorphicOrderAt_fun_comp_add_const_eq_meromorphicOrderAt]
-    exact h₃w
+    exact h₂w
   · have hf : (fun z ↦ g (z - c)) = f := funext fun z ↦ by simp [g]
     rw [← meromorphicOn_closedBall_fun_comp_sub_const_iff_meromorphicOn_closedBall (c := c), hf]
     exact h₁f
