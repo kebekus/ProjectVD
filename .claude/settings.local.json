@@ -3,7 +3,8 @@
     "allow": [
       "Bash(lake build *)",
       "Bash(awk 'length > 100 {print NR\": \"$0}' VD/MathlibSubmitted/Translation.lean)",
-      "Bash(awk 'length > 100 {print NR\": \\(\"length\"\\) \"$0}' VD/MathlibSubmitted/Translation.lean)"
+      "Bash(awk 'length > 100 {print NR\": \\(\"length\"\\) \"$0}' VD/MathlibSubmitted/Translation.lean)",
+      "Bash(awk '{ if \\(length\\($0\\) > 100\\) print FILENAME\":\"NR\": \"length\\($0\\)\" chars\" }' VD/MathlibPending/Cartan.lean)"
     ]
   }
 }

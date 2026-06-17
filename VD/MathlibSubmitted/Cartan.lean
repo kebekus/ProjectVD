@@ -4,19 +4,18 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Matteo Cipollina, Stefan Kebekus
 -/
 
---module
+module
 
-import VD.MathlibSubmitted.ProximityIntegral
-import Mathlib.Analysis.Complex.ValueDistribution.Cartan
-import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
+public import Mathlib.Analysis.Complex.ValueDistribution.Cartan
+public import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
+public import Mathlib.Analysis.Complex.ValueDistribution.Proximity.IntegralPresentation
 
 /-!
 # Cartan's Formula
 
-This file proves Cartan's formula, which expresses the characteristic function
-of a meromorphic function `f` at `⊤` as a circle average of the logarithmic
-counting function. As an application, it establishes that the characteristic
-function is monotone on `(0, ∞)`.
+This file proves Cartan's formula, which expresses the characteristic function of a meromorphic
+function `f` at `⊤` as a circle average of the logarithmic counting function. As an application, it
+establishes that the characteristic function is monotone on `(0, ∞)`.
 -/
 
 public section
@@ -40,8 +39,7 @@ private lemma logCounting_add_log_trailingCoeff_eq_circleAverage_add_logCounting
   linarith
 
 /--
-Circle integrability of the term `logCounting f · R` that appears in Cartan's
-formula.
+Circle integrability of the term `logCounting f · R` that appears in Cartan's formula.
 -/
 theorem circleIntegrable_logCounting (h : Meromorphic f) :
     CircleIntegrable (logCounting f · R) 0 1 := by
@@ -63,13 +61,11 @@ theorem circleIntegrable_logCounting (h : Meromorphic f) :
 -/
 
 /--
-**Cartan's formula** with the additive constant written explicitly as a circle
-average of the logarithm of the first nonzero Laurent coefficient of `f - a` at
-the origin.
+**Cartan's formula** with the additive constant written explicitly as a circle average of the
+logarithm of the first nonzero Laurent coefficient of `f - a` at the origin.
 
-See `circleIntegrable_logCounting` and
-`circleIntegrable_log_trailingCoeff_of_meromorphic` for the facts that the
-summands are acutally circle integrable.
+See `circleIntegrable_logCounting` and `circleIntegrable_log_trailingCoeff_of_meromorphic` for the
+facts that the summands are actually circle integrable.
 -/
 theorem characteristic_top_eq_circleAverage_add_circleAverage (h : Meromorphic f) (hR : R ≠ 0) :
     characteristic f ⊤ R = circleAverage (logCounting f · R) 0 1
@@ -97,9 +93,8 @@ theorem characteristic_top_eq_circleAverage_of_meromorphicOrderAt_pos
   simp [circleAverage_log_norm_meromorphicTrailingCoeffAt_of_meromorphicOrderAt_pos h₂f]
 
 /--
-Qualitative version of **Cartan's formula**: Away from `0`, the difference
-between `characteristic f ⊤` and `circleAverage (logCounting f · ·) 0 1` is
-constant.
+Qualitative version of **Cartan's formula**: Away from `0`, the difference between `characteristic f
+⊤` and `circleAverage (logCounting f · ·) 0 1` is constant.
 -/
 theorem characteristic_top_eq_circleAverage_add_const (h : Meromorphic f) :
     ∃ const, ∀ R ≠ 0, characteristic f ⊤ R = circleAverage (logCounting f · R) 0 1 + const :=
@@ -113,8 +108,8 @@ theorem characteristic_top_eq_circleAverage_add_const (h : Meromorphic f) :
 /--
 The characteristic function is monotone on `(0, ∞)`.
 
-This result is surprisingly non-trivial, given that the proximity function is
-not monotone in general.
+This result is surprisingly non-trivial, given that the proximity function is not monotone in
+general.
 -/
 theorem characteristic_monotoneOn (h : Meromorphic f) :
     MonotoneOn (characteristic f ⊤) (Set.Ioi 0) := by
