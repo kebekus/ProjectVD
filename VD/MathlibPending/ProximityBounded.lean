@@ -7,6 +7,10 @@ import VD.MathlibPending.PoissonJensen
 import VD.MathlibSubmitted.BoundedRangeIsBigO
 import Mathlib.Analysis.Complex.Liouville
 import Mathlib.Analysis.Complex.ValueDistribution.Proximity.Basic
+import Mathlib.Analysis.Analytic.IsolatedZeros
+import Mathlib.Analysis.Calculus.DSlope
+import Mathlib.Algebra.Polynomial.Eval.Degree
+import Mathlib.Topology.Algebra.Polynomial
 
 /-!
 # Boundedness of the Proximity Function
@@ -73,6 +77,92 @@ theorem one_lt_norm_canonicalFactor (hw : w ∈ ball 0 R) (hz : z ∈ ball 0 R) 
     canonicalFactor, Complex.norm_div, Complex.norm_mul, norm_real, norm_eq_abs, gt_iff_lt]
   rwa [one_lt_div (mul_pos (abs_pos.mpr hR.ne') (norm_pos_iff.mpr (sub_ne_zero.mpr hzw))),
     abs_of_pos hR]
+
+/-!
+## Polynomial Growth and Liouville-type Rigidity
+
+General complex-analysis facts, independent of value distribution theory: a polynomial grows at
+most polynomially, and conversely an entire function of polynomial growth is a polynomial.
+-/
+
+/-- A polynomial function grows at most polynomially: for `1 ≤ ‖z‖`, the value `‖p.eval z‖` is
+bounded by a constant times `‖z‖ ^ p.natDegree`. -/
+lemma Polynomial.norm_eval_le_of_one_le (p : Polynomial ℂ) :
+    ∃ C, 0 ≤ C ∧ ∀ z : ℂ, 1 ≤ ‖z‖ → ‖p.eval z‖ ≤ C * ‖z‖ ^ p.natDegree := by
+  refine ⟨∑ i ∈ Finset.range (p.natDegree + 1), ‖p.coeff i‖,
+    Finset.sum_nonneg fun _ _ ↦ norm_nonneg _, fun z hz ↦ ?_⟩
+  calc ‖p.eval z‖
+      = ‖∑ i ∈ Finset.range (p.natDegree + 1), p.coeff i * z ^ i‖ := by rw [p.eval_eq_sum_range]
+    _ ≤ ∑ i ∈ Finset.range (p.natDegree + 1), ‖p.coeff i * z ^ i‖ := norm_sum_le _ _
+    _ ≤ ∑ i ∈ Finset.range (p.natDegree + 1), ‖p.coeff i‖ * ‖z‖ ^ p.natDegree := by
+        refine Finset.sum_le_sum fun i hi ↦ ?_
+        rw [norm_mul, norm_pow]
+        exact mul_le_mul_of_nonneg_left
+          (pow_le_pow_right₀ hz (Nat.lt_succ_iff.1 (Finset.mem_range.1 hi))) (norm_nonneg _)
+    _ = (∑ i ∈ Finset.range (p.natDegree + 1), ‖p.coeff i‖) * ‖z‖ ^ p.natDegree := by
+        rw [Finset.sum_mul]
+
+/-- The divided-difference function `dslope f 0` of an entire function `f` is again entire. -/
+lemma AnalyticOnNhd.dslope_zero (hf : AnalyticOnNhd ℂ f univ) :
+    AnalyticOnNhd ℂ (dslope f 0) univ := by
+  intro z _
+  rcases eq_or_ne z 0 with rfl | hz
+  · obtain ⟨p, hp⟩ := hf 0 (mem_univ 0)
+    exact hp.has_fpower_series_dslope_fslope.analyticAt
+  · have hD : AnalyticAt ℂ (fun w ↦ (f w - f 0) / (w - 0)) z :=
+      AnalyticAt.div ((hf z (mem_univ z)).sub analyticAt_const)
+        (analyticAt_id.sub analyticAt_const) (by simpa using hz)
+    refine hD.congr ?_
+    filter_upwards [dslope_eventuallyEq_slope_of_ne f hz] with w hw
+    rw [hw, slope_def_field]
+
+/-- An entire function `f : ℂ → ℂ` whose norm grows at most polynomially (along `cobounded`) is a
+polynomial. -/
+lemma exists_polynomial_of_analyticOnNhd_of_growth :
+    ∀ (n : ℕ) (f : ℂ → ℂ) (C : ℝ), AnalyticOnNhd ℂ f univ →
+      (∀ᶠ z in cobounded ℂ, ‖f z‖ ≤ C * ‖z‖ ^ n) →
+      ∃ p : Polynomial ℂ, f = fun z ↦ p.eval z := by
+  intro n
+  induction n with
+  | zero =>
+    intro f C hf hg
+    have hcont : Continuous f := hf.continuous
+    simp only [pow_zero, mul_one] at hg
+    have hK : IsBounded {z : ℂ | C < ‖f z‖} := by
+      have : IsBounded {z : ℂ | ‖f z‖ ≤ C}ᶜ := isBounded_compl_iff.2 hg
+      simpa only [compl_setOf, not_le] using this
+    have hbdd : IsBounded (range f) := by
+      have himg : IsBounded (f '' {z : ℂ | C < ‖f z‖}) :=
+        ((hK.isCompact_closure.image hcont).isBounded).subset
+          (image_mono subset_closure)
+      refine (himg.union (isBounded_closedBall (x := (0 : ℂ)) (r := C))).subset ?_
+      rintro _ ⟨z, rfl⟩
+      by_cases hz : C < ‖f z‖
+      · exact Or.inl ⟨z, hz, rfl⟩
+      · exact Or.inr (by simp only [mem_closedBall, dist_zero_right]; exact not_lt.mp hz)
+    have hdiff : Differentiable ℂ f := fun x ↦ (hf x (mem_univ x)).differentiableAt
+    obtain ⟨c, hc⟩ := hdiff.exists_eq_const_of_bounded hbdd
+    exact ⟨Polynomial.C c, by rw [hc]; ext z; simp⟩
+  | succ n ih =>
+    intro f C hf hg
+    have hg_an : AnalyticOnNhd ℂ (dslope f 0) univ := hf.dslope_zero
+    have e1 : ∀ᶠ z in cobounded ℂ, (1 : ℝ) ≤ ‖z‖ := eventually_cobounded_le_norm (E := ℂ) 1
+    have hgrowth : ∀ᶠ z in cobounded ℂ, ‖dslope f 0 z‖ ≤ (C + ‖f 0‖) * ‖z‖ ^ n := by
+      filter_upwards [hg, e1] with z hz h1z
+      have hz0 : z ≠ 0 := by rintro rfl; rw [norm_zero] at h1z; linarith
+      rw [dslope_of_ne f hz0, slope_def_field, sub_zero, norm_div,
+        div_le_iff₀ (by positivity), mul_assoc, ← pow_succ]
+      have hpow : (1 : ℝ) ≤ ‖z‖ ^ (n + 1) := one_le_pow₀ h1z
+      nlinarith [norm_sub_le (f z) (f 0), hz, norm_nonneg (f 0),
+        mul_nonneg (norm_nonneg (f 0)) (sub_nonneg.2 hpow)]
+    obtain ⟨q, hq⟩ := ih (dslope f 0) (C + ‖f 0‖) hg_an hgrowth
+    refine ⟨Polynomial.X * q + Polynomial.C (f 0), ?_⟩
+    funext z
+    have hid : z • dslope f 0 z = f z - f 0 := by
+      have h := sub_smul_dslope f 0 z; rwa [sub_zero] at h
+    simp only [hq, smul_eq_mul] at hid
+    simp only [Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_X, Polynomial.eval_C]
+    rw [hid]; ring
 
 /-!
 ## Boundedness of the Proximity Function
@@ -214,5 +304,76 @@ theorem proximity_isBigO_one_iff_exists_eq_const (h₁f : AnalyticOnNhd ℂ f un
   · rintro ⟨c, hc⟩
     rw [hc, show proximity (fun _ ↦ c) ⊤ = fun _ ↦ log⁺ ‖c‖ from funext fun _ ↦ proximity_const]
     exact isBigO_const_const _ one_ne_zero atTop
+
+/-!
+## Polynomial Growth of the Proximity Function
+
+The log-scale analogue of `proximity_isBigO_one_iff_exists_eq_const`: an entire function has
+proximity function `O(log)` if and only if it is a polynomial.
+-/
+
+/-- The proximity function of a polynomial is `O(log)`. -/
+lemma proximity_isBigO_log_of_polynomial (p : Polynomial ℂ) :
+    proximity (fun z ↦ p.eval z) ⊤ =O[atTop] Real.log := by
+  obtain ⟨C, hC0, hC⟩ := Polynomial.norm_eval_le_of_one_le p
+  have hcont : Continuous fun z : ℂ ↦ log⁺ ‖p.eval z‖ :=
+    continuous_posLog.comp (continuous_norm.comp p.continuous)
+  set g : ℝ → ℝ := fun r ↦ log⁺ C + (p.natDegree : ℝ) * Real.log r with hg_def
+  have hg_isBigO : g =O[atTop] Real.log :=
+    (isLittleO_const_log_atTop.isBigO).add (isBigO_const_mul_self (p.natDegree : ℝ) Real.log atTop)
+  refine Asymptotics.IsBigO.trans ?_ hg_isBigO
+  rw [Asymptotics.isBigO_iff]
+  refine ⟨1, ?_⟩
+  filter_upwards [eventually_ge_atTop (1 : ℝ)] with r hr
+  have hlogr : 0 ≤ Real.log r := Real.log_nonneg hr
+  have habs : |r| = r := abs_of_nonneg (by linarith)
+  have hgr : 0 ≤ g r := add_nonneg posLog_nonneg (mul_nonneg (Nat.cast_nonneg _) hlogr)
+  rw [one_mul, Real.norm_of_nonneg (proximity_nonneg _), Real.norm_of_nonneg hgr, proximity_top]
+  refine circleAverage_mono_on_of_le_circle (hcont.continuousOn.circleIntegrable') fun x hx ↦ ?_
+  rw [mem_sphere_zero_iff_norm, habs] at hx
+  calc log⁺ ‖p.eval x‖
+      ≤ log⁺ (C * r ^ p.natDegree) :=
+        posLog_le_posLog (norm_nonneg _) (by have := hC x (hx ▸ hr); rwa [hx] at this)
+    _ ≤ log⁺ C + log⁺ (r ^ p.natDegree) := posLog_mul
+    _ = log⁺ C + (p.natDegree : ℝ) * log⁺ r := by rw [posLog_pow]
+    _ = g r := by rw [posLog_eq_log (x := r) (by rw [habs]; exact hr)]
+
+/-- The log-scale Liouville theorem: an entire function `ℂ → ℂ` has proximity function `O(log)` if
+and only if it is a polynomial. -/
+theorem proximity_isBigO_log_iff_exists_eq_polynomial (h₁f : AnalyticOnNhd ℂ f univ) :
+    proximity f ⊤ =O[atTop] Real.log ↔ ∃ p : Polynomial ℂ, f = fun z ↦ p.eval z := by
+  constructor
+  · intro h
+    obtain ⟨C, hC⟩ := Asymptotics.isBigO_iff.1 h
+    refine exists_polynomial_of_analyticOnNhd_of_growth ⌈3 * C⌉₊ f
+      (Real.exp (3 * C * Real.log 2)) h₁f ?_
+    have htend : Tendsto (fun w : ℂ ↦ ‖2 * w‖) (cobounded ℂ) atTop := by
+      refine (Filter.Tendsto.const_mul_atTop (show (0 : ℝ) < 2 by norm_num)
+        tendsto_norm_cobounded_atTop).congr fun w ↦ ?_
+      simp
+    filter_upwards [htend.eventually hC, eventually_cobounded_le_norm (E := ℂ) 1,
+      htend.eventually (eventually_ge_atTop (1 : ℝ))] with w hCw hw1 hw2
+    rcases eq_or_ne (f w) 0 with hfw | hfw
+    · rw [hfw, norm_zero]; positivity
+    · have hfwpos : 0 < ‖f w‖ := norm_pos_iff.2 hfw
+      have hwpos : 0 < ‖w‖ := by linarith
+      have hpx : proximity f ⊤ ‖2 * w‖ ≤ C * Real.log ‖2 * w‖ := by
+        have := hCw
+        rwa [Real.norm_of_nonneg (proximity_nonneg _),
+          Real.norm_of_nonneg (Real.log_nonneg hw2)] at this
+      have hlog2w : Real.log ‖2 * w‖ = Real.log 2 + Real.log ‖w‖ := by
+        rw [show ‖2 * w‖ = 2 * ‖w‖ by simp, Real.log_mul (by norm_num) (ne_of_gt hwpos)]
+      have hceil : 3 * C ≤ (⌈3 * C⌉₊ : ℝ) := Nat.le_ceil _
+      have hlogfw : Real.log ‖f w‖ ≤ 3 * C * Real.log 2 + (⌈3 * C⌉₊ : ℝ) * Real.log ‖w‖ := by
+        have h3 : Real.log ‖f w‖ ≤ 3 * proximity f ⊤ ‖2 * w‖ := log_norm_le_three_mul_proximity h₁f
+        nlinarith [hpx, hlog2w, h3, Real.log_nonneg hw1,
+          mul_le_mul_of_nonneg_right hceil (Real.log_nonneg hw1)]
+      calc ‖f w‖ = Real.exp (Real.log ‖f w‖) := (Real.exp_log hfwpos).symm
+        _ ≤ Real.exp (3 * C * Real.log 2 + (⌈3 * C⌉₊ : ℝ) * Real.log ‖w‖) :=
+            Real.exp_le_exp.2 hlogfw
+        _ = Real.exp (3 * C * Real.log 2) * ‖w‖ ^ ⌈3 * C⌉₊ := by
+            rw [Real.exp_add, ← Real.log_pow, Real.exp_log (by positivity)]
+  · rintro ⟨p, rfl⟩
+    exact proximity_isBigO_log_of_polynomial p
 
 end ValueDistribution
