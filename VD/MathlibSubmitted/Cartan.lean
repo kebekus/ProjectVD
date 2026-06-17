@@ -73,7 +73,7 @@ theorem characteristic_top_eq_circleAverage_add_circleAverage (h : Meromorphic f
   calc characteristic f ⊤ R
     _ = circleAverage (fun a ↦ circleAverage (log ‖f · - a‖) 0 R + logCounting f ⊤ R) 0 1 := by
       simp only [characteristic, proximity, ↓reduceDIte, Pi.add_apply]
-      rw [← proximity_top, ← proximity_top_eq_circleAverage_circleAverage h,
+      rw [← proximity_top, ← circleAverage_circleAverage_eq_proximity_top h,
         circleAverage_fun_add (circleIntegrable_circleAverage_log_norm_sub h)
           (circleIntegrable_const (logCounting f ⊤ R) 0 1), circleAverage_const]
     _ = circleAverage (logCounting f · R) 0 1

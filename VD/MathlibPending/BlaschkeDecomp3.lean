@@ -10,9 +10,8 @@ import VD.MathlibSubmitted.BlaschkeDecomp2
 /-!
 # Additional Material on the Extended Canonical Decomposition
 
-This file provides companion lemmas to the extended canonical decomposition,
-expressing the function `h` (and `log ‖h‖`) entirely in terms of `f`, including
-the case where `f` has order zero.
+This file provides companion lemmas to the extended canonical decomposition, expressing the function
+`h` (and `log ‖h‖`) entirely in terms of `f`, including the case where `f` has order zero.
 -/
 
 open Complex Filter Function MeromorphicOn Metric Real Set Topology --ValueDistribution
@@ -35,10 +34,8 @@ variable
   {R : ℝ} {x c w : ℂ} {f h : ℂ → E}
 
 /--
-Companion lemma to
-`congr_codiscreteWitin_closedBall_prod_canonicalFactor_mul_prod_smul`: In the
-setting of the extended canonical decomposition, write the function `h` entirely
-in terms of `f`.
+Companion lemma to `congr_codiscreteWitin_closedBall_prod_canonicalFactor_mul_prod_smul`: In the
+setting of the extended canonical decomposition, write the function `h` entirely in terms of `f`.
 -/
 lemma _root_.ECanonicalDecomp.eq_smul_meromorphicTrailingCoeffAt
     {f h : ℂ → E} (D : ECanonicalDecomp f h R) (hw : w ∈ closedBall 0 R) (hR : 0 < R) :
@@ -80,12 +77,11 @@ lemma _root_.ECanonicalDecomp.eq_smul_meromorphicTrailingCoeffAt
     exact isOpen_ball.perfect_closure.2
 
 /--
-Companion lemma to
-`congr_codiscreteWitin_closedBall_prod_canonicalFactor_mul_prod_smul`: In the
-setting of the extended canonical decomposition, write the function `h` entirely
-in terms of `f`, under the assumption that `f` has order zero.
+Companion lemma to `congr_codiscreteWitin_closedBall_prod_canonicalFactor_mul_prod_smul`: In the
+setting of the extended canonical decomposition, write the function `h` entirely in terms of `f`,
+under the assumption that `f` has order zero.
 -/
-lemma _root_.ECanonicalDecomp.eq_smul_meromorphicTrailingCoeffAt'
+lemma _root_.ECanonicalDecomp.eq_smul_meromorphicTrailingCoeffAt_of_meromorphicOrderAt
     {f h : ℂ → E} (D : ECanonicalDecomp f h R) (h₁w : w ∈ closedBall 0 R)
     (h₂w : meromorphicOrderAt f w = 0) (hR : 0 < R) :
     h w = ((∏ᶠ i, (canonicalFactor R i w) ^ (divisor f (ball 0 R) i))
@@ -109,10 +105,9 @@ lemma _root_.ECanonicalDecomp.eq_smul_meromorphicTrailingCoeffAt'
     grind [meromorphicTrailingCoeffAt_id_sub_const]
 
 /--
-Companion lemma to
-`congr_codiscreteWitin_closedBall_prod_canonicalFactor_mul_prod_smul`: In the
-setting of the extended canonical decomposition, write the function `log ‖h‖`
-entirely in terms of `f`, under the assumption that `f` has order zero.
+Companion lemma to `congr_codiscreteWitin_closedBall_prod_canonicalFactor_mul_prod_smul`: In the
+setting of the extended canonical decomposition, write the function `log ‖h‖` entirely in terms of
+`f`, under the assumption that `f` has order zero.
 -/
 lemma _root_.ECanonicalDecomp.log_norm_eq
     {f h : ℂ → E} (D : ECanonicalDecomp f h R) (h₁w : w ∈ closedBall 0 R)
@@ -140,7 +135,7 @@ lemma _root_.ECanonicalDecomp.log_norm_eq
     refine canonicalFactor_ne_zero h₁x h₁w ?_
     rintro rfl
     exact hx (by simp [divisor_apply (D.meromorphicOn.mono_set ball_subset_closedBall) h₁x, h₂w])
-  rw [D.eq_smul_meromorphicTrailingCoeffAt'
+  rw [D.eq_smul_meromorphicTrailingCoeffAt_of_meromorphicOrderAt
     h₁w h₂w hR, finprod_eq_prod_of_mulSupport_subset (s := h₄f.toFinset) _ (by aesop),
     finprod_eq_prod_of_mulSupport_subset (s := h₃f.toFinset) _ (by aesop),
     finsum_eq_sum_of_support_subset (s := h₄f.toFinset) _ (fun _ _ ↦ (by aesop)),
