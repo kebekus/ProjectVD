@@ -30,6 +30,12 @@ variable
 /-!
 # Material to go elsewhere
 -/
+theorem Asymptotics.IsBigO.sum'
+    {α : Type*} {F : Type*} {E' : Type*} [Norm F] [SeminormedAddCommGroup E'] {g : α → F}
+    {l : Filter α} {ι : Type*} {A : ι → α → E'} {s : Finset ι} (h : ∀ i ∈ s, A i =O[l] g) :
+    (∑ i ∈ s, A i) =O[l] g := by
+  convert Asymptotics.IsBigO.sum h
+  rw [Finset.sum_apply]
 
 lemma sum_apply_smul_single_eq_self_on_univ [DecidableEq E] [ProperSpace E] {D : locallyFinsupp E ℤ}
     (h : D.support.Finite) :
@@ -68,12 +74,7 @@ lemma logCounting_isBigO_log_of_finite_support [ProperSpace E] {D : locallyFinsu
     logCounting D =O[atTop] Real.log := by
   classical
   rw [sum_apply_smul_single_eq_self_on_univ h, map_sum]
-  have hfun : (∑ z ∈ h.toFinset, logCounting (single z (D z)))
-      = fun r ↦ ∑ z ∈ h.toFinset, logCounting (single z (D z)) r := by
-    ext r
-    rw [Finset.sum_apply]
-  rw [hfun]
-  exact IsBigO.sum fun z _ ↦ logCounting_single_isBigO_log
+  exact Asymptotics.IsBigO.sum' fun _ _ ↦ logCounting_single_isBigO_log
 
 /--
 A non-negative function whose logarithmic counting function is big-O of `log` has finite support.
@@ -82,14 +83,17 @@ lemma finite_support_of_logCounting_isBigO_log [ProperSpace E]
     {D : locallyFinsupp E ℤ} (h : 0 ≤ D) (hO : logCounting D =O[atTop] Real.log) :
     D.support.Finite := by
   classical
-  by_contra hInf
-  rw [Set.not_finite] at hInf
+  -- Let (N : ℕ) be a number such that ‖logCounting D x‖ ≤ N * ‖log x‖
   obtain ⟨C, hC⟩ := isBigO_iff.1 hO
   obtain ⟨N, hCN⟩ := exists_nat_gt (max C 0)
-  obtain ⟨t, htsub, htcard⟩ := hInf.exists_subset_card_eq N
   have hCN' : C < N := lt_of_le_of_lt (le_max_left C 0) hCN
-  -- The auxiliary divisor `D'` is bounded above by `D`.
+  -- Argue by contradiction, let t be a cardinality=N finite subset in the (infinite) supporty of D
+  -- and let D' be the divisor for the indicator function of t
+  by_contra hInf
+  rw [Set.not_finite] at hInf
+  obtain ⟨t, htsub, htcard⟩ := hInf.exists_subset_card_eq N
   set D' := ∑ z ∈ t, single z (1 : ℤ) with hD'
+  -- The auxiliary divisor `D'` is bounded above by `D`.
   have hle : D' ≤ D := by
     rw [le_def, Pi.le_def]
     intro w
@@ -99,8 +103,7 @@ lemma finite_support_of_logCounting_isBigO_log [ProperSpace E]
       have h₁ : D w ≠ 0 := mem_support.mp (htsub (Finset.mem_coe.2 hw))
       have h₂ : (0 : ℤ) ≤ D w := by simpa using (le_def.1 h) w
       omega
-    · simp only [hw, if_false]
-      simpa using (le_def.1 h) w
+    · simpa [hw, if_false] using (le_def.1 h) w
   -- A uniform bound on the norms of points in `t`.
   obtain ⟨R₀, hR₀⟩ : ∃ R₀ : ℝ, ∀ z ∈ t, ‖z‖ ≤ R₀ := by
     rcases t.eq_empty_or_nonempty with rfl | ht
