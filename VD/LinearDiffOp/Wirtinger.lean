@@ -47,10 +47,10 @@ def wirtingerDeriv : LinearDiffOp ℝ ℂ ℂ ℂ 1 where
   tensorField _ := {
     toFun fps := (fps 1 ![1] - I * fps 1 ![I]) / 2
     map_add' fps₁ fps₂ := by
-      simp only [Pi.add_apply, ContinuousMultilinearMap.add_apply]
+      simp only [Pi.add_apply, add_apply]
       ring
     map_smul' c fps := by
-      simp only [Pi.smul_apply, ContinuousMultilinearMap.smul_apply, RingHom.id_apply, real_smul]
+      simp only [Pi.smul_apply, smul_apply, RingHom.id_apply, real_smul]
       ring
     cont := by fun_prop
   }
@@ -64,10 +64,10 @@ def wirtingerDerivBar : LinearDiffOp ℝ ℂ ℂ ℂ 1 where
   tensorField _ := {
     toFun fps := (fps 1 ![1] + I * fps 1 ![I]) / 2
     map_add' fps₁ fps₂ := by
-      simp only [Pi.add_apply, ContinuousMultilinearMap.add_apply]
+      simp only [Pi.add_apply, add_apply]
       ring
     map_smul' c fps := by
-      simp only [Pi.smul_apply, ContinuousMultilinearMap.smul_apply, RingHom.id_apply, real_smul]
+      simp only [Pi.smul_apply, smul_apply, RingHom.id_apply, real_smul]
       ring
     cont := by fun_prop
   }
