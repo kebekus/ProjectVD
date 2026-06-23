@@ -164,7 +164,7 @@ For sufficiently regular functions, linear differential operators commute with s
     ext m v
     unfold ftaylorSeries
     rw [iteratedFDeriv_sum_apply]
-    · simp only [ContinuousMultilinearMap.sum_apply, Finset.sum_apply]
+    · simp only [sum_apply, Finset.sum_apply]
     · exact fun j hj ↦ (h j hj).of_le (by norm_num; grind)
   simp_all [linearDiffOp_coe_apply]
 
@@ -179,7 +179,7 @@ For sufficiently regular functions, linear differential operators commute with s
     ext m v
     unfold ftaylorSeriesWithin
     rw [iteratedFDerivWithin_sum_apply hs he]
-    · simp only [ContinuousMultilinearMap.sum_apply, Finset.sum_apply]
+    · simp only [sum_apply, Finset.sum_apply]
     · exact fun j hj ↦ (h j hj).of_le (by norm_num; grind)
   simp_all [linearDiffOp_applyWithin]
 

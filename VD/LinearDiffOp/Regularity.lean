@@ -45,8 +45,8 @@ See `lieDerivative_apply`.
 def lieDerivative (v : E → E) : LinearDiffOp ℝ E F F 1 where
   tensorField e := {
     toFun fps := fps 1 ![v e]
-    map_add' fps₁ fps₂ := by apply ContinuousMultilinearMap.add_apply
-    map_smul' m fps := by apply ContinuousMultilinearMap.smul_apply
+    map_add' fps₁ fps₂ := rfl
+    map_smul' m fps := rfl
     cont := by fun_prop
   }
 
@@ -89,4 +89,3 @@ lemma lieBracket_apply {v₁ v₂ : E → E} (hf : ContDiffAt ℝ 2 f e)
     ContinuousLinearMap.flip_apply, map_sub,
     ContDiffAt.isSymmSndFDerivAt hf (by simp) (v₁ e) (v₂ e)]
   abel
-
