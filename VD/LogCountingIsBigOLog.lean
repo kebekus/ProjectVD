@@ -28,6 +28,22 @@ variable
   {E : Type*} [NormedAddCommGroup E]
 
 /-!
+# Material to go elsewhere
+-/
+
+lemma sum_apply_smul_single_eq_self_on_univ [DecidableEq E] [ProperSpace E] {D : locallyFinsupp E ℤ}
+    (h : D.support.Finite) :
+    D = ∑ z ∈ h.toFinset, single z (D z) := by
+  ext w
+  simp only [coe_sum, Finset.sum_apply, single_apply, Finset.sum_ite_eq]
+  set s := h.toFinset with hs
+  by_cases hw : w ∈ s
+  · simp [hw]
+  · simp only [hw, if_false]
+    have : w ∉ support D := by simpa only [hs, Set.Finite.mem_toFinset] using hw
+    exact notMem_support.mp this
+
+/-!
 ## Logarithmic Counting Functions for Functions with Locally Finite Support
 -/
 
@@ -37,35 +53,25 @@ consequence of `logCounting_single_eq_log_sub_const`.
 -/
 lemma logCounting_single_isBigO_log [DecidableEq E] [ProperSpace E] {e : E} {n : ℤ} :
     logCounting (single e n) =O[atTop] Real.log := by
-  have h₁ : logCounting (single e n) =ᶠ[atTop] (fun r ↦ (n : ℝ) * log r - (n : ℝ) * log ‖e‖) := by
+  have h₁ : logCounting (single e n) =ᶠ[atTop] (n * log · - n * log ‖e‖) := by
     filter_upwards [eventually_ge_atTop ‖e‖] with r hr
     rw [logCounting_single_eq_log_sub_const hr]
     ring
-  have hb : (fun r ↦ (n : ℝ) * log r) =O[atTop] Real.log := isBigO_const_mul_self (n : ℝ) log atTop
-  have ho : (fun _ : ℝ ↦ (n : ℝ) * log ‖e‖) =O[atTop] Real.log := isLittleO_const_log_atTop.isBigO
-  exact (hb.sub ho).congr' h₁.symm EventuallyEq.rfl
+  have hb : (n * log ·) =O[atTop] Real.log := isBigO_const_mul_self (n : ℝ) log atTop
+  exact (hb.sub isLittleO_const_log_atTop.isBigO).congr' h₁.symm EventuallyEq.rfl
 
 /--
-A function with finite support has a logarithmic counting function that is big-O of `log`. Note that
-this direction does not require non-negativity.
+A function with finite support has a logarithmic counting function that is big-O of `log`.
 -/
-lemma logCounting_isBigO_log_of_finite_support [ProperSpace E]
-    {D : locallyFinsupp E ℤ} (h : D.support.Finite) :
+lemma logCounting_isBigO_log_of_finite_support [ProperSpace E] {D : locallyFinsupp E ℤ}
+    (h : D.support.Finite) :
     logCounting D =O[atTop] Real.log := by
   classical
-  set s := h.toFinset with hs
-  have hD : D = ∑ z ∈ s, single z (D z) := by
-    ext w
-    simp only [coe_sum, Finset.sum_apply, single_apply, Finset.sum_ite_eq]
-    by_cases hw : w ∈ s
-    · simp [hw]
-    · simp only [hw, if_false]
-      have : w ∉ support D := by simpa only [hs, Set.Finite.mem_toFinset] using hw
-      exact notMem_support.mp this
-  rw [hD, map_sum]
-  have hfun : (∑ z ∈ s, logCounting (single z (D z)))
-      = fun r ↦ ∑ z ∈ s, logCounting (single z (D z)) r := by
-    ext r; rw [Finset.sum_apply]
+  rw [sum_apply_smul_single_eq_self_on_univ h, map_sum]
+  have hfun : (∑ z ∈ h.toFinset, logCounting (single z (D z)))
+      = fun r ↦ ∑ z ∈ h.toFinset, logCounting (single z (D z)) r := by
+    ext r
+    rw [Finset.sum_apply]
   rw [hfun]
   exact IsBigO.sum fun z _ ↦ logCounting_single_isBigO_log
 
