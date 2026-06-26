@@ -109,8 +109,8 @@ private theorem poissonJensen₀ (h₁w : w ∈ ball 0 R) (h₂w : meromorphicOr
     apply CircleIntegrable.const_smul
     apply CircleIntegrable.re_herglotzRieszKernel_smul h₁w
     apply circleIntegrable_log_norm (fun x hx ↦ by fun_prop)
-  -- The Poisson–Jensen identity for the circle average of `log ‖f‖`, obtained by
-  -- replacing `f` with its canonical decomposition and integrating term by term.
+  -- The Poisson–Jensen identity for the circle average of `log ‖f‖`, obtained by replacing `f` with
+  -- its canonical decomposition and integrating term by term.
   have key : circleAverage (re ∘ herglotzRieszKernel 0 w • (Real.log ‖f ·‖)) 0 R =
       ∑ᶠ x, (divisor f (sphere 0 R)) x * Real.log ‖w - x‖ + Real.log ‖h w‖ :=
     calc circleAverage (re ∘ herglotzRieszKernel 0 w • (Real.log ‖f ·‖)) 0 R
@@ -210,14 +210,11 @@ theorem MeromorphicOn.log_norm_meromorphicTrailingCoeffAt
       exact (herglotzRieszKernel_add_const c w x).symm
     · -- Translate the finsum by `i ↦ i + c`: a zero of `f` at `i + c` corresponds to a
       -- zero of `g` at `i`, and the canonical factors match accordingly.
-      apply finsum_eq_of_bijective (fun i ↦ i + c) (Equiv.addRight c).bijective
+      apply finsum_eq_of_bijective (· + c) (Equiv.addRight c).bijective
       intro x
       simp only [add_sub_cancel_right, divisor_ball_fun_comp_add_const_eq_divisor_ball]
-  · rw [mem_ball_iff_norm] at h₁w
-    simpa [mem_ball_zero_iff] using h₁w
+  · simpa [mem_ball_zero_iff] using (mem_ball_iff_norm.1 h₁w)
   · change meromorphicOrderAt (fun z ↦ f (z + c)) (w - c) = 0
-    rw [meromorphicOrderAt_fun_comp_add_const_eq_meromorphicOrderAt]
-    exact h₂w
+    rwa [meromorphicOrderAt_fun_comp_add_const_eq_meromorphicOrderAt]
   · have hf : (fun z ↦ g (z - c)) = f := funext fun z ↦ by simp [g]
-    rw [← meromorphicOn_closedBall_fun_comp_sub_const_iff_meromorphicOn_closedBall (c := c), hf]
-    exact h₁f
+    rwa [← meromorphicOn_closedBall_fun_comp_sub_const_iff_meromorphicOn_closedBall (c := c), hf]
