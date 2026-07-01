@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import VD.MathlibPending.PoissonJensen
-import VD.MathlibSubmitted.BoundedRangeIsBigO
+import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
 import Mathlib.Analysis.Complex.Liouville
 import Mathlib.Analysis.Complex.ValueDistribution.Proximity.Basic
 import Mathlib.Analysis.Analytic.IsolatedZeros
