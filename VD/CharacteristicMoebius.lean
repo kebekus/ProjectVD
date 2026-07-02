@@ -6,6 +6,7 @@ Authors: Stefan Kebekus
 import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 import Mathlib.Analysis.Meromorphic.IsolatedZeros
 import VD.MathlibPending.BoundednessCharacteristic
+import VD.MathlibSubmitted.Scaling
 
 /-!
 # Invariance of the Characteristic Function under Automorphisms of the Projective Line
@@ -38,74 +39,79 @@ variable {f : ℂ → ℂ}
 ## Scaling by a Nonzero Constant
 -/
 
+/-!
+### LogCounting
+-/
+
 variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜] {U : Set 𝕜} {z : 𝕜}
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
 
-@[simp] theorem meromorphicAt_const_smul_iff_meromorphicAt {f : 𝕜 → E} {s : 𝕜} (hs : s ≠ 0) :
-    MeromorphicAt (s • f) z ↔ MeromorphicAt f z := by
-  constructor
-  <;> intro hf
-  · rw [((eq_inv_smul_iff₀ hs).mpr rfl : f = s⁻¹ • s • f)]
-    fun_prop
-  · fun_prop
-
-@[simp] theorem meromorphicAt_fun_const_smul_iff_meromorphicAt {f : 𝕜 → E} {s : 𝕜} (hs : s ≠ 0) :
-    MeromorphicAt (fun x ↦ s • f x) z ↔ MeromorphicAt f z :=
-  meromorphicAt_const_smul_iff_meromorphicAt hs
-
-@[simp] theorem meromorphicOn_const_smul_iff_meromorphicOn {f : 𝕜 → E} {s : 𝕜} (hs : s ≠ 0) :
-    MeromorphicOn (s • f) U ↔ MeromorphicOn f U :=
-  ⟨fun hf x hx ↦ (meromorphicAt_fun_const_smul_iff_meromorphicAt hs).mp (hf x hx),
-    fun hf x hx ↦ (meromorphicAt_const_smul_iff_meromorphicAt hs).mpr (hf x hx)⟩
-
-@[simp] theorem meromorphicOn_fun_const_smul_iff_meromorphicOn {f : 𝕜 → E} {s : 𝕜} (hs : s ≠ 0) :
-    MeromorphicOn (fun x ↦ s • f x) U ↔ MeromorphicOn f U :=
-  meromorphicOn_const_smul_iff_meromorphicOn hs
-
-@[simp] theorem meromorphicOrderAt_const_smul_iff_meromorphicOrderAt {f : 𝕜 → E} {s : 𝕜}
-    (hs : s ≠ 0) :
-    meromorphicOrderAt (s • f) z = meromorphicOrderAt f z := by
-  by_cases hf : MeromorphicAt f z
-  · rw [(by aesop : s • f = (fun (_ : 𝕜) ↦ s) • f),
-      meromorphicOrderAt_smul_of_ne_zero (by fun_prop) hs]
-  simp_all
-
-@[simp] theorem meromorphicOrderAt_fun_const_smul_iff_meromorphicOrderAt {f : 𝕜 → E} {s : 𝕜}
-    (hs : s ≠ 0) :
-    meromorphicOrderAt (fun x ↦ s • f x) z = meromorphicOrderAt f z :=
-  meromorphicOrderAt_const_smul_iff_meromorphicOrderAt hs
-
-@[simp] theorem divisor_const_smul {f : 𝕜 → E} {s : 𝕜} {U : Set 𝕜} (hs : s ≠ 0) :
-    divisor (s • f) U = divisor f U := by
-  ext z
-  by_cases h₁f : MeromorphicOn f U
-  · by_cases hz : z ∈ U
-    · rw [divisor_apply h₁f hz, divisor_apply (by simp_all) hz]
-      simp_all
-    · simp_all
-  · simp_all
-
-@[simp] theorem divisor_fun_const_smul {f : 𝕜 → E} {s : 𝕜} {U : Set 𝕜} (hs : s ≠ 0) :
-    divisor (fun x ↦ s • f x) U = divisor f U :=
-  divisor_const_smul hs
-
+/-- The logCounting function at top is invariant under scaling. -/
 @[simp] theorem logCounting_const_smul_top [ProperSpace 𝕜] {f : 𝕜 → E} {s : 𝕜} (hs : s ≠ 0) :
     ValueDistribution.logCounting (s • f) ⊤ = ValueDistribution.logCounting f ⊤ := by
   simp_all [logCounting_top]
 
+/-- The logCounting function at top is invariant under scaling. -/
 @[simp] theorem logCounting_fun_const_smul_top [ProperSpace 𝕜] {f : 𝕜 → E} {s : 𝕜} (hs : s ≠ 0) :
     ValueDistribution.logCounting (fun x ↦ s • f x) ⊤ = ValueDistribution.logCounting f ⊤ :=
   logCounting_const_smul_top hs
 
+/-!
+### Proximity
+-/
+
 variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
+
+/-- If `f` is circle integrable, then so are its scalar multiples. -/
+theorem CircleIntegrable.const_smul' {f : ℂ → E} {c s : ℂ} {R : ℝ} (h : CircleIntegrable f c R) :
+    CircleIntegrable (s • f) c R := by
+  sorry
+
+@[simp]
+theorem circleIntegrable_iff_circleIntegrable_const_smul {f : ℂ → E} {c s : ℂ} {R : ℝ} (h : s ≠ 0) :
+    CircleIntegrable (s • f) c R ↔ CircleIntegrable f c R := by
+  constructor <;> intro hf
+  · sorry
+  · sorry
+
+
+
+/--
+The proximity function `f • g` at `⊤` is less than or equal to the sum of the proximity functions of
+`f` and `g`, respectively.
+-/
+theorem proximity_smul_top_le {f₁ : ℂ → ℂ} {f₂ : ℂ → E} (h₁f₁ : Meromorphic f₁)
+    (h₁f₂ : Meromorphic f₂) :
+    proximity (f₁ • f₂) ⊤ ≤ proximity f₁ ⊤ + proximity f₂ ⊤ := by
+  calc proximity (f₁ • f₂) ⊤
+    _ = circleAverage (fun x ↦ log⁺ (‖f₁ x‖ * ‖f₂ x‖)) 0 := by
+      simp [proximity, norm_smul]
+    _ ≤ circleAverage (fun x ↦ log⁺ ‖f₁ x‖ + log⁺ ‖f₂ x‖) 0 := by
+      intro r
+      apply circleAverage_mono
+      · simp_rw [← norm_smul]
+        apply MeromorphicOn.circleIntegrable_posLog_norm
+        apply Meromorphic.meromorphicOn
+        fun_prop
+      · apply (MeromorphicOn.circleIntegrable_posLog_norm (fun x a ↦ h₁f₁ x)).add
+          (MeromorphicOn.circleIntegrable_posLog_norm (fun x a ↦ h₁f₂ x))
+      · exact fun _ _ ↦ posLog_mul
+    _ = circleAverage (log⁺ ‖f₁ ·‖) 0 + circleAverage (log⁺ ‖f₂ ·‖) 0 := by
+      ext r
+      apply circleAverage_add
+      · exact MeromorphicOn.circleIntegrable_posLog_norm (fun x a ↦ h₁f₁ x)
+      · exact MeromorphicOn.circleIntegrable_posLog_norm (fun x a ↦ h₁f₂ x)
+    _ = proximity f₁ ⊤ + proximity f₂ ⊤ := by simp [proximity]
 
 theorem isBigO_proximity_top_sub_proximity_const_smul_top [ProperSpace 𝕜] {f : ℂ → E} {s : ℂ}
     (hs : s ≠ 0) :
     (proximity (s • f) ⊤ - proximity f ⊤) =O[atTop] (1 : ℝ → ℝ) := by
   have η₁ {r : ℝ} : proximity (s • f) ⊤ r ≤ log⁺ ‖s‖ + proximity f ⊤ r := by
     rw [show (s • f) = (fun _ : ℂ ↦ s) • f by funext z; rfl]
+    have := proximity_smul_top_le
+    simpa [proximity_const] -- using (proximity_mul_top_le (Meromorphic.const l) hg) r
     sorry
   apply isBigO_of_le' (c := log⁺ ‖s‖ + log⁺ ‖s⁻¹‖)
   sorry
