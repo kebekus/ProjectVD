@@ -6,7 +6,7 @@ Authors: Stefan Kebekus
 import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 import Mathlib.Analysis.Meromorphic.IsolatedZeros
 import VD.MathlibPending.BoundednessCharacteristic
-import VD.MathlibSubmitted.Scaling
+import VD.MathlibPending.Scaling
 
 /-!
 # Invariance of the Characteristic Function under Automorphisms of the Projective Line
@@ -67,16 +67,16 @@ variable
 /-- If `f` is circle integrable, then so are its scalar multiples. -/
 theorem CircleIntegrable.const_smul' {f : ℂ → E} {c s : ℂ} {R : ℝ} (h : CircleIntegrable f c R) :
     CircleIntegrable (s • f) c R := by
-  sorry
+  apply h.smul
 
 @[simp]
 theorem circleIntegrable_iff_circleIntegrable_const_smul {f : ℂ → E} {c s : ℂ} {R : ℝ} (h : s ≠ 0) :
     CircleIntegrable (s • f) c R ↔ CircleIntegrable f c R := by
   constructor <;> intro hf
-  · sorry
-  · sorry
-
-
+  · have : f = s⁻¹ • s • f := by aesop
+    rw [this]
+    exact hf.const_smul'
+  · exact hf.const_smul'
 
 /--
 The proximity function `f • g` at `⊤` is less than or equal to the sum of the proximity functions of
