@@ -75,8 +75,8 @@ theorem circleIntegrable_iff_circleIntegrable_const_smul {f : ℂ → E} {c s : 
   constructor <;> intro hf
   · have : f = s⁻¹ • s • f := by aesop
     rw [this]
-    exact hf.const_smul'
-  · exact hf.const_smul'
+    exact hf.const_smul' -- should be fun_prop
+  · exact hf.const_smul' -- should be fun_prop
 
 /--
 The proximity function `f • g` at `⊤` is less than or equal to the sum of the proximity functions of
@@ -105,68 +105,64 @@ theorem proximity_smul_top_le {f₁ : ℂ → ℂ} {f₂ : ℂ → E} (h₁f₁ 
       · exact MeromorphicOn.circleIntegrable_posLog_norm (fun x a ↦ h₁f₂ x)
     _ = proximity f₁ ⊤ + proximity f₂ ⊤ := by simp [proximity]
 
-theorem isBigO_proximity_top_sub_proximity_const_smul_top [ProperSpace 𝕜] {f : ℂ → E} {s : ℂ}
-    (hs : s ≠ 0) :
+theorem abs_posLog_mul_sub_posLog_le_posLog_add_posLog {x y : ℝ} (hx : x ≠ 0) :
+    |log⁺ (x * y) - log⁺ y| ≤ log⁺ x + log⁺ x⁻¹ := by
+  rw [abs_le]
+  constructor
+  · grind [(posLog_mul (x := x⁻¹) (y := x * y)), posLog_nonneg]
+  · grind [posLog_mul, posLog_nonneg]
+
+theorem isBigO_proximity_top_sub_proximity_const_smul_top {f : ℂ → E} {s : ℂ}
+    (hf : Meromorphic f) (hs : s ≠ 0) :
     (proximity (s • f) ⊤ - proximity f ⊤) =O[atTop] (1 : ℝ → ℝ) := by
-  have η₁ {r : ℝ} : proximity (s • f) ⊤ r ≤ log⁺ ‖s‖ + proximity f ⊤ r := by
-    rw [show (s • f) = (fun _ : ℂ ↦ s) • f by funext z; rfl]
-    have := proximity_smul_top_le
-    simpa [proximity_const] -- using (proximity_mul_top_le (Meromorphic.const l) hg) r
-    sorry
-  apply isBigO_of_le' (c := log⁺ ‖s‖ + log⁺ ‖s⁻¹‖)
-  sorry
+  apply Asymptotics.isBigO_iff.2
+  use log⁺ ‖s‖ + log⁺ ‖s⁻¹‖
+  apply eventually_atTop.2
+  use 0
+  intro r hr
+  simp only [proximity, ↓reduceDIte, Pi.smul_apply, Pi.sub_apply, norm_eq_abs, norm_inv,
+    Pi.one_apply, norm_one, mul_one]
+  rw [← circleAverage_sub]
+  · trans circleAverage |(log⁺ ‖s • f ·‖) - (log⁺ ‖f ·‖)| 0 r
+    · apply abs_circleAverage_le_circleAverage_abs
+    · rw [← circleAverage_const (a := log⁺ ‖s‖ + log⁺ ‖s‖⁻¹)]
+      apply circleAverage_mono
+      · -- should be fun_prop
+        apply CircleIntegrable.abs
+        apply CircleIntegrable.sub
+        · refine circleIntegrable_posLog_norm_of_nonneg ?_ hr
+          intro z hz
+          exact MeromorphicAt.fun_const_smul (hf z) s
+        · refine circleIntegrable_posLog_norm_of_nonneg ?_ hr
+          intro z hz
+          exact hf z
+      · -- should be fun_prop
+        exact circleIntegrable_const (log⁺ ‖s‖ + log⁺ ‖s‖⁻¹) 0 r
+      · intro x hx
+        simp only [Pi.abs_apply, Pi.sub_apply]
+        rw [norm_smul]
+        apply abs_posLog_mul_sub_posLog_le_posLog_add_posLog
+        simp_all
+  · -- should be fun_prop
+    refine circleIntegrable_posLog_norm_of_nonneg ?_ hr
+    intro z hz
+    exact MeromorphicAt.fun_const_smul (hf z) s
+  · -- should be fun_prop
+    refine circleIntegrable_posLog_norm_of_nonneg ?_ hr
+    intro z hz
+    exact hf z
 
 /--
 Multiplying a meromorphic function by a nonzero constant changes the characteristic function (for
-the value `⊤`) only by a bounded function: the logarithmic counting function is unchanged (the poles
-are the same), and the proximity function changes by at most `log⁺ ‖l‖` resp. `log⁺ ‖l⁻¹‖`.
+the value `⊤`) only by a bounded function.
 -/
-theorem isBigO_characteristic_sub_characteristic_const_mul {g : ℂ → ℂ} {l : ℂ}
-    (hg : Meromorphic g) (hl : l ≠ 0) :
-    (characteristic (fun z ↦ l * g z) ⊤ - characteristic g ⊤) =O[atTop] (1 : ℝ → ℝ) := by
-  -- The logarithmic counting functions agree, since the divisors agree.
-  have hdiv : divisor (fun z ↦ l * g z) Set.univ = divisor g Set.univ := by
-    ext z
-    rw [divisor_apply ((show Meromorphic (fun z ↦ l * g z) by fun_prop).meromorphicOn)
-        (Set.mem_univ z), divisor_apply hg.meromorphicOn (Set.mem_univ z)]
-    congr 1
-    rw [show (fun z ↦ l * g z) = (fun _ : ℂ ↦ l) • g by
-        funext w; simp [smul_eq_mul],
-      meromorphicOrderAt_smul (MeromorphicAt.const l z) (hg z)]
-    simp [meromorphicOrderAt_const, hl]
-  have hlog : logCounting (fun z ↦ l * g z) ⊤ = logCounting g ⊤ := by
-    simp only [logCounting_top, hdiv]
-  -- The proximity functions agree up to a bounded function.
-  have hpx_le : ∀ r, proximity (fun z ↦ l * g z) ⊤ r ≤ log⁺ ‖l‖ + proximity g ⊤ r := by
-    intro r
-    rw [show (fun z ↦ l * g z) = (fun _ : ℂ ↦ l) * g by funext z; rfl]
-    simpa [proximity_const] using (proximity_mul_top_le (Meromorphic.const l) hg) r
-  have hpx_ge : ∀ r, proximity g ⊤ r ≤ log⁺ ‖l⁻¹‖ + proximity (fun z ↦ l * g z) ⊤ r := by
-    intro r
-    have hlg : Meromorphic (fun z ↦ l * g z) := by fun_prop
-    have h2 := (proximity_mul_top_le (Meromorphic.const l⁻¹) hlg) r
-    rw [show ((fun _ ↦ l⁻¹) * (fun z ↦ l * g z)) = g by
-      funext z; simp [inv_mul_cancel_left₀ hl]] at h2
-    simpa [proximity_const] using h2
-  have hpx_bdd : ∀ r, ‖(proximity (fun z ↦ l * g z) ⊤ - proximity g ⊤) r‖
-      ≤ (log⁺ ‖l‖ + log⁺ ‖l⁻¹‖) * ‖(1 : ℝ → ℝ) r‖ := by
-    intro r
-    simp only [Pi.sub_apply, Pi.one_apply, norm_one, mul_one, Real.norm_eq_abs, abs_le]
-    refine ⟨?_, ?_⟩
-    · linarith [hpx_ge r, posLog_nonneg (x := ‖l‖)]
-    · linarith [hpx_le r, posLog_nonneg (x := ‖l⁻¹‖)]
-  have hpx_isBigO : (proximity (fun z ↦ l * g z) ⊤ - proximity g ⊤) =O[atTop] (1 : ℝ → ℝ) :=
-    isBigO_of_le' (c := log⁺ ‖l‖ + log⁺ ‖l⁻¹‖) _ hpx_bdd
-  -- Combine: the characteristic difference equals the proximity difference.
-  have hchar_eq : (characteristic (fun z ↦ l * g z) ⊤ - characteristic g ⊤)
-      = (proximity (fun z ↦ l * g z) ⊤ - proximity g ⊤) := by
-    unfold characteristic
-    rw [hlog]
-    ext r
-    simp only [Pi.add_apply, Pi.sub_apply]
-    ring
-  rw [hchar_eq]
-  exact hpx_isBigO
+theorem isBigO_characteristic_sub_characteristic_const_mul {f : ℂ → ℂ} {s : ℂ}
+    (hf : Meromorphic f) (hs : s ≠ 0) :
+    (characteristic (s • f) ⊤ - characteristic f ⊤) =O[atTop] (1 : ℝ → ℝ) := by
+  unfold characteristic
+  rw [logCounting_const_smul_top hs]
+  ring_nf
+  apply isBigO_proximity_top_sub_proximity_const_smul_top hf hs
 
 /-!
 ## Postcomposition with an Automorphism of the Projective Line
@@ -183,34 +179,34 @@ eventually constant along the codiscrete filter, so both characteristic function
 -/
 theorem isBigO_characteristic_sub_characteristic_moebius {a b c d : ℂ}
     (hf : Meromorphic f) (hΔ : a * d - b * c ≠ 0) :
-    (characteristic (fun z ↦ (a * f z + b) / (c * f z + d)) ⊤ - characteristic f ⊤)
+    (characteristic ((a • f · + b) / (c • f · + d)) ⊤ - characteristic f ⊤)
       =O[atTop] (1 : ℝ → ℝ) := by
   -- A helper to reverse the order of a bounded difference.
   have flip : ∀ {A B : ℝ → ℝ}, (A - B) =O[atTop] (1 : ℝ → ℝ) → (B - A) =O[atTop] (1 : ℝ → ℝ) := by
     intro A B h
-    have hAB : B - A = -(A - B) := by ext r; simp only [Pi.sub_apply, Pi.neg_apply]; ring
-    rw [hAB]
-    exact h.neg_left
+    rw [← isBigO_neg_left]
+    aesop
   by_cases hc : c = 0
   · -- Affine case `c = 0`: the map is `w ↦ (a / d) * w + b / d`.
-    have had : a * d ≠ 0 := by rw [hc] at hΔ; simpa using hΔ
-    have ha : a ≠ 0 := left_ne_zero_of_mul had
-    have hd : d ≠ 0 := right_ne_zero_of_mul had
-    have hφeqC : (fun z ↦ (a * f z + b) / (c * f z + d)) = (fun z ↦ a / d * f z + b / d) := by
-      funext z; rw [hc]; simp only [zero_mul, zero_add]; field_simp
-    rw [hφeqC]
-    have hg1C : Meromorphic (fun z ↦ a / d * f z + b / d) := by fun_prop
+    subst hc
+    simp_all only [mul_zero, sub_zero, ne_eq, mul_eq_zero, not_or, smul_eq_mul, zero_mul, zero_add]
+    have : ((a * f · + b) / (fun _ ↦ d)) = (a / d * f · + b / d) := by
+      grind [Pi.div_apply]
+    rw [this]
+    clear this
     have s1 := isBigO_characteristic_sub_characteristic_shift (a₀ := (b / d : ℂ))
-      (f := fun z ↦ a / d * f z + b / d) hg1C
+      (f := fun z ↦ a / d * f z + b / d) (by fun_prop)
     rw [show (fun z ↦ (a / d * f z + b / d) - b / d) = (fun z ↦ a / d * f z) by funext z; ring]
       at s1
-    have s2 := isBigO_characteristic_sub_characteristic_const_mul (g := f) (l := a / d) hf
-      (div_ne_zero ha hd)
+    have s2 := isBigO_characteristic_sub_characteristic_const_mul (f := f) (s := a / d) hf
+      (div_ne_zero hΔ.1 hΔ.2)
     have keyC : (characteristic (fun z ↦ a / d * f z + b / d) ⊤ - characteristic f ⊤)
         = (characteristic (fun z ↦ a / d * f z + b / d) ⊤ - characteristic (fun z ↦ a / d * f z)
             ⊤)
           + (characteristic (fun z ↦ a / d * f z) ⊤ - characteristic f ⊤) := by
-      ext r; simp only [Pi.add_apply, Pi.sub_apply]; ring
+      ext r
+      simp only [Pi.add_apply, Pi.sub_apply]
+      ring
     rw [keyC]
     exact s1.add s2
   · -- Case `c ≠ 0`.
@@ -254,7 +250,7 @@ theorem isBigO_characteristic_sub_characteristic_moebius {a b c d : ℂ}
       have d2 : (characteristic (fun z ↦ (b * c - a * d) / c ^ 2 * (f z + d / c)⁻¹) ⊤
           - characteristic (fun z ↦ (f z + d / c)⁻¹) ⊤) =O[atTop] (1 : ℝ → ℝ) :=
         isBigO_characteristic_sub_characteristic_const_mul
-          (g := fun z ↦ (f z + d / c)⁻¹) (l := (b * c - a * d) / c ^ 2) (by fun_prop) hl
+          (f := fun z ↦ (f z + d / c)⁻¹) (s := (b * c - a * d) / c ^ 2) (by fun_prop) hl
       have d1 : (characteristic (fun z ↦ a / c + (b * c - a * d) / c ^ 2 * (f z + d / c)⁻¹) ⊤
           - characteristic (fun z ↦ (b * c - a * d) / c ^ 2 * (f z + d / c)⁻¹) ⊤)
           =O[atTop] (1 : ℝ → ℝ) := by
