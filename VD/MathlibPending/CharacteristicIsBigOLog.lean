@@ -35,35 +35,31 @@ namespace ValueDistribution
 
 /-- A polynomial defines an entire function. -/
 private lemma analyticOnNhd_polynomial (p : Polynomial ℂ) :
-    AnalyticOnNhd ℂ (fun z ↦ p.eval z) univ :=
+    AnalyticOnNhd ℂ p.eval univ :=
   fun z _ ↦ (Polynomial.differentiable p).analyticAt z
 
 /-- A nonzero polynomial is nowhere locally constant zero. -/
 private lemma polynomial_meromorphicOrderAt_ne_top {p : Polynomial ℂ} (hp : p ≠ 0) (z : ℂ) :
-    meromorphicOrderAt (fun w ↦ p.eval w) z ≠ ⊤ := by
-  have hana : AnalyticAt ℂ (fun w ↦ p.eval w) z := (Polynomial.differentiable p).analyticAt z
-  rw [meromorphicOrderAt_ne_top_iff_eventually_ne_zero hana.meromorphicAt]
+    meromorphicOrderAt p.eval z ≠ ⊤ := by
+  have : AnalyticAt ℂ p.eval z := (Polynomial.differentiable p).analyticAt z
+  rw [meromorphicOrderAt_ne_top_iff_eventually_ne_zero this.meromorphicAt]
   by_contra h
-  rw [Filter.not_eventually] at h
-  simp only [not_not] at h
-  rw [hana.frequently_zero_iff_eventually_zero] at h
+  simp_rw [Filter.not_eventually, not_ne_iff, this.frequently_zero_iff_eventually_zero] at h
   exact hp (Polynomial.eq_zero_of_infinite_isRoot p (infinite_of_mem_nhds z h))
 
 /-- The characteristic function of the zero function vanishes. -/
 private lemma characteristic_zero_top : characteristic (0 : ℂ → ℂ) ⊤ = 0 := by
-  unfold characteristic
-  simp only [logCounting_const_zero, add_zero]
+  simp only [characteristic, logCounting_const_zero, add_zero]
   funext r
-  rw [proximity_top]
-  simp [circleAverage_const]
+  simp [proximity_top, circleAverage_const] -- need simp lemma: proximity_const_top
 
 /-- The characteristic function of a polynomial is `O(log)`. -/
 private lemma characteristic_polynomial_isBigO_log (p : Polynomial ℂ) :
-    characteristic (fun z ↦ p.eval z) ⊤ =O[atTop] Real.log := by
-  have hlc : logCounting (fun z ↦ p.eval z) ⊤ = 0 := by
-    rw [logCounting_top, show (divisor (fun z ↦ p.eval z) univ)⁻ = 0 from
+    characteristic p.eval ⊤ =O[atTop] Real.log := by
+  have hlc : logCounting p.eval ⊤ = 0 := by
+    rw [logCounting_top, show (divisor p.eval univ)⁻ = 0 from
       negPart_eq_zero.2 (analyticOnNhd_polynomial p).divisor_nonneg, map_zero]
-  rw [show characteristic (fun z ↦ p.eval z) ⊤ = proximity (fun z ↦ p.eval z) ⊤ from by
+  rw [show characteristic p.eval ⊤ = proximity p.eval ⊤ from by
     unfold characteristic; rw [hlc, add_zero]]
   exact proximity_isBigO_log_of_polynomial p
 
@@ -84,7 +80,7 @@ theorem rational_iff_characteristic_isBigO_log {f : ℂ → ℂ} (hf : Meromorph
       rw [show ((0 : Polynomial ℂ).eval / q.eval) = (0 : ℂ → ℂ) from by funext z; simp,
         characteristic_zero_top]
       exact Asymptotics.isBigO_zero _ _
-    rw [show (p.eval / q.eval) = (fun z ↦ p.eval z) * (fun z ↦ q.eval z)⁻¹ from by
+    rw [show (p.eval / q.eval) = p.eval * (fun z ↦ q.eval z)⁻¹ from by
       funext z; simp [div_eq_mul_inv]]
     have hpm : Meromorphic fun z ↦ p.eval z :=
       fun z ↦ (analyticOnNhd_polynomial p z (mem_univ z)).meromorphicAt
@@ -99,7 +95,7 @@ theorem rational_iff_characteristic_isBigO_log {f : ℂ → ℂ} (hf : Meromorph
       simpa using inv_ne_zero hw
     have hmulle := characteristic_mul_top_eventuallyLE hpm
       (polynomial_meromorphicOrderAt_ne_top hp) hqinvm hqinvord
-    have h1 : characteristic (fun z ↦ p.eval z) ⊤ =O[atTop] Real.log :=
+    have h1 : characteristic p.eval ⊤ =O[atTop] Real.log :=
       characteristic_polynomial_isBigO_log p
     have h2 : characteristic (fun z ↦ q.eval z)⁻¹ ⊤ =O[atTop] Real.log := by
       have hone : (1 : ℝ → ℝ) =O[atTop] Real.log := isLittleO_const_log_atTop.isBigO
@@ -114,7 +110,7 @@ theorem rational_iff_characteristic_isBigO_log {f : ℂ → ℂ} (hf : Meromorph
     rw [Asymptotics.isBigO_iff]
     refine ⟨1, ?_⟩
     filter_upwards [hmulle,
-      characteristic_eventually_nonneg (f := (fun z ↦ p.eval z) * (fun z ↦ q.eval z)⁻¹) (a := ⊤),
+      characteristic_eventually_nonneg (f := p.eval * (fun z ↦ q.eval z)⁻¹) (a := ⊤),
       characteristic_eventually_nonneg (f := fun z ↦ p.eval z) (a := ⊤),
       characteristic_eventually_nonneg (f := (fun z ↦ q.eval z)⁻¹) (a := ⊤)] with r hle hg hpa hqa
     rw [one_mul, Real.norm_of_nonneg hg, Real.norm_of_nonneg (add_nonneg hpa hqa)]
@@ -128,8 +124,7 @@ theorem rational_iff_characteristic_isBigO_log {f : ℂ → ℂ} (hf : Meromorph
       have hDfin : ((divisor f univ)⁻).support.Finite :=
         (logCounting_isBigO_log_iff_finite_support (f := f)).1 hlog
       have hd : Function.HasFiniteSupport fun u ↦ (divisor f univ)⁻ u := hDfin
-      have hnn : ∀ u, 0 ≤ (divisor f univ)⁻ u := fun u ↦ by
-        simpa using Function.locallyFinsuppWithin.le_def.1 (negPart_nonneg (divisor f univ)) u
+      have hnn : ∀ u, 0 ≤ (divisor f univ)⁻ u := fun u ↦ by simp
       set q : Polynomial ℂ :=
         ∏ u ∈ hDfin.toFinset, (Polynomial.X - Polynomial.C u) ^ ((divisor f univ)⁻ u).toNat
         with hq_def
