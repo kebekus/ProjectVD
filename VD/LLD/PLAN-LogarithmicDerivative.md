@@ -128,9 +128,9 @@ theorem ValueDistribution.isBigO_proximity_logDeriv_of_isBigO_rpow {f : ℂ → 
 - differentiated Poisson(–Schwarz) representation for ball-nonvanishing functions (B4);
 - `logDeriv` of `canonicalFactor` + bounds (B5);
 - **differentiated Poisson–Jensen formula** (B6);
-- uniform circle-average bound for `‖· − a‖^(−1/2)` (C2);
-- concavity estimate `circleAverage log⁺ u ≤ log⁺ (circleAverage u) + log 2` (C1);
-- unintegrated counting function vs. `logCounting` (C3);
+- ~~uniform circle-average bound for `‖· − a‖^(−1/2)` (C2)~~ ✅ done;
+- ~~concavity estimate `circleAverage log⁺ u ≤ log⁺ (circleAverage u) + log 2` (C1)~~ ✅ done;
+- ~~unintegrated counting function vs. `logCounting` (C3)~~ ✅ done;
 - the two-radius estimate T1 (C4);
 - ~~the Borel growth lemma T2 (D)~~ ✅ done;
 - final assembly T3 + corollaries (E).
@@ -341,6 +341,23 @@ Difficulty: B6 medium-high (bookkeeping), everything else low-medium.
 
 ## 5. Work package C — circle-average estimates and the two-radius bound (T1)
 
+**✅ C1–C3 DONE (2026-07-07).** C1–C2 implemented in `VD/LLD/CircleAverageEstimates.lean`
+(~340 lines), C3 in `VD/LLD/CountingEstimate.lean` (~150 lines); both compile lint-clean.
+Deviations from the sketches below:
+
+- **C2** needs no case split at all: the estimate
+  `‖circleMap 0 r (θ + arg a) − a‖ ≥ (r/2)·|sin (θ/2)|` holds for **every** `a : ℂ`
+  (via `‖circleMap 0 r θ − s‖² = (r−s)² + 4rs·sin²(θ/2)` for `s = ‖a‖ ≥ 0`, linear in `sin²`),
+  so a single Jordan-inequality majorant
+  `(r/(2π)·θ)^(−1/2) + (r/(2π)·(2π−θ))^(−1/2)` covers all base points. Its integral is exactly
+  `8π·r^(−1/2)`, giving the explicit absolute constant `C = 4`. Integrability for arbitrary
+  radii (`r < 0`, `r = 0`) is reduced to `r > 0` via `Function.Periodic.intervalIntegrable₀`
+  and angle shifts.
+- **C3** is stated in the `Function.locallyFinsuppWithin` namespace (where `logCounting` for
+  divisors actually lives); the helper `Real.sub_div_le_log_div : (r − ρ)/r ≤ log (r/ρ)` is
+  included there. The FMT specialisation is deferred to C4, where characteristic/proximity are
+  in scope.
+
 ### C1. Concavity: averages of `log⁺`
 
 ```lean
@@ -508,8 +525,8 @@ one local file per future Mathlib target:
 | 4 | `CauchyIntegralDeriv.lean` ✅ | `MeasureTheory/Integral/CircleIntegral.lean` (extend) | B1–B3 (done) | — |
 | 5 | `PoissonSchwarzDeriv.lean` | `Analysis/Complex/Poisson.lean` (extend) | B4, B5 | 4, **Poisson–Jensen chain** |
 | 6 | `PoissonJensenDeriv.lean` | `Analysis/Complex/PoissonJensenDeriv.lean` | B6 | 1, 5 |
-| 7 | `CircleAverageEstimates.lean` | `MeasureTheory/Integral/CircleAverage.lean` (extend) + `PosLog…` | C1, C2 | — |
-| 8 | `CountingEstimate.lean` | `…/ValueDistribution/LogCounting/Basic.lean` (extend) | C3 | — |
+| 7 | `CircleAverageEstimates.lean` ✅ | `MeasureTheory/Integral/CircleAverage.lean` (extend) + `PosLog…` | C1, C2 (done) | — |
+| 8 | `CountingEstimate.lean` ✅ | `…/ValueDistribution/LogCounting/Basic.lean` (extend) | C3 (done) | — |
 | 9 | `LogDerivTwoRadius.lean` | `…/ValueDistribution/LogDerivLemma.lean` (part 1) | C4 (T1) | 1, 6, 7, 8 |
 | 10 | `LogDerivLemma.lean` | `…/ValueDistribution/LogDerivLemma.lean` (part 2) | E (T3 + corollaries) | 3, 9 |
 
