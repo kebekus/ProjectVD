@@ -124,7 +124,7 @@ theorem ValueDistribution.isBigO_proximity_logDeriv_of_isBigO_rpow {f : ℂ → 
 
 - ~~meromorphic order/congruence/arithmetic API for `logDeriv` (A)~~ ✅ done;
 - ~~`posLog_rpow`, `abs_log_eq_posLog_add_posLog_inv` (A)~~ ✅ done;
-- derivative of the Cauchy integral in the pole variable (B1);
+- ~~derivative of the Cauchy integral in the pole variable (B1)~~ ✅ done (with B2–B3);
 - differentiated Poisson(–Schwarz) representation for ball-nonvanishing functions (B4);
 - `logDeriv` of `canonicalFactor` + bounds (B5);
 - **differentiated Poisson–Jensen formula** (B6);
@@ -222,6 +222,18 @@ Sign check (`f = id`, `R = 1`): `divisor = δ₀`, `canonicalFactor 1 0 = (·)�
 
 The classical shape is recovered via B5:
 `logDeriv (canonicalFactor R a) w = −((w − a)⁻¹ + conj a / (R² − conj a * w))`.
+
+**✅ B1–B3 DONE (2026-07-07).** Implemented in `VD/LLD/CauchyIntegralDeriv.lean`; compiles
+lint-clean, ~230 lines. Deviations from the sketch below: B2/B3 are stated for the integrand
+`fun ζ ↦ herglotzRieszKernel 0 w ζ • g ζ` with `g` valued in a complex Banach space (B4 will
+instantiate `g := fun ζ ↦ (log ‖h ζ‖ : ℂ)`); B3 carries the extra hypothesis `w ∈ ball 0 R`
+(needed for integrability — without it the statement is false when only the real part of the
+integrand is integrable); B2's derivative is proved directly by the dominated-derivative theorem
+(not via B1 and partial fractions), and the analyticity record comes as corollaries
+`differentiableOn_/analyticOnNhd_circleAverage_herglotzRieszKernel_smul` via
+`DifferentiableOn.analyticOnNhd` rather than `hasFPowerSeriesOn_cauchy_integral`. The kernel's
+continuity on the sphere is proved inline (private lemma) to keep the file independent of the
+pending Poisson–Jensen chain.
 
 ### B1. Derivative of the Cauchy integral (new, Mathlib-worthy on its own)
 
@@ -493,7 +505,7 @@ one local file per future Mathlib target:
 | 1 | `MeromorphicLogDeriv.lean` ✅ | `Analysis/Meromorphic/LogDeriv.lean` | package A (done) | — |
 | 2 | `PosLog.lean` ✅ | `Analysis/SpecialFunctions/Log/PosLog.lean` (extend) | `posLog_rpow`, `abs_log_…` (done) | — |
 | 3 | `BorelGrowth.lean` ✅ | `MeasureTheory/Function/BorelGrowth.lean` | package D (T2, done) | — |
-| 4 | `CauchyIntegralDeriv.lean` | `MeasureTheory/Integral/CircleIntegral.lean` (extend) | B1–B3 | — |
+| 4 | `CauchyIntegralDeriv.lean` ✅ | `MeasureTheory/Integral/CircleIntegral.lean` (extend) | B1–B3 (done) | — |
 | 5 | `PoissonSchwarzDeriv.lean` | `Analysis/Complex/Poisson.lean` (extend) | B4, B5 | 4, **Poisson–Jensen chain** |
 | 6 | `PoissonJensenDeriv.lean` | `Analysis/Complex/PoissonJensenDeriv.lean` | B6 | 1, 5 |
 | 7 | `CircleAverageEstimates.lean` | `MeasureTheory/Integral/CircleAverage.lean` (extend) + `PosLog…` | C1, C2 | — |
