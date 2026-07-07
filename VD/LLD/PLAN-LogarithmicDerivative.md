@@ -122,8 +122,8 @@ theorem ValueDistribution.isBigO_proximity_logDeriv_of_isBigO_rpow {f : ℂ → 
 
 ### Missing (= the actual work, grouped into work packages A–E below)
 
-- meromorphic order/congruence/arithmetic API for `logDeriv` (A);
-- `posLog_rpow`, `abs_log_eq_posLog_add_posLog_inv` (A);
+- ~~meromorphic order/congruence/arithmetic API for `logDeriv` (A)~~ ✅ done;
+- ~~`posLog_rpow`, `abs_log_eq_posLog_add_posLog_inv` (A)~~ ✅ done;
 - derivative of the Cauchy integral in the pole variable (B1);
 - differentiated Poisson(–Schwarz) representation for ball-nonvanishing functions (B4);
 - `logDeriv` of `canonicalFactor` + bounds (B5);
@@ -138,6 +138,13 @@ theorem ValueDistribution.isBigO_proximity_logDeriv_of_isBigO_rpow {f : ℂ → 
 ---
 
 ## 3. Work package A — meromorphic API for `logDeriv`
+
+**✅ DONE (2026-07-07).** Implemented in `VD/LLD/MeromorphicLogDeriv.lean` and
+`VD/LLD/PosLog.lean`; compiles lint-clean. Deviations from the sketch below: statements are in
+Mathlib-ready generality (`𝕜 → 𝕜'` where possible; order lemmas over `𝕜 → 𝕜` with
+`[CompleteSpace 𝕜] [CharZero 𝕜]`); added the helper `MeromorphicOn.ne_zero_mem_codiscreteWithin`
+and, beyond `logDeriv_mul_eventuallyEq`, the `Finset`/`finprod`/`zpow` versions including the
+B6-shaped `logDeriv_finprod_zpow_eventuallyEq` (divisor-style `ℤ`-exponents).
 
 *New file, eventually `Mathlib/Analysis/Meromorphic/LogDeriv.lean`
 (locally: `VD/LLD/MeromorphicLogDeriv.lean`). Independent of everything else.*
@@ -475,8 +482,8 @@ one local file per future Mathlib target:
 
 | # | Local file (`VD/LLD/`) | Mathlib target | Contents | Depends on |
 |---|---|---|---|---|
-| 1 | `MeromorphicLogDeriv.lean` | `Analysis/Meromorphic/LogDeriv.lean` | package A | — |
-| 2 | `PosLog.lean` | `Analysis/SpecialFunctions/Log/PosLog.lean` (extend) | `posLog_rpow`, `abs_log_…` | — |
+| 1 | `MeromorphicLogDeriv.lean` ✅ | `Analysis/Meromorphic/LogDeriv.lean` | package A (done) | — |
+| 2 | `PosLog.lean` ✅ | `Analysis/SpecialFunctions/Log/PosLog.lean` (extend) | `posLog_rpow`, `abs_log_…` (done) | — |
 | 3 | `BorelGrowth.lean` | `MeasureTheory/Function/BorelGrowth.lean` | package D (T2) | — |
 | 4 | `CauchyIntegralDeriv.lean` | `MeasureTheory/Integral/CircleIntegral.lean` (extend) | B1–B3 | — |
 | 5 | `PoissonSchwarzDeriv.lean` | `Analysis/Complex/Poisson.lean` (extend) | B4, B5 | 4, **Poisson–Jensen chain** |
