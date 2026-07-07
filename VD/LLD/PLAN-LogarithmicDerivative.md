@@ -132,7 +132,7 @@ theorem ValueDistribution.isBigO_proximity_logDeriv_of_isBigO_rpow {f : ℂ → 
 - concavity estimate `circleAverage log⁺ u ≤ log⁺ (circleAverage u) + log 2` (C1);
 - unintegrated counting function vs. `logCounting` (C3);
 - the two-radius estimate T1 (C4);
-- the Borel growth lemma T2 (D);
+- ~~the Borel growth lemma T2 (D)~~ ✅ done;
 - final assembly T3 + corollaries (E).
 
 ---
@@ -422,6 +422,14 @@ Difficulty: C4 medium (long but mechanical once 1–6 are in place).
 
 ## 6. Work package D — the Borel growth lemma (T2)
 
+**✅ DONE (2026-07-07).** Implemented in `VD/LLD/BorelGrowth.lean`; compiles lint-clean, ~120
+lines. The proof deviates from the Vitali recommendation below: it slices the bad set `E` into
+dyadic pieces `Eₙ = {r ∈ E | 2ⁿ · S a ≤ S r < 2ⁿ⁺¹ · S a}`. Any two points `x ≤ y` of `Eₙ`
+satisfy `y − x < (S x)⁻¹ ≤ 2⁻ⁿ` (else monotonicity forces `S y ≥ S (x + (S x)⁻¹) > 2 · S x ≥
+2ⁿ⁺¹ · S a > S y`), so `diam Eₙ ≤ 2⁻ⁿ` and `volume E ≤ Σ 2⁻ⁿ = 2 < ∞` by outer-measure
+subadditivity (`measure_iUnion_le` + `Real.volume_le_diam`) — no covering lemma, no recursion,
+and no measurability argument at all.
+
 *Pure measure theory / real analysis; fully parallel to A–C. Suggested target file
 `Mathlib/MeasureTheory/Function/BorelGrowth.lean` (maintainers may prefer another home).*
 
@@ -484,7 +492,7 @@ one local file per future Mathlib target:
 |---|---|---|---|---|
 | 1 | `MeromorphicLogDeriv.lean` ✅ | `Analysis/Meromorphic/LogDeriv.lean` | package A (done) | — |
 | 2 | `PosLog.lean` ✅ | `Analysis/SpecialFunctions/Log/PosLog.lean` (extend) | `posLog_rpow`, `abs_log_…` (done) | — |
-| 3 | `BorelGrowth.lean` | `MeasureTheory/Function/BorelGrowth.lean` | package D (T2) | — |
+| 3 | `BorelGrowth.lean` ✅ | `MeasureTheory/Function/BorelGrowth.lean` | package D (T2, done) | — |
 | 4 | `CauchyIntegralDeriv.lean` | `MeasureTheory/Integral/CircleIntegral.lean` (extend) | B1–B3 | — |
 | 5 | `PoissonSchwarzDeriv.lean` | `Analysis/Complex/Poisson.lean` (extend) | B4, B5 | 4, **Poisson–Jensen chain** |
 | 6 | `PoissonJensenDeriv.lean` | `Analysis/Complex/PoissonJensenDeriv.lean` | B6 | 1, 5 |
