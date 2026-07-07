@@ -5,7 +5,6 @@ Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 import Mathlib.Analysis.Meromorphic.IsolatedZeros
-import VD.MathlibPending.BoundednessCharacteristic
 import VD.MathlibPending.Scaling
 
 /-!
@@ -15,9 +14,10 @@ As a corollary to the First Main Theorem of Value Distribution Theory, we show t
 meromorphic function `f : ℂ → ℂ` with an automorphism of the projective line `ℙ¹(ℂ) = ℂ ∪ {∞}`
 changes the characteristic function `characteristic f ⊤` only by a bounded function.
 
-An automorphism of `ℙ¹(ℂ)` is a Möbius transformation `w ↦ (a * w + b) / (c * w + d)` with `a * d -
-b * c ≠ 0`.  The characteristic function plays the role of a height, and the statement below is the
-analogue of the fact that heights are invariant under the action of `PGL₂` up to bounded terms.
+An automorphism of `ℙ¹(ℂ)` is a Möbius transformation `w ↦ (a * w + b) / (c * w + d)` with
+discriminant `a * d - b * c ≠ 0`.  The characteristic function plays the role of a height, and the
+statement below is the analogue of the fact that heights are invariant under the action of `PGL₂` up
+to bounded terms.
 
 The proof decomposes a general Möbius transformation into the standard generators (translations,
 inversion, and scaling) and applies the two parts of the First Main Theorem
@@ -73,8 +73,7 @@ theorem CircleIntegrable.const_smul' {f : ℂ → E} {c s : ℂ} {R : ℝ} (h : 
 theorem circleIntegrable_iff_circleIntegrable_const_smul {f : ℂ → E} {c s : ℂ} {R : ℝ} (h : s ≠ 0) :
     CircleIntegrable (s • f) c R ↔ CircleIntegrable f c R := by
   constructor <;> intro hf
-  · have : f = s⁻¹ • s • f := by aesop
-    rw [this]
+  · rw [show f = s⁻¹ • s • f by simp_all]
     exact hf.const_smul' -- should be fun_prop
   · exact hf.const_smul' -- should be fun_prop
 
@@ -113,7 +112,7 @@ theorem abs_posLog_mul_sub_posLog_le_posLog_add_posLog {x y : ℝ} (hx : x ≠ 0
     |log⁺ (x * y) - log⁺ y| ≤ log⁺ x + log⁺ x⁻¹ := by
   rw [abs_le]
   constructor
-  · grind [(posLog_mul (x := x⁻¹) (y := x * y)), posLog_nonneg]
+  · grind [posLog_mul (x := x⁻¹) (y := x * y), posLog_nonneg]
   · grind [posLog_mul, posLog_nonneg]
 
 theorem isBigO_proximity_top_sub_proximity_const_smul_top {f : ℂ → E} {s : ℂ}
@@ -248,6 +247,7 @@ private lemma transitivity₂ {f₁ f₂ f₃ : ℂ → ℂ} (h₂₃ : f₂ =�
   rw [characteristic_congr_codiscrete h₂₃.symm (by grind)]
   apply hc r (by aesop)
 
+
 /--
 **Corollary to the First Main Theorem.** Postcomposing a meromorphic function `f : ℂ → ℂ` with an
 automorphism `w ↦ (a * w + b) / (c * w + d)` (with `a * d - b * c ≠ 0`) of the projective line
@@ -291,7 +291,7 @@ theorem isBigO_characteristic_sub_characteristic_moebius {a b c d : ℂ}
         fun_prop
       apply transitivity₂ (f₂ := (fun z ↦ a / c + (b * c - a * d) / c ^ 2 * (f z + d / c)⁻¹))
       · filter_upwards [hne] with z hz
-        simp only [Pi.div_apply]
+        rw [Pi.div_apply]
         field_simp [hc, hz, show f z * c + d ≠ 0 by grind, show f z + d / c ≠ 0 by grind]
         ring
       apply transitivity₁ (fun z ↦ (b * c - a * d) / c ^ 2 * (f z + d / c)⁻¹)
@@ -300,9 +300,8 @@ theorem isBigO_characteristic_sub_characteristic_moebius {a b c d : ℂ}
       apply transitivity₁ (f · + d / c)⁻¹
       · apply isBigO_characteristic_sub_characteristic_const_mul (by fun_prop)
         grind
-      apply transitivity₁ (f · + d / c)
-      · apply isBigO_characteristic_sub_characteristic_inv (by fun_prop)
-      apply transitivity₁ f
+      apply transitivity₁ (f · + d / c) (isBigO_characteristic_sub_characteristic_inv (by fun_prop))
+      apply transitivity₁
       · simp_rw [← sub_neg_eq_add]
         apply isBigO_characteristic_sub_characteristic_shift (by fun_prop)
       rw [sub_self]
@@ -310,15 +309,16 @@ theorem isBigO_characteristic_sub_characteristic_moebius {a b c d : ℂ}
     · -- Degenerate case: the denominator vanishes away from a codiscrete set.
       simp only [ne_eq, not_forall, Decidable.not_not] at hord
       rw [Meromorphic.exists_meromorphicOrderAt_eq_top_iff_eventually_zero (by fun_prop)] at hord
-      apply transitivity₁ (fun _ ↦ -(d / c))
+      apply transitivity₁ fun _ ↦ -(d / c)
       · apply transitivity₂ (f₂ := 0)
         · filter_upwards [hord] with z hz
           simp_all
         · -- should be simp
-          simp_rw [isBigO_iff, eventually_atTop]
-          use |log⁺ (‖d‖ / ‖c‖)|, 1
-          intro r hr
-          simp
+          apply Asymptotics.IsBigO.sub
+          · simp only [characteristic_const, norm_neg, Complex.norm_div]
+            apply Asymptotics.isBigO_const_one
+          · simp only [characteristic_zero]
+            apply Asymptotics.isBigO_const_one
       · apply transitivity₂ (f₂ := f) (f₃ := fun _ ↦ -(d / c))
         · filter_upwards [hord] with z hz
           rw [Pi.zero_apply] at hz

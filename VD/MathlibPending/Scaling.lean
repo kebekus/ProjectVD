@@ -7,12 +7,11 @@ import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 import Mathlib.Analysis.Meromorphic.IsolatedZeros
 import VD.MathlibPending.BoundednessCharacteristic
 
-
-open Asymptotics Filter Function Metric MeromorphicOn Real Set Topology ValueDistribution
-
 /-!
 ## Scaling by a Nonzero Constant
 -/
+
+open Asymptotics Filter Function Metric MeromorphicOn Real Set Topology ValueDistribution
 
 variable
   {𝕜 : Type*} [NontriviallyNormedField 𝕜] {U : Set 𝕜} {z : 𝕜}
