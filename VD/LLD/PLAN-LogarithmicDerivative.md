@@ -125,8 +125,8 @@ theorem ValueDistribution.isBigO_proximity_logDeriv_of_isBigO_rpow {f : ℂ → 
 - ~~meromorphic order/congruence/arithmetic API for `logDeriv` (A)~~ ✅ done;
 - ~~`posLog_rpow`, `abs_log_eq_posLog_add_posLog_inv` (A)~~ ✅ done;
 - ~~derivative of the Cauchy integral in the pole variable (B1)~~ ✅ done (with B2–B3);
-- differentiated Poisson(–Schwarz) representation for ball-nonvanishing functions (B4);
-- `logDeriv` of `canonicalFactor` + bounds (B5);
+- ~~differentiated Poisson(–Schwarz) representation for ball-nonvanishing functions (B4)~~ ✅ done;
+- ~~`logDeriv` of `canonicalFactor` + bounds (B5)~~ ✅ done;
 - **differentiated Poisson–Jensen formula** (B6);
 - ~~uniform circle-average bound for `‖· − a‖^(−1/2)` (C2)~~ ✅ done;
 - ~~concavity estimate `circleAverage log⁺ u ≤ log⁺ (circleAverage u) + log 2` (C1)~~ ✅ done;
@@ -269,6 +269,17 @@ theorem re_circleAverage_herglotzRieszKernel_smul (hg : CircleIntegrable g 0 R) 
     (circleAverage (herglotzRieszKernel 0 w • g) 0 R).re
       = circleAverage ((Complex.re ∘ herglotzRieszKernel 0 w) • g) 0 R
 ```
+
+**✅ B4–B5 DONE (2026-07-07).** Implemented in `VD/LLD/PoissonSchwarzDeriv.lean` (~230 lines);
+compiles lint-clean. Deviations from the sketches below: B4 is named
+`MeromorphicOn.logDeriv_eq_circleAverage` (dot notation on the closed-ball meromorphy); its proof
+follows steps 1–4 exactly, with step 1's analyticity from the B2 corollary
+`analyticOnNhd_circleAverage_herglotzRieszKernel_smul` and step 3's constant obtained via
+`IsOpen.exists_is_const_of_deriv_eq_zero` applied to `h · exp (−G)`. The boundary special case is
+`circleAverage_smul_log_norm_sub_sphere`. B5's `Complex.logDeriv_canonicalFactor` carries the
+additional (necessary) hypothesis `R ≠ 0`; the norm bound
+`Complex.norm_logDeriv_canonicalFactor_le` needs no `w ≠ a` hypothesis — at `w = a` both sides
+degenerate gracefully (`0 ≤ …` by the junk-value conventions).
 
 ### B4. Differentiated Poisson representation for ball-nonvanishing functions
 
@@ -523,7 +534,7 @@ one local file per future Mathlib target:
 | 2 | `PosLog.lean` ✅ | `Analysis/SpecialFunctions/Log/PosLog.lean` (extend) | `posLog_rpow`, `abs_log_…` (done) | — |
 | 3 | `BorelGrowth.lean` ✅ | `MeasureTheory/Function/BorelGrowth.lean` | package D (T2, done) | — |
 | 4 | `CauchyIntegralDeriv.lean` ✅ | `MeasureTheory/Integral/CircleIntegral.lean` (extend) | B1–B3 (done) | — |
-| 5 | `PoissonSchwarzDeriv.lean` | `Analysis/Complex/Poisson.lean` (extend) | B4, B5 | 4, **Poisson–Jensen chain** |
+| 5 | `PoissonSchwarzDeriv.lean` ✅ | `Analysis/Complex/Poisson.lean` (extend) | B4, B5 (done) | 4, **Poisson–Jensen chain** |
 | 6 | `PoissonJensenDeriv.lean` | `Analysis/Complex/PoissonJensenDeriv.lean` | B6 | 1, 5 |
 | 7 | `CircleAverageEstimates.lean` ✅ | `MeasureTheory/Integral/CircleAverage.lean` (extend) + `PosLog…` | C1, C2 (done) | — |
 | 8 | `CountingEstimate.lean` ✅ | `…/ValueDistribution/LogCounting/Basic.lean` (extend) | C3 (done) | — |
