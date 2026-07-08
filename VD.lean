@@ -18,6 +18,5 @@ import VD.MathlibPending.CharacteristicMoebius
 import VD.MathlibPending.PoissonJensen
 import VD.MathlibPending.ProximityBounded
 import VD.MathlibPending.Scaling
-import VD.MathlibSubmitted.BlaschkeDecomp2
 import VD.MathlibSubmitted.LogCountingIsBigOLog
 import VD.MathlibSubmitted.Translation

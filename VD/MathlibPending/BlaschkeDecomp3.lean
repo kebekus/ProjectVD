@@ -5,7 +5,6 @@ Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Complex.CanonicalDecomposition
 import Mathlib.Analysis.Complex.JensenFormula
-import VD.MathlibSubmitted.BlaschkeDecomp2
 
 /-!
 # Additional Material on the Extended Canonical Decomposition
@@ -37,7 +36,7 @@ variable
 Companion lemma to `congr_codiscreteWitin_closedBall_prod_canonicalFactor_mul_prod_smul`: In the
 setting of the extended canonical decomposition, write the function `h` entirely in terms of `f`.
 -/
-lemma _root_.ECanonicalDecomp.eq_smul_meromorphicTrailingCoeffAt
+lemma Complex.ECanonicalDecomp.eq_smul_meromorphicTrailingCoeffAt
     {f h : ℂ → E} (D : ECanonicalDecomp f h R) (hw : w ∈ closedBall 0 R) (hR : 0 < R) :
     h w
       = ((∏ᶠ i, meromorphicTrailingCoeffAt (canonicalFactor R i) w ^ (divisor f (ball 0 R) i))
@@ -81,7 +80,7 @@ Companion lemma to `congr_codiscreteWitin_closedBall_prod_canonicalFactor_mul_pr
 setting of the extended canonical decomposition, write the function `h` entirely in terms of `f`,
 under the assumption that `f` has order zero.
 -/
-lemma _root_.ECanonicalDecomp.eq_smul_meromorphicTrailingCoeffAt_of_meromorphicOrderAt
+lemma Complex.ECanonicalDecomp.eq_smul_meromorphicTrailingCoeffAt_of_meromorphicOrderAt
     {f h : ℂ → E} (D : ECanonicalDecomp f h R) (h₁w : w ∈ closedBall 0 R)
     (h₂w : meromorphicOrderAt f w = 0) (hR : 0 < R) :
     h w = ((∏ᶠ i, (canonicalFactor R i w) ^ (divisor f (ball 0 R) i))
@@ -109,7 +108,7 @@ Companion lemma to `congr_codiscreteWitin_closedBall_prod_canonicalFactor_mul_pr
 setting of the extended canonical decomposition, write the function `log ‖h‖` entirely in terms of
 `f`, under the assumption that `f` has order zero.
 -/
-lemma _root_.ECanonicalDecomp.log_norm_eq
+lemma Complex.ECanonicalDecomp.log_norm_eq
     {f h : ℂ → E} (D : ECanonicalDecomp f h R) (h₁w : w ∈ closedBall 0 R)
     (h₂w : meromorphicOrderAt f w = 0)
     (hR : 0 < R) :
