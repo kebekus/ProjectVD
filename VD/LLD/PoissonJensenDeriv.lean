@@ -324,3 +324,46 @@ theorem MeromorphicOn.logDeriv_eqOn_codiscrete {f : ℂ → ℂ} {R : ℝ}
   simp only [Pi.add_apply]
   rw [hw₂', hw₃', hs₁, hs₂, key w hw]
   ring
+
+/-!
+## Sanity Check
+
+For `f = id` and `R = 1`, the right-hand side of the differentiated Poisson–Jensen formula
+evaluates, at every nonzero point `w` of the unit ball, to `logDeriv id w = w⁻¹`: the kernel
+term vanishes because `log ‖·‖ = 0` on the unit circle, the divisor of `id` is a single simple
+zero at the origin, and `logDeriv (canonicalFactor 1 0) w = -w⁻¹`.
+-/
+
+example {w : ℂ} (hw' : w ≠ 0) :
+    circleAverage (fun ζ ↦ (2 * ζ / (ζ - w) ^ 2) • (Real.log ‖(id : ℂ → ℂ) ζ‖ : ℂ)) 0 1
+      - ∑ᶠ a, (divisor (id : ℂ → ℂ) (ball 0 1) a) • logDeriv (canonicalFactor 1 a) w
+    = logDeriv id w := by
+  have hmero : MeromorphicOn (id : ℂ → ℂ) (ball 0 1) := fun x _ ↦ analyticAt_id.meromorphicAt
+  -- The kernel term vanishes on the unit circle
+  have h₁ : circleAverage (fun ζ ↦ (2 * ζ / (ζ - w) ^ 2) • (Real.log ‖(id : ℂ → ℂ) ζ‖ : ℂ)) 0 1
+      = 0 := by
+    apply circleAverage_const_on_circle
+    intro a ha
+    rw [abs_one, mem_sphere_zero_iff_norm] at ha
+    simp [ha]
+  -- The divisor of `id` on the unit ball is a single simple zero at the origin
+  have hd₀ : ∀ a : ℂ, a ≠ 0 → divisor (id : ℂ → ℂ) (ball 0 1) a = 0 := by
+    intro a ha
+    by_cases hab : a ∈ ball (0 : ℂ) 1
+    · rw [hmero.divisor_apply hab, analyticAt_id.meromorphicOrderAt_eq,
+        analyticAt_id.analyticOrderAt_eq_zero.2 ha]
+      rfl
+    · by_contra hne
+      exact hab ((divisor _ _).supportWithinDomain (mem_support.2 hne))
+  have hd₁ : divisor (id : ℂ → ℂ) (ball 0 1) 0 = 1 := by
+    rw [hmero.divisor_apply (by simp), meromorphicOrderAt_id]
+    rfl
+  -- The divisor sum reduces to the canonical factor at the origin
+  have h₂ : (∑ᶠ a, (divisor (id : ℂ → ℂ) (ball 0 1) a) • logDeriv (canonicalFactor 1 a) w)
+      = logDeriv (canonicalFactor 1 0) w := by
+    rw [finsum_eq_single _ 0 (fun a ha ↦ by rw [hd₀ a ha, zero_smul]), hd₁, one_smul]
+  -- The logarithmic derivative of the canonical factor at the origin (B5)
+  have h₃ : logDeriv (canonicalFactor 1 0) w = -w⁻¹ := by
+    rw [Complex.logDeriv_canonicalFactor one_ne_zero hw' (by simp)]
+    simp
+  rw [h₁, h₂, h₃, logDeriv_apply, deriv_id, id_eq, zero_sub, neg_neg, one_div]
