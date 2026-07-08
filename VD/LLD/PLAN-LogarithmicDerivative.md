@@ -131,9 +131,12 @@ theorem ValueDistribution.isBigO_proximity_logDeriv_of_isBigO_rpow {f : ℂ → 
 - ~~uniform circle-average bound for `‖· − a‖^(−1/2)` (C2)~~ ✅ done;
 - ~~concavity estimate `circleAverage log⁺ u ≤ log⁺ (circleAverage u) + log 2` (C1)~~ ✅ done;
 - ~~unintegrated counting function vs. `logCounting` (C3)~~ ✅ done;
-- the two-radius estimate T1 (C4);
+- ~~the two-radius estimate T1 (C4)~~ ✅ done;
 - ~~the Borel growth lemma T2 (D)~~ ✅ done;
-- final assembly T3 + corollaries (E).
+- ~~final assembly T3 + corollaries (E)~~ ✅ done.
+
+**All work packages are complete (2026-07-08); the Lemma on the Logarithmic Derivative is
+fully formalized.** Remaining: upstreaming (see §8) and the post-LLD items (§10).
 
 ---
 
@@ -439,6 +442,20 @@ the error terms `log R + log⁺ (R − ρ)⁻¹`.
 
 ### C4. The two-radius estimate (theorem T1)
 
+**✅ DONE (2026-07-08).** Implemented in `VD/LLD/LogDerivTwoRadius.lean` (~690 lines); compiles
+lint-clean. `ValueDistribution.exists_proximity_logDeriv_le` is stated exactly as T1. Deviations
+from the sketch below: steps 1–4 are packaged into one private lemma `proximity_logDeriv_le`
+producing `m(r) ≤ 2·log⁺(√K + n·(4 + (ρ−r)^(−1/2))) + 2 log 2` (the constant `4` is C2's explicit
+constant); steps 5 and 6 are separate private lemmas (`circleAverage_abs_log_norm_le`,
+`finsum_abs_divisor_le`), both bounding by `2·T(R) + c_f` with `c_f` the FMT constant. A private
+helper `circleAverage_mono_codiscreteWithin` compares circle averages of functions that satisfy
+`≤` only away from a discrete set (needed since B6 holds only codiscretely); further private
+helpers: `√`-subadditivity (binary and over `Finset.sum`, absent from Mathlib and worth
+upstreaming), `norm_circleAverage_le`, and `posLog_le_abs` (duplicated from C1's private part).
+The final constant is `c := 5 + 22·log 2 + 3·log⁺ c_f`. The degenerate case uses
+`exists_meromorphicOrderAt_eq_top_iff_eventually_zero` from `VD/MathlibPending/`, so the T1 file
+currently depends on the CharacteristicMoebius pending chain in addition to files 1, 6, 7, 8.
+
 Fix `1 ≤ r < R`, set `ρ := (r + R)/2`, `n := ∑ᶠ |divisor f (ball 0 ρ)|`,
 `K := (2ρ/(ρ−r)²) · circleAverage |log ‖f ·‖| 0 ρ`. Chain of estimates, each a
 lemma-sized step:
@@ -509,6 +526,17 @@ Estimated size: 250–350 lines. Difficulty: medium; zero dependencies on A–C.
 
 ## 7. Work package E — assembly (T3) and corollaries
 
+**✅ DONE (2026-07-08).** Implemented in `VD/LLD/LogDerivLemma.lean` (~240 lines); compiles
+lint-clean. `ValueDistribution.isBigO_proximity_logDeriv` (T3) and
+`ValueDistribution.isBigO_proximity_logDeriv_of_isBigO_rpow` (finite-order corollary, via
+`R := 2r`, no Borel lemma) are stated exactly as planned; the sanity check for `f = Complex.exp`
+is included as an `example` (`Complex.logDeriv_exp` already exists in Mathlib). Deviations from
+the sketch below: `S := fun r ↦ max 1 (characteristic f ⊤ r)` (arguments swapped, matching
+`posLog_eq_log_max_one`); constants are absorbed using `1 ≤ log r` for `r ≥ e`, giving the
+explicit big-O constants `c·(3 + 2 log 2)` (T3) and `c·(log⁺ C + ρ⁺ log 2 + log 2 + 2 + ρ⁺)`
+(corollary, `ρ⁺ := max ρ 0`); the convenience unfolding with explicit exceptional sets was not
+added — `volume.cofinite ⊓ atTop` membership is already idiomatic.
+
 With `S := fun r ↦ max (characteristic f ⊤ r) 1` (monotone on `Ici 1` by
 `characteristic_monotoneOn`, `≥ 1`), apply T1 with `R := r + (S r)⁻¹`:
 
@@ -549,8 +577,8 @@ one local file per future Mathlib target:
 | 6 | `PoissonJensenDeriv.lean` ✅ | `Analysis/Complex/PoissonJensenDeriv.lean` | B6 (done) | 1, 5 |
 | 7 | `CircleAverageEstimates.lean` ✅ | `MeasureTheory/Integral/CircleAverage.lean` (extend) + `PosLog…` | C1, C2 (done) | — |
 | 8 | `CountingEstimate.lean` ✅ | `…/ValueDistribution/LogCounting/Basic.lean` (extend) | C3 (done) | — |
-| 9 | `LogDerivTwoRadius.lean` | `…/ValueDistribution/LogDerivLemma.lean` (part 1) | C4 (T1) | 1, 6, 7, 8 |
-| 10 | `LogDerivLemma.lean` | `…/ValueDistribution/LogDerivLemma.lean` (part 2) | E (T3 + corollaries) | 3, 9 |
+| 9 | `LogDerivTwoRadius.lean` ✅ | `…/ValueDistribution/LogDerivLemma.lean` (part 1) | C4 (T1, done) | 1, 6, 7, 8 |
+| 10 | `LogDerivLemma.lean` ✅ | `…/ValueDistribution/LogDerivLemma.lean` (part 2) | E (T3 + corollaries, done) | 3, 9 |
 
 - Items 1–4, 7, 8 are **fully parallel** and independently PR-able today.
 - The **critical path** is the pending Poisson–Jensen upstream chain

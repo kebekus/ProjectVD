@@ -38,7 +38,7 @@ the Lemma on the Logarithmic Derivative.
 
 open Complex Filter MeasureTheory Metric Real Set
 
-/-!
+/-!(
 ## C1: Jensen's Inequality for Circle Averages of `log⁺`
 -/
 

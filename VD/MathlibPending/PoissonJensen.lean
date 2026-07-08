@@ -5,7 +5,7 @@ Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Complex.CanonicalDecomposition
 import Mathlib.Analysis.Complex.JensenFormula
-import VD.MathlibPending.BlaschkeDecomp3
+import VD.MathlibSubmitted.BlaschkeDecomp3
 import VD.MathlibSubmitted.Translation
 
 /-!
