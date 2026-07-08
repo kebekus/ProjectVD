@@ -21,4 +21,3 @@ import VD.MathlibPending.Scaling
 import VD.MathlibSubmitted.BlaschkeDecomp2
 import VD.MathlibSubmitted.LogCountingIsBigOLog
 import VD.MathlibSubmitted.Translation
-import VD.MathlibSubmitted.meromorphicAt_topology
