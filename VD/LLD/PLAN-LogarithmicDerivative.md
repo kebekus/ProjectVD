@@ -127,7 +127,7 @@ theorem ValueDistribution.isBigO_proximity_logDeriv_of_isBigO_rpow {f : ℂ → 
 - ~~derivative of the Cauchy integral in the pole variable (B1)~~ ✅ done (with B2–B3);
 - ~~differentiated Poisson(–Schwarz) representation for ball-nonvanishing functions (B4)~~ ✅ done;
 - ~~`logDeriv` of `canonicalFactor` + bounds (B5)~~ ✅ done;
-- **differentiated Poisson–Jensen formula** (B6);
+- ~~differentiated Poisson–Jensen formula (B6)~~ ✅ done;
 - ~~uniform circle-average bound for `‖· − a‖^(−1/2)` (C2)~~ ✅ done;
 - ~~concavity estimate `circleAverage log⁺ u ≤ log⁺ (circleAverage u) + log 2` (C1)~~ ✅ done;
 - ~~unintegrated counting function vs. `logCounting` (C3)~~ ✅ done;
@@ -329,6 +329,17 @@ theorem Complex.norm_logDeriv_canonicalFactor_le … :
 ```
 
 ### B6. Assembly of the differentiated Poisson–Jensen formula
+
+**✅ DONE (2026-07-08).** Implemented in `VD/LLD/PoissonJensenDeriv.lean` (~330 lines); compiles
+lint-clean. Deviations from the sketch below: the statement writes the integrand with an explicit
+complex cast, `(2 * ζ / (ζ - w) ^ 2) • (Real.log ‖f ζ‖ : ℂ)`, matching B4; no positivity
+hypothesis on `R` (for `R ≤ 0` the ball is empty and the statement is vacuous). The proof follows
+steps 1–3 exactly, with the package-A lemma `logDeriv_finprod_zpow_eventuallyEq` expanding both
+finprods; order-≠-⊤ bookkeeping for the product factors runs through `meromorphicOrderAt_prod`,
+`meromorphicOrderAt_zpow` and `WithTop.sum_ne_top/mul_ne_top`. Private helpers: continuity and
+integrability of the derived kernel `2ζ/(ζ−w)²` on the sphere, `meromorphicOrderAt (· - v) ≠ ⊤`,
+and `logDeriv (· - v) w = (w - v)⁻¹`. The sphere-divisor cancellation works as predicted via
+`circleAverage_smul_log_norm_sub_sphere`.
 
 Mirror the proof of `poissonJensen₀` in `VD/MathlibPending/PoissonJensen.lean`:
 
@@ -535,7 +546,7 @@ one local file per future Mathlib target:
 | 3 | `BorelGrowth.lean` ✅ | `MeasureTheory/Function/BorelGrowth.lean` | package D (T2, done) | — |
 | 4 | `CauchyIntegralDeriv.lean` ✅ | `MeasureTheory/Integral/CircleIntegral.lean` (extend) | B1–B3 (done) | — |
 | 5 | `PoissonSchwarzDeriv.lean` ✅ | `Analysis/Complex/Poisson.lean` (extend) | B4, B5 (done) | 4, **Poisson–Jensen chain** |
-| 6 | `PoissonJensenDeriv.lean` | `Analysis/Complex/PoissonJensenDeriv.lean` | B6 | 1, 5 |
+| 6 | `PoissonJensenDeriv.lean` ✅ | `Analysis/Complex/PoissonJensenDeriv.lean` | B6 (done) | 1, 5 |
 | 7 | `CircleAverageEstimates.lean` ✅ | `MeasureTheory/Integral/CircleAverage.lean` (extend) + `PosLog…` | C1, C2 (done) | — |
 | 8 | `CountingEstimate.lean` ✅ | `…/ValueDistribution/LogCounting/Basic.lean` (extend) | C3 (done) | — |
 | 9 | `LogDerivTwoRadius.lean` | `…/ValueDistribution/LogDerivLemma.lean` (part 1) | C4 (T1) | 1, 6, 7, 8 |
