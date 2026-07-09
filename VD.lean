@@ -1,4 +1,3 @@
-import VD.LLD.BorelGrowth
 import VD.LLD.CauchyIntegralDeriv
 import VD.LLD.CircleAverageEstimates
 import VD.LLD.CountingEstimate
@@ -18,5 +17,6 @@ import VD.MathlibPending.PoissonJensen
 import VD.MathlibPending.ProximityBounded
 import VD.MathlibPending.Scaling
 import VD.MathlibSubmitted.BlaschkeDecomp3
+import VD.MathlibSubmitted.BorelGrowth
 import VD.MathlibSubmitted.LogCountingIsBigOLog
 import VD.MathlibSubmitted.Translation

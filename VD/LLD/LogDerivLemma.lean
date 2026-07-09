@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
-import VD.LLD.BorelGrowth
+import VD.MathlibSubmitted.BorelGrowth
 import VD.LLD.LogDerivTwoRadius
 
 /-!

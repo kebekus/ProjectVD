@@ -1,61 +1,71 @@
 /-
 Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Stefan Kebekus
+Authors: Stefan Kebekus using Claude Code
 -/
 import Mathlib.Analysis.SpecificLimits.Basic
 import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
 
 /-!
-# The Borel Growth Lemma — LLD work package D (theorem T2)
-
-See `VD/LLD/PLAN-LogarithmicDerivative.md`, §6.
+# The Borel Growth Lemma
 
 Mathlib target: new file, suggested `Mathlib/MeasureTheory/Function/BorelGrowth.lean`
-(maintainers may prefer another home). Pure real analysis / measure theory.
-Dependencies: none (fully parallel to all other packages, independently PR-able).
 
-This file proves **Borel's growth lemma**: if `S : ℝ → ℝ` is monotone on `Set.Ici a` and
+This file proves Émile Borel's **Growth Lemma**: if `S : ℝ → ℝ` is monotone on `Set.Ici a` and
 satisfies `1 ≤ S` there, then
 
-`∀ᶠ r in volume.cofinite ⊓ atTop, S (r + (S r)⁻¹) ≤ 2 * S r`,
+`∀ᶠ r in volume.cofinite ⊓ atTop, S (r + (S r)⁻¹) ≤ 2 * S r`.
 
-that is, `S (r + (S r)⁻¹) ≤ 2 * S r` holds for all sufficiently large `r` outside an exceptional
-set of finite Lebesgue measure. In Nevanlinna theory, this is the standard device for eliminating
-the auxiliary second radius from the two-radius estimate of the Lemma on the Logarithmic
-Derivative; see Lemma 2.4 in [Hayman, *Meromorphic functions*][MR164038].
+In other words: The inequality `S (r + (S r)⁻¹) ≤ 2 * S r` holds for all sufficiently large `r`
+outside an exceptional set `E` of finite Lebesgue measure. In Value Distribution Theory, this
+statement is central to the proof of the "Lemma on the Logarithmic Derivatives".
 
-The proof here is neither the classical greedy recursion nor the Vitali covering argument:
-slice the exceptional set `E` into the dyadic pieces `Eₙ = {r ∈ E | 2 ^ n * S a ≤ S r <
-2 ^ (n + 1) * S a}`. If `x ≤ y` both lie in `Eₙ`, then `S (x + (S x)⁻¹) > 2 * S x ≥
-2 ^ (n + 1) * S a > S y`, so monotonicity forces `y - x < (S x)⁻¹ ≤ 2⁻ⁿ`. Each slice has
-diameter at most `2⁻ⁿ`, so `volume E ≤ ∑ 2⁻ⁿ = 2 < ∞`. No measurability, covering lemma, or
-recursion is needed.
+The proof here is simpler than the argument typically found in textbooks and does not make any
+regularity assumption on `S`. It slices the exceptional set `E` into the dyadic pieces
+
+`Eₙ = {r ∈ E | 2 ^ n * S a ≤ S r < 2 ^ (n + 1) * S a}`.
+
+If `x ≤ y` both lie in `Eₙ`, then there are inequalities
+
+`S (x + (S x)⁻¹) > 2 * S x ≥ 2 ^ (n + 1) * S a > S y`.
+
+Monotonicity will then force `y - x < (S x)⁻¹ ≤ 2⁻ⁿ`.  As a consequence, each slice has diameter at
+most `2⁻ⁿ`, so that `volume E` is bounded by `∑ 2⁻ⁿ = 2 < ∞`.
+
+## References
+
+
+
+In Nevanlinna theory, this is the standard device for eliminating the auxiliary second radius from
+the two-radius estimate of the Lemma on the Logarithmic Derivative; see Lemma 2.4 in [Hayman,
+*Meromorphic functions*][MR164038].
+
 -/
 
 open Filter MeasureTheory Set
 
-/-- **Borel's growth lemma**: if `S` is monotone on `Set.Ici a` and satisfies `1 ≤ S` there,
-then `S (r + (S r)⁻¹) ≤ 2 * S r` for all sufficiently large `r` outside a set of finite
-Lebesgue measure. -/
+/--
+**Borel's Growth Lemma**: if `S : ℝ → ℝ` is monotone on `Set.Ici a` and satisfies `1 ≤ S` there,
+then the inequality `S (r + (S r)⁻¹) ≤ 2 * S r` hold for all sufficiently large `r` outside a set of
+finite Lebesgue measure.
+-/
 theorem MonotoneOn.eventually_le_two_mul {S : ℝ → ℝ} {a : ℝ}
     (h₁ : MonotoneOn S (Set.Ici a)) (h₂ : ∀ r ∈ Set.Ici a, 1 ≤ S r) :
     ∀ᶠ r in volume.cofinite ⊓ atTop, S (r + (S r)⁻¹) ≤ 2 * S r := by
   classical
   -- The exceptional set `E` and its dyadic slices `En n`
-  set E : Set ℝ := {r | a ≤ r ∧ 2 * S r < S (r + (S r)⁻¹)} with hE_def
-  set En : ℕ → Set ℝ := fun n ↦ {r ∈ E | 2 ^ n * S a ≤ S r ∧ S r < 2 ^ (n + 1) * S a}
+  set E := {r | a ≤ r ∧ 2 * S r < S (r + (S r)⁻¹)} with hE_def
+  set En := fun n ↦ {r ∈ E | 2 ^ n * S a ≤ S r ∧ S r < 2 ^ (n + 1) * S a}
     with hEn_def
-  have hSa : (0 : ℝ) < S a := zero_lt_one.trans_le (h₂ a self_mem_Ici)
-  have hS_pos : ∀ r ∈ Ici a, (0 : ℝ) < S r := fun r hr ↦ zero_lt_one.trans_le (h₂ r hr)
+  have hSa : 0 < S a := zero_lt_one.trans_le (h₂ a self_mem_Ici)
+  have hS_pos : ∀ r ∈ Ici a, 0 < S r := fun r hr ↦ zero_lt_one.trans_le (h₂ r hr)
   -- The slices cover `E`
   have hcov : E ⊆ ⋃ n, En n := by
     intro r hr
     have h₃ : S a ≤ S r := h₁ self_mem_Ici hr.1 hr.1
     have h₄ : ∃ n : ℕ, S r < 2 ^ (n + 1) * S a := by
       obtain ⟨n, hn⟩ := pow_unbounded_of_one_lt (S r / S a) one_lt_two
-      have h₅ : S r < 2 ^ n * S a := (div_lt_iff₀ hSa).1 hn
-      exact ⟨n, h₅.trans_le
+      exact ⟨n, ((div_lt_iff₀ hSa).1 hn).trans_le
         (mul_le_mul_of_nonneg_right (pow_le_pow_right₀ one_le_two n.le_succ) hSa.le)⟩
     refine mem_iUnion.2 ⟨Nat.find h₄, hr, ?_, Nat.find_spec h₄⟩
     rcases Nat.eq_zero_or_pos (Nat.find h₄) with h₅ | h₅
@@ -64,7 +74,7 @@ theorem MonotoneOn.eventually_le_two_mul {S : ℝ → ℝ} {a : ℝ}
       rw [show Nat.find h₄ - 1 + 1 = Nat.find h₄ by omega] at h₆
       exact not_lt.1 h₆
   -- Two points of a slice are at distance at most `(2 ^ n)⁻¹`
-  have hkey : ∀ n : ℕ, ∀ x ∈ En n, ∀ y ∈ En n, x ≤ y → y - x ≤ ((2 : ℝ) ^ n)⁻¹ := by
+  have hkey : ∀ n, ∀ x ∈ En n, ∀ y ∈ En n, x ≤ y → y - x ≤ (2 ^ n)⁻¹ := by
     intro n x hx y hy hxy
     obtain ⟨⟨h₁x, h₂x⟩, h₃x, -⟩ := hx
     obtain ⟨⟨h₁y, -⟩, -, h₄y⟩ := hy
@@ -78,9 +88,8 @@ theorem MonotoneOn.eventually_le_two_mul {S : ℝ → ℝ} {a : ℝ}
       linarith
     -- …and `(S x)⁻¹` is at most `(2 ^ n)⁻¹`
     have h₇ : (S x)⁻¹ ≤ ((2 : ℝ) ^ n)⁻¹ := by
-      have h₈ : (2 : ℝ) ^ n ≤ S x :=
-        le_trans (le_mul_of_one_le_right (by positivity) (h₂ a self_mem_Ici)) h₃x
       gcongr
+      exact le_trans (le_mul_of_one_le_right (by positivity) (h₂ a self_mem_Ici)) h₃x
     linarith
   -- Hence each slice has diameter at most `(2 ^ n)⁻¹`…
   have hdiam : ∀ n : ℕ, Metric.ediam (En n) ≤ ENNReal.ofReal ((2 ^ n)⁻¹) := by
@@ -95,9 +104,9 @@ theorem MonotoneOn.eventually_le_two_mul {S : ℝ → ℝ} {a : ℝ}
       exact hkey n y hy x hx h
   -- …and `E` has finite volume
   have hvol : volume E < ⊤ := by
-    have hsum : Summable fun n : ℕ ↦ ((2 : ℝ) ^ n)⁻¹ := by
+    have hsum : Summable fun n ↦ ((2 : ℝ) ^ n)⁻¹ := by
       simpa only [inv_pow] using
-        summable_geometric_of_lt_one (r := (2 : ℝ)⁻¹) (by norm_num) (by norm_num)
+        summable_geometric_of_lt_one (r := 2⁻¹) (by norm_num) (by norm_num)
     have h₃ : ∑' n : ℕ, ENNReal.ofReal (((2 : ℝ) ^ n)⁻¹) = ENNReal.ofReal 2 := by
       rw [← ENNReal.ofReal_tsum_of_nonneg (f := fun n ↦ ((2 : ℝ) ^ n)⁻¹)
         (fun n ↦ by positivity) hsum]
