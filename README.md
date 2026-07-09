@@ -3,38 +3,38 @@
 ### Formalizing Value Distribution Theory
 
 This project aims to formalize [value distribution
-theory](https://en.wikipedia.org/wiki/Value_distribution_theory_of_holomorphic_functions)
-for meromorphic functions in the complex plane, roughly following Serge Lang's
-[Introduction to Complex Hyperbolic
-Spaces](https://link.springer.com/book/10.1007/978-1-4757-1945-1). The project
-uses the [Lean](https://lean-lang.org/) theorem prover and builds on
-[mathlib](https://leanprover-community.github.io/), the Lean mathematical
-library.
+theory](https://en.wikipedia.org/wiki/Value_distribution_theory_of_holomorphic_functions) for
+meromorphic functions in the complex plane, roughly following Serge Lang's [Introduction to Complex
+Hyperbolic Spaces](https://link.springer.com/book/10.1007/978-1-4757-1945-1). The project uses the
+[Lean](https://lean-lang.org/) theorem prover and builds on
+[mathlib](https://leanprover-community.github.io/), the Lean mathematical library.
 
 ### Help Wanted
 
-Please be in touch if you would like to join
-the fun!
+Please be in touch if you would like to join the fun!
 
 ## Current State and Future Plans
 
 ### Milestones reached
 
 - Formalized Nevanlinna's [First Main
-  Theorem](https://en.wikipedia.org/wiki/Nevanlinna_theory#First_fundamental_theorem).
-- Merged the formalization of first main theorem into Lean's mathlib.
+  Theorem](https://en.wikipedia.org/wiki/Nevanlinna_theory#First_fundamental_theorem) and merged
+  code into Mathlib
+- Formalized the Lemma on Logarithmic Derivatives
+- First Main Theorem as a statement about invariance under Möbius transformations
+- Characterization of rational functions in terms of their characteristic
+- Merged the formalization of first main theorem into Lean's mathlib
 
-### Next Milestones 
+### Next Milestones
 
-- Rationality criteria, transcendence criteria
-- The Theorem on Logarithmic Differentials
+- Transcendence criteria
 - The [Second Main
   Theorem](https://en.wikipedia.org/wiki/Nevanlinna_theory#Second_fundamental_theorem)
-- Merge formalizations into mathlib
 - Establish some of the more immediate applications
+- Merge formalizations into mathlib
 
-These plans might change, depending on feedback from the community and specific
-interests of project participants.
+These plans might change, depending on feedback from the community and specific interests of project
+participants.
 
 ## Material Covered
 
@@ -54,6 +54,7 @@ The following concepts have been formalized so far.
     - Behavior of pole/zero orders under standard operations
     - Zero/pole divisors attached to meromorphic functions and associated API
     - Extraction of zeros and poles
+    - Canonical decomposition and variants
 - Integrals and integrability of special functions
     - Interval integrals and integrability of the logarithm and its combinations
       with trigonometric functions; circle integrability of log ‖z-a‖
@@ -64,6 +65,10 @@ The following concepts have been formalized so far.
     - Logarithmic counting functions of divisors
     - Nevanlinna heights of entire meromorphic functions
     - Proximity functions for entire meromorphic functions
-- [Jensen's formula](https://en.wikipedia.org/wiki/Jensen%27s_formula)
+- [Jensen's formula](https://en.wikipedia.org/wiki/Jensen%27s_formula), generalized Poisson-Jensen
+  formula
 - Nevanlinna's [First Main
   Theorem](https://en.wikipedia.org/wiki/Nevanlinna_theory#First_fundamental_theorem)
+- Lemma on Logarithmic Derivatives
+- Characterization of constant in terms of their characteristic ("Quantitative Liouville Theorem").
+- Characterization of rational functions in terms of their characteristic.
