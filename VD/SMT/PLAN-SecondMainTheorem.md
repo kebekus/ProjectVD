@@ -217,7 +217,7 @@ exponential, with defects `δ(0) = δ(∞) = 1` summing exactly to `2`.
 
 ---
 
-## 3. Work package A — truncated divisors and truncated counting
+## 3. Work package A — truncated divisors and truncated counting ✅ **DONE**
 
 *New: ~40 lines extending `Mathlib/Topology/LocallyFinsupp.lean` + new file
 `Mathlib/Analysis/Complex/ValueDistribution/LogCounting/Truncated.lean`
@@ -285,7 +285,7 @@ Estimated size: ~280 lines. Difficulty: low.
 
 ---
 
-## 4. Work package B — the divisor of the derivative
+## 4. Work package B — the divisor of the derivative ✅ **DONE**
 
 *New file, eventually `Mathlib/Analysis/Meromorphic/DivisorDeriv.lean`
 (locally: `VD/SMT/DivisorDeriv.lean`). Depends on A. This is the material explicitly
@@ -369,13 +369,16 @@ Difficulty: medium.
 
 ---
 
-## 5. Work package C — the separation lemma
+## 5. Work package C — the separation lemma ✅ **DONE**
 
 *Pure elementary analysis, no meromorphy. Locally `VD/SMT/SeparationLemma.lean`; Mathlib
 target: extend `Mathlib/Analysis/SpecialFunctions/Log/PosLog.lean` (fallback: fold into
 the SMT file, see §12). Independent of everything else. Stated over a general
-`NontriviallyNormedField` — the proof only uses the triangle inequality and
-multiplicativity of the norm.*
+`NormedField` (weaker than the planned `NontriviallyNormedField` — the proof only uses
+the triangle inequality and multiplicativity of the norm), in `namespace Real` following
+the precedent of `posLog_norm_sum_le`. Implemented with one public helper,
+`Real.sum_posLog_norm_inv_sub_le` (the "far from all targets" bound), reused for both
+case (i) and the tail estimate of case (ii).*
 
 ```lean
 /-- **Separation lemma**: for a finite set `s` of points, closeness to one point of `s`,

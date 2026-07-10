@@ -52,17 +52,16 @@ logarithmic counting function of `D` at radius `r`. -/
 theorem sum_toClosedBall_le_logCounting {D : Function.locallyFinsupp ℂ ℤ} {ρ r : ℝ}
     (hD : 0 ≤ D) (hρ : 1 ≤ ρ) (hρr : ρ < r) :
     (∑ᶠ z, (D.toClosedBall ρ z : ℝ)) * Real.log (r / ρ) ≤ D.logCounting r := by
-  have hρ₀ : (0 : ℝ) < ρ := by linarith
   have hr₀ : (0 : ℝ) < r := by linarith
-  have habsρ : |ρ| = ρ := abs_of_pos hρ₀
+  have habsρ : |ρ| = ρ := abs_of_pos (by linarith)
   have habsr : |r| = r := abs_of_pos hr₀
-  have hD' : ∀ z, 0 ≤ D z := fun z ↦ by simpa using (le_def.1 hD) z
+  have hD' : ∀ z, 0 ≤ D z := (by simpa using (le_def.1 hD) ·)
   -- Evaluation of `toClosedBall` outside the ball
-  have hout : ∀ (s : ℝ) (z : ℂ), z ∉ closedBall (0 : ℂ) |s| → D.toClosedBall s z = 0 := by
+  have hout : ∀ s z, z ∉ closedBall 0 |s| → D.toClosedBall s z = 0 := by
     intro s z hz
     simp [toClosedBall, restrictMonoidHom_apply, hz]
   -- `toClosedBall` inherits nonnegativity
-  have hpos : ∀ (s : ℝ) (z : ℂ), 0 ≤ D.toClosedBall s z := by
+  have hpos : ∀ s z, 0 ≤ D.toClosedBall s z := by
     intro s z
     by_cases hz : z ∈ closedBall (0 : ℂ) |s|
     · rw [toClosedBall_eval_within _ hz]
