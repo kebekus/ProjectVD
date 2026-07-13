@@ -3,7 +3,6 @@ import VD.LLD.CircleAverageEstimates
 import VD.LLD.CountingEstimate
 import VD.LLD.LogDerivLemma
 import VD.LLD.LogDerivTwoRadius
-import VD.LLD.MeromorphicLogDeriv
 import VD.LLD.PoissonJensenDeriv
 import VD.LLD.PoissonSchwarzDeriv
 import VD.LLD.PosLog
@@ -19,6 +18,7 @@ import VD.MathlibPending.Scaling
 import VD.MathlibSubmitted.BlaschkeDecomp3
 import VD.MathlibSubmitted.BorelGrowth
 import VD.MathlibSubmitted.LogCountingIsBigOLog
+import VD.MathlibSubmitted.MeromorphicLogDeriv
 import VD.MathlibSubmitted.Translation
 import VD.SMT.Deficiency
 import VD.SMT.DivisorDeriv

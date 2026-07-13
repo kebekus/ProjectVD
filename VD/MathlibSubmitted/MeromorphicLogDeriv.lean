@@ -53,7 +53,7 @@ variable
 -/
 
 /-- If `f` is meromorphic at a point, then so is its logarithmic derivative. -/
-protected theorem MeromorphicAt.logDeriv [CompleteSpace 𝕜'] (hf : MeromorphicAt f x) :
+@[fun_prop] theorem MeromorphicAt.logDeriv [CompleteSpace 𝕜'] (hf : MeromorphicAt f x) :
     MeromorphicAt (logDeriv f) x :=
   hf.deriv.div hf
 
@@ -68,8 +68,10 @@ section order
 
 variable [CompleteSpace 𝕜] {f : 𝕜 → 𝕜}
 
-/-- At zeros and poles of a meromorphic function `f`, the logarithmic derivative has a simple
-pole: its meromorphic order equals `-1`. -/
+/--
+At zeros and poles of a meromorphic function `f`, the logarithmic derivative has a simple pole: its
+meromorphic order equals `-1`.
+-/
 theorem meromorphicOrderAt_logDeriv_eq_neg_one [CharZero 𝕜] (hf : MeromorphicAt f x)
     (h₁ : meromorphicOrderAt f x ≠ 0) (h₂ : meromorphicOrderAt f x ≠ ⊤) :
     meromorphicOrderAt (logDeriv f) x = -1 := by
@@ -78,14 +80,15 @@ theorem meromorphicOrderAt_logDeriv_eq_neg_one [CharZero 𝕜] (hf : Meromorphic
   have h₃ : n ≠ 0 := by
     rintro rfl
     exact h₁ (by exact_mod_cast hn)
-  rw [show logDeriv f = deriv f / f from rfl, meromorphicOrderAt_div hf.deriv hf,
+  rw [logDeriv, meromorphicOrderAt_div hf.deriv hf,
     meromorphicOrderAt_deriv_eq_sub_one (Int.cast_ne_zero.mpr h₃) hn, hn]
   norm_cast
-  rw [show n - 1 - n = -1 by ring]
-  rfl
+  simp
 
-/-- At points where a meromorphic function has order zero, the meromorphic order of the
-logarithmic derivative is nonnegative. -/
+/--
+At points where a meromorphic function has order zero, the meromorphic order of the logarithmic
+derivative is nonnegative.
+-/
 theorem meromorphicOrderAt_logDeriv_nonneg (hf : MeromorphicAt f x)
     (h : meromorphicOrderAt f x = 0) :
     0 ≤ meromorphicOrderAt (logDeriv f) x := by
@@ -105,22 +108,23 @@ end order
 /-!
 ## Congruence
 
-On an open set `U`, the logarithmic derivative only depends on the equivalence class of the
-function with respect to equality away from codiscrete subsets of `U`. Note that this statement
-is pure calculus and requires no meromorphy assumption.
+On an open set `U`, the logarithmic derivative only depends on the equivalence class of the function
+with respect to equality away from codiscrete subsets of `U`. Note that this statement is pure
+calculus and requires no meromorphy assumption.
 -/
 
-/-- If two functions agree on a codiscrete subset of an open set `U`, then so do their
-logarithmic derivatives. -/
+/--
+If two functions agree on a codiscrete subset of an open set `U`, then so do their logarithmic
+derivatives.
+-/
 theorem logDeriv_congr_codiscreteWithin (hU : IsOpen U) (h : f =ᶠ[codiscreteWithin U] g) :
     logDeriv f =ᶠ[codiscreteWithin U] logDeriv g := by
-  have h' : ∀ y ∈ U, {z | f z = g z} ∪ Uᶜ ∈ 𝓝[≠] y :=
-    mem_codiscreteWithin_iff_forall_mem_nhdsNE.1 h
   filter_upwards [h, self_mem_codiscreteWithin U] with y h₁y h₂y
   have h₃y : f =ᶠ[𝓝 y] g := by
     have h₄ : {z | f z = g z} ∪ Uᶜ ∈ 𝓝 y := by
       rw [← nhdsNE_sup_pure y, mem_sup]
-      exact ⟨h' y h₂y, mem_pure.2 (mem_union_left _ h₁y)⟩
+      exact ⟨mem_codiscreteWithin_iff_forall_mem_nhdsNE.1 h y h₂y,
+        mem_pure.2 (mem_union_left _ h₁y)⟩
     filter_upwards [h₄, hU.mem_nhds h₂y] with z h₁z h₂z
     rcases h₁z with h₁z | h₁z
     · exact h₁z
@@ -136,22 +140,25 @@ away from a codiscrete set, turning the pointwise arithmetic into arithmetic of 
 equivalence classes.
 -/
 
-/-- A function meromorphic on `U`, with meromorphic order nowhere `⊤`, is nonvanishing away from
-a codiscrete subset of `U`. -/
+/--
+A function meromorphic on `U`, with meromorphic order nowhere `⊤`, is nonvanishing away from a
+codiscrete subset of `U`.
+-/
 theorem MeromorphicOn.ne_zero_mem_codiscreteWithin {E : Type*} [NormedAddCommGroup E]
     [NormedSpace 𝕜 E] {f : 𝕜 → E} (hf : MeromorphicOn f U)
     (h'f : ∀ x ∈ U, meromorphicOrderAt f x ≠ ⊤) :
     {x | f x ≠ 0} ∈ codiscreteWithin U := by
-  rw [mem_codiscreteWithin]
+  simp_rw [mem_codiscreteWithin, disjoint_principal_right]
   intro x hx
-  rw [disjoint_principal_right]
   filter_upwards [(meromorphicOrderAt_ne_top_iff_eventually_ne_zero (hf x hx)).1 (h'f x hx)]
     with y hy
   simp [hy]
 
-/-- The logarithmic derivative converts products into sums: away from a codiscrete subset of `U`,
-the logarithmic derivative of a product of two meromorphic functions is the sum of the
-logarithmic derivatives. -/
+/--
+The logarithmic derivative converts products into sums: away from a codiscrete subset of `U`, the
+logarithmic derivative of a product of two meromorphic functions is the sum of the logarithmic
+derivatives.
+-/
 theorem MeromorphicOn.logDeriv_mul_eventuallyEq (hf : MeromorphicOn f U) (hg : MeromorphicOn g U)
     (h'f : ∀ x ∈ U, meromorphicOrderAt f x ≠ ⊤) (h'g : ∀ x ∈ U, meromorphicOrderAt g x ≠ ⊤) :
     logDeriv (f * g) =ᶠ[codiscreteWithin U] logDeriv f + logDeriv g := by
@@ -161,18 +168,22 @@ theorem MeromorphicOn.logDeriv_mul_eventuallyEq (hf : MeromorphicOn f U) (hg : M
   rw [Pi.add_apply, Pi.mul_def]
   exact logDeriv_mul y h₃y h₄y h₁y.differentiableAt h₂y.differentiableAt
 
-/-- The logarithmic derivative converts products into sums: away from a codiscrete subset of `ℂ`,
-the logarithmic derivative of a product of two meromorphic functions is the sum of the
-logarithmic derivatives. -/
+/--
+The logarithmic derivative converts products into sums: away from a codiscrete subset of `ℂ`, the
+logarithmic derivative of a product of two meromorphic functions is the sum of the logarithmic
+derivatives.
+-/
 theorem Meromorphic.logDeriv_mul_eventuallyEq (hf : Meromorphic f) (hg : Meromorphic g)
     (h'f : ∀ x, meromorphicOrderAt f x ≠ ⊤) (h'g : ∀ x, meromorphicOrderAt g x ≠ ⊤) :
     logDeriv (f * g) =ᶠ[codiscrete 𝕜] logDeriv f + logDeriv g :=
   (meromorphicOn_univ.2 hf).logDeriv_mul_eventuallyEq (meromorphicOn_univ.2 hg)
     (fun x _ ↦ h'f x) (fun x _ ↦ h'g x)
 
-/-- The logarithmic derivative converts products into sums: away from a codiscrete subset of `U`,
-the logarithmic derivative of a finite product of meromorphic functions is the sum of the
-logarithmic derivatives. -/
+/--
+The logarithmic derivative converts products into sums: away from a codiscrete subset of `U`, the
+logarithmic derivative of a finite product of meromorphic functions is the sum of the logarithmic
+derivatives.
+-/
 theorem logDeriv_prod_eventuallyEq {ι : Type*} {s : Finset ι} {F : ι → 𝕜 → 𝕜'}
     (h : ∀ i ∈ s, MeromorphicOn (F i) U)
     (h' : ∀ i ∈ s, ∀ x ∈ U, meromorphicOrderAt (F i) x ≠ ⊤) :
@@ -186,9 +197,11 @@ theorem logDeriv_prod_eventuallyEq {ι : Type*} {s : Finset ι} {F : ι → 𝕜
     show (∏ i ∈ s, F i) = (∏ i ∈ s, F i ·) from funext fun z ↦ Finset.prod_apply z s F]
   exact logDeriv_prod h₂y fun i hi ↦ (h₁y i hi).differentiableAt
 
-/-- The logarithmic derivative converts products into sums: away from a codiscrete subset of `U`,
-the logarithmic derivative of a finite product of meromorphic functions is the sum of the
-logarithmic derivatives. -/
+/--
+The logarithmic derivative converts products into sums: away from a codiscrete subset of `U`, the
+logarithmic derivative of a finite product of meromorphic functions is the sum of the logarithmic
+derivatives.
+-/
 theorem logDeriv_finprod_eventuallyEq {ι : Type*} {F : ι → 𝕜 → 𝕜'}
     (hF : (mulSupport F).Finite)
     (h : ∀ i, MeromorphicOn (F i) U)
@@ -203,20 +216,24 @@ theorem logDeriv_finprod_eventuallyEq {ι : Type*} {F : ι → 𝕜 → 𝕜'}
     rw [h₁i, Pi.one_def, logDeriv_const]
   rw [finprod_eq_prod_of_mulSupport_subset F (s := hF.toFinset) (by simp),
     finsum_eq_sum_of_support_subset _ hsub]
-  exact logDeriv_prod_eventuallyEq (fun i _ ↦ h i) fun i _ ↦ h' i
+  exact logDeriv_prod_eventuallyEq (fun i _ ↦ h i) (fun i _ ↦ h' i)
 
-/-- Away from a codiscrete subset of `U`, the logarithmic derivative of the `n`-th power of a
-meromorphic function is `n` times the logarithmic derivative. -/
+/--
+Away from a codiscrete subset of `U`, the logarithmic derivative of the `n`-th power of a
+meromorphic function is `n` times the logarithmic derivative.
+-/
 theorem MeromorphicOn.logDeriv_zpow_eventuallyEq (hf : MeromorphicOn f U) (n : ℤ) :
     logDeriv (f ^ n) =ᶠ[codiscreteWithin U] n • logDeriv f := by
   filter_upwards [hf.analyticAt_mem_codiscreteWithin] with y hy
   rw [Pi.smul_apply, zsmul_eq_mul, show f ^ n = (f · ^ n) from rfl]
   exact logDeriv_fun_zpow hy.differentiableAt n
 
-/-- The logarithmic derivative converts products into sums: away from a codiscrete subset of `U`,
-the logarithmic derivative of a finite product of integer powers of meromorphic functions is the
+/--
+The logarithmic derivative converts products into sums: away from a codiscrete subset of `U`, the
+logarithmic derivative of a finite product of integer powers of meromorphic functions is the
 corresponding weighted sum of logarithmic derivatives. This is the shape of statement used in the
-differentiated Poisson–Jensen formula, where the exponents are given by a divisor. -/
+differentiated Poisson–Jensen formula, where the exponents are given by a divisor.
+-/
 theorem logDeriv_finprod_zpow_eventuallyEq {ι : Type*} {F : ι → 𝕜 → 𝕜'} {d : ι → ℤ}
     (hd : (support d).Finite)
     (h : ∀ i, MeromorphicOn (F i) U)
