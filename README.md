@@ -24,13 +24,18 @@ Please be in touch if you would like to join the fun!
 - First Main Theorem as a statement about invariance under Möbius transformations
 - Characterization of rational functions in terms of their characteristic
 - Merged the formalization of first main theorem into Lean's mathlib
+- Formalized the [Second Main
+  Theorem](https://en.wikipedia.org/wiki/Nevanlinna_theory#Second_fundamental_theorem), in Lang's
+  form with ramification term and in the classical truncated form
+- Formalized the defect relation for transcendental meromorphic functions
+- Formalized [Picard's little
+  theorem](https://en.wikipedia.org/wiki/Picard_theorem#Little_Picard_Theorem), for meromorphic
+  functions omitting three values and for entire functions omitting two values
 
 ### Next Milestones
 
-- Transcendence criteria
-- The [Second Main
-  Theorem](https://en.wikipedia.org/wiki/Nevanlinna_theory#Second_fundamental_theorem)
-- Establish some of the more immediate applications
+- Nevanlinna's five-value theorem
+- The defect relation for rational functions
 - Merge formalizations into mathlib
 
 These plans might change, depending on feedback from the community and specific interests of project
@@ -72,3 +77,18 @@ The following concepts have been formalized so far.
 - Lemma on Logarithmic Derivatives
 - Characterization of constant in terms of their characteristic ("Quantitative Liouville Theorem").
 - Characterization of rational functions in terms of their characteristic.
+- Nevanlinna's [Second Main
+  Theorem](https://en.wikipedia.org/wiki/Nevanlinna_theory#Second_fundamental_theorem)
+    - Truncated divisors and truncated logarithmic counting functions
+    - Zero and pole divisors of the derivative of a meromorphic function
+    - Pointwise separation lemma for finitely many targets
+    - Second Main Theorem with ramification term (Lang's form) and in the classical
+      truncated form, for arbitrary finite target sets in ℂ ∪ {∞}, with no nondegeneracy
+      hypotheses
+- Applications of the Second Main Theorem
+    - Nevanlinna deficiency and truncated deficiency, with basic API
+    - The defect relation Σ Θ(a) ≤ 2 for transcendental meromorphic functions
+    - The omission predicate for values in ℂ ∪ {∞}
+    - [Picard's little theorem](https://en.wikipedia.org/wiki/Picard_theorem#Little_Picard_Theorem):
+      meromorphic functions omitting three values are constant away from a discrete set;
+      entire functions omitting two values are constant

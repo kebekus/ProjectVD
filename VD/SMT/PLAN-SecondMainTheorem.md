@@ -738,12 +738,29 @@ side conditions — `IsBoundedUnder`/`IsCoboundedUnder` — are the fiddly part)
 
 ---
 
-## 10. Work package H — Picard's little theorem (S4)
+## 10. Work package H — Picard's little theorem (S4) ✅ **DONE**
 
 *Locally `VD/SMT/Picard.lean`; Mathlib target: new file `Analysis/Complex/Picard.lean`
 (little Picard is **not** in Mathlib — only Picard–Lindelöf for ODEs — so this is a
 flagship corollary). Depends on F (S2) and the pending
-`rational_iff_characteristic_isBigO_log`.*
+`rational_iff_characteristic_isBigO_log`.
+Implementation notes: H1 and H3 as planned (H1 additionally handles possibly negative
+`C` and bounds `u` from below via monotonicity from a base point, since `=O` needs
+`|u|`). The omission predicate gained a third bridge lemma, `Omits.congr` (transfer
+along `=ᶠ[codiscrete ℂ]`, via `meromorphicOrderAt_congr` and the fact that codiscrete
+sets are punctured neighborhoods of every point). **The algebraic finish simplified
+considerably against the sketch:** since `#S ≥ 3` and at most one value is `⊤`, the set
+`S` always contains *two distinct finite* omitted values, so only one case is needed —
+`p − a·q` and `p − b·q` are constants, and subtracting makes `q` and `p` constant; the
+"omits `⊤` ⟹ `q` constant" branch never arises. Risk 9's cancellation concern is
+handled by passing to reduced representatives via
+`UniqueFactorizationMonoid.exists_reduced_factors'` (`IsRelPrime` + `X − C z`
+divisibility — no Bezout or `GCDMonoid` instances needed), and the "positive order"
+contradiction uses `tendsto_zero_iff_meromorphicOrderAt_pos` (pure continuity of the
+rational model at the root) instead of order arithmetic. One `@[simp]` lemma
+`trunc_zero` was added to package A. The absorption step (`c·log⁺ T ≤ T/2` for large
+`T`, case split on `T r` against a fixed threshold) works pointwise and needs no new
+filter machinery.*
 
 ### H1. Filter-to-`atTop` transfer for monotone functions
 
