@@ -585,11 +585,21 @@ C/D).
 
 ---
 
-## 8. Work package F — the truncated SMT (S2)
+## 8. Work package F — the truncated SMT (S2) ✅ **DONE**
 
 *Locally `VD/SMT/SecondMainTheorem.lean`; Mathlib target
 `…/ValueDistribution/SecondMainTheorem.lean` (part 3). Depends on A, B, E; uses FMT
-parts 1 + 2.*
+parts 1 + 2.
+Implementation notes: proof as planned, with the fallback of risk 8 adopted from the
+start — a private auxiliary lemma `secondMainTheorem_aux` proves the statement for finite
+targets `s : Finset ℂ` with the `⊤`-term always counted
+(`(#s − 1)·T(r) ≤ Σₐ N̄(r, a) + N̄(r, ⊤) + c·(log⁺ T(r) + log r)`), assembled by a single
+`linarith` from S1, the combined FMT, and the two counting inequalities of package B. The
+public statement follows by `Finset.preimage`/`Finset.erase` bookkeeping
+(`Finset.sum_preimage`, `Finset.card_preimage`, `Finset.add_sum_erase`); for `⊤ ∉ S` the
+`⊤`-term is traded against one characteristic via `N̄(r, ⊤) ≤ N(r, ⊤) ≤ T(r)`. Both
+helpers are included as planned; the anticipated `WithTop` plumbing annoyance did not
+materialize beyond ~20 lines.*
 
 Helpers (both flagged for possible upstreaming into `FirstMainTheorem.lean`):
 
