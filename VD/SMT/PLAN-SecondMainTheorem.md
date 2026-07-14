@@ -417,11 +417,18 @@ pressure to optimize).
 
 ---
 
-## 6. Work package D — proximity estimates
+## 6. Work package D — proximity estimates ✅ **DONE**
 
 *Locally `VD/SMT/ProximityEstimates.lean`; Mathlib target
-`Analysis/Complex/ValueDistribution/SecondMainTheorem.lean` (part 1). Depends on B, C,
-the LLD, FMT part 2, and (D1 only) the pending `CharacteristicMoebius` chain.*
+`Analysis/Complex/ValueDistribution/SecondMainTheorem.lean` (part 1). Depends on C,
+the LLD, FMT part 2, and (D1 only) the pending `CharacteristicMoebius` chain.
+Implementation notes: package B turned out not to be needed — the only order-level input
+is `meromorphicOrderAt_deriv_eq_sub_one`, which is already in Mathlib. The "15-line
+adaptation of `logDeriv_congr_codiscreteWithin`" anticipated for D1 is included as the
+public lemma `deriv_congr_codiscreteWithin` (Mathlib-worthy on its own; possible target
+near `Mathlib/Analysis/Calculus/Deriv/Basic.lean`). Everything else went as planned;
+the junk-value identities of D3/D4 survived Lean's `x/0 = 0` conventions exactly as
+predicted in risk 2.*
 
 ### D1. The constancy dichotomy
 
@@ -790,7 +797,7 @@ local file per future Mathlib PR target, each registered by an import line in th
 | 1 | `TruncatedCounting.lean` | `Topology/LocallyFinsupp.lean` (extend) + **new** `…/ValueDistribution/LogCounting/Truncated.lean` | package A | — |
 | 2 | `DivisorDeriv.lean` | **new** `Analysis/Meromorphic/DivisorDeriv.lean` | package B | 1 |
 | 3 | `SeparationLemma.lean` | `Analysis/SpecialFunctions/Log/PosLog.lean` (extend) | package C | — |
-| 4 | `ProximityEstimates.lean` | `…/ValueDistribution/SecondMainTheorem.lean` (part 1) | package D | 2, 3, **LLD (T3)**, pending `CharacteristicMoebius` |
+| 4 | `ProximityEstimates.lean` | `…/ValueDistribution/SecondMainTheorem.lean` (part 1) | package D | 3, **LLD (T3)**, pending `CharacteristicMoebius` |
 | 5 | `SecondMainTheoremRamification.lean` | `…/ValueDistribution/SecondMainTheorem.lean` (part 2) | package E (S1) | 4 |
 | 6 | `SecondMainTheorem.lean` | `…/ValueDistribution/SecondMainTheorem.lean` (part 3) | package F (S2, S2′) | 1, 2, 5 |
 | 7 | `Deficiency.lean` | **new** `…/ValueDistribution/Deficiency.lean` | package G (S3) | 6 |
