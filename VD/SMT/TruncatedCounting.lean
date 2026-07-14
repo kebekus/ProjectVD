@@ -87,6 +87,10 @@ lemma trunc_mono {D₁ D₂ : locallyFinsuppWithin U ℤ} (h : D₁ ≤ D₂) : 
   ext z
   simp only [trunc_apply, min_assoc, min_self]
 
+@[simp] lemma trunc_zero : (0 : locallyFinsuppWithin U ℤ).trunc = 0 := by
+  ext z
+  simp
+
 lemma support_trunc (D : locallyFinsuppWithin U ℤ) : D.trunc.support = D.support := by
   ext z
   simp only [Function.mem_support, ne_eq, trunc_apply]
