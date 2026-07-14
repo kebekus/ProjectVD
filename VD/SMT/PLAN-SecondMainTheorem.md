@@ -524,12 +524,19 @@ Difficulty: medium (D1 is the only delicate proof; D4 is long but mechanical).
 
 ---
 
-## 7. Work package E — the SMT with ramification (S1)
+## 7. Work package E — the SMT with ramification (S1) ✅ **DONE**
 
 *Locally `VD/SMT/SecondMainTheoremRamification.lean`; Mathlib target
 `…/ValueDistribution/SecondMainTheorem.lean` (part 2). Depends on B (for
 `meromorphicOrderAt_deriv_eq_top` and the nonnegativity of `N₁`) and D; uses FMT part 1
-and the LLD.*
+and the LLD.
+Implementation notes: proof went exactly as planned (degenerate case via D1, main case
+via FMT-1 + D3 + D4 + one combined `IsBigO` for the LLD and all D2 instances, assembled
+by `nlinarith`). The posPart corollary S1′ is included as
+`secondMainTheorem_ramification_posPart`. The sanity example verifies that all counting
+terms — in particular the ramification term — vanish identically for `Complex.exp`; the
+sharpness statement `T(r, exp) = r/π` would require computing a circle integral and is
+not formalized.*
 
 Statement S1 as in §1, plus its posPart corollary and:
 
