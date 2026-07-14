@@ -649,10 +649,28 @@ only annoyance).
 
 ---
 
-## 9. Work package G — deficiency and the defect relation (S3)
+## 9. Work package G — deficiency and the defect relation (S3) ✅ **DONE**
 
 *Locally `VD/SMT/Deficiency.lean`; Mathlib target: new file
-`…/ValueDistribution/Deficiency.lean`. Depends on A (definitions) and F (S2).*
+`…/ValueDistribution/Deficiency.lean`. Depends on A (definitions) and F (S2).
+Implementation notes: definitions and API as planned; risk 5's "bounded quotient" helper
+materialized as one private lemma placing all three quotients `m/T`, `N/T`, `N̄/T`
+eventually in `[0, 2]`, from which every `IsBoundedUnder`/`IsCoboundedUnder` side
+condition is discharged. The FMT bridge `deficiency_eq_one_sub_limsup` is proved by a
+`le_liminf_add`/`liminf_add_le` sandwich around the vanishing FMT error `(T_a − T)/T`,
+plus `liminf_const_sub`. **Deviation from the sketch (steps 4–5):** instead of taking
+`limsup` along the exceptional-set filter and using finite subadditivity, S3 uses an
+ε-of-room argument — `eventually_lt_of_limsup_lt` gives `N̄(·,a)/T < L(a) + δ` per target
+along `atTop`; these finitely many bounds, the S2 inequality, and the error-term
+smallness are intersected along `volume.cofinite ⊓ atTop`, one radius is extracted
+(`NeBot` + `Eventually.exists`), and `T r` is cancelled; `le_of_forall_pos_le_add`
+concludes. Finite subadditivity of `limsup` and the finer-filter comparison are not
+needed. The `NeBot (volume.cofinite ⊓ atTop)` instance is included (flagged for
+upstreaming next to `Measure.cofinite`); `deficiency_eq_one_of_omits` is realized in
+divisor-vanishing form as `deficiency_eq_one_of_logCounting_eq_zero`, to be fed by
+package H's `Omits` predicate; the extra bridge
+`tendsto_characteristic_atTop_of_log_isLittleO` (transcendence ⟹ unbounded `T`) is
+public. The sharpness example for `exp` is not formalized (needs `T(r, exp) = r/π`).*
 
 ```lean
 namespace ValueDistribution   -- generality f : ℂ → E where meaningful
