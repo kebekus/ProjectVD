@@ -242,7 +242,11 @@ lemma Omits.truncatedLogCounting_eq_zero {a : WithTop ℂ} (hf : Meromorphic f)
       intro z
       rw [MeromorphicOn.divisor_apply (meromorphicOn_univ.2 hf) (Set.mem_univ z)]
       simpa using WithTop.untop₀_nonneg.mpr ((omits_top_iff.1 h) z)
-    rw [truncatedLogCounting_top, h₁, locallyFinsuppWithin.trunc_zero, map_zero]
+    have h₂ : (MeromorphicOn.divisor f Set.univ)⁻.trunc = 0 := by
+      rw [h₁]
+      ext z
+      simp
+    rw [truncatedLogCounting_top, h₂, map_zero]
   · lift a to ℂ using ha with b₀
     have hfa : Meromorphic (f · - b₀) := by fun_prop
     have h₁ : (MeromorphicOn.divisor (f · - b₀) Set.univ)⁺ = 0 := by
@@ -251,7 +255,11 @@ lemma Omits.truncatedLogCounting_eq_zero {a : WithTop ℂ} (hf : Meromorphic f)
       intro z
       rw [MeromorphicOn.divisor_apply (meromorphicOn_univ.2 hfa) (Set.mem_univ z)]
       simpa using WithTop.untop₀_le_untop₀ (by simp) ((omits_coe_iff.1 h) z)
-    rw [truncatedLogCounting_coe, h₁, locallyFinsuppWithin.trunc_zero, map_zero]
+    have h₂ : (MeromorphicOn.divisor (f · - b₀) Set.univ)⁺.trunc = 0 := by
+      rw [h₁]
+      ext z
+      simp
+    rw [truncatedLogCounting_coe, h₂, map_zero]
 
 /-!
 ## The Algebraic Core: Rational Functions Omitting Finite Values

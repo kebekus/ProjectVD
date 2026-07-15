@@ -67,9 +67,10 @@ theorem logDeriv_canonicalFactor {R : ℝ} {a w : ℂ} (hR : R ≠ 0) (hw₁ : w
   field_simp [sub_ne_zero.2 hw₁]
   ring
 
-/-- Norm bound for the logarithmic derivative of the canonical factor on interior circles: for
-`‖a‖ < ρ` and `‖w‖ = r < ρ`, we have
-`‖logDeriv (canonicalFactor ρ a) w‖ ≤ ‖w - a‖⁻¹ + (ρ - r)⁻¹`. -/
+/--
+Norm bound for the logarithmic derivative of the canonical factor on interior circles: for `‖a‖ < ρ`
+and `‖w‖ = r < ρ`, we have `‖logDeriv (canonicalFactor ρ a) w‖ ≤ ‖w - a‖⁻¹ + (ρ - r)⁻¹`.
+-/
 theorem norm_logDeriv_canonicalFactor_le {ρ r : ℝ} {a w : ℂ}
     (ha : ‖a‖ < ρ) (hw : ‖w‖ = r) (hr : r < ρ) :
     ‖logDeriv (canonicalFactor ρ a) w‖ ≤ ‖w - a‖⁻¹ + (ρ - r)⁻¹ := by
