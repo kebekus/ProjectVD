@@ -207,8 +207,8 @@ private theorem log_norm_le_circleAverage_posLog_norm
         exact log_nonneg (one_lt_norm_canonicalFactor (by aesop) h₁w (by aesop)).le
     _ ≤ circleAverage (re ∘ herglotzRieszKernel 0 w * (log⁺ ‖f ·‖)) 0 R := by
       apply circleAverage_mono ((circleIntegrable_log_norm h₃f).mul_of_continuousOn
-        (continuousOn_herglotzRieszKernel_sphere h₁w)) ((circleIntegrable_posLog_norm
-        h₃f).mul_of_continuousOn (continuousOn_herglotzRieszKernel_sphere h₁w))
+        (continuousOn_re_herglotzRieszKernel_sphere h₁w)) ((circleIntegrable_posLog_norm
+        h₃f).mul_of_continuousOn (continuousOn_re_herglotzRieszKernel_sphere h₁w))
       intro x hx
       simp only [Pi.mul_apply, comp_apply]
       gcongr

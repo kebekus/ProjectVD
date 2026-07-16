@@ -42,7 +42,7 @@ theorem analyticOnNhd_herglotzRieszKernel_compl {c w : ℂ} :
 /-- The real part of the Herglotz–Riesz kernel `herglotzRieszKernel c w` is continuous on the sphere
 `sphere c |R|` around an interior point `w ∈ ball c R`. -/
 @[fun_prop]
-theorem continuousOn_herglotzRieszKernel_sphere {c w : ℂ} {R : ℝ} (hw : w ∈ ball c R) :
+theorem continuousOn_re_herglotzRieszKernel_sphere {c w : ℂ} {R : ℝ} (hw : w ∈ ball c R) :
     ContinuousOn (re ∘ herglotzRieszKernel c w) (sphere c |R|) := by
   intro x hx
   apply ContinuousAt.continuousWithinAt

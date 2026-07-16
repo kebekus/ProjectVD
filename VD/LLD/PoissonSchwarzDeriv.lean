@@ -6,6 +6,7 @@ Authors: Stefan Kebekus
 import Mathlib.Analysis.Complex.HasPrimitives
 import Mathlib.Analysis.Complex.OpenMapping
 import VD.LLD.CauchyIntegralDeriv
+import VD.MathlibSubmitted.CauchyIntegralDeriv
 import VD.MathlibPending.PoissonJensen
 
 /-!

@@ -17,6 +17,7 @@ import VD.MathlibPending.ProximityBounded
 import VD.MathlibPending.Scaling
 import VD.MathlibSubmitted.BlaschkeDecomp3
 import VD.MathlibSubmitted.BorelGrowth
+import VD.MathlibSubmitted.CauchyIntegralDeriv
 import VD.MathlibSubmitted.LogCountingIsBigOLog
 import VD.MathlibSubmitted.MeromorphicLogDeriv
 import VD.MathlibSubmitted.Translation
