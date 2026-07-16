@@ -59,7 +59,7 @@ theorem sum_toClosedBall_le_logCounting {D : Function.locallyFinsupp ℂ ℤ} {�
   -- Evaluation of `toClosedBall` outside the ball
   have hout : ∀ s z, z ∉ closedBall 0 |s| → D.toClosedBall s z = 0 := by
     intro s z hz
-    simp [toClosedBall, restrictMonoidHom_apply, hz]
+    simp [toClosedBall, hz]
   -- `toClosedBall` inherits nonnegativity
   have hpos : ∀ s z, 0 ≤ D.toClosedBall s z := by
     intro s z
