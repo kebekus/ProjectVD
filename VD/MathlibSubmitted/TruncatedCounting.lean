@@ -67,20 +67,17 @@ noncomputable def trunc (D : locallyFinsuppWithin U Y) : locallyFinsuppWithin U 
 
 /-- Truncation decreases functions. -/
 lemma trunc_le (D : locallyFinsuppWithin U Y) : D.trunc ≤ D := by
-  rw [le_def]
   intro z
-  simp only [trunc_apply]
+  rw [trunc_apply]
   exact min_le_left (D z) 1
 
 /-- Truncation preserves non-negativity. -/
 lemma trunc_nonneg {D : locallyFinsuppWithin U Y} (h : 0 ≤ D) : 0 ≤ D.trunc := by
-  rw [le_def]
   intro z
   simpa using le_min ((le_def.1 h) z) zero_le_one
 
 /-- Truncation is monotone. -/
 lemma trunc_mono {D₁ D₂ : locallyFinsuppWithin U Y} (h : D₁ ≤ D₂) : D₁.trunc ≤ D₂.trunc := by
-  rw [le_def]
   intro z
   simpa using min_le_min_right 1 ((le_def.1 h) z)
 
@@ -92,7 +89,7 @@ lemma trunc_mono {D₁ D₂ : locallyFinsuppWithin U Y} (h : D₁ ≤ D₂) : D�
 /-- Truncation of the zero function. -/
 @[simp] lemma trunc_zero : (0 : locallyFinsuppWithin U Y).trunc = 0 := by
   ext z
-  simp only [trunc_apply]
+  rw [trunc_apply]
   exact min_eq_left zero_le_one
 
 /-- Truncation does not change the support. -/
@@ -100,11 +97,11 @@ lemma support_trunc [NeZero (1 : Y)] (D : locallyFinsuppWithin U Y) :
     D.trunc.support = D.support := by
   ext z
   simp only [Function.mem_support, ne_eq, trunc_apply]
-  constructor
-  · intro h₁ h₂
-    exact h₁ (by rw [h₂]; exact min_eq_left zero_le_one)
-  · intro h₁ h₂
-    rcases min_eq_iff.1 h₂ with ⟨h, _⟩ | ⟨h, _⟩
+  constructor <;> intro h₁ h₂
+  · apply h₁
+    rw [h₂]
+    exact min_eq_left zero_le_one
+  · rcases min_eq_iff.1 h₂ with ⟨h, _⟩ | ⟨h, _⟩
     · exact h₁ h
     · exact one_ne_zero h
 
@@ -148,13 +145,11 @@ For `1 ≤ r`, the counting function of a truncated divisor is bounded above by 
 of the divisor itself.
 -/
 theorem logCounting_trunc_le (D : locallyFinsupp E ℤ) {r : ℝ} (hr : 1 ≤ r) :
-    logCounting D.trunc r ≤ logCounting D r :=
-  logCounting_le (trunc_le D) hr
+    logCounting D.trunc r ≤ logCounting D r := logCounting_le (trunc_le D) hr
 
 /-- For `1 ≤ r`, the counting function of a truncated non-negative divisor is non-negative. -/
 theorem logCounting_trunc_nonneg {D : locallyFinsupp E ℤ} (h : 0 ≤ D) {r : ℝ} (hr : 1 ≤ r) :
-    0 ≤ logCounting D.trunc r :=
-  logCounting_nonneg (trunc_nonneg h) hr
+    0 ≤ logCounting D.trunc r := logCounting_nonneg (trunc_nonneg h) hr
 
 end Function.locallyFinsuppWithin
 
@@ -202,7 +197,7 @@ with multiplicity one.
 -/
 lemma truncatedLogCounting_zero :
     truncatedLogCounting f 0 = ((divisor f Set.univ)⁺.trunc).logCounting := by
-  simp only [truncatedLogCounting, WithTop.zero_ne_top, reduceDIte, WithTop.untop₀_zero, sub_zero]
+  simp [truncatedLogCounting, WithTop.zero_ne_top, reduceDIte, WithTop.untop₀_zero, sub_zero]
 
 /-- Evaluation of the truncated logarithmic counting function at zero yields zero. -/
 @[simp] lemma truncatedLogCounting_eval_zero :
