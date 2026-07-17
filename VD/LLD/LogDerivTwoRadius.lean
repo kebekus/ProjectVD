@@ -6,10 +6,24 @@ Authors: Stefan Kebekus
 import Mathlib.Analysis.Complex.ValueDistribution.Cartan
 import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 import VD.LLD.CircleAverageEstimates
-import VD.LLD.CountingEstimate
 import VD.LLD.PoissonJensenDeriv
 import VD.LLD.PosLog
 import VD.MathlibPending.CharacteristicMoebius
+import VD.MathlibSubmitted.CountingEstimate
+
+/-!
+## Elementary Helper
+-/
+
+/-- Elementary bound for the logarithm of a quotient, used to convert `1 / log (r / ρ)` into
+more convenient error terms. -/
+theorem Real.sub_div_le_log_div {ρ r : ℝ} (hρ : 0 < ρ) (hr : 0 < r) :
+    (r - ρ) / r ≤ Real.log (r / ρ) := by
+  have h₁ := Real.log_le_sub_one_of_pos (div_pos hρ hr)
+  have h₂ : Real.log (r / ρ) = -Real.log (ρ / r) := by
+    rw [← Real.log_inv, inv_div]
+  have h₃ : (r - ρ) / r = 1 - ρ / r := by field_simp
+  linarith
 
 /-!
 # The Two-Radius Estimate — LLD work package C4 (theorem T1)

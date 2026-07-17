@@ -26,25 +26,47 @@ assembly.
 
 open Function Metric Real Set
 
-/-!
-## Elementary Helper
--/
-
-/-- Elementary bound for the logarithm of a quotient, used to convert `1 / log (r / ρ)` into
-more convenient error terms. -/
-theorem Real.sub_div_le_log_div {ρ r : ℝ} (hρ : 0 < ρ) (hr : 0 < r) :
-    (r - ρ) / r ≤ Real.log (r / ρ) := by
-  have h₁ := Real.log_le_sub_one_of_pos (div_pos hρ hr)
-  have h₂ : Real.log (r / ρ) = -Real.log (ρ / r) := by
-    rw [← Real.log_inv, inv_div]
-  have h₃ : (r - ρ) / r = 1 - ρ / r := by field_simp
-  linarith
 
 /-!
 ## The Counting Estimate
 -/
 
 namespace Function.locallyFinsuppWithin
+
+variable
+  {X : Type*} [TopologicalSpace X] {U : Set X}
+  {Y : Type*}
+  {E : Type*} [NormedAddCommGroup E]
+
+/-- Restriction is monotone -/
+lemma restrict_mono [Zero Y] [LinearOrder Y] {A B : locallyFinsuppWithin U Y}
+    {V : Set X} (hVU : V ⊆ U) (hAB : A ≤ B) :
+    A.restrict hVU ≤ B.restrict hVU := by
+  intro z
+  by_cases hz : z ∈ V
+  · simp_all [restrict_apply, hAB z]
+  · simp_all
+
+/-- Restriction as an ordered group morphism -/
+noncomputable def restrictOrderMonoidHom [AddCommGroup Y] [LinearOrder Y] [IsOrderedAddMonoid Y]
+    {V : Set X} (h : V ⊆ U) :
+    locallyFinsuppWithin U Y →+o locallyFinsuppWithin V Y where
+  toFun D := D.restrict h
+  map_zero' := by
+    ext x
+    simp [restrict_apply]
+  map_add' D₁ D₂ := by
+    ext x
+    by_cases hx : x ∈ V
+    <;> simp [restrict_apply, hx]
+  monotone' _ _ hAB z := by
+    apply restrict_mono h hAB
+
+@[simp]
+lemma restrictOrderMonoidHom_apply [AddCommGroup Y] [LinearOrder Y] [IsOrderedAddMonoid Y]
+    {V : Set X} (D : locallyFinsuppWithin U Y) (h : V ⊆ U) :
+    restrictOrderMonoidHom h D = D.restrict h := by rfl
+
 
 /-- **Counting estimate**: for a nonnegative divisor `D` on `ℂ` and radii `1 ≤ ρ < r`, the total
 mass of `D` on the closed ball of radius `ρ`, weighted by `log (r / ρ)`, is bounded by the
@@ -56,17 +78,13 @@ theorem sum_toClosedBall_le_logCounting {D : Function.locallyFinsupp ℂ ℤ} {�
   have habsρ : |ρ| = ρ := abs_of_pos (by linarith)
   have habsr : |r| = r := abs_of_pos hr₀
   have hD' : ∀ z, 0 ≤ D z := (by simpa using (le_def.1 hD) ·)
-  -- Evaluation of `toClosedBall` outside the ball
-  have hout : ∀ s z, z ∉ closedBall 0 |s| → D.toClosedBall s z = 0 := by
-    intro s z hz
-    simp [toClosedBall, hz]
   -- `toClosedBall` inherits nonnegativity
   have hpos : ∀ s z, 0 ≤ D.toClosedBall s z := by
     intro s z
     by_cases hz : z ∈ closedBall (0 : ℂ) |s|
     · rw [toClosedBall_eval_within _ hz]
       exact hD' z
-    · rw [hout s z hz]
+    · simp [toClosedBall, hz]
   -- The common finite index set
   have hfin : ((D.toClosedBall r).support).Finite :=
     finiteSupport _ (isCompact_closedBall 0 |r|)
@@ -82,7 +100,7 @@ theorem sum_toClosedBall_le_logCounting {D : Function.locallyFinsupp ℂ ℤ} {�
         rw [mem_closedBall_zero_iff, habsr]
         exact le_trans (by rwa [mem_closedBall_zero_iff, habsρ] at h) hρr.le)]
       rwa [toClosedBall_eval_within _ h] at hz
-    · exact absurd (hout ρ z h) hz
+    · simp_all [toClosedBall]
   -- Rewrite both sides as finite sums over `t`
   have hLHS : (∑ᶠ z, (D.toClosedBall ρ z : ℝ)) = ∑ z ∈ t, (D.toClosedBall ρ z : ℝ) := by
     apply finsum_eq_sum_of_support_subset
@@ -124,8 +142,7 @@ theorem sum_toClosedBall_le_logCounting {D : Function.locallyFinsupp ℂ ℤ} {�
         rw [div_eq_mul_inv]
         apply Real.log_le_log (by positivity)
         gcongr
-      · rw [hout ρ z hzρ]
-        simp only [Int.cast_zero, zero_mul]
+      · rw [locallyFinsuppWithin.apply_eq_zero_of_notMem _ hzρ, Int.cast_zero, zero_mul]
         by_cases hzr : D.toClosedBall r z = 0
         · simp [hzr]
         · apply mul_nonneg (by exact_mod_cast hpos r z)

@@ -1,6 +1,5 @@
 import VD.LLD.CauchyIntegralDeriv
 import VD.LLD.CircleAverageEstimates
-import VD.LLD.CountingEstimate
 import VD.LLD.LogDerivLemma
 import VD.LLD.LogDerivTwoRadius
 import VD.LLD.PoissonJensenDeriv
@@ -18,6 +17,7 @@ import VD.MathlibPending.Scaling
 import VD.MathlibSubmitted.BlaschkeDecomp3
 import VD.MathlibSubmitted.BorelGrowth
 import VD.MathlibSubmitted.CauchyIntegralDeriv
+import VD.MathlibSubmitted.CountingEstimate
 import VD.MathlibSubmitted.LogCountingIsBigOLog
 import VD.MathlibSubmitted.MeromorphicLogDeriv
 import VD.MathlibSubmitted.Translation
