@@ -285,7 +285,7 @@ theorem isBigO_characteristic_sub_characteristic_moebius {a b c d : ℂ}
     by_cases hord : ∀ z, meromorphicOrderAt (c * f · + d) z ≠ ⊤
     · have hne : ∀ᶠ z in codiscrete ℂ, c * f z + d ≠ 0 := by
         -- Wrong name!
-        apply MeromorphicAt.MeromorphicOn.codiscreteWithin_setOf_ne_zero _ (fun u _ ↦ hord u)
+        apply MeromorphicAt.MeromorphicOn.codiscreteWithin_setOfPred_ne_zero _ (fun u _ ↦ hord u)
         -- should be fun_prop
         apply Meromorphic.meromorphicOn
         fun_prop

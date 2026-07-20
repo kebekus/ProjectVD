@@ -130,7 +130,7 @@ lemma exists_polynomial_of_analyticOnNhd_of_growth :
     simp only [pow_zero, mul_one] at hg
     have hK : IsBounded {z : ℂ | C < ‖f z‖} := by
       have : IsBounded {z : ℂ | ‖f z‖ ≤ C}ᶜ := isBounded_compl_iff.2 hg
-      simpa only [compl_setOf, not_le] using this
+      simpa only [compl_ofPred, not_le] using this
     have hbdd : IsBounded (range f) := by
       have himg : IsBounded (f '' {z : ℂ | C < ‖f z‖}) :=
         ((hK.isCompact_closure.image hcont).isBounded).subset

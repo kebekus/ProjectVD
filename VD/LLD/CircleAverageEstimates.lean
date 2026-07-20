@@ -295,7 +295,7 @@ private lemma ae_mem_Ioo :
   have h₂ : ∀ᵐ (θ : ℝ) ∂(volume.restrict (Ioc (0:ℝ) (2 * π))), θ ≠ 2 * π := by
     apply ae_restrict_of_ae
     rw [ae_iff]
-    simp only [ne_eq, not_not, setOf_eq_eq_singleton]
+    simp only [ne_eq, not_not, ofPred_eq_eq_singleton]
     exact measure_singleton _
   filter_upwards [h₁, h₂] with θ hθ h2
   exact ⟨hθ.1, lt_of_le_of_ne hθ.2 h2⟩
