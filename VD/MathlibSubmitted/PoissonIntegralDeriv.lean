@@ -49,8 +49,10 @@ variable
 ## Auxiliary Lemmas
 -/
 
-/-- For `w ∈ ball c R`, there is a radius `d > 0` such that `ball w d ⊆ ball c R` and all points
-of `ball w d` keep distance at least `d` from the circle `sphere c R`. -/
+/-
+For `w ∈ ball c R`, there is a radius `d > 0` such that `ball w d ⊆ ball c R` and all points of
+`ball w d` keep distance at least `d` from the circle `sphere c R`.
+-/
 private lemma exists_ball_subset_forall_le_norm_circleMap_sub (hw : w ∈ ball c R) :
     ∃ d > 0, ball w d ⊆ ball c R ∧ ∀ x ∈ ball w d, ∀ θ : ℝ, d ≤ ‖circleMap c R θ - x‖ := by
   have hR : 0 < R := pos_of_mem_ball hw
@@ -68,8 +70,8 @@ private lemma exists_ball_subset_forall_le_norm_circleMap_sub (hw : w ∈ ball c
     linarith
 
 /--
-The Herglotz–Riesz kernel `herglotzRieszKernel c w` is continuous on the circle
-`sphere c |R|` whenever `w ∈ ball c R`.
+The Herglotz–Riesz kernel `herglotzRieszKernel c w` is continuous on the circle `sphere c |R|`
+whenever `w ∈ ball c R`.
 -/
 @[fun_prop] lemma continuousOn_herglotzRieszKernel_sphere (hw : w ∈ ball c R) :
     ContinuousOn (herglotzRieszKernel c w) (sphere c |R|) := by
@@ -135,8 +137,10 @@ theorem hasDerivAt_circleAverage_herglotzRieszKernel_smul [CompleteSpace E]
       exact h₃
     exact h₂.smul_const (g (circleMap 0 R θ))
 
-/-- The Herglotz–Riesz kernel integral of a circle-integrable function is differentiable in the
-pole parameter, throughout the open ball. -/
+/--
+The Herglotz–Riesz kernel integral of a circle-integrable function is differentiable in the pole
+parameter, throughout the open ball.
+-/
 theorem differentiableOn_circleAverage_herglotzRieszKernel_smul [CompleteSpace E]
     (hg : CircleIntegrable g 0 R) :
     DifferentiableOn ℂ
@@ -145,8 +149,10 @@ theorem differentiableOn_circleAverage_herglotzRieszKernel_smul [CompleteSpace E
     (hasDerivAt_circleAverage_herglotzRieszKernel_smul hg
       hw).differentiableAt.differentiableWithinAt
 
-/-- The Herglotz–Riesz kernel integral of a circle-integrable function is analytic in the pole
-parameter, throughout the open ball. -/
+/--
+The Herglotz–Riesz kernel integral of a circle-integrable function is analytic in the pole
+parameter, throughout the open ball.
+-/
 theorem analyticOnNhd_circleAverage_herglotzRieszKernel_smul [CompleteSpace E]
     (hg : CircleIntegrable g 0 R) :
     AnalyticOnNhd ℂ
@@ -157,8 +163,10 @@ theorem analyticOnNhd_circleAverage_herglotzRieszKernel_smul [CompleteSpace E]
 ## B3: Real Part of the Herglotz–Riesz Kernel Integral
 -/
 
-/-- Taking real parts commutes with the Herglotz–Riesz kernel integral of a real-valued
-circle-integrable function. -/
+/--
+Taking real parts commutes with the Herglotz–Riesz kernel integral of a real-valued
+circle-integrable function.
+-/
 theorem re_circleAverage_herglotzRieszKernel_smul {g : ℂ → ℝ}
     (hg : CircleIntegrable g 0 R) (hw : w ∈ ball 0 R) :
     (circleAverage (fun ζ ↦ herglotzRieszKernel 0 w ζ • (g ζ : ℂ)) 0 R).re
