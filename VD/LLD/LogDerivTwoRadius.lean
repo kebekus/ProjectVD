@@ -7,9 +7,9 @@ import Mathlib.Analysis.Complex.ValueDistribution.Cartan
 import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 import VD.LLD.CircleAverageEstimates
 import VD.LLD.PoissonJensenDeriv
-import VD.LLD.PosLog
 import VD.MathlibPending.CharacteristicMoebius
 import VD.MathlibSubmitted.CountingEstimate
+import VD.MathlibSubmitted.PosLog
 
 /-!
 ## Elementary Helper
@@ -289,7 +289,7 @@ private lemma proximity_logDeriv_le {f : ℂ → ℂ} {r ρ : ℝ} (hf : Meromor
     · filter_upwards with θ
       simp only [Pi.abs_apply, Real.norm_eq_abs, abs_abs]
       rw [abs_of_nonneg posLog_nonneg]
-      exact posLog_le_abs _
+      exact Real.posLog_le_abs _
   -- Step 3: integrate the pointwise bound
   have step3 : proximity (logDeriv f) ⊤ r ≤ 2 * circleAverage (fun w ↦ log⁺ (g w)) 0 r := by
     rw [proximity_top]

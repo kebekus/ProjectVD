@@ -9,6 +9,7 @@ import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.Analysis.SpecialFunctions.Log.PosLog
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
 import Mathlib.MeasureTheory.Integral.CircleAverage
+import VD.MathlibSubmitted.PosLog
 
 /-!
 # Circle-Average Estimates — LLD work packages C1–C2
@@ -41,32 +42,6 @@ open Complex Filter MeasureTheory Metric Real Set
 /-!(
 ## C1: Jensen's Inequality for Circle Averages of `log⁺`
 -/
-
-private lemma posLog_le_log_one_add {x : ℝ} (hx : 0 ≤ x) : log⁺ x ≤ Real.log (1 + x) := by
-  rw [posLog_apply]
-  apply max_le (Real.log_nonneg (by linarith))
-  rcases hx.eq_or_lt with rfl | hx'
-  · simp
-  · exact Real.log_le_log hx' (by linarith)
-
-private lemma log_one_add_le_posLog {x : ℝ} (hx : 0 ≤ x) :
-    Real.log (1 + x) ≤ log⁺ x + Real.log 2 := by
-  rw [posLog_eq_log_max_one hx]
-  have h₁ : (1 : ℝ) + x ≤ max 1 x * 2 := by
-    rcases le_total x 1 with h | h
-    · rw [max_eq_left h]; linarith
-    · rw [max_eq_right h]; linarith
-  calc Real.log (1 + x)
-      ≤ Real.log (max 1 x * 2) := Real.log_le_log (by linarith) h₁
-    _ = Real.log (max 1 x) + Real.log 2 :=
-        Real.log_mul (by positivity) two_ne_zero
-
-private lemma posLog_le_abs (x : ℝ) : log⁺ x ≤ |x| := by
-  rcases le_or_gt |x| 1 with h | h
-  · rw [(posLog_eq_zero_iff x).2 h]
-    exact abs_nonneg x
-  · rw [← posLog_abs, posLog_eq_log (by rw [abs_abs]; exact h.le)]
-    linarith [Real.log_le_sub_one_of_pos (lt_trans one_pos h : (0:ℝ) < |x|)]
 
 private lemma circleIntegrable_posLog_comp {u : ℂ → ℝ} {r : ℝ} (hu : CircleIntegrable u 0 r) :
     CircleIntegrable (log⁺ ∘ u) 0 r := by
@@ -104,9 +79,11 @@ private lemma concaveOn_log_one_add : ConcaveOn ℝ (Ici 0) (fun x ↦ Real.log 
   have h₄ : a * (1 + x) + b * (1 + y) = 1 + (a * x + b * y) := by linear_combination hab
   rwa [h₄] at h₃
 
-/-- **Jensen's inequality for circle averages**: for a nonnegative circle-integrable function
-`u`, the circle average of `log⁺ u` is at most `log⁺` of the circle average, up to an additive
-constant `log 2`. -/
+/--
+**Jensen's inequality for circle averages**: for a nonnegative circle-integrable function `u`, the
+circle average of `log⁺ u` is at most `log⁺` of the circle average, up to an additive constant `log
+2`.
+-/
 theorem Real.circleAverage_posLog_le_posLog_circleAverage {u : ℂ → ℝ} {r : ℝ}
     (h₀ : ∀ z ∈ sphere (0 : ℂ) |r|, 0 ≤ u z) (hu : CircleIntegrable u 0 r) :
     circleAverage (log⁺ ∘ u) 0 r ≤ log⁺ (circleAverage u 0 r) + Real.log 2 := by
