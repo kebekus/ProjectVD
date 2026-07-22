@@ -47,10 +47,7 @@ theorem continuousOn_re_herglotzRieszKernel_sphere {c w : ℂ} {R : ℝ} (hw : w
   intro x hx
   apply ContinuousAt.continuousWithinAt
   apply ContinuousAt.comp (by fun_prop) (analyticOnNhd_herglotzRieszKernel_compl x _).continuousAt
-  by_contra h
-  simp only [mem_compl_iff, mem_singleton_iff, not_not] at h
-  rw [← h, ← abs_of_pos (pos_of_mem_ball hw), mem_ball_iff_norm] at hw
-  simp_all
+  grind [mem_sphere, mem_ball, le_abs_self R]
 
 /-- Scaling a circle-integrable function by the real part of the Herglotz–Riesz kernel preserves
 circle integrability. -/

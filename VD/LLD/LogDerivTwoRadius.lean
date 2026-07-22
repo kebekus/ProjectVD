@@ -134,10 +134,7 @@ private lemma continuousOn_derivedKernel {w : ℂ} {R : ℝ} (hw : w ∈ ball 0 
   intro z hz
   apply pow_ne_zero
   rw [sub_ne_zero]
-  rintro rfl
-  rw [mem_sphere_zero_iff_norm] at hz
-  rw [mem_ball_zero_iff, hz] at hw
-  exact absurd hw (not_lt.2 (le_abs_self R))
+  grind [mem_sphere, mem_ball, le_abs_self R]
 
 /-!
 ## Step 1–4: The Analytic Estimate
@@ -519,11 +516,8 @@ theorem ValueDistribution.exists_proximity_logDeriv_le {f : ℂ → ℂ} (hf : M
     have h₁ : logDeriv f =ᶠ[codiscrete ℂ] logDeriv (0 : ℂ → ℂ) :=
       logDeriv_congr_codiscreteWithin isOpen_univ
         (hf.exists_meromorphicOrderAt_eq_top_iff_eventually_zero.1 hdeg)
-    have h₂ : logDeriv f =ᶠ[codiscrete ℂ] (0 : ℂ → ℂ) := by
-      apply h₁.trans
-      apply EventuallyEq.of_eq
-      have : logDeriv (0 : ℂ → ℂ) = logDeriv (fun _ ↦ (0:ℂ)) := rfl
-      rw [this, logDeriv_const]
+    have h₂ : logDeriv f =ᶠ[codiscrete ℂ] (0 : ℂ → ℂ) :=
+      h₁.trans (EventuallyEq.of_eq (logDeriv_const 0))
     rw [proximity_congr_codiscrete h₂ (by linarith : r ≠ 0)]
     have h₃ : proximity (0 : ℂ → ℂ) ⊤ r = 0 := by
       rw [proximity_top]

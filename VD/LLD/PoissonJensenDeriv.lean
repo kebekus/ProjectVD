@@ -51,10 +51,7 @@ private lemma continuousOn_derivedKernel {w : ℂ} {R : ℝ} (hw : w ∈ ball 0 
   intro z hz
   apply pow_ne_zero
   rw [sub_ne_zero]
-  rintro rfl
-  rw [mem_sphere_zero_iff_norm] at hz
-  rw [mem_ball_zero_iff, hz] at hw
-  exact absurd hw (not_lt.2 (le_abs_self R))
+  grind [mem_sphere, mem_ball, le_abs_self R]
 
 /-- If `g` is meromorphic on the closed ball and `w` lies in the open ball, then
 `ζ ↦ (2ζ/(ζ-w)²) • log ‖g ζ‖` is circle integrable. -/

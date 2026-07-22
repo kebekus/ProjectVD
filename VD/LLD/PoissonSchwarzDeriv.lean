@@ -222,10 +222,8 @@ theorem circleAverage_smul_log_norm_sub_sphere {u w : ℂ} {R : ℝ}
     fun z _ ↦ analyticAt_id.sub analyticAt_const
   have h₃ : ∀ z ∈ ball (0 : ℂ) R, z - u ≠ 0 := by
     intro z hz
-    apply sub_ne_zero.2
-    intro hcon
-    rw [mem_ball_zero_iff, hcon, mem_sphere_zero_iff_norm.1 hu] at hz
-    exact lt_irrefl _ hz
+    rw [sub_ne_zero]
+    grind [mem_sphere, mem_ball]
   have h₁ : MeromorphicOn (fun ζ : ℂ ↦ ζ - u) (closedBall 0 R) :=
     fun z _ ↦ (analyticAt_id.sub analyticAt_const).meromorphicAt
   have hmain := h₁.logDeriv_eq_circleAverage h₂ h₃ hw
