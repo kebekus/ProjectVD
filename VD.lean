@@ -19,7 +19,6 @@ import VD.MathlibSubmitted.CauchyIntegralDeriv
 import VD.MathlibSubmitted.CountingEstimate
 import VD.MathlibSubmitted.LogCountingIsBigOLog
 import VD.MathlibSubmitted.MeromorphicLogDeriv
-import VD.MathlibSubmitted.PoissonIntegralDeriv
 import VD.MathlibSubmitted.Translation
 import VD.MathlibSubmitted.TruncatedCounting
 import VD.SMT.Deficiency
