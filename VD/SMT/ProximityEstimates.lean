@@ -214,14 +214,14 @@ theorem proximity_deriv_top_le {f : ℂ → ℂ} (hf : Meromorphic f)
 `f` to the targets is controlled by the proximity of `1/f′` to `⊤` plus the proximity of
 the shifted logarithmic derivatives to `⊤`, up to a constant depending only on `s`:
 `Σₐ m(r, a) ≤ m(r, 1/f′) + Σₐ m(r, f′/(f - a)) + c`. This is the integrated form of the
-separation lemma `Real.exists_sum_posLog_norm_inv_sub_le`.
+separation lemma `Real.exists_sum_posLog_inv_norm_sub_le`.
 -/
 theorem sum_proximity_le {f : ℂ → ℂ} (hf : Meromorphic f)
     (h' : ∀ x, meromorphicOrderAt (deriv f) x ≠ ⊤) (s : Finset ℂ) :
     ∃ c, ∀ r : ℝ, 1 ≤ r →
       ∑ a ∈ s, proximity f a r
         ≤ proximity (deriv f)⁻¹ ⊤ r + ∑ a ∈ s, proximity (logDeriv (f · - a)) ⊤ r + c := by
-  obtain ⟨C, hC⟩ := Real.exists_sum_posLog_norm_inv_sub_le s
+  obtain ⟨C, hC⟩ := Real.exists_sum_posLog_inv_norm_sub_le s
   refine ⟨C + Real.log s.card, fun r hr ↦ ?_⟩
   have hr0 : r ≠ 0 := (one_pos.trans_le hr).ne'
   have hd : Meromorphic (deriv f) := hf.deriv

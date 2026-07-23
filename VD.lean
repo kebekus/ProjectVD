@@ -3,7 +3,6 @@ import VD.LLD.LogDerivLemma
 import VD.LLD.LogDerivTwoRadius
 import VD.LLD.PoissonJensenDeriv
 import VD.LLD.PoissonSchwarzDeriv
-import VD.LLD.PosLog
 import VD.LinearDiffOp.Basic
 import VD.LinearDiffOp.Regularity
 import VD.LinearDiffOp.Wirtinger
@@ -19,6 +18,7 @@ import VD.MathlibSubmitted.CauchyIntegralDeriv
 import VD.MathlibSubmitted.CountingEstimate
 import VD.MathlibSubmitted.LogCountingIsBigOLog
 import VD.MathlibSubmitted.MeromorphicLogDeriv
+import VD.MathlibSubmitted.PosLog
 import VD.MathlibSubmitted.Translation
 import VD.MathlibSubmitted.TruncatedCounting
 import VD.SMT.Deficiency

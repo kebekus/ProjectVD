@@ -16,7 +16,7 @@ Dependencies: none (independently PR-able).
 This file proves the pointwise **separation lemma** of value distribution theory, over a
 general normed field —
 
-- `Real.exists_sum_posLog_norm_inv_sub_le`: for a finite set `s` of points there is a
+- `Real.exists_sum_posLog_inv_norm_sub_le`: for a finite set `s` of points there is a
   constant `C` with `∑ a ∈ s, log⁺ ‖w - a‖⁻¹ ≤ log⁺ ‖∑ a ∈ s, (w - a)⁻¹‖ + C` for
   **all** `w`.
 
@@ -37,24 +37,26 @@ namespace Real
 
 variable {𝕜 : Type*} [NormedField 𝕜]
 
-/-- Helper for the separation lemma `exists_sum_posLog_norm_inv_sub_le`: if `w` keeps
-distance at least `c` from every point of `s`, then `∑ a ∈ s, log⁺ ‖w - a‖⁻¹` is bounded
-by `#s * log⁺ c⁻¹`. -/
-lemma sum_posLog_norm_inv_sub_le {s : Finset 𝕜} {w : 𝕜} {c : ℝ} (hc : 0 < c)
+/--
+If `w` keeps distance at least `c` from every point of a finite set `s`, then `∑ a ∈ s, log⁺ ‖w -
+a‖⁻¹` is bounded by `#s * log⁺ c⁻¹`.
+-/
+lemma sum_posLog_inv_norm_sub_le {s : Finset 𝕜} {w : 𝕜} {c : ℝ} (hc : 0 < c)
     (h : ∀ a ∈ s, c ≤ ‖w - a‖) :
     ∑ a ∈ s, log⁺ ‖w - a‖⁻¹ ≤ s.card * log⁺ c⁻¹ := by
   calc ∑ a ∈ s, log⁺ ‖w - a‖⁻¹
       ≤ ∑ a ∈ s, log⁺ c⁻¹ := by
-        refine Finset.sum_le_sum fun a ha ↦ posLog_le_posLog (by positivity) ?_
+        refine sum_le_sum fun a ha ↦ posLog_le_posLog (by positivity) ?_
         gcongr
         exact h a ha
-    _ = s.card * log⁺ c⁻¹ := by rw [Finset.sum_const, nsmul_eq_mul]
+    _ = s.card * log⁺ c⁻¹ := by rw [sum_const, nsmul_eq_mul]
 
-/-- **Separation lemma**: for a finite set `s` of points, closeness to one point of `s`,
-measured by `∑ a ∈ s, log⁺ ‖· - a‖⁻¹`, is detected by the single function
-`log⁺ ‖∑ a ∈ s, (· - a)⁻¹‖`, up to a constant depending only on `s`. Key pointwise input
-for the Second Main Theorem of value distribution theory. -/
-theorem exists_sum_posLog_norm_inv_sub_le (s : Finset 𝕜) :
+/--
+**Separation lemma**: for a finite set `s` of points, closeness to one point of `s`, measured by `∑
+a ∈ s, log⁺ ‖· - a‖⁻¹`, is detected by the single function `log⁺ ‖∑ a ∈ s, (· - a)⁻¹‖`, up to a
+constant depending only on `s`.
+-/
+theorem exists_sum_posLog_inv_norm_sub_le (s : Finset 𝕜) :
     ∃ C, ∀ w : 𝕜, ∑ a ∈ s, log⁺ ‖w - a‖⁻¹ ≤ log⁺ ‖∑ a ∈ s, (w - a)⁻¹‖ + C := by
   classical
   rcases Nat.lt_or_ge s.card 2 with hcard | hcard
@@ -62,45 +64,44 @@ theorem exists_sum_posLog_norm_inv_sub_le (s : Finset 𝕜) :
     refine ⟨0, fun w ↦ ?_⟩
     have h : s.card = 0 ∨ s.card = 1 := by omega
     obtain h | h := h
-    · rw [Finset.card_eq_zero] at h
+    · rw [card_eq_zero] at h
       simp [h]
-    · obtain ⟨a, rfl⟩ := Finset.card_eq_one.mp h
+    · obtain ⟨a, rfl⟩ := card_eq_one.mp h
       simp [norm_inv]
   · -- Main case `2 ≤ #s`: take `δ` as the minimal gap of the target set, capped at `1`.
     obtain ⟨δ, hδ₀, hδ₁, hδgap⟩ :
         ∃ δ : ℝ, 0 < δ ∧ δ ≤ 1 ∧ ∀ a ∈ s, ∀ b ∈ s, a ≠ b → δ ≤ ‖a - b‖ := by
       have hs : s.offDiag.Nonempty := by
-        obtain ⟨a, ha, b, hb, hab⟩ := Finset.one_lt_card_iff_nontrivial.mp hcard
-        exact ⟨(a, b), Finset.mem_offDiag.mpr ⟨ha, hb, hab⟩⟩
+        obtain ⟨a, ha, b, hb, hab⟩ := one_lt_card_iff_nontrivial.mp hcard
+        exact ⟨(a, b), mem_offDiag.mpr ⟨ha, hb, hab⟩⟩
       refine ⟨min 1 (s.offDiag.inf' hs fun p ↦ dist p.1 p.2), lt_min one_pos ?_,
         min_le_left _ _, fun a ha b hb hab ↦ ?_⟩
-      · rw [Finset.lt_inf'_iff]
-        exact fun p hp ↦ dist_pos.mpr (Finset.mem_offDiag.mp hp).2.2
+      · rw [lt_inf'_iff]
+        exact fun p hp ↦ dist_pos.mpr (mem_offDiag.mp hp).2.2
       · rw [← dist_eq_norm]
         have h1 : (s.offDiag.inf' hs fun p ↦ dist p.1 p.2) ≤ dist (a, b).1 (a, b).2 :=
-          Finset.inf'_le _ (Finset.mem_offDiag.mpr ⟨ha, hb, hab⟩)
+          inf'_le _ (mem_offDiag.mpr ⟨ha, hb, hab⟩)
         exact (min_le_right _ _).trans h1
     have hq2 : (2 : ℝ) ≤ s.card := by exact_mod_cast hcard
     have h2q : (0 : ℝ) < 2 * s.card := by linarith
     have hlogq : 0 ≤ log s.card := log_nonneg (by linarith)
     have hposA : 0 ≤ log⁺ (2 * s.card / δ) := posLog_nonneg
     refine ⟨s.card * log⁺ (2 * s.card / δ) + log s.card, fun w ↦ ?_⟩
-    by_cases hfar : ∀ a ∈ s, δ / (2 * s.card) ≤ ‖w - a‖
+    by_cases! hfar : ∀ a ∈ s, δ / (2 * s.card) ≤ ‖w - a‖
     · -- Case (i): `w` keeps distance `δ/(2 #s)` from every point of `s`; then already the
       -- left-hand side is bounded by the constant.
-      have h1 := sum_posLog_norm_inv_sub_le (div_pos hδ₀ h2q) hfar
+      have h1 := sum_posLog_inv_norm_sub_le (div_pos hδ₀ h2q) hfar
       rw [inv_div] at h1
       have h2 : (0 : ℝ) ≤ log⁺ ‖∑ a ∈ s, (w - a)⁻¹‖ := posLog_nonneg
       linarith
     · -- Case (ii): `w` is `δ/(2 #s)`-close to some `a₀ ∈ s`, hence `δ/2`-far from every
       -- other point of `s`.
-      push Not at hfar
       obtain ⟨a₀, ha₀, hnear⟩ := hfar
       have hcaste : ((s.erase a₀).card : ℝ) = (s.card : ℝ) - 1 := by
-        rw [Finset.card_erase_of_mem ha₀, Nat.cast_sub (by omega), Nat.cast_one]
+        rw [card_erase_of_mem ha₀, Nat.cast_sub (by omega), Nat.cast_one]
       have hother : ∀ b ∈ s.erase a₀, δ / 2 ≤ ‖w - b‖ := by
         intro b hb
-        obtain ⟨hba₀, hbs⟩ := Finset.mem_erase.mp hb
+        obtain ⟨hba₀, hbs⟩ := mem_erase.mp hb
         have h1 : δ ≤ ‖a₀ - b‖ := hδgap a₀ ha₀ b hbs (Ne.symm hba₀)
         have h2 : ‖a₀ - b‖ ≤ ‖a₀ - w‖ + ‖w - b‖ := by
           simpa [dist_eq_norm] using dist_triangle a₀ w b
@@ -110,7 +111,7 @@ theorem exists_sum_posLog_norm_inv_sub_le (s : Finset 𝕜) :
       -- Tail estimate: the sum over `s \ {a₀}` is bounded by the constant.
       have htail : ∑ b ∈ s.erase a₀, log⁺ ‖w - b‖⁻¹
           ≤ ((s.card : ℝ) - 1) * log⁺ (2 * s.card / δ) := by
-        have h1 := sum_posLog_norm_inv_sub_le (by positivity) hother
+        have h1 := sum_posLog_inv_norm_sub_le (by positivity) hother
         rw [inv_div, hcaste] at h1
         refine h1.trans (mul_le_mul_of_nonneg_left ?_ (by linarith))
         refine posLog_le_posLog (by positivity) ?_
@@ -121,8 +122,8 @@ theorem exists_sum_posLog_norm_inv_sub_le (s : Finset 𝕜) :
       have hhead : log⁺ ‖w - a₀‖⁻¹ ≤ log s.card + log⁺ ‖∑ a ∈ s, (w - a)⁻¹‖ := by
         rcases eq_or_ne w a₀ with rfl | hne
         -- At `w = a₀` the junk-value convention gives `log⁺ ‖w - a₀‖⁻¹ = log⁺ 0⁻¹ = 0`.
-        · simp only [sub_self, norm_zero, inv_zero, posLog_zero]
-          exact add_nonneg hlogq posLog_nonneg
+        · simpa only [sub_self, norm_zero, inv_zero, posLog_zero]
+            using add_nonneg hlogq posLog_nonneg
         · have hpos : 0 < ‖w - a₀‖ := norm_pos_iff.mpr (sub_ne_zero.mpr hne)
           -- The singular term is large …
           have hlarge : 2 * s.card / δ ≤ ‖w - a₀‖⁻¹ := by
@@ -133,18 +134,18 @@ theorem exists_sum_posLog_norm_inv_sub_le (s : Finset 𝕜) :
             calc ‖∑ b ∈ s.erase a₀, (w - b)⁻¹‖
                 ≤ ∑ b ∈ s.erase a₀, ‖(w - b)⁻¹‖ := norm_sum_le _ _
               _ ≤ ∑ b ∈ s.erase a₀, 2 / δ := by
-                  refine Finset.sum_le_sum fun b hb ↦ ?_
+                  refine sum_le_sum fun b hb ↦ ?_
                   rw [norm_inv, ← inv_div]
                   gcongr
                   exact hother b hb
               _ = ((s.card : ℝ) - 1) * (2 / δ) := by
-                  rw [Finset.sum_const, nsmul_eq_mul, hcaste]
+                  rw [sum_const, nsmul_eq_mul, hcaste]
           -- … so the full sum has norm at least `‖w - a₀‖⁻¹ / #s`.
           have hlow : ‖w - a₀‖⁻¹ - ((s.card : ℝ) - 1) * (2 / δ)
               ≤ ‖∑ a ∈ s, (w - a)⁻¹‖ := by
             have h5 : ‖(w - a₀)⁻¹‖
                 ≤ ‖∑ a ∈ s, (w - a)⁻¹‖ + ‖∑ b ∈ s.erase a₀, (w - b)⁻¹‖ := by
-              rw [← Finset.add_sum_erase s (fun a ↦ (w - a)⁻¹) ha₀]
+              rw [← add_sum_erase s (fun a ↦ (w - a)⁻¹) ha₀]
               simpa using norm_sub_le ((w - a₀)⁻¹ + ∑ b ∈ s.erase a₀, (w - b)⁻¹)
                 (∑ b ∈ s.erase a₀, (w - b)⁻¹)
             rw [norm_inv] at h5
@@ -160,7 +161,7 @@ theorem exists_sum_posLog_norm_inv_sub_le (s : Finset 𝕜) :
                 posLog_le_posLog (by positivity) hdom
             _ ≤ log s.card + log⁺ ‖∑ a ∈ s, (w - a)⁻¹‖ := posLog_nat_mul
       -- Assemble the two estimates.
-      rw [← Finset.add_sum_erase s (fun a ↦ log⁺ ‖w - a‖⁻¹) ha₀]
+      rw [← add_sum_erase s (fun a ↦ log⁺ ‖w - a‖⁻¹) ha₀]
       have h6 : ((s.card : ℝ) - 1) * log⁺ (2 * s.card / δ)
           ≤ s.card * log⁺ (2 * s.card / δ) :=
         mul_le_mul_of_nonneg_right (by linarith) hposA
