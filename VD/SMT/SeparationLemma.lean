@@ -3,7 +3,6 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Analysis.Normed.Field.Lemmas
 import Mathlib.Analysis.SpecialFunctions.Log.PosLog
 
 /-!
@@ -59,16 +58,16 @@ theorem exists_sum_posLog_norm_inv_sub_le (s : Finset 𝕜) :
     ∃ C, ∀ w : 𝕜, ∑ a ∈ s, log⁺ ‖w - a‖⁻¹ ≤ log⁺ ‖∑ a ∈ s, (w - a)⁻¹‖ + C := by
   classical
   rcases Nat.lt_or_ge s.card 2 with hcard | hcard
-  -- For `#s ≤ 1` the constant `0` works, the sums being empty or singletons.
-  · refine ⟨0, fun w ↦ ?_⟩
+  · -- For `#s ≤ 1` the constant `0` works, the sums being empty or singletons.
+    refine ⟨0, fun w ↦ ?_⟩
     have h : s.card = 0 ∨ s.card = 1 := by omega
     obtain h | h := h
     · rw [Finset.card_eq_zero] at h
       simp [h]
     · obtain ⟨a, rfl⟩ := Finset.card_eq_one.mp h
       simp [norm_inv]
-  -- Main case `2 ≤ #s`: take `δ` as the minimal gap of the target set, capped at `1`.
-  · obtain ⟨δ, hδ₀, hδ₁, hδgap⟩ :
+  · -- Main case `2 ≤ #s`: take `δ` as the minimal gap of the target set, capped at `1`.
+    obtain ⟨δ, hδ₀, hδ₁, hδgap⟩ :
         ∃ δ : ℝ, 0 < δ ∧ δ ≤ 1 ∧ ∀ a ∈ s, ∀ b ∈ s, a ≠ b → δ ≤ ‖a - b‖ := by
       have hs : s.offDiag.Nonempty := by
         obtain ⟨a, ha, b, hb, hab⟩ := Finset.one_lt_card_iff_nontrivial.mp hcard
@@ -87,15 +86,15 @@ theorem exists_sum_posLog_norm_inv_sub_le (s : Finset 𝕜) :
     have hposA : 0 ≤ log⁺ (2 * s.card / δ) := posLog_nonneg
     refine ⟨s.card * log⁺ (2 * s.card / δ) + log s.card, fun w ↦ ?_⟩
     by_cases hfar : ∀ a ∈ s, δ / (2 * s.card) ≤ ‖w - a‖
-    -- Case (i): `w` keeps distance `δ/(2 #s)` from every point of `s`; then already the
-    -- left-hand side is bounded by the constant.
-    · have h1 := sum_posLog_norm_inv_sub_le (div_pos hδ₀ h2q) hfar
+    · -- Case (i): `w` keeps distance `δ/(2 #s)` from every point of `s`; then already the
+      -- left-hand side is bounded by the constant.
+      have h1 := sum_posLog_norm_inv_sub_le (div_pos hδ₀ h2q) hfar
       rw [inv_div] at h1
       have h2 : (0 : ℝ) ≤ log⁺ ‖∑ a ∈ s, (w - a)⁻¹‖ := posLog_nonneg
       linarith
-    -- Case (ii): `w` is `δ/(2 #s)`-close to some `a₀ ∈ s`, hence `δ/2`-far from every
-    -- other point of `s`.
-    · push Not at hfar
+    · -- Case (ii): `w` is `δ/(2 #s)`-close to some `a₀ ∈ s`, hence `δ/2`-far from every
+      -- other point of `s`.
+      push Not at hfar
       obtain ⟨a₀, ha₀, hnear⟩ := hfar
       have hcaste : ((s.erase a₀).card : ℝ) = (s.card : ℝ) - 1 := by
         rw [Finset.card_erase_of_mem ha₀, Nat.cast_sub (by omega), Nat.cast_one]
