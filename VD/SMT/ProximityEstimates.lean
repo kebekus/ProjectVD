@@ -6,7 +6,7 @@ Authors: Stefan Kebekus
 import VD.LLD.LogDerivLemma
 import VD.MathlibPending.CharacteristicMoebius
 import VD.MathlibSubmitted.MeromorphicLogDeriv
-import VD.SMT.SeparationLemma
+import VD.MathlibSubmitted.SeparationLemma
 
 /-!
 # Proximity Estimates for the Second Main Theorem — SMT work package D
