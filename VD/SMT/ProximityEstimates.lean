@@ -48,35 +48,6 @@ References: [Lang, *Introduction to Complex Hyperbolic Spaces*][MR886677], Ch. V
 open Asymptotics Filter MeasureTheory Metric Real Set Topology ValueDistribution
 
 /-!
-## Congruence Lemma for Derivatives
-
-Like the logarithmic derivative (`logDeriv_congr_codiscreteWithin`), the derivative on an
-open set `U` only depends on the equivalence class of the function with respect to
-equality away from codiscrete subsets of `U`. This is pure calculus and requires no
-meromorphy assumption.
--/
-
-/--
-If two functions agree on a codiscrete subset of an open set `U`, then so do their
-derivatives.
--/
-theorem deriv_congr_codiscreteWithin {𝕜 : Type*} [NontriviallyNormedField 𝕜]
-    {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] {f g : 𝕜 → E} {U : Set 𝕜}
-    (hU : IsOpen U) (h : f =ᶠ[codiscreteWithin U] g) :
-    deriv f =ᶠ[codiscreteWithin U] deriv g := by
-  filter_upwards [h, self_mem_codiscreteWithin U] with y h₁y h₂y
-  have h₃y : f =ᶠ[𝓝 y] g := by
-    have h₄ : {z | f z = g z} ∪ Uᶜ ∈ 𝓝 y := by
-      rw [← nhdsNE_sup_pure y, mem_sup]
-      exact ⟨mem_codiscreteWithin_iff_forall_mem_nhdsNE.1 h y h₂y,
-        mem_pure.2 (mem_union_left _ h₁y)⟩
-    filter_upwards [h₄, hU.mem_nhds h₂y] with z h₁z h₂z
-    rcases h₁z with h₁z | h₁z
-    · exact h₁z
-    · exact absurd h₂z h₁z
-  exact h₃y.deriv_eq
-
-/-!
 ## D1: The Constancy Dichotomy
 
 The degenerate case of the Second Main Theorem: if the derivative of a meromorphic
@@ -130,7 +101,7 @@ theorem Meromorphic.eventuallyEq_const_of_exists_meromorphicOrderAt_deriv_eq_top
       (hd.exists_meromorphicOrderAt_eq_top_iff_eventually_zero.1 h)
   have h₃ : ∀ x, deriv g x = 0 := by
     have h₄ : ∃ᶠ z in 𝓝[≠] (0 : ℂ), deriv g z = 0 :=
-      Filter.Eventually.frequently (mem_codiscrete_iff_forall_mem_nhdsNE.1 h₂ 0)
+      Filter.Eventually.frequently (mem_nhdsNE_of_mem_codiscrete h₂ 0)
     exact fun x ↦ AnalyticOnNhd.eqOn_zero_of_preconnected_of_frequently_eq_zero
       (fun x _ ↦ (hg x).deriv) isPreconnected_univ (mem_univ 0) h₄ (mem_univ x)
   -- … so `g` is constant, and `f` agrees with it away from a discrete set.

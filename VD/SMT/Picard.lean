@@ -7,6 +7,7 @@ import Mathlib.Analysis.Complex.Polynomial.Basic
 import Mathlib.RingTheory.PrincipalIdealDomain
 import Mathlib.RingTheory.UniqueFactorizationDomain.Basic
 import VD.MathlibPending.CharacteristicIsBigOLog
+import VD.MathlibSubmitted.Codiscrete
 import VD.SMT.SecondMainTheorem
 
 /-!
@@ -143,35 +144,11 @@ theorem MonotoneOn.isBigO_log_of_eventually_le {u : ℝ → ℝ} {x₀ C : ℝ}
 ## Auxiliary Lemmas
 -/
 
-/-- Sets that are codiscrete in `ℂ` are punctured neighborhoods of every point. -/
-private lemma mem_nhdsNE_of_mem_codiscrete {s : Set ℂ} (hs : s ∈ Filter.codiscrete ℂ) (x : ℂ) :
-    s ∈ 𝓝[≠] x := by
-  rw [Filter.codiscrete, mem_codiscreteWithin_iff_forall_mem_nhdsNE] at hs
-  have h₁ := hs x (Set.mem_univ x)
-  rwa [compl_univ, union_empty] at h₁
-
 /-- The positive part of the logarithm grows sublinearly. -/
 private lemma tendsto_posLog_div_atTop : Tendsto (fun x : ℝ ↦ log⁺ x / x) atTop (𝓝 0) := by
   apply Tendsto.congr' _ Real.isLittleO_log_id_atTop.tendsto_div_nhds_zero
   filter_upwards [eventually_ge_atTop 1] with x hx
   rw [Real.posLog_eq_log (by rwa [abs_of_nonneg (by linarith)]), id_eq]
-
-/-- Nonzero polynomials are nonzero away from a codiscrete set. -/
-private lemma eventually_eval_ne_zero_codiscrete {g : Polynomial ℂ} (hg : g ≠ 0) :
-    ∀ᶠ z in Filter.codiscrete ℂ, g.eval z ≠ 0 := by
-  obtain ⟨x₀, hx₀⟩ : ∃ x, g.eval x ≠ 0 := by
-    by_contra hcon
-    simp only [not_exists, not_ne_iff] at hcon
-    refine hg (Polynomial.eq_zero_of_infinite_isRoot g ?_)
-    have h₁ : {x : ℂ | g.IsRoot x} = Set.univ := by
-      ext x
-      simp [Polynomial.IsRoot.def, hcon x]
-    rw [h₁]
-    exact Set.infinite_univ
-  have h₂ : AnalyticOnNhd ℂ g.eval Set.univ :=
-    fun z _ ↦ (Polynomial.differentiable g).analyticAt z
-  filter_upwards [h₂.preimage_zero_mem_codiscreteWithin hx₀ (Set.mem_univ x₀)
-    isConnected_univ] with z hz using hz
 
 namespace ValueDistribution
 

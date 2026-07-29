@@ -7,6 +7,7 @@ import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
 import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 import Mathlib.Algebra.Polynomial.Eval.Defs
 import Mathlib.Analysis.Calculus.Deriv.Polynomial
+import VD.MathlibSubmitted.Codiscrete
 import VD.MathlibSubmitted.LogCountingIsBigOLog
 import VD.MathlibPending.BoundednessCharacteristic
 
@@ -189,16 +190,8 @@ theorem rational_iff_characteristic_isBigO_log {f : ℂ → ℂ} (hf : Meromorph
         rw [hpp] at this
         exact this
       -- `q` is nonzero on a codiscrete set, so we can divide.
-      have hqne0 : ∀ᶠ z in codiscrete ℂ, q.eval z ≠ 0 := by
-        obtain ⟨x₀, hx₀⟩ : ∃ x, q.eval x ≠ 0 := by
-          by_contra h
-          simp only [not_exists, not_ne_iff] at h
-          refine hq0 (Polynomial.eq_zero_of_infinite_isRoot q ?_)
-          have : {x : ℂ | q.IsRoot x} = univ := by
-            ext x; simp [Polynomial.IsRoot.def, h x]
-          rw [this]; exact Set.infinite_univ
-        filter_upwards [(analyticOnNhd_polynomial q).preimage_zero_mem_codiscreteWithin hx₀
-          (mem_univ x₀) isConnected_univ] with z hz using hz
+      have hqne0 : ∀ᶠ z in codiscrete ℂ, q.eval z ≠ 0 :=
+        eventually_eval_ne_zero_codiscrete hq0
       refine ⟨pp, q, hq0, ?_⟩
       filter_upwards [hg_eq, hqne0] with z hgz hqz
       have hfq : f z * q.eval z = pp.eval z := by simpa [hg_def] using hgz
@@ -212,13 +205,9 @@ theorem rational_iff_characteristic_isBigO_log {f : ℂ → ℂ} (hf : Meromorph
         obtain ⟨z₀, hz₀⟩ := hH
         exact ((hf.exists_meromorphicOrderAt_ne_top_iff_forall isConnected_univ).1
           ⟨⟨z, mem_univ z⟩, hz⟩ ⟨z₀, mem_univ z₀⟩) hz₀
-      have hf0 : f =ᶠ[codiscrete ℂ] 0 := by
-        have hmem : {z : ℂ | f z = 0} ∈ codiscrete ℂ := by
-          rw [Filter.codiscrete, mem_codiscreteWithin_iff_forall_mem_nhdsNE]
-          intro x _
-          rw [compl_univ, union_empty]
-          exact meromorphicOrderAt_eq_top_iff.1 (hAll x)
-        filter_upwards [hmem] with z hz using hz
+      have hf0 : f =ᶠ[codiscrete ℂ] 0 :=
+        eventuallyEq_codiscrete_iff_forall_eventuallyEq_nhdsNE.2
+          fun x ↦ meromorphicOrderAt_eq_top_iff.1 (hAll x)
       exact ⟨0, 1, one_ne_zero, by filter_upwards [hf0] with z hz; simp [hz]⟩
 
 /--

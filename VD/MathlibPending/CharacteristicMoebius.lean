@@ -6,6 +6,7 @@ Authors: Stefan Kebekus
 import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 import Mathlib.Analysis.Meromorphic.IsolatedZeros
 import VD.MathlibPending.Scaling
+import VD.MathlibSubmitted.Codiscrete
 
 /-!
 # Invariance of the Characteristic Function under Automorphisms of the Projective Line
@@ -172,18 +173,6 @@ theorem isBigO_characteristic_sub_characteristic_const_mul {f : ℂ → ℂ} {s 
 -/
 
 variable
-  {X : Type*} [TopologicalSpace X]
-  {Y : Type*}
-
-lemma mem_codiscrete_iff_forall_mem_nhdsNE {S : Set X} :
-    S ∈ codiscrete X ↔ ∀ x, S ∈ 𝓝[≠] x := by
-  simp [codiscrete, mem_codiscreteWithin_iff_forall_mem_nhdsNE]
-
-lemma eventuallyEq_discrete_iff_forall_eventuallyEq_nhdsNe {f₁ f₂ : X → Y} :
-    f₁ =ᶠ[codiscrete X] f₂ ↔ ∀ x, f₁ =ᶠ[𝓝[≠] x] f₂ := by
-  simp [EventuallyEq, Filter.Eventually, mem_codiscrete_iff_forall_mem_nhdsNE]
-
-variable
   {𝕜 : Type*} [RCLike 𝕜]
   {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
 
@@ -202,7 +191,7 @@ theorem Meromorphic.exists_meromorphicOrderAt_eq_top_iff_eventually_zero {f : �
     (∃ u, meromorphicOrderAt f u = ⊤) ↔ (f =ᶠ[codiscrete 𝕜] 0) := by
   rw [hf.exists_meromorphicOrderAt_eq_top_iff_forall]
   constructor <;> intro h
-  · apply eventuallyEq_discrete_iff_forall_eventuallyEq_nhdsNe.2
+  · apply eventuallyEq_codiscrete_iff_forall_eventuallyEq_nhdsNE.2
       (fun x ↦meromorphicOrderAt_eq_top_iff.1 (h x))
   · intro _
     rw [meromorphicOrderAt_eq_top_iff, Filter.Eventually]
