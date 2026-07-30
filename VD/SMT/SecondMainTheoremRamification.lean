@@ -145,7 +145,8 @@ theorem secondMainTheorem_ramification {f : ℂ → ℂ} (hf : Meromorphic f) (s
   -- constant away from a discrete set, and both sides of the estimate are eventually
   -- constant.
   · push Not at h'
-    obtain ⟨c₀, hc₀⟩ := hf.eventuallyEq_const_of_exists_meromorphicOrderAt_deriv_eq_top h'
+    obtain ⟨c₀, hc₀⟩ := hf.exists_eventuallyEq_const_iff_deriv_eventuallyEq_zero.2
+      ((Meromorphic.exists_meromorphicOrderAt_eq_top_iff_eventually_zero hd).1 h')
     -- The divisor of `deriv f` vanishes, and with it both of its counting functions.
     have hall : ∀ x, meromorphicOrderAt (deriv f) x = ⊤ :=
       (Meromorphic.exists_meromorphicOrderAt_eq_top_iff_forall hd).1 h'

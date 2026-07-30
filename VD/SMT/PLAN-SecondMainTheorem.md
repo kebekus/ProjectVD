@@ -428,31 +428,62 @@ adaptation of `logDeriv_congr_codiscreteWithin`" anticipated for D1 is included 
 public lemma `deriv_congr_codiscreteWithin` (Mathlib-worthy on its own; possible target
 near `Mathlib/Analysis/Calculus/Deriv/Basic.lean`). Everything else went as planned;
 the junk-value identities of D3/D4 survived Lean's `x/0 = 0` conventions exactly as
-predicted in risk 2.*
+predicted in risk 2. D1 was later strengthened from the one-directional
+`eventuallyEq_const_of_exists_meromorphicOrderAt_deriv_eq_top` to the iff
+`exists_eventuallyEq_const_iff_deriv_eventuallyEq_zero`, whose converse direction is
+three lines from `deriv_congr_codiscreteWithin`, then localized to open connected
+sets (`MeromorphicOn.exists_eventuallyEq_const_iff_deriv_eventuallyEq_zero`), the global
+form remaining as a two-line corollary. The proof was subsequently re-engineered to avoid
+`MeromorphicNFOn`/`toMeromorphicNFOn` and the global identity theorem (local constant at
+one point + order-`⊤` propagation applied to `f - c`), so that D1 can merge into Mathlib
+below `Analysis/Meromorphic/NormalForm.lean`.*
 
 ### D1. The constancy dichotomy
 
 ```lean
-/-- A meromorphic function on `ℂ` whose derivative vanishes somewhere to infinite order
-is constant away from a discrete set. -/
-theorem Meromorphic.eventuallyEq_const_of_exists_meromorphicOrderAt_deriv_eq_top
-    {f : ℂ → ℂ} (hf : Meromorphic f) (h : ∃ x, meromorphicOrderAt (deriv f) x = ⊤) :
-    ∃ c, f =ᶠ[codiscrete ℂ] fun _ ↦ c
+/-- A function meromorphic on an open connected subset `U` of `ℝ` or `ℂ`, with values in
+a complete normed space, is constant away from a discrete subset of `U` if and only if
+its derivative vanishes away from a discrete subset of `U`. Meromorphic analogue of
+`IsOpen.exists_is_const_of_fderiv_eq_zero`. -/
+theorem MeromorphicOn.exists_eventuallyEq_const_iff_deriv_eventuallyEq_zero
+    {𝕜 : Type*} [RCLike 𝕜] {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+    [CompleteSpace E] {f : 𝕜 → E} {U : Set 𝕜} (hf : MeromorphicOn f U) (h₁U : IsOpen U)
+    (h₂U : IsConnected U) :
+    (∃ c, f =ᶠ[codiscreteWithin U] fun _ ↦ c) ↔ deriv f =ᶠ[codiscreteWithin U] 0
 ```
 
-Proof sketch: `h` upgrades to `∀ x` (`exists_meromorphicOrderAt_eq_top_iff_forall` for
-`hf.deriv`). Then no `x` has `meromorphicOrderAt f x < 0` or `∈ (0, ⊤)` (else
-`meromorphicOrderAt_deriv_eq_sub_one` would give finite deriv-order). Two cases: some `x`
-has order `⊤` — then `f =ᶠ[codiscrete ℂ] 0` directly (`…_iff_eventually_zero`); or the
-order of `f` is `0` everywhere — pass to `g := toMeromorphicNFOn f Set.univ`
-(`g =ᶠ[codiscrete ℂ] f`, analytic on all of `ℂ` since in normal form with order `0`
-everywhere), transfer `deriv g =ᶠ[codiscrete ℂ] deriv f =ᶠ 0` (deriv-congruence on open
-codiscrete sets: 15-line adaptation of `logDeriv_congr_codiscreteWithin`), kill `deriv g`
-identically by the identity theorem
-(`AnalyticOnNhd.eqOn_zero_of_preconnected_of_frequently_eq_zero`, `ℂ` preconnected),
-conclude `g` constant (`IsOpen.is_const_of_fderiv_eq_zero` over `ℝ` via
-`HasDerivAt.hasFDerivAt`). This route deliberately avoids
-connectedness-of-complement arguments.
+The global version for functions meromorphic on all of `𝕜`
+(`Meromorphic.exists_eventuallyEq_const_iff_deriv_eventuallyEq_zero`, stated with
+`codiscrete 𝕜`) is a two-line corollary via `U = Set.univ`. The statement is in the
+natural maximal generality of the surrounding API: the domain an open connected subset of
+`ℝ` or `ℂ` (`RCLike` — connectedness is essential: the order-`⊤` propagation fails over
+totally disconnected fields like `ℚ_p`), the target any complete normed space
+(completeness is required by `meromorphicOrderAt_deriv_eq_sub_one` and
+`AnalyticAt.deriv`). The helper lemma
+`eventuallyEq_codiscreteWithin_iff_forall_eventuallyEq_nhdsNE` (open-set version of the
+membership dictionary; Mathlib target `Mathlib/Topology/DiscreteSubset.lean`) mediates
+between `codiscreteWithin U` and punctured neighborhoods.
+
+The SMT dichotomy consumes the `←` direction of the global corollary: the degenerate
+hypothesis `∃ x, meromorphicOrderAt (deriv f) x = ⊤` produced by `push Not` converts to
+the right-hand side via `exists_meromorphicOrderAt_eq_top_iff_eventually_zero`. The `→`
+direction is three lines from `deriv_congr_codiscreteWithin`; stating the iff gives the
+mathematically complete, Mathlib-facing form.
+
+Proof sketch (`←`): fix a base point `z₀ ∈ U`. The order of `f` at `z₀` is `0` or `⊤`
+(any other order would force a finite order for `deriv f` via
+`meromorphicOrderAt_deriv_eq_sub_one`, contradicting `deriv f =ᶠ[𝓝[≠] z₀] 0`). In either
+case `f` is constant on a punctured neighborhood of `z₀`: for order `⊤` the constant is
+`0`; for order `0` the local representative `g` of `meromorphicOrderAt_eq_int_iff` is
+analytic at `z₀` with `deriv g =ᶠ[𝓝[≠] z₀] 0` (`Filter.EventuallyEq.nhdsNE_deriv`),
+hence `deriv g = 0` on a full ball by continuity of `deriv g`, and `g` is constant there
+(`Convex.is_const_of_fderivWithin_eq_zero`). Now subtract: `f - c` has order `⊤` at
+`z₀`, hence at every point of the connected `U`
+(`MeromorphicOn.exists_meromorphicOrderAt_ne_top_iff_forall_mem`), so
+`f =ᶠ[codiscreteWithin U] c`. This route needs no normal forms (`toMeromorphicNFOn`), no
+global identity theorem, and no connectedness-of-complement arguments; every ingredient
+lives at or below `Mathlib/Analysis/Meromorphic/Order.lean`, plus `MeanValue` and the
+deriv-congruence lemmas.
 
 ### D2. The `S(r)` lemma for shifted logarithmic derivatives
 

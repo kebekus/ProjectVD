@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import VD.LLD.LogDerivLemma
-import VD.MathlibPending.CharacteristicMoebius
 import VD.MathlibSubmitted.MeromorphicLogDeriv
 import VD.MathlibSubmitted.SeparationLemma
 
@@ -15,17 +14,18 @@ See `VD/SMT/PLAN-SecondMainTheorem.md`, §6.
 
 Mathlib target: `Mathlib/Analysis/Complex/ValueDistribution/SecondMainTheorem.lean`
 (part 1 of 3).
-Dependencies: `VD/SMT/SeparationLemma.lean` (package C), the Lemma on the Logarithmic
-Derivative (`VD/LLD/LogDerivLemma.lean`), and the pending
-`VD/MathlibPending/CharacteristicMoebius.lean` (D1 only).
+Dependencies: `VD/SMT/SeparationLemma.lean` (package C) and the Lemma on the Logarithmic
+Derivative (`VD/LLD/LogDerivLemma.lean`).
 
 This file collects the four proximity estimates from which the Second Main Theorem of
 value distribution theory is assembled:
 
-- D1, `Meromorphic.eventuallyEq_const_of_exists_meromorphicOrderAt_deriv_eq_top`: the
-  constancy dichotomy — a meromorphic function on `ℂ` whose derivative vanishes somewhere
-  to infinite order is constant away from a discrete set. This isolates the degenerate
-  case of the hypothesis-free Second Main Theorem.
+- D1, `MeromorphicOn.exists_eventuallyEq_const_iff_deriv_eventuallyEq_zero`: the
+  constancy dichotomy — a function meromorphic on an open connected subset of `ℝ` or `ℂ`,
+  with values in a complete normed space, is constant away from a discrete set iff its
+  derivative vanishes away from a discrete set; the global version
+  `Meromorphic.exists_eventuallyEq_const_iff_deriv_eventuallyEq_zero` is a corollary.
+  This isolates the degenerate case of the hypothesis-free Second Main Theorem.
 
 - D2, `ValueDistribution.isBigO_proximity_logDeriv_shift`: `m(r, f′/(f − a)) = S(r)` —
   the Lemma on the Logarithmic Derivative for `f - a`, with the error expressed through
@@ -50,64 +50,126 @@ open Asymptotics Filter MeasureTheory Metric Real Set Topology ValueDistribution
 /-!
 ## D1: The Constancy Dichotomy
 
-The degenerate case of the Second Main Theorem: if the derivative of a meromorphic
-function vanishes to infinite order at a single point, then the function is constant away
-from a discrete set. This allows stating the Second Main Theorem without any
+The degenerate case of the Second Main Theorem: a function meromorphic on an open
+connected set is constant away from a discrete set if and only if its derivative vanishes
+away from a discrete set — equivalently, by
+`MeromorphicOn.exists_meromorphicOrderAt_ne_top_iff_forall_mem`, vanishes to infinite
+order at a single point. This allows stating the Second Main Theorem without any
 nondegeneracy hypothesis.
 -/
 
 /--
-A meromorphic function on `ℂ` whose derivative vanishes somewhere to infinite order is
-constant away from a discrete set.
+On an open set `U`, two functions agree along `codiscreteWithin U` if and only if they
+agree along the punctured neighborhood of every point of `U`. Local version of
+`eventuallyEq_codiscrete_iff_forall_eventuallyEq_nhdsNE`.
 -/
-theorem Meromorphic.eventuallyEq_const_of_exists_meromorphicOrderAt_deriv_eq_top
-    {f : ℂ → ℂ} (hf : Meromorphic f) (h : ∃ x, meromorphicOrderAt (deriv f) x = ⊤) :
-    ∃ c, f =ᶠ[codiscrete ℂ] fun _ ↦ c := by
-  have hd : Meromorphic (deriv f) := hf.deriv
-  -- The derivative vanishes to infinite order everywhere, so the meromorphic order of
-  -- `f` at every point is `0` or `⊤`.
-  have h' : ∀ x, meromorphicOrderAt (deriv f) x = ⊤ :=
-    hd.exists_meromorphicOrderAt_eq_top_iff_forall.1 h
-  have horder : ∀ x, meromorphicOrderAt f x = 0 ∨ meromorphicOrderAt f x = ⊤ := by
-    intro x
-    by_contra hcon
-    push Not at hcon
-    obtain ⟨n, hn⟩ := WithTop.ne_top_iff_exists.1 hcon.2
-    have hn0 : n ≠ 0 := fun h0 ↦ hcon.1 (by simp [← hn, h0])
-    have := meromorphicOrderAt_deriv_eq_sub_one
-      ((Int.cast_ne_zero (α := ℂ)).2 hn0) hn.symm
-    rw [h' x] at this
-    exact WithTop.coe_ne_top this.symm
-  by_cases htop : ∃ x, meromorphicOrderAt f x = ⊤
-  -- If `f` itself vanishes to infinite order somewhere, it vanishes away from a
-  -- discrete set, and the constant is `0`.
-  · exact ⟨0, hf.exists_meromorphicOrderAt_eq_top_iff_eventually_zero.1 htop⟩
-  -- Otherwise, the order of `f` is `0` everywhere; pass to the normal form `g`, which is
-  -- then analytic on all of `ℂ`.
-  push Not at htop
-  have h0 : ∀ x, meromorphicOrderAt f x = 0 := fun x ↦ (horder x).resolve_right (htop x)
-  have hfU : MeromorphicOn f Set.univ := meromorphicOn_univ.2 hf
-  set g := toMeromorphicNFOn f Set.univ with hg_def
-  have hfg : f =ᶠ[codiscrete ℂ] g := toMeromorphicNFOn_eqOn_codiscrete hfU
-  have hg : ∀ x, AnalyticAt ℂ g x := by
-    intro x
-    have h₁ : MeromorphicNFAt g x := meromorphicNFOn_toMeromorphicNFOn f Set.univ (mem_univ x)
-    rw [← h₁.meromorphicOrderAt_nonneg_iff_analyticAt,
-      meromorphicOrderAt_toMeromorphicNFOn hfU (mem_univ x), h0 x]
-  -- The derivative of `g` vanishes on a codiscrete set, hence everywhere by the identity
-  -- theorem …
-  have h₂ : deriv g =ᶠ[codiscrete ℂ] 0 :=
-    (deriv_congr_codiscreteWithin isOpen_univ hfg).symm.trans
-      (hd.exists_meromorphicOrderAt_eq_top_iff_eventually_zero.1 h)
-  have h₃ : ∀ x, deriv g x = 0 := by
-    have h₄ : ∃ᶠ z in 𝓝[≠] (0 : ℂ), deriv g z = 0 :=
-      Filter.Eventually.frequently (mem_nhdsNE_of_mem_codiscrete h₂ 0)
-    exact fun x ↦ AnalyticOnNhd.eqOn_zero_of_preconnected_of_frequently_eq_zero
-      (fun x _ ↦ (hg x).deriv) isPreconnected_univ (mem_univ 0) h₄ (mem_univ x)
-  -- … so `g` is constant, and `f` agrees with it away from a discrete set.
-  have h₄ : ∀ x, g x = g 0 :=
-    fun x ↦ is_const_of_deriv_eq_zero (fun x ↦ (hg x).differentiableAt) h₃ x 0
-  exact ⟨g 0, hfg.trans (Eventually.of_forall h₄)⟩
+lemma eventuallyEq_codiscreteWithin_iff_forall_eventuallyEq_nhdsNE {X Y : Type*}
+    [TopologicalSpace X] {U : Set X} (hU : IsOpen U) {f g : X → Y} :
+    f =ᶠ[codiscreteWithin U] g ↔ ∀ x ∈ U, f =ᶠ[𝓝[≠] x] g := by
+  rw [EventuallyEq, Filter.Eventually, mem_codiscreteWithin_iff_forall_mem_nhdsNE]
+  refine forall₂_congr fun x hx ↦
+    ⟨fun h ↦ ?_, fun h ↦ mem_of_superset h subset_union_left⟩
+  filter_upwards [h, mem_nhdsWithin_of_mem_nhds (hU.mem_nhds hx)] with z hz h₂z
+  exact hz.resolve_right fun h₃z ↦ h₃z h₂z
+
+/--
+A function meromorphic on an open connected subset `U` of `ℝ` or `ℂ`, with values in a
+complete normed space, is constant away from a discrete subset of `U` if and only if its
+derivative vanishes away from a discrete subset of `U`. Meromorphic analogue of
+`IsOpen.exists_is_const_of_fderiv_eq_zero`.
+-/
+theorem MeromorphicOn.exists_eventuallyEq_const_iff_deriv_eventuallyEq_zero
+    {𝕜 : Type*} [RCLike 𝕜] {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+    [CompleteSpace E] {f : 𝕜 → E} {U : Set 𝕜} (hf : MeromorphicOn f U) (h₁U : IsOpen U)
+    (h₂U : IsConnected U) :
+    (∃ c, f =ᶠ[codiscreteWithin U] fun _ ↦ c) ↔ deriv f =ᶠ[codiscreteWithin U] 0 := by
+  constructor
+  · -- Congruence in the codiscrete filter passes to derivatives, and constants have
+    -- vanishing derivative.
+    rintro ⟨c, hc⟩
+    filter_upwards [deriv_congr_codiscreteWithin h₁U hc] with z hz
+    simp [hz]
+  · -- Vanishing derivative means: constant
+    intro h
+    obtain ⟨z₀, hz₀⟩ := h₂U.nonempty
+    have h₀ : deriv f =ᶠ[𝓝[≠] z₀] 0 :=
+      (eventuallyEq_codiscreteWithin_iff_forall_eventuallyEq_nhdsNE h₁U).1 h z₀ hz₀
+    have h₁ : meromorphicOrderAt (deriv f) z₀ = ⊤ := meromorphicOrderAt_eq_top_iff.2 h₀
+    -- Step 1: `f` is constant on a punctured neighborhood of the base point `z₀`.
+    obtain ⟨c, hc⟩ : ∃ c, f =ᶠ[𝓝[≠] z₀] fun _ ↦ c := by
+      -- The meromorphic order of `f` at `z₀` is `0` or `⊤`, since any other order would
+      -- force a finite order for `deriv f`.
+      have horder : meromorphicOrderAt f z₀ = 0 ∨ meromorphicOrderAt f z₀ = ⊤ := by
+        by_contra hcon
+        push Not at hcon
+        obtain ⟨n, hn⟩ := WithTop.ne_top_iff_exists.1 hcon.2
+        have hn0 : n ≠ 0 := fun h0 ↦ hcon.1 (by simp [← hn, h0])
+        have := meromorphicOrderAt_deriv_eq_sub_one
+          ((Int.cast_ne_zero (α := 𝕜)).2 hn0) hn.symm
+        rw [h₁] at this
+        exact WithTop.coe_ne_top this.symm
+      rcases horder with h₂ | h₂
+      -- Order `0`: near `z₀`, the function `f` agrees with an analytic `g` whose derivative
+      -- vanishes; by continuity, `deriv g = 0` on a ball, so `g` is constant there.
+      · obtain ⟨g, h₁g, h₂g, h₃g⟩ :=
+          (meromorphicOrderAt_eq_int_iff (n := 0) (hf z₀ hz₀)).1 (by exact_mod_cast h₂)
+        have hfg : f =ᶠ[𝓝[≠] z₀] g := by
+          filter_upwards [h₃g] with z hz
+          simpa using hz
+        have hdg : deriv g =ᶠ[𝓝[≠] z₀] 0 := hfg.nhdsNE_deriv.symm.trans h₀
+        have hdfull : ∀ᶠ z in 𝓝 z₀, deriv g z = 0 := by
+          filter_upwards [eventually_nhdsWithin_iff.1 hdg] with z hz
+          rcases eq_or_ne z z₀ with rfl | hne
+          · have h₄ : Tendsto (deriv g) (𝓝[≠] z) (𝓝 (deriv g z)) :=
+              h₁g.deriv.continuousAt.continuousWithinAt
+            have h₅ : Tendsto (deriv g) (𝓝[≠] z) (𝓝 0) := by
+              rw [tendsto_congr' hdg]
+              exact tendsto_const_nhds
+            exact tendsto_nhds_unique h₄ h₅
+          · exact hz hne
+        obtain ⟨r, hr, hball⟩ := Metric.eventually_nhds_iff_ball.1
+          (hdfull.and h₁g.eventually_analyticAt)
+        have hcball : ∀ z ∈ Metric.ball z₀ r, g z = g z₀ := by
+          intro z hz
+          apply (convex_ball z₀ r).is_const_of_fderivWithin_eq_zero
+            (fun w hw ↦ (hball w hw).2.differentiableAt.differentiableWithinAt)
+            (fun w hw ↦ ?_) hz (Metric.mem_ball_self hr)
+          rw [fderivWithin_of_isOpen Metric.isOpen_ball hw]
+          have h₅ : HasDerivAt g 0 w := by
+            have := (hball w hw).2.differentiableAt.hasDerivAt
+            rwa [(hball w hw).1] at this
+          simpa using h₅.hasFDerivAt.fderiv
+        refine ⟨g z₀, ?_⟩
+        filter_upwards [hfg,
+          mem_nhdsWithin_of_mem_nhds (Metric.ball_mem_nhds z₀ hr)] with z h₁z h₂z
+        rw [h₁z, hcball z h₂z]
+      -- Order `⊤`: `f` vanishes on a punctured neighborhood of `z₀`, and the constant is `0`.
+      · exact ⟨0, meromorphicOrderAt_eq_top_iff.1 h₂⟩
+    -- Step 2: `f - c` has order `⊤` at `z₀`, hence everywhere on `U` by connectedness.
+    have h₃ : ∀ y ∈ U, meromorphicOrderAt (f · - c) y = ⊤ := by
+      intro y hy
+      by_contra h₂y
+      have hF : MeromorphicOn (f · - c) U := fun x hx ↦ (hf x hx).sub (.const c x)
+      apply (hF.exists_meromorphicOrderAt_ne_top_iff_forall_mem h₂U).1 ⟨y, hy, h₂y⟩ z₀ hz₀
+      rw [meromorphicOrderAt_eq_top_iff]
+      filter_upwards [hc] with z hz
+      simp [hz]
+    refine ⟨c, (eventuallyEq_codiscreteWithin_iff_forall_eventuallyEq_nhdsNE h₁U).2
+      fun y hy ↦ ?_⟩
+    filter_upwards [meromorphicOrderAt_eq_top_iff.1 (h₃ y hy)] with z hz
+    exact sub_eq_zero.1 hz
+
+/--
+A meromorphic function on `ℝ` or `ℂ`, with values in a complete normed space, is constant
+away from a discrete set if and only if its derivative vanishes away from a discrete set.
+Meromorphic analogue of `is_const_of_deriv_eq_zero`.
+-/
+theorem Meromorphic.exists_eventuallyEq_const_iff_deriv_eventuallyEq_zero
+    {𝕜 : Type*} [RCLike 𝕜] {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
+    [CompleteSpace E] {f : 𝕜 → E} (hf : Meromorphic f) :
+    (∃ c, f =ᶠ[codiscrete 𝕜] fun _ ↦ c) ↔ deriv f =ᶠ[codiscrete 𝕜] 0 :=
+  (meromorphicOn_univ.2 hf).exists_eventuallyEq_const_iff_deriv_eventuallyEq_zero
+    isOpen_univ isConnected_univ
 
 namespace ValueDistribution
 
