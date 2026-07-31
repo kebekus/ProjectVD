@@ -59,8 +59,8 @@ nondegeneracy hypothesis.
 -/
 
 /--
-On an open set `U`, two functions agree along `codiscreteWithin U` if and only if they
-agree along the punctured neighborhood of every point of `U`. Local version of
+On an open set `U`, two functions agree along `codiscreteWithin U` if and only if they agree along
+the punctured neighborhood of every point of `U`. Local version of
 `eventuallyEq_codiscrete_iff_forall_eventuallyEq_nhdsNE`.
 -/
 lemma eventuallyEq_codiscreteWithin_iff_forall_eventuallyEq_nhdsNE {X Y : Type*}
@@ -73,9 +73,9 @@ lemma eventuallyEq_codiscreteWithin_iff_forall_eventuallyEq_nhdsNE {X Y : Type*}
   exact hz.resolve_right fun h₃z ↦ h₃z h₂z
 
 /--
-A function meromorphic on an open connected subset `U` of `ℝ` or `ℂ`, with values in a
-complete normed space, is constant away from a discrete subset of `U` if and only if its
-derivative vanishes away from a discrete subset of `U`. Meromorphic analogue of
+A function meromorphic on an open connected subset `U` of `ℝ` or `ℂ`, with values in a complete
+normed space, is constant away from a discrete subset of `U` if and only if its derivative vanishes
+away from a discrete subset of `U`. Meromorphic analogue of
 `IsOpen.exists_is_const_of_fderiv_eq_zero`.
 -/
 theorem MeromorphicOn.exists_eventuallyEq_const_iff_deriv_eventuallyEq_zero
@@ -94,7 +94,6 @@ theorem MeromorphicOn.exists_eventuallyEq_const_iff_deriv_eventuallyEq_zero
     obtain ⟨z₀, hz₀⟩ := h₂U.nonempty
     have h₀ : deriv f =ᶠ[𝓝[≠] z₀] 0 :=
       (eventuallyEq_codiscreteWithin_iff_forall_eventuallyEq_nhdsNE h₁U).1 h z₀ hz₀
-    have h₁ : meromorphicOrderAt (deriv f) z₀ = ⊤ := meromorphicOrderAt_eq_top_iff.2 h₀
     -- Step 1: `f` is constant on a punctured neighborhood of the base point `z₀`.
     obtain ⟨c, hc⟩ : ∃ c, f =ᶠ[𝓝[≠] z₀] fun _ ↦ c := by
       -- The meromorphic order of `f` at `z₀` is `0` or `⊤`, since any other order would
@@ -102,30 +101,24 @@ theorem MeromorphicOn.exists_eventuallyEq_const_iff_deriv_eventuallyEq_zero
       have horder : meromorphicOrderAt f z₀ = 0 ∨ meromorphicOrderAt f z₀ = ⊤ := by
         by_contra hcon
         push Not at hcon
-        obtain ⟨n, hn⟩ := WithTop.ne_top_iff_exists.1 hcon.2
-        have hn0 : n ≠ 0 := fun h0 ↦ hcon.1 (by simp [← hn, h0])
-        have := meromorphicOrderAt_deriv_eq_sub_one
-          ((Int.cast_ne_zero (α := 𝕜)).2 hn0) hn.symm
-        rw [h₁] at this
-        exact WithTop.coe_ne_top this.symm
+        lift meromorphicOrderAt f z₀ to ℤ using hcon.2 with n hn
+        rw [ne_eq, WithTop.coe_eq_zero, ←ne_eq] at hcon
+        apply WithTop.coe_ne_top (a := n - 1)
+        rw [← meromorphicOrderAt_deriv_eq_sub_one (Int.cast_ne_zero.2 hcon.1) hn.symm,
+          meromorphicOrderAt_eq_top_iff.2 h₀]
       rcases horder with h₂ | h₂
       -- Order `0`: near `z₀`, the function `f` agrees with an analytic `g` whose derivative
       -- vanishes; by continuity, `deriv g = 0` on a ball, so `g` is constant there.
-      · obtain ⟨g, h₁g, h₂g, h₃g⟩ :=
-          (meromorphicOrderAt_eq_int_iff (n := 0) (hf z₀ hz₀)).1 (by exact_mod_cast h₂)
-        have hfg : f =ᶠ[𝓝[≠] z₀] g := by
-          filter_upwards [h₃g] with z hz
-          simpa using hz
-        have hdg : deriv g =ᶠ[𝓝[≠] z₀] 0 := hfg.nhdsNE_deriv.symm.trans h₀
+      · obtain ⟨g, h₁g, h₂g, h₃g⟩ := (meromorphicOrderAt_eq_int_iff (n := 0) (hf z₀ hz₀)).1 h₂
+        rw [← Filter.EventuallyEq] at h₃g
+        simp_rw [zpow_ofNat, pow_zero, one_smul] at h₃g
+        have hdg : deriv g =ᶠ[𝓝[≠] z₀] 0 := h₃g.nhdsNE_deriv.symm.trans h₀
         have hdfull : ∀ᶠ z in 𝓝 z₀, deriv g z = 0 := by
           filter_upwards [eventually_nhdsWithin_iff.1 hdg] with z hz
           rcases eq_or_ne z z₀ with rfl | hne
-          · have h₄ : Tendsto (deriv g) (𝓝[≠] z) (𝓝 (deriv g z)) :=
-              h₁g.deriv.continuousAt.continuousWithinAt
-            have h₅ : Tendsto (deriv g) (𝓝[≠] z) (𝓝 0) := by
-              rw [tendsto_congr' hdg]
-              exact tendsto_const_nhds
-            exact tendsto_nhds_unique h₄ h₅
+          · apply tendsto_nhds_unique (l := 𝓝[≠] z) h₁g.deriv.continuousAt.continuousWithinAt
+            rw [tendsto_congr' hdg]
+            exact tendsto_const_nhds
           · exact hz hne
         obtain ⟨r, hr, hball⟩ := Metric.eventually_nhds_iff_ball.1
           (hdfull.and h₁g.eventually_analyticAt)
@@ -140,7 +133,7 @@ theorem MeromorphicOn.exists_eventuallyEq_const_iff_deriv_eventuallyEq_zero
             rwa [(hball w hw).1] at this
           simpa using h₅.hasFDerivAt.fderiv
         refine ⟨g z₀, ?_⟩
-        filter_upwards [hfg,
+        filter_upwards [h₃g,
           mem_nhdsWithin_of_mem_nhds (Metric.ball_mem_nhds z₀ hr)] with z h₁z h₂z
         rw [h₁z, hcball z h₂z]
       -- Order `⊤`: `f` vanishes on a punctured neighborhood of `z₀`, and the constant is `0`.
@@ -160,9 +153,9 @@ theorem MeromorphicOn.exists_eventuallyEq_const_iff_deriv_eventuallyEq_zero
     exact sub_eq_zero.1 hz
 
 /--
-A meromorphic function on `ℝ` or `ℂ`, with values in a complete normed space, is constant
-away from a discrete set if and only if its derivative vanishes away from a discrete set.
-Meromorphic analogue of `is_const_of_deriv_eq_zero`.
+A meromorphic function on `ℝ` or `ℂ`, with values in a complete normed space, is constant away from
+a discrete set if and only if its derivative vanishes away from a discrete set. Meromorphic analogue
+of `is_const_of_deriv_eq_zero`.
 -/
 theorem Meromorphic.exists_eventuallyEq_const_iff_deriv_eventuallyEq_zero
     {𝕜 : Type*} [RCLike 𝕜] {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E]
@@ -178,11 +171,11 @@ namespace ValueDistribution
 -/
 
 /--
-**Lemma on the Logarithmic Derivative, arbitrary finite targets**: for `f` meromorphic on
-the complex plane and any value `a`, the proximity function of `logDeriv (f · - a)` for
-the value `⊤` satisfies `m(r, f′/(f - a)) = O(log⁺ T(r, f) + log r)` as `r → ∞`, outside
-an exceptional set of finite Lebesgue measure. Note that the error is expressed through
-the characteristic of `f` itself, not that of `f - a`.
+**Lemma on the Logarithmic Derivative, arbitrary finite targets**: for `f` meromorphic on the
+complex plane and any value `a`, the proximity function of `logDeriv (f · - a)` for the value `⊤`
+satisfies `m(r, f′/(f - a)) = O(log⁺ T(r, f) + log r)` as `r → ∞`, outside an exceptional set of
+finite Lebesgue measure. Note that the error is expressed through the characteristic of `f` itself,
+not that of `f - a`.
 -/
 theorem isBigO_proximity_logDeriv_shift {f : ℂ → ℂ} (hf : Meromorphic f) (a : ℂ) :
     proximity (logDeriv (f · - a)) ⊤ =O[volume.cofinite ⊓ atTop]
@@ -222,8 +215,8 @@ theorem isBigO_proximity_logDeriv_shift {f : ℂ → ℂ} (hf : Meromorphic f) (
 -/
 
 /--
-The proximity function of the derivative is bounded by that of the function plus that of
-the logarithmic derivative: `m(r, f′) ≤ m(r, f) + m(r, f′/f)`.
+The proximity function of the derivative is bounded by that of the function plus that of the
+logarithmic derivative: `m(r, f′) ≤ m(r, f) + m(r, f′/f)`.
 -/
 theorem proximity_deriv_top_le {f : ℂ → ℂ} (hf : Meromorphic f)
     (h' : ∀ x, meromorphicOrderAt f x ≠ ⊤) {r : ℝ} (hr : r ≠ 0) :
@@ -243,11 +236,11 @@ theorem proximity_deriv_top_le {f : ℂ → ℂ} (hf : Meromorphic f)
 -/
 
 /--
-**Integrated separation bound**: for a finite set `s` of targets, the total proximity of
-`f` to the targets is controlled by the proximity of `1/f′` to `⊤` plus the proximity of
-the shifted logarithmic derivatives to `⊤`, up to a constant depending only on `s`:
-`Σₐ m(r, a) ≤ m(r, 1/f′) + Σₐ m(r, f′/(f - a)) + c`. This is the integrated form of the
-separation lemma `Real.exists_sum_posLog_inv_norm_sub_le`.
+**Integrated separation bound**: for a finite set `s` of targets, the total proximity of `f` to the
+targets is controlled by the proximity of `1/f′` to `⊤` plus the proximity of the shifted
+logarithmic derivatives to `⊤`, up to a constant depending only on `s`: `Σₐ m(r, a) ≤ m(r, 1/f′) +
+Σₐ m(r, f′/(f - a)) + c`. This is the integrated form of the separation lemma
+`Real.exists_sum_posLog_inv_norm_sub_le`.
 -/
 theorem sum_proximity_le {f : ℂ → ℂ} (hf : Meromorphic f)
     (h' : ∀ x, meromorphicOrderAt (deriv f) x ≠ ⊤) (s : Finset ℂ) :
