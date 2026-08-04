@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C .lake/packages/mathlib log --oneline -1)"
+    ]
+  }
+}
