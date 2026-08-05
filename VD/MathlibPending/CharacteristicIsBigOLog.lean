@@ -8,7 +8,6 @@ import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 import Mathlib.Algebra.Polynomial.Eval.Defs
 import Mathlib.Analysis.Calculus.Deriv.Polynomial
 import VD.MathlibSubmitted.Codiscrete
-import VD.MathlibSubmitted.LogCountingIsBigOLog
 import VD.MathlibPending.BoundednessCharacteristic
 
 /-!

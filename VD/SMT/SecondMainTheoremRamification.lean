@@ -127,7 +127,9 @@ theorem secondMainTheorem_ramification {f : ℂ → ℂ} (hf : Meromorphic f) (s
       calc proximity (logDeriv f) ⊤ r + ∑ a ∈ s, proximity (logDeriv (f · - a)) ⊤ r
           ≤ ‖proximity (logDeriv f) ⊤ r + ∑ a ∈ s, proximity (logDeriv (f · - a)) ⊤ r‖ :=
             le_abs_self _
-        _ ≤ C₀ * ‖log⁺ (characteristic f ⊤ r) + Real.log r‖ := hbound
+        _ ≤ C₀ * ‖log⁺ (characteristic f ⊤ r) + Real.log r‖ := by
+          rw [← Finset.sum_apply]
+          exact hbound
         _ = C₀ * (log⁺ (characteristic f ⊤ r) + Real.log r) := by
             rw [Real.norm_of_nonneg (by linarith)]
     -- Absorb the additive constants `c₁` and `c₂` into the error term.

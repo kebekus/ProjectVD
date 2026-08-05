@@ -17,7 +17,6 @@ import VD.MathlibSubmitted.BorelGrowth
 import VD.MathlibSubmitted.CauchyIntegralDeriv
 import VD.MathlibSubmitted.Codiscrete
 import VD.MathlibSubmitted.CountingEstimate
-import VD.MathlibSubmitted.LogCountingIsBigOLog
 import VD.MathlibSubmitted.MeromorphicLogDeriv
 import VD.MathlibSubmitted.PosLog
 import VD.MathlibSubmitted.SeparationLemma
@@ -29,3 +28,4 @@ import VD.SMT.Picard
 import VD.SMT.ProximityEstimates
 import VD.SMT.SecondMainTheorem
 import VD.SMT.SecondMainTheoremRamification
+import VD.Test
