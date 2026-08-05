@@ -43,6 +43,11 @@ open Complex Filter Function MeromorphicOn Metric Real Set Topology
 ## Auxiliary Lemmas
 -/
 
+@[fun_prop]
+lemma meromorphicAt_canonicalFactor {R : ℝ} {x w : ℂ} : MeromorphicAt (canonicalFactor R w) x := by
+  rw [canonicalFactor_def]
+  fun_prop
+
 /-- The derived Herglotz–Riesz kernel `ζ ↦ 2ζ/(ζ-w)²` is continuous on the circle
 `sphere 0 |R|` whenever `w ∈ ball 0 R`. -/
 private lemma continuousOn_derivedKernel {w : ℂ} {R : ℝ} (hw : w ∈ ball 0 R) :
