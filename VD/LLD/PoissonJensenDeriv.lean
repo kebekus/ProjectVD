@@ -70,7 +70,7 @@ private lemma circleIntegrable_derivedKernel_smul_log_norm {g : ℂ → ℂ} {w 
   have h₂ : CircleIntegrable (fun ζ ↦ (Real.log ‖g ζ‖ : ℂ)) 0 R := by
     simp only [CircleIntegrable, intervalIntegrable_iff] at h₁ ⊢
     exact Complex.ofRealCLM.integrable_comp h₁
-  exact h₂.smul_of_continuousOn (continuousOn_derivedKernel hw)
+  exact h₂.continuousOn_smul (continuousOn_derivedKernel hw)
 
 /-- The meromorphic order of `· - v` is never `⊤`. -/
 private lemma meromorphicOrderAt_id_sub_const_ne_top {v x : ℂ} :

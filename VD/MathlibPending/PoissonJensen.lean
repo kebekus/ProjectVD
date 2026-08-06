@@ -24,13 +24,11 @@ needed along the way.
 
 open Complex Filter Function MeromorphicOn Metric Real Set Topology
 
-
 /-!
 ## The Poisson–Jensen Formula
 -/
 
 variable {R : ℝ} {c w : ℂ} {f : ℂ → ℂ}
-
 
 /-- **The Poisson–Jensen Formula.** If `f` is meromorphic on `closedBall c R` and has vanishing
 order at an interior point `w ∈ ball c R`, then the logarithm of the norm of the trailing
@@ -48,27 +46,23 @@ theorem MeromorphicOn.log_norm_meromorphicTrailingCoeffAt
   -- Reduce to the centred case by translating `f` to `g z = f (z + c)`.
   let g := fun z ↦ f (z + c)
   have hfg : f = fun z ↦ g (z - c) := by simp [g]
-  repeat rw [hfg]
-  simp only
+  rw [hfg]
   have htc : meromorphicTrailingCoeffAt (fun z ↦ g (z - c)) w
-      = meromorphicTrailingCoeffAt g (w - c) := by
-    rw [← hfg]
-    exact (meromorphicTrailingCoeffAt_fun_comp_add_const_eq_meromorphicTrailingCoeffAt
-      (f := f) (c := c) (x := w)).symm
-  rw [htc, MeromorphicOn.log_norm_meromorphicTrailingCoeffAt₀ (R := R)]
+      = meromorphicTrailingCoeffAt g (w - c) :=
+    meromorphicTrailingCoeffAt_fun_comp_sub_const_eq_meromorphicTrailingCoeffAt
+  rw [htc, log_norm_meromorphicTrailingCoeffAt₀ (R := R)]
   · congr 1
-    · simp only [← Real.circleAverage_map_add_const (c := c), Pi.mul_apply, comp_apply,
+    · simp only [← circleAverage_map_add_const (c := c), Pi.mul_apply, comp_apply,
         add_sub_cancel_right]
       congr
       ext x
       exact (herglotzRieszKernel_add_const c w x).symm
     · -- Translate the finsum by `i ↦ i + c`: a zero of `f` at `i + c` corresponds to a
       -- zero of `g` at `i`, and the canonical factors match accordingly.
-      apply finsum_eq_of_bijective (· + c) (Equiv.addRight c).bijective
-      intro x
-      simp only [add_sub_cancel_right, divisor_ball_fun_comp_add_const_eq_divisor_ball]
-  · simpa [mem_ball_zero_iff] using (mem_ball_iff_norm.1 h₁w)
+      refine finsum_eq_of_bijective (· + c) (Equiv.addRight c).bijective fun x ↦ ?_
+      simp only [add_sub_cancel_right, divisor_ball_fun_comp_sub_const_eq_divisor_ball]
+  · simpa [mem_ball_zero_iff] using mem_ball_iff_norm.1 h₁w
   · change meromorphicOrderAt (fun z ↦ f (z + c)) (w - c) = 0
-    rwa [meromorphicOrderAt_fun_comp_add_const_eq_meromorphicOrderAt]
-  · have hf : (fun z ↦ g (z - c)) = f := funext fun z ↦ by simp [g]
-    rwa [← meromorphicOn_closedBall_fun_comp_sub_const_iff_meromorphicOn_closedBall (c := c), hf]
+    rwa [meromorphicOrderAt_fun_comp_add_const_eq_meromorphicOrderAt, sub_add_cancel]
+  · rwa [← meromorphicOn_closedBall_fun_comp_sub_const_iff_meromorphicOn_closedBall (c := c),
+      ← hfg]

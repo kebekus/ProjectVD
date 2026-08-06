@@ -206,9 +206,9 @@ private theorem log_norm_le_circleAverage_posLog_norm
       · have := (divisor f (ball 0 R)).supportWithinDomain
         exact log_nonneg (one_lt_norm_canonicalFactor (by aesop) h₁w (by aesop)).le
     _ ≤ circleAverage (re ∘ herglotzRieszKernel 0 w * (log⁺ ‖f ·‖)) 0 R := by
-      apply circleAverage_mono ((circleIntegrable_log_norm h₃f).mul_of_continuousOn
+      apply circleAverage_mono ((circleIntegrable_log_norm h₃f).continuousOn_mul
         (continuousOn_re_herglotzRieszKernel_sphere h₁w)) ((circleIntegrable_posLog_norm
-        h₃f).mul_of_continuousOn (continuousOn_re_herglotzRieszKernel_sphere h₁w))
+        h₃f).continuousOn_mul (continuousOn_re_herglotzRieszKernel_sphere h₁w))
       intro x hx
       simp only [Pi.mul_apply, comp_apply]
       gcongr
@@ -224,7 +224,7 @@ private theorem log_norm_le_circleAverage_posLog_norm
     _ ≤ circleAverage (((R + ‖w‖) / (R - ‖w‖)) • (log⁺ ‖f ·‖)) 0 R := by
       have hint : CircleIntegrable (log⁺ ‖f ·‖) 0 R := circleIntegrable_posLog_norm h₃f
       apply circleAverage_mono (hint.re_herglotzRieszKernel_smul h₁w)
-        (hint.mul_of_continuousOn (by fun_prop))
+        (hint.continuousOn_mul (by fun_prop))
       intro x hx
       rw [abs_of_pos (pos_of_mem_ball h₁w)] at hx
       rw [Pi.smul_apply', comp_apply, smul_eq_mul, Pi.mul_apply]

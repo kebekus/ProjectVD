@@ -5,7 +5,6 @@ Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Complex.CanonicalDecomposition
 import Mathlib.Analysis.Complex.JensenFormula
-import VD.MathlibSubmitted.Translation
 
 /-!
 # The Poisson–Jensen Formula
@@ -58,7 +57,7 @@ theorem CircleIntegrable.re_herglotzRieszKernel_smul {E : Type*} [NormedAddCommG
     [NormedSpace ℝ E] {c w : ℂ} {R : ℝ} {f : ℂ → E} (hw : w ∈ ball c R)
     (hf : CircleIntegrable f c R) :
     CircleIntegrable (re ∘ herglotzRieszKernel c w • f) c R :=
-  hf.smul_of_continuousOn (by fun_prop)
+  hf.continuousOn_smul (by fun_prop)
 
 /-!
 ## The Poisson–Jensen Formula

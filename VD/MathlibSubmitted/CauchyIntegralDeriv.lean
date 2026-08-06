@@ -98,7 +98,7 @@ theorem hasDerivAt_circleIntegral_sub_inv_smul [CompleteSpace E]
       ((Measurable.aestronglyMeasurable (by fun_prop)).smul hgm)
   · -- Integrability of the integrand at `w`
     have : CircleIntegrable ((fun z ↦ (z - w)⁻¹) • g) c R := by
-      apply hg.smul_of_continuousOn
+      apply hg.continuousOn_smul
       apply ContinuousOn.inv₀ (by fun_prop)
       intro z hz
       apply sub_ne_zero.2

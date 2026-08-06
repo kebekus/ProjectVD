@@ -195,7 +195,7 @@ private lemma proximity_logDeriv_le {f : ℂ → ℂ} {r ρ : ℝ} (hf : Meromor
         hf.meromorphicOn.circleIntegrable_log_norm.abs
       have hint₁ : CircleIntegrable
           (fun ζ ↦ ‖(2 * ζ / (ζ - w) ^ 2) • (Real.log ‖f ζ‖ : ℂ)‖) 0 ρ := by
-        have h₁ := hlog_int.smul_of_continuousOn (continuousOn_derivedKernel hwball).norm
+        have h₁ := hlog_int.continuousOn_smul (continuousOn_derivedKernel hwball).norm
         have h₂ : (fun ζ : ℂ ↦ ‖2 * ζ / (ζ - w) ^ 2‖) • (fun ζ ↦ |Real.log ‖f ζ‖|)
             = fun ζ ↦ ‖(2 * ζ / (ζ - w) ^ 2) • (Real.log ‖f ζ‖ : ℂ)‖ := by
           funext ζ

@@ -20,7 +20,6 @@ import VD.MathlibSubmitted.MeromorphicLogDeriv
 import VD.MathlibSubmitted.PoissonJensen
 import VD.MathlibSubmitted.PosLog
 import VD.MathlibSubmitted.SeparationLemma
-import VD.MathlibSubmitted.Translation
 import VD.MathlibSubmitted.TruncatedCounting
 import VD.SMT.Deficiency
 import VD.SMT.DivisorDeriv
