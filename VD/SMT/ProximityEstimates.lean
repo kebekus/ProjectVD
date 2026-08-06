@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import VD.LLD.LogDerivLemma
-import VD.MathlibSubmitted.MeromorphicLogDeriv
 import VD.MathlibSubmitted.SeparationLemma
 
 /-!
@@ -223,8 +222,8 @@ theorem proximity_deriv_top_le {f : ℂ → ℂ} (hf : Meromorphic f)
     proximity (deriv f) ⊤ r ≤ proximity f ⊤ r + proximity (logDeriv f) ⊤ r := by
   -- Away from the codiscrete set where `f` does not vanish, `f′ = f · (f′/f)`.
   have h₁ : deriv f =ᶠ[codiscrete ℂ] f * logDeriv f := by
-    filter_upwards [(meromorphicOn_univ.2 hf).ne_zero_mem_codiscreteWithin fun x _ ↦ h' x]
-      with z hz
+    filter_upwards [(meromorphicOn_univ.2 hf).eventually_codiscreteWithin_apply_ne_zero
+      fun x _ ↦ h' x] with z hz
     rw [Pi.mul_apply, logDeriv_apply, mul_div_cancel₀ _ hz]
   calc proximity (deriv f) ⊤ r
       = proximity (f * logDeriv f) ⊤ r := proximity_congr_codiscrete h₁ hr
@@ -285,8 +284,8 @@ theorem sum_proximity_le {f : ℂ → ℂ} (hf : Meromorphic f)
   have step3 : proximity F ⊤ r
       = proximity ((deriv f)⁻¹ * ∑ a ∈ s, logDeriv (f · - a)) ⊤ r := by
     apply proximity_congr_codiscrete _ hr0
-    filter_upwards [(meromorphicOn_univ.2 hd).ne_zero_mem_codiscreteWithin fun x _ ↦ h' x]
-      with z hz
+    filter_upwards [(meromorphicOn_univ.2 hd).eventually_codiscreteWithin_apply_ne_zero
+      fun x _ ↦ h' x] with z hz
     simp only [hF_def, Pi.mul_apply, Pi.inv_apply, Finset.sum_apply, Finset.mul_sum]
     refine Finset.sum_congr rfl fun a _ ↦ ?_
     rw [logDeriv_apply, deriv_sub_const, div_eq_mul_inv, ← mul_assoc,
