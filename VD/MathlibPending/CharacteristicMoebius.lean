@@ -5,8 +5,8 @@ Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 import Mathlib.Analysis.Meromorphic.IsolatedZeros
-import VD.MathlibPending.Scaling
 import VD.MathlibSubmitted.Codiscrete
+import VD.MathlibSubmitted.Scaling
 
 /-!
 # Invariance of the Characteristic Function under Automorphisms of the Projective Line

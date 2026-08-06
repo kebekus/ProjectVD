@@ -11,7 +11,6 @@ import VD.MathlibPending.CharacteristicIsBigOLog
 import VD.MathlibPending.CharacteristicMoebius
 import VD.MathlibPending.PoissonJensen
 import VD.MathlibPending.ProximityBounded
-import VD.MathlibPending.Scaling
 import VD.MathlibSubmitted.BorelGrowth
 import VD.MathlibSubmitted.CauchyIntegralDeriv
 import VD.MathlibSubmitted.Codiscrete
@@ -19,6 +18,7 @@ import VD.MathlibSubmitted.CountingEstimate
 import VD.MathlibSubmitted.MeromorphicLogDeriv
 import VD.MathlibSubmitted.PoissonJensen
 import VD.MathlibSubmitted.PosLog
+import VD.MathlibSubmitted.Scaling
 import VD.MathlibSubmitted.SeparationLemma
 import VD.MathlibSubmitted.TruncatedCounting
 import VD.SMT.Deficiency
