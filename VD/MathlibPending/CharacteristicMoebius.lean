@@ -65,18 +65,13 @@ variable
 variable
   {E : Type*} [NormedAddCommGroup E] [NormedSpace ℂ E]
 
-/-- If `f` is circle integrable, then so are its scalar multiples. -/
-theorem CircleIntegrable.const_smul' {f : ℂ → E} {c s : ℂ} {R : ℝ} (h : CircleIntegrable f c R) :
-    CircleIntegrable (s • f) c R := by
-  apply h.smul
-
 @[simp]
 theorem circleIntegrable_iff_circleIntegrable_const_smul {f : ℂ → E} {c s : ℂ} {R : ℝ} (h : s ≠ 0) :
     CircleIntegrable (s • f) c R ↔ CircleIntegrable f c R := by
   constructor <;> intro hf
   · rw [show f = s⁻¹ • s • f by simp_all]
-    exact hf.const_smul' -- should be fun_prop
-  · exact hf.const_smul' -- should be fun_prop
+    fun_prop
+  · fun_prop
 
 /--
 The proximity function `f • g` at `⊤` is less than or equal to the sum of the proximity functions of
@@ -140,8 +135,7 @@ theorem isBigO_proximity_top_sub_proximity_const_smul_top {f : ℂ → E} {s : �
         · refine circleIntegrable_posLog_norm_of_nonneg ?_ hr
           intro z hz
           exact MeromorphicAt.fun_const_smul (hf z) s
-      · -- should be fun_prop
-        exact circleIntegrable_const (log⁺ ‖s‖ + log⁺ ‖s‖⁻¹) 0 r
+      · fun_prop
       · intro x hx
         simp only [Pi.abs_apply, Pi.sub_apply]
         rw [norm_smul, abs_sub_comm]

@@ -310,6 +310,7 @@ private lemma intervalIntegrable_comp_add_of_periodic {F : ℝ → ℝ}
 
 /-- **C2, integrability**: the singular integrand `‖· - a‖ ^ (-2⁻¹)` is circle integrable, for
 every center `a` and radius `r`. -/
+@[fun_prop]
 theorem Real.circleIntegrable_norm_sub_rpow (a : ℂ) (r : ℝ) :
     CircleIntegrable (‖· - a‖ ^ (-(2:ℝ)⁻¹)) 0 r := by
   -- The case of positive radius

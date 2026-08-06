@@ -223,11 +223,10 @@ private theorem log_norm_le_circleAverage_posLog_norm
         exact le_max_right _ _
     _ ≤ circleAverage (((R + ‖w‖) / (R - ‖w‖)) • (log⁺ ‖f ·‖)) 0 R := by
       have hint : CircleIntegrable (log⁺ ‖f ·‖) 0 R := circleIntegrable_posLog_norm h₃f
-      apply circleAverage_mono (hint.re_herglotzRieszKernel_smul h₁w)
-        (hint.continuousOn_mul (by fun_prop))
+      apply circleAverage_mono (by fun_prop) (hint.continuousOn_mul (by fun_prop))
       intro x hx
       rw [abs_of_pos (pos_of_mem_ball h₁w)] at hx
-      rw [Pi.smul_apply', comp_apply, smul_eq_mul, Pi.mul_apply]
+      simp only [Pi.mul_apply, comp_apply]
       gcongr
       · exact posLog_nonneg
       · simpa [herglotzRieszKernel] using re_herglotzRieszKernel_le hx h₁w

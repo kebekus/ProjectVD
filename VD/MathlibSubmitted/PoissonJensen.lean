@@ -19,14 +19,14 @@ The formula generalises Jensen's formula (`MeromorphicOn.circleAverage_log_norm`
 `c` to an arbitrary interior point `w`, the Herglotz–Riesz kernel `herglotzRieszKernel c w` playing
 the role of the Poisson kernel.
 
-The file also collects analytic and integrability properties of the Herglotz–Riesz kernel that are
+The file also collects analytic and continuity properties of the Herglotz–Riesz kernel that are
 needed along the way.
 -/
 
 open Complex Filter Function MeromorphicOn Metric Real Set Topology
 
 /-!
-## Analytic and Integrability Properties of the Herglotz–Riesz Kernel
+## Analytic and Continuity Properties of the Herglotz–Riesz Kernel
 -/
 
 /-- The Herglotz–Riesz kernel `herglotzRieszKernel c w` is analytic away from its pole at `w`. -/
@@ -48,16 +48,6 @@ theorem continuousOn_re_herglotzRieszKernel_sphere {c w : ℂ} {R : ℝ} (hw : w
   apply ContinuousAt.continuousWithinAt
   apply ContinuousAt.comp (by fun_prop) (analyticOnNhd_herglotzRieszKernel_compl x _).continuousAt
   grind [mem_sphere, mem_ball, le_abs_self R]
-
-/--
-Scaling a circle-integrable function by the real part of the Herglotz–Riesz kernel preserves circle
-integrability.
--/
-theorem CircleIntegrable.re_herglotzRieszKernel_smul {E : Type*} [NormedAddCommGroup E]
-    [NormedSpace ℝ E] {c w : ℂ} {R : ℝ} {f : ℂ → E} (hw : w ∈ ball c R)
-    (hf : CircleIntegrable f c R) :
-    CircleIntegrable (re ∘ herglotzRieszKernel c w • f) c R :=
-  hf.continuousOn_smul (by fun_prop)
 
 /-!
 ## The Poisson–Jensen Formula
@@ -102,16 +92,13 @@ theorem MeromorphicOn.log_norm_meromorphicTrailingCoeffAt₀ (h₁w : w ∈ ball
   have cast_smul {x : ℂ} {φ : ℂ → ℝ} :
       (divisor f (sphere 0 R)) x • φ = ((divisor f (sphere 0 R)) x : ℝ) • φ := by aesop
   have ρ₁ : CircleIntegrable (Complex.re ∘ herglotzRieszKernel 0 w • (Real.log ‖h ·‖)) 0 R := by
-    apply CircleIntegrable.re_herglotzRieszKernel_smul h₁w
-    apply circleIntegrable_log_norm (h₁h.meromorphicOn.mono_set _)
-    simpa [abs_of_pos hR] using sphere_subset_closedBall
+    have : CircleIntegrable (fun z ↦ Real.log ‖h z‖) 0 R := by
+      apply circleIntegrable_log_norm (h₁h.meromorphicOn.mono_set _)
+      simpa [abs_of_pos hR] using sphere_subset_closedBall
+    fun_prop
   have ρ₂ : ∀ i ∈ h₂f.toFinset, CircleIntegrable ((divisor f (sphere 0 R)) i •
-      re ∘ herglotzRieszKernel 0 w • (Real.log ‖· - i‖)) 0 R := by
-    intro i hi
-    rw [cast_smul]
-    apply CircleIntegrable.const_smul
-    apply CircleIntegrable.re_herglotzRieszKernel_smul h₁w
-    apply circleIntegrable_log_norm (fun x hx ↦ by fun_prop)
+      re ∘ herglotzRieszKernel 0 w • (Real.log ‖· - i‖)) 0 R :=
+    fun i _ ↦ by fun_prop
   -- The Poisson–Jensen identity for the circle average of `log ‖f‖`, obtained by replacing `f` with
   -- its canonical decomposition and integrating term by term.
   have key : circleAverage (re ∘ herglotzRieszKernel 0 w • (Real.log ‖f ·‖)) 0 R =

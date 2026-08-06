@@ -201,8 +201,8 @@ private lemma proximity_logDeriv_le {f : ℂ → ℂ} {r ρ : ℝ} (hf : Meromor
           funext ζ
           simp
         rwa [h₂] at h₁
-      have hint₂ : CircleIntegrable (fun ζ ↦ 2 * ρ / (ρ - r) ^ 2 * |Real.log ‖f ζ‖|) 0 ρ :=
-        hlog_int.const_smul (a := 2 * ρ / (ρ - r) ^ 2)
+      have hint₂ : CircleIntegrable (fun ζ ↦ 2 * ρ / (ρ - r) ^ 2 * |Real.log ‖f ζ‖|) 0 ρ := by
+        fun_prop
       refine le_trans (circleAverage_mono hint₁ hint₂ ?_) ?_
       · intro ζ hζ
         rw [mem_sphere_zero_iff_norm, abs_of_pos hρ₀] at hζ
@@ -277,10 +277,7 @@ private lemma proximity_logDeriv_le {f : ℂ → ℂ} {r ρ : ℝ} (hf : Meromor
     hld.meromorphicOn.circleIntegrable_posLog_norm
   have int_sum : CircleIntegrable (fun w ↦ ∑ a ∈ s,
       (|divisor f (ball 0 ρ) a| : ℝ) * (‖w - a‖ ^ (-(2:ℝ)⁻¹) + (ρ - r) ^ (-(2:ℝ)⁻¹))) 0 r := by
-    apply CircleIntegrable.fun_sum
-    intro a _
-    exact ((Real.circleIntegrable_norm_sub_rpow a r).add
-      (circleIntegrable_const ((ρ - r) ^ (-(2:ℝ)⁻¹)) 0 r)).const_smul
+    fun_prop
   have int_g : CircleIntegrable g 0 r := (circleIntegrable_const (√K) 0 r).add int_sum
   have int_posLog_g : CircleIntegrable (fun w ↦ log⁺ (g w)) 0 r := by
     apply IntervalIntegrable.mono_fun int_g.abs
@@ -295,8 +292,7 @@ private lemma proximity_logDeriv_le {f : ℂ → ℂ} {r ρ : ℝ} (hf : Meromor
     rw [proximity_top]
     calc circleAverage (fun w ↦ log⁺ ‖logDeriv f w‖) 0 r
         ≤ circleAverage (fun w ↦ 2 * log⁺ (g w)) 0 r := by
-          apply circleAverage_mono_codiscreteWithin hr₀.ne' int_lhs
-            (int_posLog_g.const_smul (a := (2:ℝ)))
+          apply circleAverage_mono_codiscreteWithin hr₀.ne' int_lhs (by fun_prop)
           rw [abs_of_pos hr₀]
           exact step2
       _ = 2 * circleAverage (fun w ↦ log⁺ (g w)) 0 r := by
@@ -323,8 +319,7 @@ private lemma proximity_logDeriv_le {f : ℂ → ℂ} {r ρ : ℝ} (hf : Meromor
       congr 1
       have h_each : ∀ a ∈ s, CircleIntegrable (fun w ↦ (|divisor f (ball 0 ρ) a| : ℝ)
           * (‖w - a‖ ^ (-(2:ℝ)⁻¹) + (ρ - r) ^ (-(2:ℝ)⁻¹))) 0 r :=
-        fun a _ ↦ ((Real.circleIntegrable_norm_sub_rpow a r).add
-          (circleIntegrable_const ((ρ - r) ^ (-(2:ℝ)⁻¹)) 0 r)).const_smul
+        fun a _ ↦ by fun_prop
       rw [circleAverage_fun_sum h_each]
       refine Finset.sum_congr rfl fun a _ ↦ ?_
       have h₂ : (fun w ↦ (|divisor f (ball 0 ρ) a| : ℝ)
