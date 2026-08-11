@@ -3,6 +3,7 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
+import VD.Field.CodiscreteWithinEventually
 import VD.LLD.LogDerivLemma
 import VD.MathlibSubmitted.SeparationLemma
 
@@ -56,20 +57,6 @@ away from a discrete set — equivalently, by
 order at a single point. This allows stating the Second Main Theorem without any
 nondegeneracy hypothesis.
 -/
-
-/--
-On an open set `U`, two functions agree along `codiscreteWithin U` if and only if they agree along
-the punctured neighborhood of every point of `U`. Local version of
-`eventuallyEq_codiscrete_iff_forall_eventuallyEq_nhdsNE`.
--/
-lemma eventuallyEq_codiscreteWithin_iff_forall_eventuallyEq_nhdsNE {X Y : Type*}
-    [TopologicalSpace X] {U : Set X} (hU : IsOpen U) {f g : X → Y} :
-    f =ᶠ[codiscreteWithin U] g ↔ ∀ x ∈ U, f =ᶠ[𝓝[≠] x] g := by
-  rw [EventuallyEq, Filter.Eventually, mem_codiscreteWithin_iff_forall_mem_nhdsNE]
-  refine forall₂_congr fun x hx ↦
-    ⟨fun h ↦ ?_, fun h ↦ mem_of_superset h subset_union_left⟩
-  filter_upwards [h, mem_nhdsWithin_of_mem_nhds (hU.mem_nhds hx)] with z hz h₂z
-  exact hz.resolve_right fun h₃z ↦ h₃z h₂z
 
 /--
 A function meromorphic on an open connected subset `U` of `ℝ` or `ℂ`, with values in a complete

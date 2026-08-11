@@ -4,7 +4,8 @@
       "Bash(git -C .lake/packages/mathlib log --oneline -1)",
       "Bash(grep -rn -B3 \"div_mul_cancel \\\\|div_mul_cancel$\" .lake/packages/mathlib/Mathlib/Algebra/Group/Defs.lean)",
       "Bash(awk 'length > 100 {print FILENAME\": \"FNR\" \\(\"length\"\\)\"}' VD/MathlibPending/PoissonJensen.lean)",
-      "Bash(grep -n \" $\" VD/MathlibPending/PoissonJensen.lean)"
+      "Bash(grep -n \" $\" VD/MathlibPending/PoissonJensen.lean)",
+      "Bash(git -C /home/kebekus/Mathe/ProjectVD status --short)"
     ]
   }
 }
