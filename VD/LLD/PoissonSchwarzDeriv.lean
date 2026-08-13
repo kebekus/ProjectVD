@@ -58,7 +58,7 @@ theorem logDeriv_canonicalFactor {R : ℝ} {a w : ℂ} (hR : R ≠ 0) (hw₁ : w
   have h₃ : (R : ℂ) * (w - a) ≠ 0 :=
     mul_ne_zero (Complex.ofReal_ne_zero.2 hR) (sub_ne_zero.2 hw₁)
   rw [canonicalFactor_def,
-    logDeriv_div w hw₂ h₃ h₁.differentiableAt h₂.differentiableAt,
+    logDeriv_fun_div w hw₂ h₃ h₁.differentiableAt h₂.differentiableAt,
     logDeriv_const_mul w _ (Complex.ofReal_ne_zero.2 hR)]
   have h₄ : HasDerivAt (fun z : ℂ ↦ z - a) 1 w := by
     simpa using (hasDerivAt_id w).sub_const a
