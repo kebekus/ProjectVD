@@ -21,7 +21,6 @@ import VD.MathlibSubmitted.CauchyIntegralDeriv
 import VD.MathlibSubmitted.Codiscrete
 import VD.MathlibSubmitted.CountingEstimate
 import VD.MathlibSubmitted.PoissonJensen
-import VD.MathlibSubmitted.PosLog
 import VD.MathlibSubmitted.Scaling
 import VD.MathlibSubmitted.SeparationLemma
 import VD.MathlibSubmitted.TruncatedCounting

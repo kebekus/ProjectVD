@@ -9,7 +9,6 @@ import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.Analysis.SpecialFunctions.Log.PosLog
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
 import Mathlib.MeasureTheory.Integral.CircleAverage
-import VD.MathlibSubmitted.PosLog
 
 /-!
 # Circle-Average Estimates — LLD work packages C1–C2
@@ -69,15 +68,9 @@ private lemma circleIntegrable_log_one_add {u : ℂ → ℝ} {r : ℝ}
         ≤ u (circleMap 0 r θ) := by linarith
       _ ≤ |u (circleMap 0 r θ)| := le_abs_self _
 
-private lemma concaveOn_log_one_add : ConcaveOn ℝ (Ici 0) (fun x ↦ Real.log (1 + x)) := by
-  refine ⟨convex_Ici 0, fun x hx y hy a b ha hb hab ↦ ?_⟩
-  simp only [mem_Ici] at hx hy
-  simp only [smul_eq_mul]
-  have h₃ := strictConcaveOn_log_Ioi.concaveOn.2 (mem_Ioi.2 (by linarith : (0:ℝ) < 1 + x))
-    (mem_Ioi.2 (by linarith : (0:ℝ) < 1 + y)) ha hb hab
-  simp only [smul_eq_mul] at h₃
-  have h₄ : a * (1 + x) + b * (1 + y) = 1 + (a * x + b * y) := by linear_combination hab
-  rwa [h₄] at h₃
+private lemma concaveOn_log_one_add : ConcaveOn ℝ (Ici 0) (fun x ↦ Real.log (1 + x)) :=
+  (strictConcaveOn_log_Ioi.concaveOn.translate_right 1).subset
+    (fun x hx ↦ by simpa using by linarith [mem_Ici.1 hx]) (convex_Ici 0)
 
 /--
 **Jensen's inequality for circle averages**: for a nonnegative circle-integrable function `u`, the
@@ -92,36 +85,19 @@ theorem Real.circleAverage_posLog_le_posLog_circleAverage {u : ℂ → ℝ} {r :
   have hIntP : CircleIntegrable (log⁺ ∘ u) 0 r := circleIntegrable_posLog_comp hu
   have step₁ : circleAverage (log⁺ ∘ u) 0 r ≤ circleAverage (fun z ↦ Real.log (1 + u z)) 0 r :=
     circleAverage_mono hIntP hInt (fun z hz ↦ posLog_le_log_one_add (h₀ z hz))
-  -- Jensen's inequality for the average with respect to `volume.restrict (Ioc 0 (2 * π))`
-  set μ : Measure ℝ := volume.restrict (Ioc 0 (2 * π)) with hμ_def
-  have hμ_univ : μ univ = ENNReal.ofReal (2 * π) := by
-    rw [hμ_def, Measure.restrict_apply_univ, Real.volume_Ioc, sub_zero]
-  have hμ_ne : NeZero μ := by
-    constructor
-    rw [← Measure.measure_univ_ne_zero, hμ_univ]
-    simp only [ne_eq, ENNReal.ofReal_eq_zero, not_le]
-    positivity
-  have hμ_real : μ.real univ = 2 * π := by
-    rw [measureReal_def, hμ_univ, ENNReal.toReal_ofReal (by positivity)]
-  have bridge : ∀ v : ℂ → ℝ, circleAverage v 0 r = ⨍ θ, v (circleMap 0 r θ) ∂μ := by
-    intro v
-    rw [circleAverage_def, average_eq, hμ_real, intervalIntegral.integral_of_le (by positivity)]
-  have hfi : Integrable (fun θ ↦ u (circleMap 0 r θ)) μ := by
-    have h₁ := intervalIntegrable_iff.1 hu
-    rwa [uIoc_of_le (by positivity : (0:ℝ) ≤ 2 * π)] at h₁
-  have hgi : Integrable (fun θ ↦ Real.log (1 + u (circleMap 0 r θ))) μ := by
-    have h₁ := intervalIntegrable_iff.1 hInt
-    rwa [uIoc_of_le (by positivity : (0:ℝ) ≤ 2 * π)] at h₁
+  -- Jensen's inequality, applied to the interval average over `Ι 0 (2 * π)`
   have step₂ : circleAverage (fun z ↦ Real.log (1 + u z)) 0 r
       ≤ Real.log (1 + circleAverage u 0 r) := by
-    rw [bridge (fun z ↦ Real.log (1 + u z)), bridge u]
-    exact concaveOn_log_one_add.le_map_average
+    rw [circleAverage_eq_intervalAverage, circleAverage_eq_intervalAverage]
+    exact concaveOn_log_one_add.le_map_set_average
       (ContinuousOn.log (by fun_prop)
         (fun x hx ↦ by simp only [mem_Ici] at hx; exact (by linarith : (0:ℝ) < 1 + x).ne'))
-      isClosed_Ici
-      (Eventually.of_forall fun θ ↦ h₀ _ (circleMap_mem_sphere' 0 r θ))
-      hfi hgi
-  have step₃ := log_one_add_le_posLog (circleAverage_nonneg_of_nonneg h₀)
+      isClosed_Ici (by simp [uIoc_of_le Real.two_pi_pos.le, Real.pi_pos])
+      (by rw [uIoc_of_le Real.two_pi_pos.le]; exact measure_Ioc_lt_top.ne)
+      (ae_restrict_of_forall_mem measurableSet_uIoc
+        fun θ _ ↦ h₀ _ (circleMap_mem_sphere' 0 r θ))
+      (intervalIntegrable_iff.1 hu) (intervalIntegrable_iff.1 hInt)
+  have step₃ := log_one_add_le_posLog (x := circleAverage u 0 r)
   linarith
 
 /-!

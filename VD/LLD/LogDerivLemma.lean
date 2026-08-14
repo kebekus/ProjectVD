@@ -115,7 +115,7 @@ theorem ValueDistribution.isBigO_proximity_logDeriv {f : ℂ → ℂ} (hf : Mero
     have h₂ : characteristic f ⊤ (r + (S r)⁻¹) ≤ 2 * S r :=
       le_trans (le_max_right _ _) hBor
     calc log⁺ (characteristic f ⊤ (r + (S r)⁻¹))
-        ≤ log⁺ (2 * S r) := posLog_le_posLog hT₀R h₂
+        ≤ log⁺ (2 * S r) := posLog_le_posLog (neg_one_lt_zero.le.trans hT₀R) h₂
       _ ≤ log⁺ 2 + log⁺ (S r) := posLog_mul
       _ ≤ Real.log 2 + log⁺ (characteristic f ⊤ r) := by
           rw [posLog_eq_log (by norm_num), eS]
@@ -205,9 +205,10 @@ theorem ValueDistribution.isBigO_proximity_logDeriv_of_isBigO_rpow {f : ℂ → 
   have e₃ : log⁺ (characteristic f ⊤ (2 * r))
       ≤ log⁺ |C| + p * (Real.log 2 + Real.log r) := by
     calc log⁺ (characteristic f ⊤ (2 * r))
-        ≤ log⁺ (|C| * (2 * r) ^ p) := posLog_le_posLog hT₀ hT2r
+        ≤ log⁺ (|C| * (2 * r) ^ p) := posLog_le_posLog (neg_one_lt_zero.le.trans hT₀) hT2r
       _ ≤ log⁺ |C| + log⁺ ((2 * r) ^ p) := posLog_mul
-      _ = log⁺ |C| + p * log⁺ (2 * r) := by rw [posLog_rpow (by positivity) hp₀]
+      _ = log⁺ |C| + p * log⁺ (2 * r) := by
+            rw [posLog_rpow (neg_one_lt_zero.le.trans (by positivity)) hp₀]
       _ ≤ log⁺ |C| + p * (Real.log 2 + Real.log r) := by
           refine add_le_add le_rfl (mul_le_mul_of_nonneg_left ?_ hp₀)
           rw [posLog_eq_log (by rw [abs_of_pos (by positivity)]; linarith), e₂]

@@ -46,7 +46,7 @@ lemma sum_posLog_inv_norm_sub_le {s : Finset 𝕜} {w : 𝕜} {c : ℝ} (hc : 0 
     ∑ a ∈ s, log⁺ ‖w - a‖⁻¹ ≤ s.card * log⁺ c⁻¹ := by
   calc ∑ a ∈ s, log⁺ ‖w - a‖⁻¹
       ≤ ∑ a ∈ s, log⁺ c⁻¹ := by
-        refine sum_le_sum fun a ha ↦ posLog_le_posLog (by positivity) ?_
+        refine sum_le_sum fun a ha ↦ posLog_le_posLog (neg_one_lt_zero.le.trans (by positivity)) ?_
         gcongr
         exact h a ha
     _ = s.card * log⁺ c⁻¹ := by rw [sum_const, nsmul_eq_mul]
@@ -114,7 +114,7 @@ theorem exists_sum_posLog_inv_norm_sub_le (s : Finset 𝕜) :
         have h1 := sum_posLog_inv_norm_sub_le (by positivity) hother
         rw [inv_div, hcaste] at h1
         refine h1.trans (mul_le_mul_of_nonneg_left ?_ (by linarith))
-        refine posLog_le_posLog (by positivity) ?_
+        refine posLog_le_posLog (neg_one_lt_zero.le.trans (by positivity)) ?_
         gcongr
         linarith
       -- Head estimate: the singular term `(w - a₀)⁻¹` dominates `∑ a ∈ s, (w - a)⁻¹`, so
@@ -158,7 +158,7 @@ theorem exists_sum_posLog_inv_norm_sub_le (s : Finset 𝕜) :
                 (by linarith : (0 : ℝ) ≤ ‖w - a₀‖⁻¹ - (s.card : ℝ) * (2 / δ))]
           calc log⁺ ‖w - a₀‖⁻¹
               ≤ log⁺ (s.card * ‖∑ a ∈ s, (w - a)⁻¹‖) :=
-                posLog_le_posLog (by positivity) hdom
+                posLog_le_posLog (neg_one_lt_zero.le.trans (by positivity)) hdom
             _ ≤ log s.card + log⁺ ‖∑ a ∈ s, (w - a)⁻¹‖ := posLog_nat_mul
       -- Assemble the two estimates.
       rw [← add_sum_erase s (fun a ↦ log⁺ ‖w - a‖⁻¹) ha₀]

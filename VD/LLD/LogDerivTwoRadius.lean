@@ -9,7 +9,6 @@ import VD.LLD.CircleAverageEstimates
 import VD.LLD.PoissonJensenDeriv
 import VD.MathlibPending.CharacteristicMoebius
 import VD.MathlibSubmitted.CountingEstimate
-import VD.MathlibSubmitted.PosLog
 
 /-!
 ## Elementary Helper
@@ -270,7 +269,7 @@ private lemma proximity_logDeriv_le {f : ℂ → ℂ} {r ρ : ℝ} (hf : Meromor
       _ = 2 * log⁺ (√‖logDeriv f w‖) := by rw [posLog_pow]; norm_num
       _ ≤ 2 * log⁺ (g w) := by
           apply mul_le_mul_of_nonneg_left _ (by norm_num)
-          exact posLog_le_posLog (Real.sqrt_nonneg _) hsq
+          exact posLog_le_posLog (neg_one_lt_zero.le.trans (Real.sqrt_nonneg _)) hsq
   -- Integrability of the functions involved
   have hld : Meromorphic (logDeriv f) := fun x ↦ (hf x).logDeriv
   have int_lhs : CircleIntegrable (fun w ↦ log⁺ ‖logDeriv f w‖) 0 r :=
@@ -348,7 +347,7 @@ private lemma proximity_logDeriv_le {f : ℂ → ℂ} {r ρ : ℝ} (hf : Meromor
       ≤ log⁺ (circleAverage g 0 r) + Real.log 2 :=
     Real.circleAverage_posLog_le_posLog_circleAverage (fun z _ ↦ hg₀ z) int_g
   have havg₀ : 0 ≤ circleAverage g 0 r := circleAverage_nonneg_of_nonneg fun z _ ↦ hg₀ z
-  have hmono := posLog_le_posLog havg₀ step4
+  have hmono := posLog_le_posLog (neg_one_lt_zero.le.trans havg₀) step4
   calc proximity (logDeriv f) ⊤ r
       ≤ 2 * circleAverage (fun w ↦ log⁺ (g w)) 0 r := step3
     _ ≤ 2 * (log⁺ (circleAverage g 0 r) + Real.log 2) := by linarith
@@ -590,7 +589,8 @@ theorem ValueDistribution.exists_proximity_logDeriv_le {f : ℂ → ℂ} (hf : M
           _ ≤ Real.log 2 + Real.log R := by
               rw [posLog_eq_log (by norm_num)]
               refine add_le_add le_rfl ?_
-              calc log⁺ ρ ≤ log⁺ R := posLog_le_posLog hρ₀.le (by linarith)
+              calc log⁺ ρ ≤ log⁺ R :=
+                    posLog_le_posLog (neg_one_lt_zero.le.trans hρ₀.le) (by linarith)
                 _ = Real.log R := posLog_eq_log (by rw [abs_of_pos hR₀]; linarith)
       have h₅ : log⁺ (((ρ - r)⁻¹) ^ 2) = 2 * log⁺ ((ρ - r)⁻¹) := by
         rw [posLog_pow]
@@ -602,7 +602,8 @@ theorem ValueDistribution.exists_proximity_logDeriv_le {f : ℂ → ℂ} (hf : M
         _ ≤ Real.log 2 + Real.log R + 2 * (Real.log 2 + log⁺ (R - r)⁻¹) := by
             linarith [hpos_inv]
     have h₆ : log⁺ A ≤ 2 * Real.log 2 + log⁺ T + log⁺ c_f := by
-      calc log⁺ A ≤ log⁺ (2 * T + c_f) := posLog_le_posLog hA₀ hA_le
+      calc log⁺ A ≤ log⁺ (2 * T + c_f) :=
+            posLog_le_posLog (neg_one_lt_zero.le.trans hA₀) hA_le
         _ ≤ Real.log 2 + log⁺ (2 * T) + log⁺ c_f := posLog_add
         _ ≤ Real.log 2 + (log⁺ 2 + log⁺ T) + log⁺ c_f := by
             linarith [posLog_mul (x := (2:ℝ)) (y := T)]
@@ -631,7 +632,7 @@ theorem ValueDistribution.exists_proximity_logDeriv_le {f : ℂ → ℂ} (hf : M
       apply le_of_eq
       field_simp
     calc log⁺ N ≤ log⁺ ((2 * T + c_f) * (2 * R * (R - r)⁻¹)) :=
-          posLog_le_posLog hN₀ hN_bound
+          posLog_le_posLog (neg_one_lt_zero.le.trans hN₀) hN_bound
       _ ≤ log⁺ (2 * T + c_f) + log⁺ (2 * R * (R - r)⁻¹) := posLog_mul
       _ ≤ (Real.log 2 + log⁺ (2 * T) + log⁺ c_f)
           + (log⁺ (2 * R) + log⁺ (R - r)⁻¹) := by
@@ -654,7 +655,7 @@ theorem ValueDistribution.exists_proximity_logDeriv_le {f : ℂ → ℂ} (hf : M
     have h₁ : log⁺ (√K + N * (4 + (ρ - r) ^ (-(2:ℝ)⁻¹)))
         ≤ Real.log 2 + log⁺ (√K) + log⁺ (N * (4 + (ρ - r) ^ (-(2:ℝ)⁻¹))) := posLog_add
     have h₂ : log⁺ (√K) = 2⁻¹ * log⁺ K := by
-      rw [Real.sqrt_eq_rpow, posLog_rpow hK₀ (by norm_num)]
+      rw [Real.sqrt_eq_rpow, posLog_rpow (neg_one_lt_zero.le.trans hK₀) (by norm_num)]
       norm_num
     have h₃ : log⁺ (N * (4 + (ρ - r) ^ (-(2:ℝ)⁻¹)))
         ≤ log⁺ N + log⁺ (4 + (ρ - r) ^ (-(2:ℝ)⁻¹)) := posLog_mul
@@ -669,7 +670,7 @@ theorem ValueDistribution.exists_proximity_logDeriv_le {f : ℂ → ℂ} (hf : M
         have e₁ : (ρ - r) ^ (-(2:ℝ)⁻¹) = ((ρ - r)⁻¹) ^ ((2:ℝ)⁻¹) := by
           rw [← Real.rpow_neg_one (ρ - r), ← Real.rpow_mul hρr₀.le]
           norm_num
-        rw [e₁, posLog_rpow (by positivity) (by norm_num)]
+        rw [e₁, posLog_rpow (neg_one_lt_zero.le.trans (by positivity)) (by norm_num)]
       have h₈ : log⁺ ((ρ - r)⁻¹) ≤ Real.log 2 + log⁺ (R - r)⁻¹ := hpos_inv
       rw [h₆, h₇] at h₅
       have h₉ : 2⁻¹ * log⁺ ((ρ - r)⁻¹) ≤ 2⁻¹ * (Real.log 2 + log⁺ (R - r)⁻¹) := by
