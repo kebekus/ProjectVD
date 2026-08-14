@@ -185,7 +185,7 @@ theorem isBigO_proximity_logDeriv_shift {f : ℂ → ℂ} (hf : Meromorphic f) (
     linarith [h₁.1]
   have h₂ : log⁺ (characteristic (f · - a) ⊤ r)
       ≤ Real.log 2 + log⁺ (characteristic f ⊤ r) + log⁺ (log⁺ ‖a‖ + Real.log 2) :=
-    (posLog_le_posLog (characteristic_nonneg hr1) hT).trans posLog_add
+    (posLog_le_posLog (neg_one_lt_zero.le.trans (characteristic_nonneg hr1)) hT).trans posLog_add
   -- Assemble, absorbing the additive constant into the `log r` term.
   have hM : 0 ≤ Real.log 2 + log⁺ (log⁺ ‖a‖ + Real.log 2) :=
     add_nonneg (log_nonneg one_le_two) posLog_nonneg
