@@ -446,6 +446,6 @@ theorem Differentiable.exists_eq_const_of_forall_ne {f : ℂ → ℂ} (hf : Diff
   have hev : ∀ᶠ z in 𝓝[≠] (0 : ℂ), f z = c := mem_nhdsNE_of_mem_codiscrete hc 0
   have hfreq : ∃ᶠ z in 𝓝[≠] (0 : ℂ), f z = c := hev.frequently
   have h₁ := AnalyticOnNhd.eqOn_of_preconnected_of_frequently_eq (fun z _ ↦ hana z)
-    (fun z _ ↦ analyticAt_const) isPreconnected_univ (Set.mem_univ 0) hfreq
+    analyticOnNhd_const isPreconnected_univ (Set.mem_univ 0) hfreq
   funext z
   exact h₁ (Set.mem_univ z)

@@ -75,8 +75,7 @@ private lemma circleIntegrable_derivedKernel_smul_log_norm {g : ℂ → ℂ} {w 
 /-- The meromorphic order of `· - v` is never `⊤`. -/
 private lemma meromorphicOrderAt_id_sub_const_ne_top {v x : ℂ} :
     meromorphicOrderAt (· - v) x ≠ ⊤ := by
-  have hm : MeromorphicAt (fun z : ℂ ↦ z - v) x :=
-    (analyticAt_id.sub analyticAt_const).meromorphicAt
+  have hm : MeromorphicAt (fun z : ℂ ↦ z - v) x := by fun_prop
   rw [meromorphicOrderAt_ne_top_iff_eventually_ne_zero hm]
   rcases eq_or_ne x v with rfl | hxv
   · filter_upwards [self_mem_nhdsWithin] with z hz
@@ -115,14 +114,12 @@ theorem MeromorphicOn.logDeriv_eqOn_codiscrete {f : ℂ → ℂ} {R : ℝ}
   have h₄f : (divisor f (ball 0 R)).support.Finite := h₁f.divisor_ball_support_finite
   -- Meromorphy of the three factors of the decomposition on the ball
   have hBmero : MeromorphicOn
-      (∏ᶠ u, canonicalFactor R u ^ (-divisor f (ball 0 R) u)) (ball 0 R) :=
-    fun x _ ↦ MeromorphicAt.finprod fun u ↦ meromorphicAt_canonicalFactor.zpow _
+      (∏ᶠ u, canonicalFactor R u ^ (-divisor f (ball 0 R) u)) (ball 0 R) := by
+    fun_prop [meromorphicAt_canonicalFactor]
   have hSmero : MeromorphicOn
-      (∏ᶠ v, (· - v) ^ divisor f (sphere 0 R) v) (ball 0 R) :=
-    fun x _ ↦ MeromorphicAt.finprod fun v ↦
-      ((analyticAt_id.sub analyticAt_const).meromorphicAt).zpow _
+      (∏ᶠ v, (· - v) ^ divisor f (sphere 0 R) v) (ball 0 R) := by fun_prop
   have hhmero : MeromorphicOn h (ball 0 R) :=
-    fun x hx ↦ (D.analyticOnNhd x (ball_subset_closedBall hx)).meromorphicAt
+    (D.analyticOnNhd.mono ball_subset_closedBall).meromorphicOn
   -- The meromorphic orders of the three factors are nowhere `⊤` on the ball
   have hBord : ∀ x ∈ ball (0 : ℂ) R,
       meromorphicOrderAt (∏ᶠ u, canonicalFactor R u ^ (-divisor f (ball 0 R) u)) x ≠ ⊤ := by
@@ -167,8 +164,7 @@ theorem MeromorphicOn.logDeriv_eqOn_codiscrete {f : ℂ → ℂ} {R : ℝ}
       logDeriv (∏ᶠ u, canonicalFactor R u ^ (-divisor f (ball 0 R) u))
         + logDeriv (∏ᶠ v, (· - v) ^ divisor f (sphere 0 R) v) + logDeriv h := by
     have hBSmero : MeromorphicOn ((∏ᶠ u, canonicalFactor R u ^ (-divisor f (ball 0 R) u))
-        * (∏ᶠ v, (· - v) ^ divisor f (sphere 0 R) v)) (ball 0 R) :=
-      fun x hx ↦ (hBmero x hx).mul (hSmero x hx)
+        * (∏ᶠ v, (· - v) ^ divisor f (sphere 0 R) v)) (ball 0 R) := hBmero.mul hSmero
     have hBSord : ∀ x ∈ ball (0 : ℂ) R,
         meromorphicOrderAt ((∏ᶠ u, canonicalFactor R u ^ (-divisor f (ball 0 R) u))
           * (∏ᶠ v, (· - v) ^ divisor f (sphere 0 R) v)) x ≠ ⊤ := by
@@ -201,12 +197,10 @@ theorem MeromorphicOn.logDeriv_eqOn_codiscrete {f : ℂ → ℂ} {R : ℝ}
     intro w hw
     -- Integrability of the individual summands
     have ιh : CircleIntegrable (fun ζ ↦ (2 * ζ / (ζ - w) ^ 2) • (Real.log ‖h ζ‖ : ℂ)) 0 R :=
-      circleIntegrable_derivedKernel_smul_log_norm
-        (fun x hx ↦ (D.analyticOnNhd x hx).meromorphicAt) hw
+      circleIntegrable_derivedKernel_smul_log_norm D.analyticOnNhd.meromorphicOn hw
     have ιv : ∀ v ∈ h₃f.toFinset, CircleIntegrable (fun ζ ↦ (divisor f (sphere 0 R) v : ℂ) •
         ((2 * ζ / (ζ - w) ^ 2) • (Real.log ‖ζ - v‖ : ℂ))) 0 R :=
-      fun v _ ↦ (circleIntegrable_derivedKernel_smul_log_norm
-        (fun x _ ↦ (analyticAt_id.sub analyticAt_const).meromorphicAt) hw).const_fun_smul
+      fun v _ ↦ (circleIntegrable_derivedKernel_smul_log_norm (by fun_prop) hw).const_fun_smul
     -- Nonvanishing of the boundary factors away from the boundary divisor
     have hprodne {a : ℂ} (ha : divisor f (sphere 0 R) a = 0) :
         ∀ b ∈ h₃f.toFinset, ‖a - b‖ ^ (divisor f (sphere 0 R)) b ≠ 0 := by
@@ -275,8 +269,7 @@ theorem MeromorphicOn.logDeriv_eqOn_codiscrete {f : ℂ → ℂ} {R : ℝ}
           exact Finset.sum_congr rfl fun v _ ↦ circleAverage_fun_smul
       -- Evaluate the boundary terms (B4 special case) and recognise `logDeriv h` (B4)
       _ = (∑ v ∈ h₃f.toFinset, (divisor f (sphere 0 R) v) • (w - v)⁻¹) + logDeriv h w := by
-          rw [← MeromorphicOn.logDeriv_eq_circleAverage
-            (fun x hx ↦ (D.analyticOnNhd x hx).meromorphicAt)
+          rw [← MeromorphicOn.logDeriv_eq_circleAverage D.analyticOnNhd.meromorphicOn
             (D.analyticOnNhd.mono ball_subset_closedBall)
             (fun z hz ↦ D.ne_zero z (ball_subset_closedBall hz)) hw]
           congr 1
@@ -340,7 +333,7 @@ example {w : ℂ} (hw' : w ≠ 0) :
     circleAverage (fun ζ ↦ (2 * ζ / (ζ - w) ^ 2) • (Real.log ‖(id : ℂ → ℂ) ζ‖ : ℂ)) 0 1
       - ∑ᶠ a, (divisor (id : ℂ → ℂ) (ball 0 1) a) • logDeriv (canonicalFactor 1 a) w
     = logDeriv id w := by
-  have hmero : MeromorphicOn (id : ℂ → ℂ) (ball 0 1) := fun x _ ↦ analyticAt_id.meromorphicAt
+  have hmero : MeromorphicOn (id : ℂ → ℂ) (ball 0 1) := by fun_prop
   -- The kernel term vanishes on the unit circle
   have h₁ : circleAverage (fun ζ ↦ (2 * ζ / (ζ - w) ^ 2) • (Real.log ‖(id : ℂ → ℂ) ζ‖ : ℂ)) 0 1
       = 0 := by

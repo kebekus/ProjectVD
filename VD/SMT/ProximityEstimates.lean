@@ -128,7 +128,7 @@ theorem MeromorphicOn.exists_eventuallyEq_const_iff_deriv_eventuallyEq_zero
     have h₃ : ∀ y ∈ U, meromorphicOrderAt (f · - c) y = ⊤ := by
       intro y hy
       by_contra h₂y
-      have hF : MeromorphicOn (f · - c) U := fun x hx ↦ (hf x hx).sub (.const c x)
+      have hF : MeromorphicOn (f · - c) U := by fun_prop
       apply (hF.exists_meromorphicOrderAt_ne_top_iff_forall_mem h₂U).1 ⟨y, hy, h₂y⟩ z₀ hz₀
       rw [meromorphicOrderAt_eq_top_iff]
       filter_upwards [hc] with z hz

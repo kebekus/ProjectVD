@@ -87,13 +87,10 @@ theorem proximity_smul_top_le {f₁ : ℂ → ℂ} {f₂ : ℂ → E} (h₁f₁ 
       intro r
       apply circleAverage_mono
       · simp_rw [← norm_smul]
-        -- should be fun_prop
         apply MeromorphicOn.circleIntegrable_posLog_norm
-        apply Meromorphic.meromorphicOn
         fun_prop
-      · -- should be fun_prop
-        apply (MeromorphicOn.circleIntegrable_posLog_norm (fun x a ↦ h₁f₁ x)).add
-          (MeromorphicOn.circleIntegrable_posLog_norm (fun x a ↦ h₁f₂ x))
+      · apply (MeromorphicOn.circleIntegrable_posLog_norm (by fun_prop)).add
+          (MeromorphicOn.circleIntegrable_posLog_norm (by fun_prop))
       · exact fun _ _ ↦ posLog_mul
     _ = circleAverage (log⁺ ‖f₁ ·‖) 0 + circleAverage (log⁺ ‖f₂ ·‖) 0 := by
       ext r
@@ -269,8 +266,6 @@ theorem isBigO_characteristic_sub_characteristic_moebius {a b c d : ℂ}
     · have hne : ∀ᶠ z in codiscrete ℂ, c * f z + d ≠ 0 := by
         -- Wrong name!
         apply MeromorphicAt.MeromorphicOn.codiscreteWithin_setOfPred_ne_zero _ (fun u _ ↦ hord u)
-        -- should be fun_prop
-        apply Meromorphic.meromorphicOn
         fun_prop
       apply transitivity₂ (f₂ := (fun z ↦ a / c + (b * c - a * d) / c ^ 2 * (f z + d / c)⁻¹))
       · filter_upwards [hne] with z hz

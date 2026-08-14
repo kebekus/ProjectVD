@@ -134,7 +134,7 @@ a zero of `deriv f` of multiplicity `m - 1`. -/
 theorem posPart_divisor_sub_trunc_le_divisor_deriv [CompleteSpace 𝕜] [CharZero 𝕜]
     {f : 𝕜 → 𝕜} {a : 𝕜} (hf : MeromorphicOn f U) :
     (divisor (f · - a) U)⁺ - ((divisor (f · - a) U)⁺).trunc ≤ (divisor (deriv f) U)⁺ := by
-  have hfa : MeromorphicOn (f · - a) U := hf.sub (.const a)
+  have hfa : MeromorphicOn (f · - a) U := by fun_prop
   have hderiv : deriv (f · - a) = deriv f := funext fun z ↦ deriv_sub_const a
   rw [Function.locallyFinsuppWithin.le_def]
   intro z
@@ -175,7 +175,7 @@ theorem sum_posPart_divisor_sub_trunc_le_divisor_deriv [CompleteSpace 𝕜] [Cha
       · exact (Function.locallyFinsuppWithin.le_def.1
           (posPart_divisor_sub_trunc_le_divisor_deriv hf)) z
       · intro b hbs hba₀
-        have hfb : MeromorphicOn (f · - b) U := hf.sub (.const b)
+        have hfb : MeromorphicOn (f · - b) U := by fun_prop
         have : meromorphicOrderAt (f · - b) z = 0 :=
           meromorphicOrderAt_sub_const_eq_zero_of_ne hba₀ ha₀
         simp [locallyFinsuppWithin.posPart_apply, locallyFinsuppWithin.trunc_apply,
@@ -185,7 +185,7 @@ theorem sum_posPart_divisor_sub_trunc_le_divisor_deriv [CompleteSpace 𝕜] [Cha
       apply le_trans (le_of_eq (Finset.sum_eq_zero ?_))
       · simp only [locallyFinsuppWithin.posPart_apply]; exact posPart_nonneg _
       · intro a ha
-        have hfa : MeromorphicOn (f · - a) U := hf.sub (.const a)
+        have hfa : MeromorphicOn (f · - a) U := by fun_prop
         have hle : meromorphicOrderAt (f · - a) z ≤ 0 := H a ha
         have hthis : (divisor (f · - a) U z) ≤ 0 := by
           rw [divisor_apply hfa hz]

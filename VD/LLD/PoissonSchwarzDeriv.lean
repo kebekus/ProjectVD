@@ -217,14 +217,12 @@ formula. -/
 theorem circleAverage_smul_log_norm_sub_sphere {u w : ℂ} {R : ℝ}
     (hu : u ∈ sphere (0 : ℂ) R) (hw : w ∈ ball (0 : ℂ) R) :
     circleAverage (fun ζ ↦ (2 * ζ / (ζ - w) ^ 2) • (Real.log ‖ζ - u‖ : ℂ)) 0 R = (w - u)⁻¹ := by
-  have h₂ : AnalyticOnNhd ℂ (fun ζ : ℂ ↦ ζ - u) (ball 0 R) :=
-    fun z _ ↦ analyticAt_id.sub analyticAt_const
+  have h₂ : AnalyticOnNhd ℂ (fun ζ : ℂ ↦ ζ - u) (ball 0 R) := by fun_prop
   have h₃ : ∀ z ∈ ball (0 : ℂ) R, z - u ≠ 0 := by
     intro z hz
     rw [sub_ne_zero]
     grind [mem_sphere, mem_ball]
-  have h₁ : MeromorphicOn (fun ζ : ℂ ↦ ζ - u) (closedBall 0 R) :=
-    fun z _ ↦ (analyticAt_id.sub analyticAt_const).meromorphicAt
+  have h₁ : MeromorphicOn (fun ζ : ℂ ↦ ζ - u) (closedBall 0 R) := by fun_prop
   have hmain := h₁.logDeriv_eq_circleAverage h₂ h₃ hw
   have h₄ : HasDerivAt (fun ζ : ℂ ↦ ζ - u) 1 w := by
     simpa using (hasDerivAt_id w).sub_const u

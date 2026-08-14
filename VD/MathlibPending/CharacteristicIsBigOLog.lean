@@ -83,10 +83,10 @@ theorem rational_iff_characteristic_isBigO_log {f : ℂ → ℂ} (hf : Meromorph
     rw [show (p.eval / q.eval) = p.eval * (fun z ↦ q.eval z)⁻¹ from by
       funext z; simp [div_eq_mul_inv]]
     have hpm : Meromorphic fun z ↦ p.eval z :=
-      fun z ↦ (analyticOnNhd_polynomial p z (mem_univ z)).meromorphicAt
+      meromorphicOn_univ.1 (analyticOnNhd_polynomial p).meromorphicOn
     have hqm : Meromorphic fun z ↦ q.eval z :=
-      fun z ↦ (analyticOnNhd_polynomial q z (mem_univ z)).meromorphicAt
-    have hqinvm : Meromorphic (fun z ↦ q.eval z)⁻¹ := fun z ↦ (hqm z).inv
+      meromorphicOn_univ.1 (analyticOnNhd_polynomial q).meromorphicOn
+    have hqinvm : Meromorphic (fun z ↦ q.eval z)⁻¹ := hqm.inv
     have hqinvord : ∀ z, meromorphicOrderAt (fun w ↦ q.eval w)⁻¹ z ≠ ⊤ := by
       intro z
       rw [meromorphicOrderAt_ne_top_iff_eventually_ne_zero (hqinvm z)]
@@ -151,8 +151,8 @@ theorem rational_iff_characteristic_isBigO_log {f : ℂ → ℂ} (hf : Meromorph
       have hqdiv : divisor (fun z ↦ q.eval z) univ = (divisor f univ)⁻ := by
         rw [hqeval]; exact Function.FactorizedRational.divisor hDfin
       have hqmero : Meromorphic fun z ↦ q.eval z :=
-        fun z ↦ (analyticOnNhd_polynomial q z (mem_univ z)).meromorphicAt
-      have hqmeroOn : MeromorphicOn (fun z ↦ q.eval z) univ := fun z _ ↦ hqmero z
+        meromorphicOn_univ.1 (analyticOnNhd_polynomial q).meromorphicOn
+      have hqmeroOn : MeromorphicOn (fun z ↦ q.eval z) univ := hqmero.meromorphicOn
       have hQord : ∀ z, meromorphicOrderAt (fun w ↦ q.eval w) z ≠ ⊤ :=
         polynomial_meromorphicOrderAt_ne_top hq0
       set g : ℂ → ℂ := f * fun z ↦ q.eval z with hg_def

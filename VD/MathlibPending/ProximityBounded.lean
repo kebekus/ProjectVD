@@ -183,21 +183,20 @@ private theorem log_norm_le_circleAverage_posLog_norm
   have h₂f : (divisor f (ball 0 R)).support.Finite := by
     apply ((divisor f (closedBall 0 R)).finiteSupport (isCompact_closedBall 0 R)).subset
     intro b hb
-    rw [mem_support, ne_eq, divisor_apply (fun x hx ↦ (h₁f x hx).meromorphicAt)
+    rw [mem_support, ne_eq, divisor_apply h₁f.meromorphicOn
       (ball_subset_closedBall ((divisor f (ball 0 R)).supportWithinDomain hb))]
     rwa [mem_support, ne_eq, divisor_apply
-      (fun c hc ↦ (fun x hx ↦ (h₁f x hx).meromorphicAt) c (ball_subset_closedBall hc))
+      (h₁f.mono ball_subset_closedBall).meromorphicOn
       ((divisor f (ball 0 R)).supportWithinDomain hb)] at hb
   have h₃f : MeromorphicOn f (sphere 0 |R|) := by
     rw [abs_of_pos (pos_of_mem_ball h₁w)]
-    exact fun x hx ↦ (h₁f x (sphere_subset_closedBall hx)).meromorphicAt
+    exact (h₁f.mono sphere_subset_closedBall).meromorphicOn
   calc Real.log ‖f w‖
     _ = Real.log ‖meromorphicTrailingCoeffAt f w‖ := by
       rw [AnalyticAt.meromorphicTrailingCoeffAt_of_meromorphicOrderAt_eq_zero
         (h₁f w (ball_subset_closedBall h₁w)) h₂w]
     _ ≤ circleAverage (re ∘ herglotzRieszKernel 0 w * (Real.log ‖f ·‖)) 0 R := by
-      rw [MeromorphicOn.log_norm_meromorphicTrailingCoeffAt
-        (fun x hx ↦ (h₁f x hx).meromorphicAt) h₁w h₂w]
+      rw [MeromorphicOn.log_norm_meromorphicTrailingCoeffAt h₁f.meromorphicOn h₁w h₂w]
       simp only [sub_zero]
       apply sub_le_self
       rw [finsum_eq_sum_of_support_subset (s := h₂f.toFinset) _ (fun _ _ ↦ by aesop)]
