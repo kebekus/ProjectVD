@@ -16,7 +16,6 @@ import VD.MathlibPending.CharacteristicIsBigOLog
 import VD.MathlibPending.CharacteristicMoebius
 import VD.MathlibPending.PoissonJensen
 import VD.MathlibPending.ProximityBounded
-import VD.MathlibSubmitted.BorelGrowth
 import VD.MathlibSubmitted.CauchyIntegralDeriv
 import VD.MathlibSubmitted.Codiscrete
 import VD.MathlibSubmitted.CountingEstimate

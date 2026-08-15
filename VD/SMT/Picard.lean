@@ -26,7 +26,7 @@ by characteristic growth).
 - H1, `MonotoneOn.isBigO_log_of_eventually_le`: filter-to-`atTop` transfer — a monotone
   function bounded by `C · log` for large `r` outside a set of finite measure is `O(log)`
   along `atTop` outright.  (Same measure-theoretic device as the Borel growth lemma in
-  `VD/MathlibSubmitted/BorelGrowth.lean`, but simpler.)
+  `Mathlib/MeasureTheory/Function/BorelGrowth.lean`, but simpler.)
 
 - H2, `ValueDistribution.Omits`: the omission predicate for values in `ℂ ∪ {∞}`, phrased
   through meromorphic orders (robust under junk values), with the bridge lemmas

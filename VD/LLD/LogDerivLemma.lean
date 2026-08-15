@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
-import VD.MathlibSubmitted.BorelGrowth
+import Mathlib.MeasureTheory.Function.BorelGrowth
 import VD.LLD.LogDerivTwoRadius
 
 /-!
@@ -80,7 +80,7 @@ theorem ValueDistribution.isBigO_proximity_logDeriv {f : ℂ → ℂ} (hf : Mero
     max_le_max le_rfl (characteristic_monotoneOn hf (mem_Ioi.2 (lt_of_lt_of_le one_pos hx))
       (mem_Ioi.2 (lt_of_lt_of_le one_pos hy)) hxy)
   -- Borel's growth lemma (T2)
-  have hBorel := hSmono.eventually_le_two_mul (fun r _ ↦ hS1 r)
+  have hBorel := hSmono.eventually_le_two_mul (hSpos 1).le
   rw [isBigO_iff]
   refine ⟨c * (3 + 2 * Real.log 2), ?_⟩
   filter_upwards [hBorel, mem_inf_of_right (eventually_ge_atTop (Real.exp 1))] with r hBor hre
