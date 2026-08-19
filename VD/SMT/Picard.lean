@@ -7,7 +7,6 @@ import Mathlib.Analysis.Complex.Polynomial.Basic
 import Mathlib.RingTheory.PrincipalIdealDomain
 import Mathlib.RingTheory.UniqueFactorizationDomain.Basic
 import VD.MathlibPending.CharacteristicIsBigOLog
-import VD.MathlibSubmitted.Codiscrete
 import VD.SMT.SecondMainTheorem
 
 /-!
@@ -192,7 +191,7 @@ lemma Omits.of_forall_ne (hf : ∀ x, AnalyticAt ℂ f x) (h : ∀ z, f z ≠ a�
 lemma Omits.congr {a : WithTop ℂ} (h : Omits f a) (hfg : f =ᶠ[codiscrete ℂ] g) :
     Omits g a := by
   have key : ∀ x, f =ᶠ[𝓝[≠] x] g := fun x ↦
-    mem_nhdsNE_of_mem_codiscrete (hfg : {z | f z = g z} ∈ codiscrete ℂ) x
+    mem_codiscrete_iff_forall_mem_nhdsNE.1 (hfg : {z | f z = g z} ∈ codiscrete ℂ) x
   by_cases ha : a = ⊤
   · subst ha
     rw [omits_top_iff] at h ⊢
@@ -369,7 +368,7 @@ theorem eventuallyConst_of_omits {f : ℂ → ℂ} (hf : Meromorphic f)
     exact hq0
   have hfpq' : f =ᶠ[codiscrete ℂ] p'.eval / q'.eval := by
     apply hfpq.trans
-    filter_upwards [eventually_eval_ne_zero_codiscrete hg0] with z hgz
+    filter_upwards [Polynomial.eventually_eval_ne_zero_codiscrete hg0] with z hgz
     rw [Pi.div_apply, Pi.div_apply, ← hgp, ← hgq, Polynomial.eval_mul, Polynomial.eval_mul]
     exact mul_div_mul_left _ _ hgz
   have hno : ∀ z, q'.eval z = 0 → p'.eval z ≠ 0 := fun z hqz hpz ↦
@@ -443,7 +442,7 @@ theorem Differentiable.exists_eq_const_of_forall_ne {f : ℂ → ℂ} (hf : Diff
   obtain ⟨c, hc⟩ := hconst
   -- Upgrade eventual constancy to constancy, by the identity theorem.
   refine ⟨c, ?_⟩
-  have hev : ∀ᶠ z in 𝓝[≠] (0 : ℂ), f z = c := mem_nhdsNE_of_mem_codiscrete hc 0
+  have hev : ∀ᶠ z in 𝓝[≠] (0 : ℂ), f z = c := mem_codiscrete_iff_forall_mem_nhdsNE.1 hc 0
   have hfreq : ∃ᶠ z in 𝓝[≠] (0 : ℂ), f z = c := hev.frequently
   have h₁ := AnalyticOnNhd.eqOn_of_preconnected_of_frequently_eq (fun z _ ↦ hana z)
     analyticOnNhd_const isPreconnected_univ (Set.mem_univ 0) hfreq

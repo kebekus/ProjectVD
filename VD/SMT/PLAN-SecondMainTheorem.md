@@ -421,22 +421,23 @@ pressure to optimize).
 
 *Locally `VD/SMT/ProximityEstimates.lean`; Mathlib target
 `Analysis/Complex/ValueDistribution/SecondMainTheorem.lean` (part 1). Depends on C,
-the LLD, FMT part 2, and (D1 only) the pending `CharacteristicMoebius` chain.
-Implementation notes: package B turned out not to be needed — the only order-level input
-is `meromorphicOrderAt_deriv_eq_sub_one`, which is already in Mathlib. The "15-line
-adaptation of `logDeriv_congr_codiscreteWithin`" anticipated for D1 is included as the
-public lemma `deriv_congr_codiscreteWithin` (Mathlib-worthy on its own; possible target
-near `Mathlib/Analysis/Calculus/Deriv/Basic.lean`). Everything else went as planned;
-the junk-value identities of D3/D4 survived Lean's `x/0 = 0` conventions exactly as
-predicted in risk 2. D1 was later strengthened from the one-directional
+the LLD, FMT part 2, and (D1 only) the pending `CharacteristicMoebius` chain. Implementation
+notes: package B turned out not to be needed — the only order-level input is
+`meromorphicOrderAt_deriv_eq_sub_one`, which is already in Mathlib. The "15-line adaptation of
+`logDeriv_congr_codiscreteWithin`" anticipated for D1 was written as the public lemma
+`deriv_congr_codiscreteWithin`, and has since been upstreamed as
+`Filter.EventuallyEq.codiscreteWithin_deriv` in `Mathlib/Analysis/Calculus/Deriv/Basic.lean`,
+which takes the codiscrete equality first and the openness hypothesis second. Everything else
+went as planned; the junk-value identities of D3/D4 survived Lean's `x/0 = 0` conventions
+exactly as predicted in risk 2. D1 was later strengthened from the one-directional
 `eventuallyEq_const_of_exists_meromorphicOrderAt_deriv_eq_top` to the iff
-`exists_eventuallyEq_const_iff_deriv_eventuallyEq_zero`, whose converse direction is
-three lines from `deriv_congr_codiscreteWithin`, then localized to open connected
-sets (`MeromorphicOn.exists_eventuallyEq_const_iff_deriv_eventuallyEq_zero`), the global
-form remaining as a two-line corollary. The proof was subsequently re-engineered to avoid
-`MeromorphicNFOn`/`toMeromorphicNFOn` and the global identity theorem (local constant at
-one point + order-`⊤` propagation applied to `f - c`), so that D1 can merge into Mathlib
-below `Analysis/Meromorphic/NormalForm.lean`.*
+`exists_eventuallyEq_const_iff_deriv_eventuallyEq_zero`, whose converse direction is three
+lines from `Filter.EventuallyEq.codiscreteWithin_deriv`, then localized to open connected sets
+(`MeromorphicOn.exists_eventuallyEq_const_iff_deriv_eventuallyEq_zero`), the global form
+remaining as a two-line corollary. The proof was subsequently re-engineered to avoid
+`MeromorphicNFOn`/`toMeromorphicNFOn` and the global identity theorem (local constant at one
+point + order-`⊤` propagation applied to `f - c`), so that D1 can merge into Mathlib below
+`Analysis/Meromorphic/NormalForm.lean`.*
 
 ### D1. The constancy dichotomy
 
@@ -467,8 +468,8 @@ between `codiscreteWithin U` and punctured neighborhoods.
 The SMT dichotomy consumes the `←` direction of the global corollary: the degenerate
 hypothesis `∃ x, meromorphicOrderAt (deriv f) x = ⊤` produced by `push Not` converts to
 the right-hand side via `exists_meromorphicOrderAt_eq_top_iff_eventually_zero`. The `→`
-direction is three lines from `deriv_congr_codiscreteWithin`; stating the iff gives the
-mathematically complete, Mathlib-facing form.
+direction is three lines from `Filter.EventuallyEq.codiscreteWithin_deriv`; stating the
+iff gives the mathematically complete, Mathlib-facing form.
 
 Proof sketch (`←`): fix a base point `z₀ ∈ U`. The order of `f` at `z₀` is `0` or `⊤`
 (any other order would force a finite order for `deriv f` via

@@ -5,7 +5,6 @@ Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 import Mathlib.Analysis.Meromorphic.IsolatedZeros
-import VD.MathlibSubmitted.Codiscrete
 import VD.MathlibSubmitted.Scaling
 
 /-!

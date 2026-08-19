@@ -73,7 +73,7 @@ theorem MeromorphicOn.exists_eventuallyEq_const_iff_deriv_eventuallyEq_zero
   · -- Congruence in the codiscrete filter passes to derivatives, and constants have
     -- vanishing derivative.
     rintro ⟨c, hc⟩
-    filter_upwards [deriv_congr_codiscreteWithin h₁U hc] with z hz
+    filter_upwards [hc.codiscreteWithin_deriv h₁U] with z hz
     simp [hz]
   · -- Vanishing derivative means: constant
     intro h

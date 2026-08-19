@@ -7,7 +7,6 @@ import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
 import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 import Mathlib.Algebra.Polynomial.Eval.Defs
 import Mathlib.Analysis.Calculus.Deriv.Polynomial
-import VD.MathlibSubmitted.Codiscrete
 import VD.MathlibPending.BoundednessCharacteristic
 
 /-!
@@ -190,7 +189,7 @@ theorem rational_iff_characteristic_isBigO_log {f : ℂ → ℂ} (hf : Meromorph
         exact this
       -- `q` is nonzero on a codiscrete set, so we can divide.
       have hqne0 : ∀ᶠ z in codiscrete ℂ, q.eval z ≠ 0 :=
-        eventually_eval_ne_zero_codiscrete hq0
+        Polynomial.eventually_eval_ne_zero_codiscrete hq0
       refine ⟨pp, q, hq0, ?_⟩
       filter_upwards [hg_eq, hqne0] with z hgz hqz
       have hfq : f z * q.eval z = pp.eval z := by simpa [hg_def] using hgz
