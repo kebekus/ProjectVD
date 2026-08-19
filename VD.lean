@@ -17,7 +17,6 @@ import VD.MathlibPending.CharacteristicMoebius
 import VD.MathlibPending.PoissonJensen
 import VD.MathlibPending.ProximityBounded
 import VD.MathlibSubmitted.CauchyIntegralDeriv
-import VD.MathlibSubmitted.Codiscrete
 import VD.MathlibSubmitted.CountingEstimate
 import VD.MathlibSubmitted.PoissonJensen
 import VD.MathlibSubmitted.Scaling
