@@ -5,7 +5,6 @@ Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Complex.HasPrimitives
 import Mathlib.Analysis.Complex.OpenMapping
-import VD.MathlibSubmitted.CauchyIntegralDeriv
 import VD.MathlibPending.PoissonJensen
 
 /-!
@@ -15,14 +14,16 @@ See `VD/LLD/PLAN-LogarithmicDerivative.md`, §4.
 
 Mathlib target: extend `Mathlib/Analysis/Complex/Poisson.lean` (B4) and
 `Mathlib/Analysis/Complex/CanonicalDecomposition.lean` (B5).
-Dependencies: `VD/LLD/CauchyIntegralDeriv.lean` (B1–B3) and the Poisson–Jensen chain
-(`VD/MathlibSubmitted/BlaschkeDecomp2.lean`, `VD/MathlibPending/PoissonJensen.lean`).
+Dependencies: the derivative of the Herglotz–Riesz kernel integral (B1–B3, now in Mathlib:
+`hasDerivAt_circleAverage_herglotzRieszKernel_smul` in `Mathlib/Analysis/Complex/Poisson.lean`)
+and the Poisson–Jensen chain (`VD/MathlibSubmitted/BlaschkeDecomp2.lean`,
+`VD/MathlibPending/PoissonJensen.lean`).
 
 - `MeromorphicOn.logDeriv_eq_circleAverage` (B4): if `h` is meromorphic on the closed ball,
   analytic and nonvanishing on the **open** ball, then its logarithmic derivative at interior
   points is the circle average of `log ‖h ·‖` against the `w`-derivative of the Herglotz–Riesz
   kernel. Proof: the kernel integral `F` is analytic in the pole with computable derivative
-  (B1–B3); its real part is `log ‖h ·‖` by Poisson–Jensen; `logDeriv h` has a primitive `G` on
+  (Mathlib); its real part is `log ‖h ·‖` by Poisson–Jensen; `logDeriv h` has a primitive `G` on
   the ball (`DifferentiableOn.isExactOn_ball`), so `h = κ · exp G`; then `F - G` has constant
   real part, hence is constant (`AnalyticOnNhd.eq_const_of_re_eq_const`), and differentiating
   gives the claim.
