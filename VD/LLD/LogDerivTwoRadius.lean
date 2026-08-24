@@ -96,14 +96,6 @@ private lemma sqrt_inv_eq_rpow {x : ℝ} (hx : 0 ≤ x) : √x⁻¹ = x ^ (-(2:�
   rw [Real.sqrt_inv, Real.sqrt_eq_rpow, ← Real.rpow_neg hx]
   norm_num
 
-/-- The positive part of the logarithm is dominated by the absolute value. -/
-private lemma posLog_le_abs (x : ℝ) : log⁺ x ≤ |x| := by
-  rcases le_or_gt |x| 1 with h | h
-  · rw [(posLog_eq_zero_iff x).2 h]
-    exact abs_nonneg x
-  · rw [← posLog_abs, posLog_eq_log (by rw [abs_abs]; exact h.le)]
-    linarith [Real.log_le_sub_one_of_pos (lt_trans one_pos h : (0:ℝ) < |x|)]
-
 /-- The norm of a circle average is at most the circle average of the norms. -/
 private lemma norm_circleAverage_le (F : ℂ → ℂ) (c : ℂ) (R : ℝ) :
     ‖circleAverage F c R‖ ≤ circleAverage (fun z ↦ ‖F z‖) c R := by
