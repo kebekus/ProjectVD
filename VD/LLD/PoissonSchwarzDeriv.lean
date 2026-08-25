@@ -118,6 +118,11 @@ theorem MeromorphicOn.logDeriv_eq_circleAverage {h : ℂ → ℂ} {R : ℝ} {w :
     logDeriv h w
       = circleAverage (fun ζ ↦ (2 * ζ / (ζ - w) ^ 2) • (Real.log ‖h ζ‖ : ℂ)) 0 R := by
   have hR : 0 < R := pos_of_mem_ball hw
+  -- Points of the open ball lie off the circle
+  have hball : ∀ z ∈ ball (0 : ℂ) R, z ∉ sphere 0 |R| := fun z hz hs ↦ by
+    rw [mem_ball_zero_iff] at hz
+    rw [mem_sphere_zero_iff_norm, abs_of_pos hR] at hs
+    exact hz.ne hs
   -- Integrability of `log ‖h ·‖`, real and complex-valued
   have hgR : CircleIntegrable (fun ζ ↦ Real.log ‖h ζ‖) 0 R :=
     MeromorphicOn.circleIntegrable_log_norm
@@ -131,9 +136,9 @@ theorem MeromorphicOn.logDeriv_eq_circleAverage {h : ℂ → ℂ} {R : ℝ} {w :
     with hF_def
   have hF_deriv : ∀ z ∈ ball 0 R, HasDerivAt F
       (circleAverage (fun ζ ↦ (2 * ζ / (ζ - z) ^ 2) • (Real.log ‖h ζ‖ : ℂ)) 0 R) z :=
-    fun z hz ↦ hasDerivAt_circleAverage_herglotzRieszKernel_smul hgC hz
+    fun z hz ↦ hasDerivAt_circleAverage_herglotzRieszKernel_smul hgC (hball z hz)
   have hF_an : AnalyticOnNhd ℂ F (ball 0 R) :=
-    analyticOnNhd_circleAverage_herglotzRieszKernel_smul hgC
+    (analyticOnNhd_circleAverage_herglotzRieszKernel_smul hgC).mono fun z hz ↦ hball z hz
   -- The real part of `F` is `log ‖h ·‖`, by Poisson–Jensen
   have horder : ∀ z ∈ ball 0 R, meromorphicOrderAt h z = 0 := by
     intro z hz
@@ -149,7 +154,7 @@ theorem MeromorphicOn.logDeriv_eq_circleAverage {h : ℂ → ℂ} {R : ℝ} {w :
   have hRe : ∀ z ∈ ball 0 R, (F z).re = Real.log ‖h z‖ := by
     intro z hz
     rw [hF_def]
-    rw [re_circleAverage_herglotzRieszKernel_smul hgR hz]
+    rw [re_circleAverage_herglotzRieszKernel_smul hgR (hball z hz)]
     have hPJ := h₁.log_norm_meromorphicTrailingCoeffAt hz (horder z hz)
     rw [(h₂ z hz).meromorphicTrailingCoeffAt_of_ne_zero (h₃ z hz)] at hPJ
     have hsum : (∑ᶠ i, ((divisor h (ball 0 R)) i)
