@@ -8,6 +8,17 @@ import VD.LLD.LogDerivLemma
 import VD.LLD.LogDerivTwoRadius
 import VD.LLD.PoissonJensenDeriv
 import VD.LLD.PoissonSchwarzDeriv
+import VD.Manifold.Bundle.ContinuousNorm
+import VD.Manifold.Bundle.LocalCoord
+import VD.Manifold.Characteristic
+import VD.Manifold.Classical
+import VD.Manifold.HolomorphicFlat
+import VD.Manifold.Counting
+import VD.Manifold.Proximity
+import VD.Manifold.RiemannSphere.Manifold
+import VD.Manifold.RiemannSphere.OfMeromorphic
+import VD.Manifold.RiemannSphere.Hyperplane
+import VD.Manifold.SectionDivisor
 import VD.LinearDiffOp.Basic
 import VD.LinearDiffOp.Regularity
 import VD.LinearDiffOp.Wirtinger
