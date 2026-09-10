@@ -5,7 +5,7 @@ Authors: Stefan Kebekus
 -/
 import VD.Field.CodiscreteWithinEventually
 import VD.LLD.LogDerivLemma
-import VD.MathlibSubmitted.SeparationLemma
+import Mathlib.Analysis.Complex.ValueDistribution.SecondMainTheorem
 
 /-!
 # Proximity Estimates for the Second Main Theorem — SMT work package D
