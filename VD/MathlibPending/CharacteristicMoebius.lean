@@ -5,7 +5,7 @@ Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 import Mathlib.Analysis.Meromorphic.IsolatedZeros
-import VD.MathlibSubmitted.Scaling
+import Mathlib.Analysis.Meromorphic.RCLike
 
 /-!
 # Invariance of the Characteristic Function under Automorphisms of the Projective Line
@@ -200,8 +200,7 @@ theorem Meromorphic.exists_meromorphicOrderAt_eq_top_iff_eventually_zero {f : �
 @[simp] theorem characteristic_zero :
     characteristic (0 : ℂ → ℂ) ⊤ = fun _ ↦ 0 := by
   convert characteristic_const (c := 0)
-  · simp
-  · simp
+  simp
 
 /- Private transitivity lemma, used in the proof of
 `isBigO_characteristic_sub_characteristic_moebius`. -/
@@ -210,8 +209,8 @@ private lemma transitivity₁ {f₁ f₃ : ℝ → ℝ} (f₂ : ℂ → ℂ)
     (h₁₂ : (f₁ - characteristic f₂ ⊤) =O[atTop] (1 : ℝ → ℝ)) :
     (f₁ - f₃) =O[atTop] (1 : ℝ → ℝ) := by
   convert h₁₂.add h₂₃
-  · exact (congrArg Norm.mk ∘ fun a ↦ a) rfl
-  · simp
+  simp only [Pi.sub_apply]
+  ring
 
 /- Private transitivity lemma, used in the proof of
 `isBigO_characteristic_sub_characteristic_moebius`. -/
@@ -253,12 +252,10 @@ theorem isBigO_characteristic_sub_characteristic_moebius {a b c d : ℂ}
     apply transitivity₁ (a * f ·)
     · convert isBigO_characteristic_sub_characteristic_shift (a₀ := -b) (f := a • f)
         (by fun_prop)
-      · rfl
       simp
     apply transitivity₁ f
     · convert isBigO_characteristic_sub_characteristic_const_mul (s := a) (f := f)
         (by fun_prop) (by aesop)
-      simp
     simp [IsBigO.of_norm_le]
   · -- Case `c ≠ 0`.
     by_cases hord : ∀ z, meromorphicOrderAt (c * f · + d) z ≠ ⊤

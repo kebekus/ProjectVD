@@ -8,7 +8,6 @@ import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 import VD.LLD.CircleAverageEstimates
 import VD.LLD.PoissonJensenDeriv
 import VD.MathlibPending.CharacteristicMoebius
-import VD.MathlibSubmitted.CountingEstimate
 
 /-!
 ## Elementary Helper

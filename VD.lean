@@ -16,9 +16,7 @@ import VD.MathlibPending.CharacteristicIsBigOLog
 import VD.MathlibPending.CharacteristicMoebius
 import VD.MathlibPending.PoissonJensen
 import VD.MathlibPending.ProximityBounded
-import VD.MathlibSubmitted.CountingEstimate
 import VD.MathlibSubmitted.PoissonJensen
-import VD.MathlibSubmitted.Scaling
 import VD.MathlibSubmitted.SeparationLemma
 import VD.MathlibSubmitted.TruncatedCounting
 import VD.SMT.Deficiency
