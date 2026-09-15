@@ -61,9 +61,9 @@ private lemma circleIntegrable_log_one_add {u : ℂ → ℝ} {r : ℝ}
       (aemeasurable_const.add (intervalIntegrable_iff.1 hu).aestronglyMeasurable.aemeasurable)
   · filter_upwards with θ
     have h₁ : 0 ≤ u (circleMap 0 r θ) := h₀ _ (circleMap_mem_sphere' 0 r θ)
-    have h₂ := Real.log_le_sub_one_of_pos (by linarith : (0:ℝ) < 1 + u (circleMap 0 r θ))
+    have h₂ := log_le_sub_one_of_pos (by linarith : (0:ℝ) < 1 + u (circleMap 0 r θ))
     simp only [Real.norm_eq_abs, abs_abs]
-    rw [abs_of_nonneg (Real.log_nonneg (by linarith))]
+    rw [abs_of_nonneg (log_nonneg (by linarith))]
     calc Real.log (1 + u (circleMap 0 r θ))
         ≤ u (circleMap 0 r θ) := by linarith
       _ ≤ |u (circleMap 0 r θ)| := le_abs_self _
@@ -80,14 +80,14 @@ circle average of `log⁺ u` is at most `log⁺` of the circle average, up to an
 theorem Real.circleAverage_posLog_le_posLog_circleAverage {u : ℂ → ℝ} {r : ℝ}
     (h₀ : ∀ z ∈ sphere (0 : ℂ) |r|, 0 ≤ u z) (hu : CircleIntegrable u 0 r) :
     circleAverage (log⁺ ∘ u) 0 r ≤ log⁺ (circleAverage u 0 r) + Real.log 2 := by
-  have hInt : CircleIntegrable (fun z ↦ Real.log (1 + u z)) 0 r :=
+  have hInt : CircleIntegrable (fun z ↦ log (1 + u z)) 0 r :=
     circleIntegrable_log_one_add h₀ hu
   have hIntP : CircleIntegrable (log⁺ ∘ u) 0 r := circleIntegrable_posLog_comp hu
-  have step₁ : circleAverage (log⁺ ∘ u) 0 r ≤ circleAverage (fun z ↦ Real.log (1 + u z)) 0 r :=
+  have step₁ : circleAverage (log⁺ ∘ u) 0 r ≤ circleAverage (fun z ↦ log (1 + u z)) 0 r :=
     circleAverage_mono hIntP hInt (fun z hz ↦ posLog_le_log_one_add (h₀ z hz))
   -- Jensen's inequality, applied to the interval average over `Ι 0 (2 * π)`
-  have step₂ : circleAverage (fun z ↦ Real.log (1 + u z)) 0 r
-      ≤ Real.log (1 + circleAverage u 0 r) := by
+  have step₂ : circleAverage (fun z ↦ log (1 + u z)) 0 r
+      ≤ log (1 + circleAverage u 0 r) := by
     rw [circleAverage_eq_intervalAverage, circleAverage_eq_intervalAverage]
     exact concaveOn_log_one_add.le_map_set_average
       (ContinuousOn.log (by fun_prop)
