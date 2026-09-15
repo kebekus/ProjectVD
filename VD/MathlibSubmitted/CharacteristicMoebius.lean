@@ -107,6 +107,19 @@ theorem abs_posLog_mul_sub_posLog_le_posLog_add_posLog {x y : ℝ} (hx : x ≠ 0
   · grind [posLog_mul (x := x⁻¹) (y := x * y), posLog_nonneg]
   · grind [posLog_mul, posLog_nonneg]
 
+/--
+If `f` is meromorphic, then `log⁺ ‖f ·‖` is circle integrable over every circle.
+-/
+@[fun_prop]
+theorem Meromorphic.circleIntegrable_posLog_norm {f : ℂ → E} (hf : Meromorphic f) {c : ℂ} {R : ℝ} :
+    CircleIntegrable (log⁺ ‖f ·‖) c R :=
+  hf.meromorphicOn.circleIntegrable_posLog_norm
+
+/--
+Multiplying a meromorphic function by a nonzero constant `s` changes the proximity function (for
+the value `⊤`) only by a bounded function. More precisely, the difference is bounded by
+`log⁺ ‖s‖ + log⁺ ‖s⁻¹‖`.
+-/
 theorem isBigO_proximity_top_sub_proximity_const_smul_top {f : ℂ → E} {s : ℂ}
     (hf : Meromorphic f) (hs : s ≠ 0) :
     (proximity f ⊤ - proximity (s • f) ⊤) =O[atTop] (1 : ℝ → ℝ) := by
@@ -117,34 +130,16 @@ theorem isBigO_proximity_top_sub_proximity_const_smul_top {f : ℂ → E} {s : �
   intro r hr
   simp only [proximity, ↓reduceDIte, Pi.smul_apply, Pi.sub_apply, norm_eq_abs, norm_inv,
     Pi.one_apply, norm_one, mul_one]
-  rw [← circleAverage_sub]
-  · trans circleAverage |(log⁺ ‖f ·‖) - (log⁺ ‖s • f ·‖)| 0 r
-    · apply abs_circleAverage_le_circleAverage_abs
-    · rw [← circleAverage_const (a := log⁺ ‖s‖ + log⁺ ‖s‖⁻¹)]
-      apply circleAverage_mono
-      · -- should be fun_prop
-        apply CircleIntegrable.abs
-        apply CircleIntegrable.sub
-        · refine circleIntegrable_posLog_norm_of_nonneg ?_ hr
-          intro z hz
-          exact hf z
-        · refine circleIntegrable_posLog_norm_of_nonneg ?_ hr
-          intro z hz
-          exact MeromorphicAt.fun_const_smul (hf z) s
-      · fun_prop
-      · intro x hx
-        simp only [Pi.abs_apply, Pi.sub_apply]
-        rw [norm_smul, abs_sub_comm]
-        apply abs_posLog_mul_sub_posLog_le_posLog_add_posLog
-        simp_all
-  · -- should be fun_prop
-    refine circleIntegrable_posLog_norm_of_nonneg ?_ hr
-    intro z hz
-    exact hf z
-  · -- should be fun_prop
-    refine circleIntegrable_posLog_norm_of_nonneg ?_ hr
-    intro z hz
-    exact MeromorphicAt.fun_const_smul (hf z) s
+  rw [← circleAverage_sub (by fun_prop) (by fun_prop)]
+  trans circleAverage |(log⁺ ‖f ·‖) - (log⁺ ‖s • f ·‖)| 0 r
+  · apply abs_circleAverage_le_circleAverage_abs
+  · rw [← circleAverage_const (a := log⁺ ‖s‖ + log⁺ ‖s‖⁻¹)]
+    apply circleAverage_mono (by fun_prop) (by fun_prop)
+    intro x hx
+    simp only [Pi.abs_apply, Pi.sub_apply]
+    rw [norm_smul, abs_sub_comm]
+    apply abs_posLog_mul_sub_posLog_le_posLog_add_posLog
+    simp_all
 
 /--
 Multiplying a meromorphic function by a nonzero constant changes the characteristic function (for
@@ -168,14 +163,19 @@ variable
 
 
 /--
-If `f` is meromorphic function on `ℝ` or `ℂ`, then there exists a point where a meromorphic function
-`f` has finite order iff `f` has finite order at every point.
+If `f` is a meromorphic function on `ℝ` or `ℂ`, then `f` has infinite order at some point iff `f`
+has infinite order at every point.  This is the counterpart of
+`Meromorphic.exists_meromorphicOrderAt_ne_top_iff_forall` for infinite order.
 -/
 theorem Meromorphic.exists_meromorphicOrderAt_eq_top_iff_forall {f : 𝕜 → E} (hf : Meromorphic f) :
     (∃ u, meromorphicOrderAt f u = ⊤) ↔ (∀ u, meromorphicOrderAt f u = ⊤) := by
   have := hf.exists_meromorphicOrderAt_ne_top_iff_forall.not.symm
   aesop
 
+/--
+A meromorphic function on `ℝ` or `ℂ` has infinite order at some point iff it vanishes outside a
+discrete set, i.e. iff it is eventually zero along the codiscrete filter.
+-/
 theorem Meromorphic.exists_meromorphicOrderAt_eq_top_iff_eventually_zero {f : 𝕜 → E}
     (hf : Meromorphic f) :
     (∃ u, meromorphicOrderAt f u = ⊤) ↔ (f =ᶠ[codiscrete 𝕜] 0) := by
@@ -187,23 +187,34 @@ theorem Meromorphic.exists_meromorphicOrderAt_eq_top_iff_eventually_zero {f : �
     rw [meromorphicOrderAt_eq_top_iff, Filter.Eventually]
     apply mem_codiscrete_iff_forall_mem_nhdsNE.1 h
 
-@[simp] lemma proximity_const' {c : E} :
+/--
+Function-level variant of `proximity_const`: the proximity function of a constant function `c` for
+the value `⊤` is the constant function `log⁺ ‖c‖`.
+-/
+@[simp] lemma fun_proximity_const {c : E} :
     proximity (fun _ ↦ c) ⊤ = fun _ ↦ log⁺ ‖c‖ := by
   ext r
   simp [proximity, circleAverage_const]
 
+/--
+The characteristic function of a constant function `c` for the value `⊤` is the constant function
+`log⁺ ‖c‖`.
+-/
 @[simp] theorem characteristic_const {c : ℂ} :
     characteristic (fun _ ↦ c) ⊤ = fun _ ↦ log⁺ ‖c‖ := by
-  unfold characteristic
-  simp
+  simp [characteristic]
 
+/-- The characteristic function of the zero function for the value `⊤` vanishes identically. -/
 @[simp] theorem characteristic_zero :
     characteristic (0 : ℂ → ℂ) ⊤ = fun _ ↦ 0 := by
   convert characteristic_const (c := 0)
   simp
 
-/- Private transitivity lemma, used in the proof of
-`isBigO_characteristic_sub_characteristic_moebius`. -/
+/-
+Private transitivity lemma, used in the proof of `isBigO_characteristic_sub_characteristic_moebius`:
+if `f₁` and `f₃` both differ from the characteristic function of `f₂` only by bounded functions,
+then `f₁ - f₃` is bounded.
+-/
 private lemma transitivity₁ {f₁ f₃ : ℝ → ℝ} (f₂ : ℂ → ℂ)
     (h₂₃ : (characteristic f₂ ⊤ - f₃) =O[atTop] (1 : ℝ → ℝ))
     (h₁₂ : (f₁ - characteristic f₂ ⊤) =O[atTop] (1 : ℝ → ℝ)) :
@@ -212,8 +223,11 @@ private lemma transitivity₁ {f₁ f₃ : ℝ → ℝ} (f₂ : ℂ → ℂ)
   simp only [Pi.sub_apply]
   ring
 
-/- Private transitivity lemma, used in the proof of
-`isBigO_characteristic_sub_characteristic_moebius`. -/
+/-
+Private transitivity lemma, used in the proof of `isBigO_characteristic_sub_characteristic_moebius`:
+replacing `f₂` by a function that agrees with it outside a discrete set does not affect boundedness
+of the difference of the characteristic functions.
+-/
 private lemma transitivity₂ {f₁ f₂ f₃ : ℂ → ℂ} (h₂₃ : f₂ =ᶠ[codiscrete ℂ] f₃)
     (h₁₂ : (characteristic f₁ ⊤ - characteristic f₂ ⊤) =O[atTop] (1 : ℝ → ℝ)) :
     (characteristic f₁ ⊤ - characteristic f₃ ⊤) =O[atTop] (1 : ℝ → ℝ) := by

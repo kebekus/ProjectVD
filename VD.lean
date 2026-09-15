@@ -13,9 +13,9 @@ import VD.LinearDiffOp.Regularity
 import VD.LinearDiffOp.Wirtinger
 import VD.MathlibPending.BoundednessCharacteristic
 import VD.MathlibPending.CharacteristicIsBigOLog
-import VD.MathlibPending.CharacteristicMoebius
 import VD.MathlibPending.PoissonJensen
 import VD.MathlibPending.ProximityBounded
+import VD.MathlibSubmitted.CharacteristicMoebius
 import VD.MathlibSubmitted.PoissonJensen
 import VD.MathlibSubmitted.TruncatedCounting
 import VD.SMT.Deficiency
