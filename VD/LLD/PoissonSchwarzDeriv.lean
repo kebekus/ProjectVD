@@ -49,22 +49,20 @@ namespace Complex
 
 /-- The logarithmic derivative of the canonical factor, away from its zero and pole. -/
 theorem logDeriv_canonicalFactor {R : ℝ} {a w : ℂ} (hR : R ≠ 0) (hw₁ : w ≠ a)
-    (hw₂ : (R : ℂ) ^ 2 - conj a * w ≠ 0) :
-    logDeriv (canonicalFactor R a) w
-      = -((w - a)⁻¹ + conj a / ((R : ℂ) ^ 2 - conj a * w)) := by
-  have h₁ : HasDerivAt (fun z : ℂ ↦ (R : ℂ) ^ 2 - conj a * z) (-conj a) w := by
+    (hw₂ : R ^ 2 - conj a * w ≠ 0) :
+    logDeriv (canonicalFactor R a) w = -((w - a)⁻¹ + conj a / (R ^ 2 - conj a * w)) := by
+  have h₁ : HasDerivAt (fun z : ℂ ↦ R ^ 2 - conj a * z) (-conj a) w := by
     simpa using ((hasDerivAt_id w).const_mul (conj a)).const_sub ((R : ℂ) ^ 2)
-  have h₂ : HasDerivAt (fun z : ℂ ↦ (R : ℂ) * (z - a)) ((R : ℂ) * 1) w :=
+  have h₂ : HasDerivAt (fun z : ℂ ↦ R * (z - a)) (R * 1) w :=
     ((hasDerivAt_id w).sub_const a).const_mul _
   have h₃ : (R : ℂ) * (w - a) ≠ 0 :=
     mul_ne_zero (Complex.ofReal_ne_zero.2 hR) (sub_ne_zero.2 hw₁)
   rw [canonicalFactor_def,
     logDeriv_fun_div w hw₂ h₃ h₁.differentiableAt h₂.differentiableAt,
     logDeriv_const_mul w _ (Complex.ofReal_ne_zero.2 hR)]
-  have h₄ : HasDerivAt (fun z : ℂ ↦ z - a) 1 w := by
+  have h₄ : HasDerivAt (· - a) 1 w := by
     simpa using (hasDerivAt_id w).sub_const a
-  rw [logDeriv_apply, logDeriv_apply, h₁.deriv, h₄.deriv]
-  rw [neg_div]
+  rw [logDeriv_apply, logDeriv_apply, h₁.deriv, h₄.deriv, neg_div]
   field_simp [sub_ne_zero.2 hw₁]
   ring
 
