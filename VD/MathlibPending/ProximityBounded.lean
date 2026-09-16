@@ -85,8 +85,10 @@ General complex-analysis facts, independent of value distribution theory: a poly
 most polynomially, and conversely an entire function of polynomial growth is a polynomial.
 -/
 
-/-- A polynomial function grows at most polynomially: for `1 ≤ ‖z‖`, the value `‖p.eval z‖` is
-bounded by a constant times `‖z‖ ^ p.natDegree`. -/
+/--
+A polynomial function grows at most polynomially: for `1 ≤ ‖z‖`, the value `‖p.eval z‖` is bounded
+by a constant times `‖z‖ ^ p.natDegree`.
+-/
 lemma Polynomial.norm_eval_le_of_one_le (p : Polynomial ℂ) :
     ∃ C, 0 ≤ C ∧ ∀ z : ℂ, 1 ≤ ‖z‖ → ‖p.eval z‖ ≤ C * ‖z‖ ^ p.natDegree := by
   refine ⟨∑ i ∈ Finset.range (p.natDegree + 1), ‖p.coeff i‖,
@@ -102,26 +104,46 @@ lemma Polynomial.norm_eval_le_of_one_le (p : Polynomial ℂ) :
     _ = (∑ i ∈ Finset.range (p.natDegree + 1), ‖p.coeff i‖) * ‖z‖ ^ p.natDegree := by
         rw [Finset.sum_mul]
 
-/-- The divided-difference function `dslope f 0` of an entire function `f` is again entire. -/
-lemma AnalyticOnNhd.dslope_zero (hf : AnalyticOnNhd ℂ f univ) :
-    AnalyticOnNhd ℂ (dslope f 0) univ := by
-  intro z _
-  rcases eq_or_ne z 0 with rfl | hz
-  · obtain ⟨p, hp⟩ := hf 0 (mem_univ 0)
-    exact hp.has_fpower_series_dslope_fslope.analyticAt
-  · have hD : AnalyticAt ℂ (fun w ↦ (f w - f 0) / (w - 0)) z :=
-      AnalyticAt.div ((hf z (mem_univ z)).sub analyticAt_const)
-        (analyticAt_id.sub analyticAt_const) (by simpa using hz)
-    refine hD.congr ?_
-    filter_upwards [dslope_eventuallyEq_slope_of_ne f hz] with w hw
-    rw [hw, slope_def_field]
+section DSlope
 
-/-- An entire function `f : ℂ → ℂ` whose norm grows at most polynomially (along `cobounded`) is a
-polynomial. -/
+variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E : Type*} [NormedAddCommGroup E]
+  [NormedSpace 𝕜 E]
+
+/--
+If `f` is analytic at `z`, then so is the divided-difference function `dslope f a`, for any base
+point `a`.
+-/
+@[fun_prop]
+protected theorem AnalyticAt.dslope {f : 𝕜 → E} {z a : 𝕜} (hf : AnalyticAt 𝕜 f z) :
+    AnalyticAt 𝕜 (dslope f a) z := by
+  rcases eq_or_ne z a with rfl | hz
+  · obtain ⟨p, hp⟩ := hf
+    exact hp.has_fpower_series_dslope_fslope.analyticAt
+  · have h : AnalyticAt 𝕜 (fun w ↦ (w - a)⁻¹ • (f w - f a)) z :=
+      ((analyticAt_id.sub analyticAt_const).inv (sub_ne_zero.2 hz)).smul (hf.sub analyticAt_const)
+    refine h.congr ?_
+    filter_upwards [dslope_eventuallyEq_slope_of_ne f hz] with w hw
+    rw [hw, slope_def_module]
+
+/--
+If `f` is analytic on a neighbourhood of `U`, then so is the divided-difference function
+`dslope f a`, for any base point `a`.
+-/
+@[fun_prop]
+protected theorem AnalyticOnNhd.dslope {f : 𝕜 → E} {a : 𝕜} {U : Set 𝕜} (hf : AnalyticOnNhd 𝕜 f U) :
+    AnalyticOnNhd 𝕜 (dslope f a) U :=
+  fun z hz ↦ (hf z hz).dslope
+
+end DSlope
+
+/--
+An entire function `f : ℂ → ℂ` whose norm grows at most polynomially (along `cobounded`) is a
+polynomial.
+-/
 lemma exists_polynomial_of_analyticOnNhd_of_growth :
     ∀ (n : ℕ) (f : ℂ → ℂ) (C : ℝ), AnalyticOnNhd ℂ f univ →
       (∀ᶠ z in cobounded ℂ, ‖f z‖ ≤ C * ‖z‖ ^ n) →
-      ∃ p : Polynomial ℂ, f = fun z ↦ p.eval z := by
+      ∃ p : Polynomial ℂ, f = p.eval := by
   intro n
   induction n with
   | zero =>
@@ -145,7 +167,6 @@ lemma exists_polynomial_of_analyticOnNhd_of_growth :
     exact ⟨Polynomial.C c, by rw [hc]; ext z; simp⟩
   | succ n ih =>
     intro f C hf hg
-    have hg_an : AnalyticOnNhd ℂ (dslope f 0) univ := hf.dslope_zero
     have e1 : ∀ᶠ z in cobounded ℂ, (1 : ℝ) ≤ ‖z‖ := eventually_cobounded_le_norm (E := ℂ) 1
     have hgrowth : ∀ᶠ z in cobounded ℂ, ‖dslope f 0 z‖ ≤ (C + ‖f 0‖) * ‖z‖ ^ n := by
       filter_upwards [hg, e1] with z hz h1z
@@ -155,7 +176,7 @@ lemma exists_polynomial_of_analyticOnNhd_of_growth :
       have hpow : (1 : ℝ) ≤ ‖z‖ ^ (n + 1) := one_le_pow₀ h1z
       nlinarith [norm_sub_le (f z) (f 0), hz, norm_nonneg (f 0),
         mul_nonneg (norm_nonneg (f 0)) (sub_nonneg.2 hpow)]
-    obtain ⟨q, hq⟩ := ih (dslope f 0) (C + ‖f 0‖) hg_an hgrowth
+    obtain ⟨q, hq⟩ := ih (dslope f 0) (C + ‖f 0‖) hf.dslope hgrowth
     refine ⟨Polynomial.X * q + Polynomial.C (f 0), ?_⟩
     funext z
     have hid : z • dslope f 0 z = f z - f 0 := by
