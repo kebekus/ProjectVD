@@ -6,6 +6,7 @@ Authors: Stefan Kebekus
 import VD.MathlibPending.PoissonJensen
 import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
 import Mathlib.Analysis.Complex.Liouville
+import Mathlib.Analysis.Polynomial.Basic
 import Mathlib.Analysis.Complex.ValueDistribution.Proximity.Basic
 import Mathlib.Analysis.Analytic.IsolatedZeros
 import Mathlib.Analysis.Calculus.DSlope
@@ -27,6 +28,7 @@ proximity function (the private lemmas `log_norm_le_circleAverage_posLog_norm` a
 Along the way this file also collects a few supporting results:
 * lemmas on divisors and trailing coefficients of meromorphic functions;
 * a lower bound for the norm of the canonical factor on the open ball.
+* analyticity of the divided-difference function `dslope f a` of an analytic function.
 
 The equivalences between bounded range and `IsBigO` asymptotics for functions `ℝ → ℝ` used in the
 final argument live in `VD.MathlibSubmitted.BoundedRangeIsBigO`.
@@ -90,7 +92,7 @@ A polynomial function grows at most polynomially: for `1 ≤ ‖z‖`, the value
 by a constant times `‖z‖ ^ p.natDegree`.
 -/
 lemma Polynomial.norm_eval_le_of_one_le (p : Polynomial ℂ) :
-    ∃ C, 0 ≤ C ∧ ∀ z : ℂ, 1 ≤ ‖z‖ → ‖p.eval z‖ ≤ C * ‖z‖ ^ p.natDegree := by
+    ∃ C, 0 ≤ C ∧ ∀ z, 1 ≤ ‖z‖ → ‖p.eval z‖ ≤ C * ‖z‖ ^ p.natDegree := by
   refine ⟨∑ i ∈ Finset.range (p.natDegree + 1), ‖p.coeff i‖,
     Finset.sum_nonneg fun _ _ ↦ norm_nonneg _, fun z hz ↦ ?_⟩
   calc ‖p.eval z‖
@@ -104,35 +106,72 @@ lemma Polynomial.norm_eval_le_of_one_le (p : Polynomial ℂ) :
     _ = (∑ i ∈ Finset.range (p.natDegree + 1), ‖p.coeff i‖) * ‖z‖ ^ p.natDegree := by
         rw [Finset.sum_mul]
 
+/--
+Asymptotic form of `Polynomial.norm_eval_le_of_one_le`: a polynomial function is
+`O(z ^ p.natDegree)` along `cobounded`.
+-/
+theorem Polynomial.isBigO_cobounded_pow_natDegree {R : Type*} [NormedRing R] [NormMulClass R]
+    (p : Polynomial R) :
+    p.eval =O[cobounded R] (· ^ p.natDegree) :=
+  isEquivalent_cobounded_leading_monomial.isBigO.trans (isBigO_const_mul_self _ _ _)
+
 section DSlope
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E : Type*} [NormedAddCommGroup E]
-  [NormedSpace 𝕜 E]
+  [NormedSpace 𝕜 E] {f : 𝕜 → E} {s : Set 𝕜} {a z : 𝕜}
+
+/--
+Away from the base point `a`, the function `dslope f a` is analytic within `s` at `z` as soon as `f`
+is.
+-/
+theorem AnalyticWithinAt.dslope_of_ne (hf : AnalyticWithinAt 𝕜 f s z) (hz : z ≠ a) :
+    AnalyticWithinAt 𝕜 (dslope f a) s z := by
+  have h : AnalyticWithinAt 𝕜 (fun w ↦ (w - a)⁻¹ • (f w - f a)) s z :=
+    ((analyticWithinAt_id.sub analyticWithinAt_const).inv (sub_ne_zero.2 hz)).smul
+      (hf.sub analyticWithinAt_const)
+  refine h.congr_of_eventuallyEq_insert ?_
+  filter_upwards [nhdsWithin_le_nhds (dslope_eventuallyEq_slope_of_ne f hz)] with w hw
+  rw [hw, slope_def_module]
 
 /--
 If `f` is analytic at `z`, then so is the divided-difference function `dslope f a`, for any base
 point `a`.
 -/
-@[fun_prop]
-protected theorem AnalyticAt.dslope {f : 𝕜 → E} {z a : 𝕜} (hf : AnalyticAt 𝕜 f z) :
+@[fun_prop] protected theorem AnalyticAt.dslope (hf : AnalyticAt 𝕜 f z) (a : 𝕜) :
     AnalyticAt 𝕜 (dslope f a) z := by
   rcases eq_or_ne z a with rfl | hz
   · obtain ⟨p, hp⟩ := hf
     exact hp.has_fpower_series_dslope_fslope.analyticAt
-  · have h : AnalyticAt 𝕜 (fun w ↦ (w - a)⁻¹ • (f w - f a)) z :=
-      ((analyticAt_id.sub analyticAt_const).inv (sub_ne_zero.2 hz)).smul (hf.sub analyticAt_const)
-    refine h.congr ?_
-    filter_upwards [dslope_eventuallyEq_slope_of_ne f hz] with w hw
-    rw [hw, slope_def_module]
+  · exact analyticWithinAt_univ.1 (hf.analyticWithinAt.dslope_of_ne hz)
 
 /--
-If `f` is analytic on a neighbourhood of `U`, then so is the divided-difference function
-`dslope f a`, for any base point `a`.
+If `f` is analytic on `s` and the base point `a` does not lie in `s`, then `dslope f a` is analytic
+on `s`.
 -/
-@[fun_prop]
-protected theorem AnalyticOnNhd.dslope {f : 𝕜 → E} {a : 𝕜} {U : Set 𝕜} (hf : AnalyticOnNhd 𝕜 f U) :
-    AnalyticOnNhd 𝕜 (dslope f a) U :=
-  fun z hz ↦ (hf z hz).dslope
+theorem AnalyticOn.dslope_of_notMem (hf : AnalyticOn 𝕜 f s) (ha : a ∉ s) :
+    AnalyticOn 𝕜 (dslope f a) s :=
+  fun z hz ↦ (hf z hz).dslope_of_ne (ne_of_mem_of_not_mem hz ha)
+
+/--
+If `f` is analytic on a set `s` that is a neighbourhood of the base point `a`, then `dslope f a` is
+analytic on `s`.
+-/
+protected theorem AnalyticOn.dslope (hf : AnalyticOn 𝕜 f s) (ha : s ∈ 𝓝 a) :
+    AnalyticOn 𝕜 (dslope f a) s := by
+  intro z hz
+  rcases eq_or_ne z a with hz' | hz'
+  · have hfa : AnalyticAt 𝕜 f a :=
+      analyticWithinAt_univ.1 ((hf a (mem_of_mem_nhds ha)).mono_of_mem_nhdsWithin
+        (mem_nhdsWithin_of_mem_nhds ha))
+    exact hz' ▸ (hfa.dslope a).analyticWithinAt
+  · exact (hf z hz).dslope_of_ne hz'
+
+/--
+If `f` is analytic on a neighbourhood of `s`, then so is `dslope f a`, for any base point `a`.
+-/
+@[fun_prop] protected theorem AnalyticOnNhd.dslope (hf : AnalyticOnNhd 𝕜 f s) (a : 𝕜) :
+    AnalyticOnNhd 𝕜 (dslope f a) s :=
+  fun z hz ↦ (hf z hz).dslope a
 
 end DSlope
 
@@ -176,7 +215,7 @@ lemma exists_polynomial_of_analyticOnNhd_of_growth :
       have hpow : (1 : ℝ) ≤ ‖z‖ ^ (n + 1) := one_le_pow₀ h1z
       nlinarith [norm_sub_le (f z) (f 0), hz, norm_nonneg (f 0),
         mul_nonneg (norm_nonneg (f 0)) (sub_nonneg.2 hpow)]
-    obtain ⟨q, hq⟩ := ih (dslope f 0) (C + ‖f 0‖) hf.dslope hgrowth
+    obtain ⟨q, hq⟩ := ih (dslope f 0) (C + ‖f 0‖) (hf.dslope 0) hgrowth
     refine ⟨Polynomial.X * q + Polynomial.C (f 0), ?_⟩
     funext z
     have hid : z • dslope f 0 z = f z - f 0 := by
