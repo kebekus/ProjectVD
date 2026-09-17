@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import VD.MathlibPending.PoissonJensen
+import VD.MathlibSubmitted.Liouville
 import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
 import Mathlib.Analysis.Complex.Liouville
 import Mathlib.Analysis.Polynomial.Basic
@@ -28,7 +29,6 @@ proximity function (the private lemmas `log_norm_le_circleAverage_posLog_norm` a
 Along the way this file also collects a few supporting results:
 * lemmas on divisors and trailing coefficients of meromorphic functions;
 * a lower bound for the norm of the canonical factor on the open ball.
-* analyticity of the divided-difference function `dslope f a` of an analytic function.
 
 The equivalences between bounded range and `IsBigO` asymptotics for functions `ℝ → ℝ` used in the
 final argument live in `VD.MathlibSubmitted.BoundedRangeIsBigO`.
@@ -79,150 +79,6 @@ theorem one_lt_norm_canonicalFactor (hw : w ∈ ball 0 R) (hz : z ∈ ball 0 R) 
     canonicalFactor, Complex.norm_div, Complex.norm_mul, norm_real, norm_eq_abs, gt_iff_lt]
   rwa [one_lt_div (mul_pos (abs_pos.mpr hR.ne') (norm_pos_iff.mpr (sub_ne_zero.mpr hzw))),
     abs_of_pos hR]
-
-/-!
-## Polynomial Growth and Liouville-type Rigidity
-
-General complex-analysis facts, independent of value distribution theory: a polynomial grows at
-most polynomially, and conversely an entire function of polynomial growth is a polynomial.
--/
-
-/--
-A polynomial function grows at most polynomially: for `1 ≤ ‖z‖`, the value `‖p.eval z‖` is bounded
-by a constant times `‖z‖ ^ p.natDegree`.
--/
-lemma Polynomial.norm_eval_le_of_one_le (p : Polynomial ℂ) :
-    ∃ C, 0 ≤ C ∧ ∀ z, 1 ≤ ‖z‖ → ‖p.eval z‖ ≤ C * ‖z‖ ^ p.natDegree := by
-  refine ⟨∑ i ∈ Finset.range (p.natDegree + 1), ‖p.coeff i‖,
-    Finset.sum_nonneg fun _ _ ↦ norm_nonneg _, fun z hz ↦ ?_⟩
-  calc ‖p.eval z‖
-      = ‖∑ i ∈ Finset.range (p.natDegree + 1), p.coeff i * z ^ i‖ := by rw [p.eval_eq_sum_range]
-    _ ≤ ∑ i ∈ Finset.range (p.natDegree + 1), ‖p.coeff i * z ^ i‖ := norm_sum_le _ _
-    _ ≤ ∑ i ∈ Finset.range (p.natDegree + 1), ‖p.coeff i‖ * ‖z‖ ^ p.natDegree := by
-        refine Finset.sum_le_sum fun i hi ↦ ?_
-        rw [norm_mul, norm_pow]
-        exact mul_le_mul_of_nonneg_left
-          (pow_le_pow_right₀ hz (Nat.lt_succ_iff.1 (Finset.mem_range.1 hi))) (norm_nonneg _)
-    _ = (∑ i ∈ Finset.range (p.natDegree + 1), ‖p.coeff i‖) * ‖z‖ ^ p.natDegree := by
-        rw [Finset.sum_mul]
-
-/--
-Asymptotic form of `Polynomial.norm_eval_le_of_one_le`: a polynomial function is
-`O(z ^ p.natDegree)` along `cobounded`.
--/
-theorem Polynomial.isBigO_cobounded_pow_natDegree {R : Type*} [NormedRing R] [NormMulClass R]
-    (p : Polynomial R) :
-    p.eval =O[cobounded R] (· ^ p.natDegree) :=
-  isEquivalent_cobounded_leading_monomial.isBigO.trans (isBigO_const_mul_self _ _ _)
-
-section DSlope
-
-variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E : Type*} [NormedAddCommGroup E]
-  [NormedSpace 𝕜 E] {f : 𝕜 → E} {s : Set 𝕜} {a z : 𝕜}
-
-/--
-Away from the base point `a`, the function `dslope f a` is analytic within `s` at `z` as soon as `f`
-is.
--/
-theorem AnalyticWithinAt.dslope_of_ne (hf : AnalyticWithinAt 𝕜 f s z) (hz : z ≠ a) :
-    AnalyticWithinAt 𝕜 (dslope f a) s z := by
-  have h : AnalyticWithinAt 𝕜 (fun w ↦ (w - a)⁻¹ • (f w - f a)) s z :=
-    ((analyticWithinAt_id.sub analyticWithinAt_const).inv (sub_ne_zero.2 hz)).smul
-      (hf.sub analyticWithinAt_const)
-  refine h.congr_of_eventuallyEq_insert ?_
-  filter_upwards [nhdsWithin_le_nhds (dslope_eventuallyEq_slope_of_ne f hz)] with w hw
-  rw [hw, slope_def_module]
-
-/--
-If `f` is analytic at `z`, then so is the divided-difference function `dslope f a`, for any base
-point `a`.
--/
-@[fun_prop] protected theorem AnalyticAt.dslope (hf : AnalyticAt 𝕜 f z) (a : 𝕜) :
-    AnalyticAt 𝕜 (dslope f a) z := by
-  rcases eq_or_ne z a with rfl | hz
-  · obtain ⟨p, hp⟩ := hf
-    exact hp.has_fpower_series_dslope_fslope.analyticAt
-  · exact analyticWithinAt_univ.1 (hf.analyticWithinAt.dslope_of_ne hz)
-
-/--
-If `f` is analytic on `s` and the base point `a` does not lie in `s`, then `dslope f a` is analytic
-on `s`.
--/
-theorem AnalyticOn.dslope_of_notMem (hf : AnalyticOn 𝕜 f s) (ha : a ∉ s) :
-    AnalyticOn 𝕜 (dslope f a) s :=
-  fun z hz ↦ (hf z hz).dslope_of_ne (ne_of_mem_of_not_mem hz ha)
-
-/--
-If `f` is analytic on a set `s` that is a neighbourhood of the base point `a`, then `dslope f a` is
-analytic on `s`.
--/
-protected theorem AnalyticOn.dslope (hf : AnalyticOn 𝕜 f s) (ha : s ∈ 𝓝 a) :
-    AnalyticOn 𝕜 (dslope f a) s := by
-  intro z hz
-  rcases eq_or_ne z a with hz' | hz'
-  · have hfa : AnalyticAt 𝕜 f a :=
-      analyticWithinAt_univ.1 ((hf a (mem_of_mem_nhds ha)).mono_of_mem_nhdsWithin
-        (mem_nhdsWithin_of_mem_nhds ha))
-    exact hz' ▸ (hfa.dslope a).analyticWithinAt
-  · exact (hf z hz).dslope_of_ne hz'
-
-/--
-If `f` is analytic on a neighbourhood of `s`, then so is `dslope f a`, for any base point `a`.
--/
-@[fun_prop] protected theorem AnalyticOnNhd.dslope (hf : AnalyticOnNhd 𝕜 f s) (a : 𝕜) :
-    AnalyticOnNhd 𝕜 (dslope f a) s :=
-  fun z hz ↦ (hf z hz).dslope a
-
-end DSlope
-
-/--
-An entire function `f : ℂ → ℂ` whose norm grows at most polynomially (along `cobounded`) is a
-polynomial.
--/
-lemma exists_polynomial_of_analyticOnNhd_of_growth :
-    ∀ (n : ℕ) (f : ℂ → ℂ) (C : ℝ), AnalyticOnNhd ℂ f univ →
-      (∀ᶠ z in cobounded ℂ, ‖f z‖ ≤ C * ‖z‖ ^ n) →
-      ∃ p : Polynomial ℂ, f = p.eval := by
-  intro n
-  induction n with
-  | zero =>
-    intro f C hf hg
-    have hcont : Continuous f := hf.continuous
-    simp only [pow_zero, mul_one] at hg
-    have hK : IsBounded {z : ℂ | C < ‖f z‖} := by
-      have : IsBounded {z : ℂ | ‖f z‖ ≤ C}ᶜ := isBounded_compl_iff.2 hg
-      simpa only [compl_ofPred, not_le] using this
-    have hbdd : IsBounded (range f) := by
-      have himg : IsBounded (f '' {z : ℂ | C < ‖f z‖}) :=
-        ((hK.isCompact_closure.image hcont).isBounded).subset
-          (image_mono subset_closure)
-      refine (himg.union (isBounded_closedBall (x := (0 : ℂ)) (r := C))).subset ?_
-      rintro _ ⟨z, rfl⟩
-      by_cases hz : C < ‖f z‖
-      · exact Or.inl ⟨z, hz, rfl⟩
-      · exact Or.inr (by simp only [mem_closedBall, dist_zero_right]; exact not_lt.mp hz)
-    have hdiff : Differentiable ℂ f := fun x ↦ (hf x (mem_univ x)).differentiableAt
-    obtain ⟨c, hc⟩ := hdiff.exists_eq_const_of_bounded hbdd
-    exact ⟨Polynomial.C c, by rw [hc]; ext z; simp⟩
-  | succ n ih =>
-    intro f C hf hg
-    have e1 : ∀ᶠ z in cobounded ℂ, (1 : ℝ) ≤ ‖z‖ := eventually_cobounded_le_norm (E := ℂ) 1
-    have hgrowth : ∀ᶠ z in cobounded ℂ, ‖dslope f 0 z‖ ≤ (C + ‖f 0‖) * ‖z‖ ^ n := by
-      filter_upwards [hg, e1] with z hz h1z
-      have hz0 : z ≠ 0 := by rintro rfl; rw [norm_zero] at h1z; linarith
-      rw [dslope_of_ne f hz0, slope_def_field, sub_zero, norm_div,
-        div_le_iff₀ (by positivity), mul_assoc, ← pow_succ]
-      have hpow : (1 : ℝ) ≤ ‖z‖ ^ (n + 1) := one_le_pow₀ h1z
-      nlinarith [norm_sub_le (f z) (f 0), hz, norm_nonneg (f 0),
-        mul_nonneg (norm_nonneg (f 0)) (sub_nonneg.2 hpow)]
-    obtain ⟨q, hq⟩ := ih (dslope f 0) (C + ‖f 0‖) (hf.dslope 0) hgrowth
-    refine ⟨Polynomial.X * q + Polynomial.C (f 0), ?_⟩
-    funext z
-    have hid : z • dslope f 0 z = f z - f 0 := by
-      have h := sub_smul_dslope f 0 z; rwa [sub_zero] at h
-    simp only [hq, smul_eq_mul] at hid
-    simp only [Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_X, Polynomial.eval_C]
-    rw [hid]; ring
 
 /-!
 ## Boundedness of the Proximity Function
@@ -373,7 +229,8 @@ proximity function `O(log)` if and only if it is a polynomial.
 /-- The proximity function of a polynomial is `O(log)`. -/
 lemma proximity_isBigO_log_of_polynomial (p : Polynomial ℂ) :
     proximity (fun z ↦ p.eval z) ⊤ =O[atTop] Real.log := by
-  obtain ⟨C, hC0, hC⟩ := Polynomial.norm_eval_le_of_one_le p
+  obtain ⟨C, hC⟩ := isBigO_iff.1 p.isBigO_cobounded_pow_natDegree
+  obtain ⟨R, -, hR⟩ := (Metric.hasBasis_cobounded_compl_closedBall (0 : ℂ)).eventually_iff.1 hC
   have hcont : Continuous fun z : ℂ ↦ log⁺ ‖p.eval z‖ :=
     continuous_posLog.comp (continuous_norm.comp p.continuous)
   set g : ℝ → ℝ := fun r ↦ log⁺ C + (p.natDegree : ℝ) * Real.log r with hg_def
@@ -382,7 +239,7 @@ lemma proximity_isBigO_log_of_polynomial (p : Polynomial ℂ) :
   refine Asymptotics.IsBigO.trans ?_ hg_isBigO
   rw [Asymptotics.isBigO_iff]
   refine ⟨1, ?_⟩
-  filter_upwards [eventually_ge_atTop (1 : ℝ)] with r hr
+  filter_upwards [eventually_ge_atTop (1 : ℝ), eventually_gt_atTop R] with r hr hRr
   have hlogr : 0 ≤ Real.log r := Real.log_nonneg hr
   have habs : |r| = r := abs_of_nonneg (by linarith)
   have hgr : 0 ≤ g r := add_nonneg posLog_nonneg (mul_nonneg (Nat.cast_nonneg _) hlogr)
@@ -390,9 +247,11 @@ lemma proximity_isBigO_log_of_polynomial (p : Polynomial ℂ) :
   refine circleAverage_mono_on_of_le_circle (hcont.continuousOn.circleIntegrable') fun x hx ↦ ?_
   rw [mem_sphere_zero_iff_norm, habs] at hx
   calc log⁺ ‖p.eval x‖
-      ≤ log⁺ (C * r ^ p.natDegree) :=
-        posLog_le_posLog (neg_one_lt_zero.le.trans (norm_nonneg _))
-          (by have := hC x (hx ▸ hr); rwa [hx] at this)
+      ≤ log⁺ (C * r ^ p.natDegree) := by
+        refine posLog_le_posLog (neg_one_lt_zero.le.trans (norm_nonneg _)) ?_
+        have hxR : x ∈ (closedBall (0 : ℂ) R)ᶜ := by
+          rw [mem_compl_iff, mem_closedBall, dist_zero_right, hx]; exact not_le.2 hRr
+        simpa only [norm_pow, hx] using hR hxR
     _ ≤ log⁺ C + log⁺ (r ^ p.natDegree) := posLog_mul
     _ = log⁺ C + (p.natDegree : ℝ) * log⁺ r := by rw [posLog_pow]
     _ = g r := by rw [posLog_eq_log (x := r) (by rw [habs]; exact hr)]
@@ -404,8 +263,9 @@ theorem proximity_isBigO_log_iff_exists_eq_polynomial (h₁f : AnalyticOnNhd ℂ
   constructor
   · intro h
     obtain ⟨C, hC⟩ := Asymptotics.isBigO_iff.1 h
-    refine exists_polynomial_of_analyticOnNhd_of_growth ⌈3 * C⌉₊ f
-      (Real.exp (3 * C * Real.log 2)) h₁f ?_
+    refine ((analyticOnNhd_univ_iff_differentiable.1 h₁f).exists_eq_polynomial_eval_of_isBigO_pow
+      (n := ⌈3 * C⌉₊) (IsBigO.of_bound (Real.exp (3 * C * Real.log 2)) ?_)).imp fun p hp ↦ hp.2
+    simp only [norm_pow]
     have htend : Tendsto (fun w : ℂ ↦ ‖2 * w‖) (cobounded ℂ) atTop := by
       refine (Filter.Tendsto.const_mul_atTop (show (0 : ℝ) < 2 by norm_num)
         tendsto_norm_cobounded_atTop).congr fun w ↦ ?_
