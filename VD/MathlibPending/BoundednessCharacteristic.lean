@@ -13,11 +13,6 @@ import VD.MathlibPending.ProximityBounded
 If `f` is complex-meromorphic, we show that the characteristic function for the poles of `f` is
 asymptotically bounded if and only if `f` is constant.  See Page 170f of [Lang, *Introduction to
 Complex Hyperbolic Spaces*][MR886677] for a detailed discussion.
-
-## TODO
-
-Establish the analogous characterization of rational functions, as functions whose logarithmic
-counting function big-O of `log`.
 -/
 
 open Filter Function Metric Real Set Topology ValueDistribution
