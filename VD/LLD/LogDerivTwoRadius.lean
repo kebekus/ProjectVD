@@ -268,7 +268,7 @@ private lemma proximity_logDeriv_le {f : ℂ → ℂ} {r ρ : ℝ} (hf : Meromor
     hld.meromorphicOn.circleIntegrable_posLog_norm
   have int_sum : CircleIntegrable (fun w ↦ ∑ a ∈ s,
       (|divisor f (ball 0 ρ) a| : ℝ) * (‖w - a‖ ^ (-(2:ℝ)⁻¹) + (ρ - r) ^ (-(2:ℝ)⁻¹))) 0 r := by
-    fun_prop
+    fun_prop (disch := norm_num)
   have int_g : CircleIntegrable g 0 r := (circleIntegrable_const (√K) 0 r).add int_sum
   have int_posLog_g : CircleIntegrable (fun w ↦ log⁺ (g w)) 0 r := by
     apply IntervalIntegrable.mono_fun int_g.abs
@@ -310,7 +310,7 @@ private lemma proximity_logDeriv_le {f : ℂ → ℂ} {r ρ : ℝ} (hf : Meromor
       congr 1
       have h_each : ∀ a ∈ s, CircleIntegrable (fun w ↦ (|divisor f (ball 0 ρ) a| : ℝ)
           * (‖w - a‖ ^ (-(2:ℝ)⁻¹) + (ρ - r) ^ (-(2:ℝ)⁻¹))) 0 r :=
-        fun a _ ↦ by fun_prop
+        fun a _ ↦ by fun_prop (disch := norm_num)
       rw [circleAverage_fun_sum h_each]
       refine Finset.sum_congr rfl fun a _ ↦ ?_
       have h₂ : (fun w ↦ (|divisor f (ball 0 ρ) a| : ℝ)
@@ -321,7 +321,7 @@ private lemma proximity_logDeriv_le {f : ℂ → ℂ} {r ρ : ℝ} (hf : Meromor
       congr 1
       have h₃ : (fun w : ℂ ↦ ‖w - a‖ ^ (-(2:ℝ)⁻¹) + (ρ - r) ^ (-(2:ℝ)⁻¹))
           = (‖· - a‖ ^ (-(2:ℝ)⁻¹)) + fun _ ↦ (ρ - r) ^ (-(2:ℝ)⁻¹) := rfl
-      rw [h₃, circleAverage_add (Real.circleIntegrable_norm_sub_rpow a r)
+      rw [h₃, circleAverage_add (circleIntegrable_norm_sub_const_rpow (by norm_num) r)
         (circleIntegrable_const _ 0 r), circleAverage_const]
     rw [e₁, hN]
     refine add_le_add le_rfl ?_
@@ -329,7 +329,10 @@ private lemma proximity_logDeriv_le {f : ℂ → ℂ} {r ρ : ℝ} (hf : Meromor
     refine Finset.sum_le_sum fun a _ ↦ mul_le_mul_of_nonneg_left ?_ (hcoeff a)
     refine add_le_add ?_ le_rfl
     calc circleAverage (‖· - a‖ ^ (-(2:ℝ)⁻¹)) 0 r
-        ≤ 4 * r ^ (-(2:ℝ)⁻¹) := Real.circleAverage_norm_sub_rpow_le hr₀
+        ≤ 4 * r ^ (-(2:ℝ)⁻¹) := by
+          have := circleAverage_norm_sub_const_rpow_le (a := a) (c := 0) hr₀.ne'
+            (p := -(2:ℝ)⁻¹) (by norm_num) (by norm_num)
+          rwa [abs_of_pos hr₀, show 2 / (-(2:ℝ)⁻¹ + 1) = 4 by norm_num] at this
       _ ≤ 4 * 1 := by
           apply mul_le_mul_of_nonneg_left _ (by norm_num)
           exact Real.rpow_le_one_of_one_le_of_nonpos hr (by norm_num)

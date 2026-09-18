@@ -4,41 +4,30 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Convex.Integral
-import Mathlib.Analysis.SpecialFunctions.Integrability.Basic
-import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.Analysis.SpecialFunctions.Log.PosLog
-import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
 import Mathlib.MeasureTheory.Integral.CircleAverage
 
 /-!
-# Circle-Average Estimates — LLD work packages C1–C2
+# Jensen's Inequality for Circle Averages of `log⁺` — LLD work package C1
 
-See `VD/LLD/PLAN-LogarithmicDerivative.md`, §5.
+See `VD/LLD/PLAN-LogarithmicDerivative.md`, §5. The companion work package C2 (uniform bounds for
+circle averages of `‖· - a‖ ^ p`) lives in `VD/LLD/CircleAverageEstimates.lean`.
 
-Mathlib target: extend `Mathlib/MeasureTheory/Integral/CircleAverage.lean` and/or the `PosLog`
-integrals files. Dependencies: none (independently PR-able).
+Mathlib target: extend `Mathlib/MeasureTheory/Integral/CircleAverage.lean`. Dependencies: none
+(independently PR-able).
 
-This file provides the two circle-average estimates used in the proof of the two-radius bound for
-the Lemma on the Logarithmic Derivative.
+## Main result
 
-- `Real.circleAverage_posLog_le_posLog_circleAverage` (C1): Jensen's inequality specialised to
-  circle averages. For nonnegative circle-integrable `u`, the average of `log⁺ u` is at most
-  `log⁺` of the average, up to an additive constant `log 2`. The proof squeezes `log⁺` between
-  `log (1 + ·)` and `log (1 + ·) - log 2` and applies `ConcaveOn.le_map_average` to the concave
-  function `log (1 + ·)` on `Set.Ici 0`.
-
-- `Real.circleIntegrable_norm_sub_rpow`, `Real.circleAverage_norm_sub_rpow_le` (C2): **uniformly
-  in `a : ℂ`**, the circle average of `‖· - a‖ ^ (-2⁻¹)` over the circle of radius `r > 0` is
-  bounded by `4 * r ^ (-2⁻¹)`. This uniformity is why the exponent-1/2 trick is used for the
-  divisor sums in the two-radius estimate: the average of `‖· - a‖⁻¹` is *not* uniformly bounded.
-  The proof combines the elementary estimate `‖circleMap 0 r (θ + arg a) - a‖ ≥ (r/2) * |sin (θ/2)|`
-  (valid for **all** `a`) with the Jordan inequality `Real.mul_le_sin`, majorizing the integrand
-  by `(r/(2π) * θ) ^ (-2⁻¹) + (r/(2π) * (2π - θ)) ^ (-2⁻¹)`, whose integral is computed exactly.
+- `Real.circleAverage_posLog_le_posLog_circleAverage`: Jensen's inequality specialised to circle
+  averages. For nonnegative circle-integrable `u`, the average of `log⁺ u` is at most `log⁺` of the
+  average, up to an additive constant `log 2`. The proof squeezes `log⁺` between `log (1 + ·)` and
+  `log (1 + ·) - log 2` and applies `ConcaveOn.le_map_set_average` to the concave function
+  `log (1 + ·)` on `Set.Ici 0`.
 -/
 
 open Complex Filter MeasureTheory Metric Real Set
 
-/-!(
+/-!
 ## C1: Jensen's Inequality for Circle Averages of `log⁺`
 -/
 

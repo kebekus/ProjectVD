@@ -3,279 +3,325 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Analysis.Convex.Integral
-import Mathlib.Analysis.SpecialFunctions.Integrability.Basic
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
-import Mathlib.Analysis.SpecialFunctions.Log.PosLog
-import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
 import Mathlib.MeasureTheory.Integral.CircleAverage
 
 /-!
-# Circle-Average Estimates — LLD work packages C1–C2
+# Circle Averages of Negative Powers of the Distance to a Point — LLD work package C2
 
-See `VD/LLD/PLAN-LogarithmicDerivative.md`, §5.
+See `VD/LLD/PLAN-LogarithmicDerivative.md`, §5. The companion work package C1 (Jensen's inequality
+for circle averages of `log⁺`) lives in `VD/MathlibSubmitted/JensenInequality.lean`.
 
-Mathlib target: extend `Mathlib/MeasureTheory/Integral/CircleAverage.lean` and/or the `PosLog`
-integrals files. Dependencies: none (independently PR-able).
+This file shows that for `-1 < p ≤ 0`, the circle average of `‖· - a‖ ^ p` over a circle of radius
+`r` is bounded by `2 / (p + 1) * |r| ^ p`, **uniformly in `a : ℂ`**. For `p = -2⁻¹` the bound reads
+`4 * |r| ^ (-2⁻¹)`; this uniformity is why the two-radius estimate for the Lemma on the Logarithmic
+Derivative uses the exponent-`1/2` trick: the average of `‖· - a‖⁻¹` is *not* uniformly bounded.
 
-This file provides the two circle-average estimates used in the proof of the two-radius bound for
-the Lemma on the Logarithmic Derivative.
+## Main results
 
-- `Real.circleAverage_posLog_le_posLog_circleAverage` (C1): Jensen's inequality specialised to
-  circle averages. For nonnegative circle-integrable `u`, the average of `log⁺ u` is at most
-  `log⁺` of the average, up to an additive constant `log 2`. The proof squeezes `log⁺` between
-  `log (1 + ·)` and `log (1 + ·) - log 2` and applies `ConcaveOn.le_map_average` to the concave
-  function `log (1 + ·)` on `Set.Ici 0`.
+- `norm_circleMap_zero_sub_sq`, `norm_circleMap_zero_sub_sq'`: the law of cosines for the chord from
+  a point of the circle `circleMap 0 r` to an arbitrary point `a`, in cosine and in half-angle form.
+- `mul_abs_sin_le_norm_circleMap_zero_sub`: the sharp universal lower bound
+  `r * |sin ((θ - arg a) / 2)| ≤ ‖circleMap 0 r θ - a‖`.
+- `circleIntegrable_norm_sub_const_rpow`: `‖· - a‖ ^ p` is circle integrable for `-1 < p`.
+- `circleAverage_norm_sub_const_rpow_le`: the uniform bound described above.
 
-- `Real.circleIntegrable_norm_sub_rpow`, `Real.circleAverage_norm_sub_rpow_le` (C2): **uniformly
-  in `a : ℂ`**, the circle average of `‖· - a‖ ^ (-2⁻¹)` over the circle of radius `r > 0` is
-  bounded by `4 * r ^ (-2⁻¹)`. This uniformity is why the exponent-1/2 trick is used for the
-  divisor sums in the two-radius estimate: the average of `‖· - a‖⁻¹` is *not* uniformly bounded.
-  The proof combines the elementary estimate `‖circleMap 0 r (θ + arg a) - a‖ ≥ (r/2) * |sin (θ/2)|`
-  (valid for **all** `a`) with the Jordan inequality `Real.mul_le_sin`, majorizing the integrand
-  by `(r/(2π) * θ) ^ (-2⁻¹) + (r/(2π) * (2π - θ)) ^ (-2⁻¹)`, whose integral is computed exactly.
+## Implementation notes
+
+The chord lemmas need no measure theory. See the upstreaming notes below for where the material of
+this file belongs in Mathlib.
+
+For the average, rotate the circle by `arg a` and combine the chord bound with the Jordan inequality
+`Real.mul_le_sin`. This majorizes the integrand by `(r/(2π) * θ) ^ p + (r/(2π) * (2π - θ)) ^ p`,
+whose integral is computed exactly.
 -/
 
-open Complex Filter MeasureTheory Metric Real Set
+/-
+# Upstreaming notes
+
+The material of this file is meant to go to Mathlib in two PRs. The second depends on the first.
+Everything below was checked against the Mathlib revision pinned in `lake-manifest.json`
+(`f61f3ed7`, 2026-09-17). Mathlib itself was *not* modified: the rewritten Mathlib proofs quoted
+below were compiled as standalone copies in a scratch file that imports this file. In that test,
+the private Mathlib lemma `circleAverage_log_norm_sub_const₁_integral` was replaced by a hypothesis
+of the same statement.
+
+## PR 1: chord lemmas in `Mathlib/Analysis/SpecialFunctions/Complex/CircleMap.lean`
+
+Move `norm_circleMap_zero_sub_sq`, `norm_circleMap_zero_sub_sq'` and
+`mul_abs_sin_le_norm_circleMap_zero_sub` verbatim to `CircleMap.lean`, directly after
+`circleMap_zero_re` (which the first proof uses) and `circleMap_zero_im`. They need no measure
+theory and compile with only `import Mathlib.Analysis.SpecialFunctions.Complex.CircleMap`. This was
+checked in classic mode; recheck under the module system, because the proofs use
+`linear_combination`, `nlinarith` and `positivity`.
+
+The first lemma is not new mathematics in Mathlib, only a new *statement*: its proof is lifted from
+the inline `have h_cos_law` in `JensenFormula.lean`, with the hypothesis `‖ρ‖ = R` removed (it was
+only used to rename `‖ρ‖` to `R`). The existing lemma `Complex.norm_exp_I_mul_ofReal_sub_one` in
+`Mathlib/Analysis/Complex/Trigonometric.lean` is the special case `r = 1`, `a = 1` of the
+half-angle form. It sits below `CircleMap.lean` in the import hierarchy and therefore stays where it
+is, but the docstrings should point to each other.
+
+PR 1 should also simplify the two Mathlib proofs that currently contain their own copies of the law
+of cosines. Together they shrink from about 60 lines to about 20.
+
+### `Mathlib/Analysis/Complex/JensenFormula.lean`
+
+The private lemma `const_mul_norm_sub_circleMap_le_norm_sub_circleMap` (15 lines) proves the law of
+cosines inline, then needs `nlinarith` with six hints to compare the chords of radius `r` and `R`.
+In half-angle form, with `t = sin ((θ - arg ρ) / 2) ^ 2`, the squared inequality becomes
+`4 * r₀ * R ^ 2 * t ≤ R * (r - R) ^ 2 + 4 * r * R ^ 2 * t`, which is immediate from `r₀ ≤ r`. The
+lemma becomes:
+
+    private lemma const_mul_norm_sub_circleMap_le_norm_sub_circleMap {r₀ r R : ℝ} {ρ : ℂ}
+        (hρ : ‖ρ‖ = R) (hr₀ : 0 < r₀) (hR : 0 < R) (hr₀r : r₀ ≤ r) (θ : ℝ) :
+        sqrt (r₀ / R) * ‖circleMap 0 R θ - ρ‖ ≤ ‖circleMap 0 r θ - ρ‖ := by
+      have : (r₀ / R) * ‖circleMap 0 R θ - ρ‖ ^ 2 ≤ ‖circleMap 0 r θ - ρ‖ ^ 2 := by
+        rw [norm_circleMap_zero_sub_sq', norm_circleMap_zero_sub_sq', hρ, div_mul_eq_mul_div,
+          div_le_iff₀ hR]
+        nlinarith [mul_nonneg (mul_nonneg (sq_nonneg R) (sq_nonneg (sin ((θ - ρ.arg) / 2))))
+          (sub_nonneg.2 hr₀r), mul_nonneg hR.le (sq_nonneg (r - R))]
+      grw [← sqrt_sq (norm_nonneg _), ← sqrt_mul (by positivity), this, sqrt_sq (norm_nonneg _)]
+
+The hypothesis `hrR : r ≤ R` is no longer needed and should be dropped. Its only caller,
+`norm_herglotzLogIntegrand_circleMap_le`, then omits `hrR` from the call. The caller keeps `hrR` in
+its own signature, because it uses it elsewhere. A more conservative alternative keeps the proof as
+it is and only replaces the seven-line `h_cos_law` by `rw [norm_circleMap_zero_sub_sq, hρ]`.
+
+### `Mathlib/Analysis/SpecialFunctions/Integrals/PosLogEqCircleAverage.lean`
+
+The proof of `circleAverage_log_norm_sub_const₁` (45 lines) first rotates the circle to move `a` to
+`1`. It does this by hand, with `circleMap_zero_mul`, `Function.Periodic.intervalIntegral_add_eq`
+and `integral_comp_add_left`. It then computes `normSq (circleMap 0 1 x - 1) = 4 * sin (x / 2) ^ 2`
+in a 16-line `calc`. The rotation is exactly `Real.circleAverage_eq_integral_add` (in
+`CircleAverage.lean`, which the file already imports), and the computation is the half-angle form
+at `r = ‖a‖ = 1`. The theorem becomes:
+
+    theorem circleAverage_log_norm_sub_const₁ (h : ‖a‖ = 1) :
+        circleAverage (log ‖· - a‖) 0 1 = 0 := by
+      -- Rotate by `arg a`. By the law of cosines,
+      -- `‖circleMap 0 1 (x + arg a) - a‖ ^ 2 = 4 * sin (x / 2) ^ 2`.
+      rw [circleAverage_eq_integral_add a.arg,
+        integral_congr (g := fun x ↦ log (4 * sin (x / 2) ^ 2) / 2),
+        circleAverage_log_norm_sub_const₁_integral, smul_zero]
+      intro x _
+      have := norm_circleMap_zero_sub_sq' 1 (x + a.arg) a
+      norm_num [h] at this
+      simp only [← this, log_pow]
+      ring
+
+The private lemma `circleAverage_log_norm_sub_const₁_integral` is unchanged. A more conservative
+alternative keeps the rotation and only replaces the 16-line `calc` by
+`Complex.normSq_eq_norm_sq _` followed by `simp [norm_circleMap_zero_sub_sq']`.
+
+No other Mathlib file computes chord lengths of `circleMap` by hand, as far as a search for
+`normSq (circleMap`, `cos (θ - … arg …)` and `sin (x / 2) ^ 2` shows.
+
+## PR 2: new file `Mathlib/Analysis/SpecialFunctions/Integrals/CircleAverageRpow.lean`
+
+Everything from the section "The Majorant" onwards goes into a new file next to
+`PosLogEqCircleAverage.lean`. It cannot go into `Mathlib/MeasureTheory/Integral/CircleAverage.lean`
+itself: that file does not import `integral_rpow` and `intervalIntegrable_rpow'` (from
+`Mathlib/Analysis/SpecialFunctions/Integrals/Basic.lean`), and it should stay light. Appending to
+`PosLogEqCircleAverage.lean` would work but mixes themes and pulls in its heavy harmonic-function
+imports for no reason. The new file needs the module-system header
+
+    module
+
+    public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
+    public import Mathlib.MeasureTheory.Integral.CircleAverage
+
+    public section
+
+and receives the chord lemmas of PR 1 transitively through `CircleAverage.lean`,
+`CircleIntegral.lean` and `CircleMap.lean`. The file's name is a suggestion; any name matching the
+file's theme works.
+
+Contents:
+- `circleIntegrable_norm_sub_const_rpow` is the real-exponent counterpart of
+  `circleIntegrable_sub_zpow_iff` in `Mathlib/MeasureTheory/Integral/CircleIntegral.lean`, which
+  covers integer exponents only. Mathlib has no `rpow` version yet. The docstrings should point to
+  each other.
+- `circleAverage_norm_sub_const_rpow_le` has no Mathlib counterpart. Its docstring should say that
+  the bound is uniform in the center and in `a`, since that is the whole point.
+- The private helpers (`div_mul_le_mul_abs_sin`, `rpow_norm_circleMap_le`, the three majorant
+  lemmas, `intervalIntegrable_shifted`, `norm_circleMap_sub_eq`) go along unchanged and stay
+  private. `div_mul_le_mul_abs_sin` is too specialised for
+  `Mathlib/Analysis/SpecialFunctions/Trigonometric/Bounds.lean`. `norm_circleMap_sub_eq` could
+  instead become a public lemma next to `circleMap_sub_center` in `CircleMap.lean`. It must not be
+  tagged `@[simp]`: at centre `0` its right-hand side matches its left-hand side, so `simp` loops.
+- The module docstring should drop the references to the LLD project and keep the mathematical
+  explanation. Mention that `fun_prop` needs a discharger for the hypothesis `-1 < p`, as in
+  `fun_prop (disch := norm_num)`.
+
+Where the material ends up:
+
+| Declaration                                   | Mathlib target                | Visibility |
+| --------------------------------------------- | ----------------------------- | ---------- |
+| `norm_circleMap_zero_sub_sq`                  | `…/Complex/CircleMap.lean`    | public     |
+| `norm_circleMap_zero_sub_sq'`                 | `…/Complex/CircleMap.lean`    | public     |
+| `mul_abs_sin_le_norm_circleMap_zero_sub`      | `…/Complex/CircleMap.lean`    | public     |
+| `norm_circleMap_sub_eq`                       | new file, or `CircleMap.lean` | private    |
+| majorant lemmas, `intervalIntegrable_shifted` | new file                      | private    |
+| `circleIntegrable_norm_sub_const_rpow`        | new file                      | public     |
+| `circleAverage_norm_sub_const_rpow_le`        | new file                      | public     |
+-/
+
+open Complex Filter MeasureTheory Real Set
+
+variable {a c : ℂ} {r p θ : ℝ}
 
 /-!
-## C2: The Uniform Bound for the Singular Integrand
+## Chord Lengths
 -/
 
-/-- Rotating the circle moves the base point of the distance function to the positive real
-axis. -/
-private lemma norm_circleMap_add_arg_sub {a : ℂ} {r : ℝ} (θ : ℝ) :
-    ‖circleMap 0 r (θ + Complex.arg a) - a‖ = ‖circleMap 0 r θ - (‖a‖ : ℂ)‖ := by
-  have ha : (‖a‖ : ℂ) * Complex.exp (Complex.arg a * Complex.I) = a :=
-    Complex.norm_mul_exp_arg_mul_I a
-  have hc : circleMap 0 r (θ + Complex.arg a)
-      = circleMap 0 r θ * Complex.exp (Complex.arg a * Complex.I) := by
-    simp only [circleMap, zero_add]
-    push_cast
-    rw [add_mul, Complex.exp_add]
-    ring
-  rw [hc]
-  calc ‖circleMap 0 r θ * Complex.exp (Complex.arg a * Complex.I) - a‖
-      = ‖(circleMap 0 r θ - (‖a‖ : ℂ)) * Complex.exp (Complex.arg a * Complex.I)‖ := by
-        rw [sub_mul, ha]
-    _ = ‖circleMap 0 r θ - (‖a‖ : ℂ)‖ := by
-        rw [norm_mul, Complex.norm_exp_ofReal_mul_I, mul_one]
+/-- Law of cosines for the chord from a point of the circle `circleMap 0 r` to an arbitrary point
+`a`. -/
+theorem norm_circleMap_zero_sub_sq (r θ : ℝ) (a : ℂ) :
+    ‖circleMap 0 r θ - a‖ ^ 2 = r ^ 2 + ‖a‖ ^ 2 - 2 * r * ‖a‖ * Real.cos (θ - a.arg) := by
+  rw [← ofReal_inj, ← normSq_eq_norm_sq, normSq_sub]
+  suffices (circleMap 0 r θ * (starRingEnd ℂ) a).re = r * ‖a‖ * Real.cos (θ - a.arg) by
+    simp [normSq_eq_norm_sq, -mul_re, this, mul_assoc]
+  conv_lhs => rw [← norm_mul_exp_arg_mul_I a, ← circleMap_zero, conj_circleMap_zero,
+    circleMap_zero_mul, circleMap_zero_re, ← sub_eq_add_neg]
 
-/-- Elementary estimate: on the circle of radius `r` around `0`, the distance to any point on the
-nonnegative real axis is at least `(r/2) * |sin (θ/2)|`. -/
-private lemma le_norm_circleMap_sub_ofReal {r : ℝ} (hr : 0 < r) (θ s : ℝ) (hs : 0 ≤ s) :
-    r / 2 * |Real.sin (θ / 2)| ≤ ‖circleMap 0 r θ - (s : ℂ)‖ := by
-  have hre : (circleMap 0 r θ - (s : ℂ)).re = r * Real.cos θ - s := by
-    simp [circleMap, Complex.exp_ofReal_mul_I_re]
-  have him : (circleMap 0 r θ - (s : ℂ)).im = r * Real.sin θ := by
-    simp [circleMap, Complex.exp_ofReal_mul_I_im]
-  have hsq : ‖circleMap 0 r θ - (s : ℂ)‖ ^ 2
-      = (r - s) ^ 2 + 4 * r * s * Real.sin (θ / 2) ^ 2 := by
-    rw [Complex.sq_norm, Complex.normSq_apply, hre, him]
-    have h₁ := Real.sin_sq_add_cos_sq θ
-    have h₂ := Real.sin_sq_eq_half_sub (θ / 2)
-    rw [show 2 * (θ / 2) = θ by ring] at h₂
-    linear_combination r ^ 2 * h₁ - 4 * r * s * h₂
-  have hle : (r / 2 * |Real.sin (θ / 2)|) ^ 2 ≤ ‖circleMap 0 r θ - (s : ℂ)‖ ^ 2 := by
-    rw [hsq, mul_pow, sq_abs]
-    nlinarith [mul_nonneg (sub_nonneg.2 (Real.sin_sq_le_one (θ / 2))) (sq_nonneg (r - s)),
-      mul_nonneg (mul_nonneg (mul_nonneg hr.le hs) (sq_nonneg (Real.sin (θ / 2))))
-        (by norm_num : (0:ℝ) ≤ 4),
-      mul_nonneg (sq_nonneg (Real.sin (θ / 2))) (sq_nonneg r),
-      mul_nonneg (sq_nonneg (Real.sin (θ / 2))) (sq_nonneg s),
-      mul_nonneg (mul_nonneg hr.le hs) (sq_nonneg (Real.sin (θ / 2)))]
-  calc r / 2 * |Real.sin (θ / 2)|
-      = √((r / 2 * |Real.sin (θ / 2)|) ^ 2) := (Real.sqrt_sq (by positivity)).symm
-    _ ≤ √(‖circleMap 0 r θ - (s : ℂ)‖ ^ 2) := Real.sqrt_le_sqrt hle
-    _ = ‖circleMap 0 r θ - (s : ℂ)‖ := Real.sqrt_sq (norm_nonneg _)
+/-- Law of cosines for the chord from a point of the circle `circleMap 0 r` to an arbitrary point
+`a`, half-angle form. -/
+theorem norm_circleMap_zero_sub_sq' (r θ : ℝ) (a : ℂ) :
+    ‖circleMap 0 r θ - a‖ ^ 2
+      = (r - ‖a‖) ^ 2 + 4 * r * ‖a‖ * Real.sin ((θ - a.arg) / 2) ^ 2 := by
+  have h := Real.sin_sq_eq_half_sub ((θ - a.arg) / 2)
+  rw [show 2 * ((θ - a.arg) / 2) = θ - a.arg by ring] at h
+  rw [norm_circleMap_zero_sub_sq]
+  linear_combination (-(4 * r * ‖a‖)) * h
 
-/-- The **universal** lower bound: for every `a : ℂ`, points on the circle of radius `r` keep
-distance at least `(r/2) * |sin (θ/2)|` from `a`, where `θ` is measured from `arg a`. -/
-private lemma le_norm_circleMap_add_arg_sub {a : ℂ} {r : ℝ} (hr : 0 < r) (θ : ℝ) :
-    r / 2 * |Real.sin (θ / 2)| ≤ ‖circleMap 0 r (θ + Complex.arg a) - a‖ := by
-  rw [norm_circleMap_add_arg_sub θ]
-  exact le_norm_circleMap_sub_ofReal hr θ ‖a‖ (norm_nonneg a)
+/-- Points of the circle `circleMap 0 r` keep distance at least `r * |sin ((θ - arg a) / 2)|` from
+any point `a`. The bound is sharp: equality holds for `a = 0` and `θ = π`. -/
+theorem mul_abs_sin_le_norm_circleMap_zero_sub (hr : 0 ≤ r) (θ : ℝ) (a : ℂ) :
+    r * |Real.sin ((θ - a.arg) / 2)| ≤ ‖circleMap 0 r θ - a‖ := by
+  refine le_of_pow_le_pow_left₀ two_ne_zero (norm_nonneg _) ?_
+  rw [mul_pow, sq_abs, norm_circleMap_zero_sub_sq']
+  nlinarith [mul_nonneg (sub_nonneg.2 (Real.sin_sq_le_one ((θ - a.arg) / 2)))
+      (sq_nonneg (r - ‖a‖)),
+    mul_nonneg (mul_nonneg (sq_nonneg (Real.sin ((θ - a.arg) / 2))) (norm_nonneg a))
+      (by positivity : (0:ℝ) ≤ 2 * r + ‖a‖)]
 
-/-- Pointwise majorization of the singular integrand by an explicitly integrable function. -/
-private lemma rpow_norm_circleMap_le {a : ℂ} {r : ℝ} (hr : 0 < r) {θ : ℝ}
-    (hθ : θ ∈ Ioo 0 (2 * π)) :
-    ‖circleMap 0 r (θ + Complex.arg a) - a‖ ^ (-(2:ℝ)⁻¹)
-      ≤ (r / (2 * π) * θ) ^ (-(2:ℝ)⁻¹) + (r / (2 * π) * (2 * π - θ)) ^ (-(2:ℝ)⁻¹) := by
+/-!
+## The Majorant
+-/
+
+-- Jordan's inequality, in the form needed for the majorant.
+private lemma div_mul_le_mul_abs_sin (hr : 0 ≤ r) (h₁ : 0 ≤ θ) (h₂ : θ ≤ π) :
+    r / (2 * π) * θ ≤ r * |Real.sin (θ / 2)| := by
+  have h := Real.mul_le_sin (x := θ / 2) (by linarith) (by linarith)
+  calc r / (2 * π) * θ ≤ r * (2 / π * (θ / 2)) := by
+        rw [div_mul_eq_mul_div, div_le_iff₀ (by positivity)]
+        field_simp
+        nlinarith [mul_nonneg hr h₁, pi_pos]
+    _ ≤ r * |Real.sin (θ / 2)| := by gcongr; exact h.trans (le_abs_self _)
+
+-- Pointwise majorization of the rotated integrand.
+private lemma rpow_norm_circleMap_le (hr : 0 < r) (hp : p ≤ 0) (hθ : θ ∈ Ioo 0 (2 * π)) :
+    ‖circleMap 0 r (θ + a.arg) - a‖ ^ p
+      ≤ (r / (2 * π) * θ) ^ p + (r / (2 * π) * (2 * π - θ)) ^ p := by
   obtain ⟨h₁, h₂⟩ := hθ
+  have hlow := mul_abs_sin_le_norm_circleMap_zero_sub hr.le (θ + a.arg) a
+  rw [add_sub_cancel_right] at hlow
   rcases le_total θ π with h | h
-  · have h₃ : r / (2 * π) * θ ≤ r / 2 * |Real.sin (θ / 2)| := by
-      have h₄ := Real.mul_le_sin (x := θ / 2) (by linarith) (by linarith)
-      have h₅ : 0 ≤ Real.sin (θ / 2) :=
-        le_trans (mul_nonneg (by positivity) (by linarith)) h₄
-      rw [abs_of_nonneg h₅]
-      calc r / (2 * π) * θ = r / 2 * (2 / π * (θ / 2)) := by field_simp
-        _ ≤ r / 2 * Real.sin (θ / 2) := by gcongr
-    have h₆ : (0:ℝ) < r / (2 * π) * θ := mul_pos (by positivity) h₁
-    have h₇ := Real.rpow_le_rpow_of_nonpos h₆
-      (le_trans h₃ (le_norm_circleMap_add_arg_sub (a := a) hr θ)) (by norm_num : -(2:ℝ)⁻¹ ≤ 0)
-    refine h₇.trans (le_add_of_nonneg_right (Real.rpow_nonneg ?_ _))
-    exact mul_nonneg (by positivity) (by linarith)
-  · have hsin : Real.sin (θ / 2) = Real.sin ((2 * π - θ) / 2) := by
-      rw [show (2 * π - θ) / 2 = π - θ / 2 by ring, Real.sin_pi_sub]
-    have h₃ : r / (2 * π) * (2 * π - θ) ≤ r / 2 * |Real.sin (θ / 2)| := by
-      have h₄ := Real.mul_le_sin (x := (2 * π - θ) / 2) (by linarith) (by linarith)
-      have h₅ : 0 ≤ Real.sin ((2 * π - θ) / 2) :=
-        le_trans (mul_nonneg (by positivity) (by linarith)) h₄
-      rw [hsin, abs_of_nonneg h₅]
-      calc r / (2 * π) * (2 * π - θ)
-          = r / 2 * (2 / π * ((2 * π - θ) / 2)) := by field_simp
-        _ ≤ r / 2 * Real.sin ((2 * π - θ) / 2) := by gcongr
-    have h₆ : (0:ℝ) < r / (2 * π) * (2 * π - θ) := mul_pos (by positivity) (by linarith)
-    have h₇ := Real.rpow_le_rpow_of_nonpos h₆
-      (le_trans h₃ (le_norm_circleMap_add_arg_sub (a := a) hr θ)) (by norm_num : -(2:ℝ)⁻¹ ≤ 0)
-    refine h₇.trans (le_add_of_nonneg_left (Real.rpow_nonneg ?_ _))
-    exact mul_nonneg (by positivity) (by linarith)
+  · refine le_add_of_le_of_nonneg ?_ (rpow_nonneg (mul_nonneg (by positivity) (by linarith)) _)
+    exact rpow_le_rpow_of_nonpos (by positivity)
+      ((div_mul_le_mul_abs_sin hr.le h₁.le h).trans hlow) hp
+  · rw [show θ / 2 = π - (2 * π - θ) / 2 by ring, Real.sin_pi_sub] at hlow
+    refine le_add_of_nonneg_of_le (rpow_nonneg (by positivity) _) ?_
+    exact rpow_le_rpow_of_nonpos (mul_pos (by positivity) (by linarith))
+      ((div_mul_le_mul_abs_sin hr.le (by linarith) (by linarith)).trans hlow) hp
 
-/-- The first piece of the majorant is interval integrable. -/
-private lemma intervalIntegrable_majorant_left {r : ℝ} (hr : 0 < r) :
-    IntervalIntegrable (fun θ : ℝ ↦ (r / (2 * π) * θ) ^ (-(2:ℝ)⁻¹)) volume 0 (2 * π) := by
-  have h₁ : IntervalIntegrable (fun x : ℝ ↦ x ^ (-(2:ℝ)⁻¹)) volume 0 r :=
-    intervalIntegral.intervalIntegrable_rpow' (by norm_num)
-  have h₂ := h₁.comp_mul_left (c := r / (2 * π))
-  have h₃ : r / (r / (2 * π)) = 2 * π := by
-    rw [div_div_eq_mul_div, mul_comm, mul_div_assoc, div_self hr.ne', mul_one]
-  simpa [h₃] using h₂
+private lemma intervalIntegrable_majorant_left (hr : 0 < r) (hp : -1 < p) :
+    IntervalIntegrable (fun θ : ℝ ↦ (r / (2 * π) * θ) ^ p) volume 0 (2 * π) := by
+  have h := (intervalIntegral.intervalIntegrable_rpow' hp (a := 0) (b := r)).comp_mul_left
+    (c := r / (2 * π))
+  simpa [show r / (r / (2 * π)) = 2 * π by field_simp] using h
 
-/-- The majorant is interval integrable. -/
-private lemma intervalIntegrable_majorant {r : ℝ} (hr : 0 < r) :
-    IntervalIntegrable (fun θ ↦ (r / (2 * π) * θ) ^ (-(2:ℝ)⁻¹)
-      + (r / (2 * π) * (2 * π - θ)) ^ (-(2:ℝ)⁻¹)) volume 0 (2 * π) := by
-  apply IntervalIntegrable.add (intervalIntegrable_majorant_left hr)
-  have h₁ := (intervalIntegrable_majorant_left hr).comp_sub_left (2 * π)
-  simpa using h₁.symm
+private lemma intervalIntegrable_majorant_right (hr : 0 < r) (hp : -1 < p) :
+    IntervalIntegrable (fun θ : ℝ ↦ (r / (2 * π) * (2 * π - θ)) ^ p) volume 0 (2 * π) := by
+  simpa using ((intervalIntegrable_majorant_left hr hp).comp_sub_left (2 * π)).symm
 
-/-- The exact value of the majorant's integral. -/
-private lemma integral_majorant {r : ℝ} (hr : 0 < r) :
-    (∫ θ in (0:ℝ)..2 * π, ((r / (2 * π) * θ) ^ (-(2:ℝ)⁻¹)
-      + (r / (2 * π) * (2 * π - θ)) ^ (-(2:ℝ)⁻¹))) = 8 * π * r ^ (-(2:ℝ)⁻¹) := by
-  have hπ : (0:ℝ) < 2 * π := by positivity
-  rw [intervalIntegral.integral_add (intervalIntegrable_majorant_left hr)
-    (by simpa using ((intervalIntegrable_majorant_left hr).comp_sub_left (2 * π)).symm)]
-  have e₂ : (∫ θ in (0:ℝ)..2 * π, (r / (2 * π) * (2 * π - θ)) ^ (-(2:ℝ)⁻¹))
-      = ∫ θ in (0:ℝ)..2 * π, (r / (2 * π) * θ) ^ (-(2:ℝ)⁻¹) := by
-    have h₁ := intervalIntegral.integral_comp_sub_left (a := 0) (b := 2 * π)
-      (fun θ ↦ (r / (2 * π) * θ) ^ (-(2:ℝ)⁻¹)) (2 * π)
-    simpa using h₁
-  have e₁ : (∫ θ in (0:ℝ)..2 * π, (r / (2 * π) * θ) ^ (-(2:ℝ)⁻¹)) = 4 * π * r ^ (-(2:ℝ)⁻¹) := by
-    have h₀ : r / (2 * π) ≠ 0 := by positivity
-    rw [intervalIntegral.integral_comp_mul_left (fun x ↦ x ^ (-(2:ℝ)⁻¹)) h₀]
-    have h₁ : r / (2 * π) * (2 * π) = r := by field_simp
-    rw [mul_zero, h₁, integral_rpow (Or.inl (by norm_num)),
-      show -(2:ℝ)⁻¹ + 1 = 2⁻¹ by norm_num, Real.zero_rpow (by norm_num), sub_zero, smul_eq_mul,
-      inv_div]
-    have h₂ : r ^ ((2:ℝ)⁻¹) / r = r ^ (-(2:ℝ)⁻¹) := by
-      rw [div_eq_mul_inv, ← Real.rpow_neg_one r, ← Real.rpow_add hr]
-      norm_num
-    calc 2 * π / r * (r ^ ((2:ℝ)⁻¹) / 2⁻¹)
-        = 4 * π * (r ^ ((2:ℝ)⁻¹) / r) := by ring
-      _ = 4 * π * r ^ (-(2:ℝ)⁻¹) := by rw [h₂]
-  rw [e₂, e₁]
+private lemma integral_majorant (hr : 0 < r) (hp : -1 < p) :
+    ∫ θ in (0:ℝ)..2 * π, ((r / (2 * π) * θ) ^ p + (r / (2 * π) * (2 * π - θ)) ^ p)
+      = 4 * π / (p + 1) * r ^ p := by
+  have hp' : 0 < p + 1 := by linarith
+  have e : ∫ θ in (0:ℝ)..2 * π, (r / (2 * π) * (2 * π - θ)) ^ p
+      = ∫ θ in (0:ℝ)..2 * π, (r / (2 * π) * θ) ^ p := by
+    simpa using intervalIntegral.integral_comp_sub_left (a := 0) (b := 2 * π)
+      (fun θ ↦ (r / (2 * π) * θ) ^ p) (2 * π)
+  rw [intervalIntegral.integral_add (intervalIntegrable_majorant_left hr hp)
+      (intervalIntegrable_majorant_right hr hp), e,
+    intervalIntegral.integral_comp_mul_left (fun x ↦ x ^ p) (by positivity), mul_zero,
+    show r / (2 * π) * (2 * π) = r by field_simp, integral_rpow (Or.inl hp),
+    zero_rpow hp'.ne', sub_zero, smul_eq_mul, rpow_add hr, rpow_one]
+  field_simp
   ring
 
-/-- Almost every point of the interval of integration lies in the open interval. -/
-private lemma ae_mem_Ioo :
-    ∀ᵐ θ ∂(volume.restrict (Set.uIoc 0 (2 * π))), θ ∈ Ioo (0:ℝ) (2 * π) := by
-  rw [show Set.uIoc (0:ℝ) (2 * π) = Ioc 0 (2 * π) from uIoc_of_le (by positivity)]
-  have h₁ : ∀ᵐ θ ∂(volume.restrict (Ioc (0:ℝ) (2 * π))), θ ∈ Ioc (0:ℝ) (2 * π) :=
-    ae_restrict_mem measurableSet_Ioc
-  have h₂ : ∀ᵐ (θ : ℝ) ∂(volume.restrict (Ioc (0:ℝ) (2 * π))), θ ≠ 2 * π := by
-    apply ae_restrict_of_ae
-    rw [ae_iff]
-    simp only [ne_eq, not_not, ofPred_eq_eq_singleton]
-    exact measure_singleton _
-  filter_upwards [h₁, h₂] with θ hθ h2
-  exact ⟨hθ.1, lt_of_le_of_ne hθ.2 h2⟩
+-- The rotated integrand is interval integrable.
+private lemma intervalIntegrable_shifted (hr : 0 < r) (hp₁ : -1 < p) (hp₂ : p ≤ 0) :
+    IntervalIntegrable (fun θ ↦ ‖circleMap 0 r (θ + a.arg) - a‖ ^ p) volume 0 (2 * π) := by
+  refine ((intervalIntegrable_majorant_left hr hp₁).add
+    (intervalIntegrable_majorant_right hr hp₁)).mono_fun' ?_ ?_
+  · have : Continuous fun θ ↦ ‖circleMap 0 r (θ + a.arg) - a‖ := by fun_prop
+    exact (this.measurable.pow_const p).aestronglyMeasurable
+  · rw [uIoc_of_le two_pi_pos.le, ← Measure.restrict_congr_set Ioo_ae_eq_Ioc, EventuallyLE,
+      ae_restrict_iff' measurableSet_Ioo]
+    filter_upwards with θ hθ
+    rw [norm_of_nonneg (rpow_nonneg (norm_nonneg _) _)]
+    exact rpow_norm_circleMap_le hr hp₂ hθ
 
-/-- The rotated singular integrand is interval integrable. -/
-private lemma intervalIntegrable_shifted {a : ℂ} {r : ℝ} (hr : 0 < r) :
-    IntervalIntegrable (fun θ ↦ ‖circleMap 0 r (θ + Complex.arg a) - a‖ ^ (-(2:ℝ)⁻¹))
-      volume 0 (2 * π) := by
-  apply IntervalIntegrable.mono_fun (intervalIntegrable_majorant hr)
-  · apply Measurable.aestronglyMeasurable
-    have h₁ : (fun θ ↦ ‖circleMap 0 r (θ + Complex.arg a) - a‖ ^ (-(2:ℝ)⁻¹))
-        = fun θ ↦ (√(‖circleMap 0 r (θ + Complex.arg a) - a‖))⁻¹ := by
-      funext θ
-      rw [Real.rpow_neg (norm_nonneg _), show ((2:ℝ)⁻¹ : ℝ) = 1 / 2 by norm_num,
-        ← Real.sqrt_eq_rpow]
-    rw [h₁]
-    apply Measurable.inv
-    apply Continuous.measurable
-    fun_prop
-  · filter_upwards [ae_mem_Ioo] with θ hθ
-    rw [Real.norm_eq_abs, abs_of_nonneg (Real.rpow_nonneg (norm_nonneg _) _), Real.norm_eq_abs,
-      abs_of_nonneg (add_nonneg
-        (Real.rpow_nonneg (mul_nonneg (by positivity) hθ.1.le) _)
-        (Real.rpow_nonneg (mul_nonneg (by positivity) (by linarith [hθ.2])) _))]
-    exact rpow_norm_circleMap_le hr hθ
+/-!
+## Main Results
+-/
 
-/-- Shifting the argument of a `2π`-periodic function preserves interval integrability over one
-full period. -/
-private lemma intervalIntegrable_comp_add_of_periodic {F : ℝ → ℝ}
-    (hper : Function.Periodic F (2 * π)) (hF : IntervalIntegrable F volume 0 (2 * π)) (η : ℝ) :
-    IntervalIntegrable (fun θ ↦ F (θ + η)) volume 0 (2 * π) := by
-  have h₁ := hper.intervalIntegrable₀ (by positivity) hF η (2 * π + η)
-  have h₂ := h₁.comp_add_right η
-  simpa using h₂
+private lemma norm_circleMap_sub_eq (c a : ℂ) (r θ : ℝ) :
+    ‖circleMap c r θ - a‖ = ‖circleMap 0 r θ - (a - c)‖ := by
+  rw [← circleMap_sub_center c r θ]
+  ring_nf
 
-/-- **C2, integrability**: the singular integrand `‖· - a‖ ^ (-2⁻¹)` is circle integrable, for
-every center `a` and radius `r`. -/
+/-- If `-1 < p`, then `‖· - a‖ ^ p` is circle integrable, for every center, radius and point `a`. -/
 @[fun_prop]
-theorem Real.circleIntegrable_norm_sub_rpow (a : ℂ) (r : ℝ) :
-    CircleIntegrable (‖· - a‖ ^ (-(2:ℝ)⁻¹)) 0 r := by
-  -- The case of positive radius
-  have main : ∀ s : ℝ, 0 < s → CircleIntegrable (‖· - a‖ ^ (-(2:ℝ)⁻¹)) 0 s := by
-    intro s hs
-    have hper : Function.Periodic
-        (fun θ ↦ ‖circleMap 0 s (θ + Complex.arg a) - a‖ ^ (-(2:ℝ)⁻¹)) (2 * π) := by
-      intro θ
-      simp only [show ∀ x : ℝ, x + 2 * π + Complex.arg a = x + Complex.arg a + 2 * π from
-        fun x ↦ by ring, periodic_circleMap 0 s (θ + Complex.arg a)]
-    have h₁ := intervalIntegrable_comp_add_of_periodic hper (intervalIntegrable_shifted hs)
-      (-Complex.arg a)
-    simpa [CircleIntegrable] using h₁
+theorem circleIntegrable_norm_sub_const_rpow (hp : -1 < p) (r : ℝ) :
+    CircleIntegrable (‖· - a‖ ^ p) c r := by
+  rcases lt_or_ge 0 p with hp₀ | hp₀
+  · exact (Continuous.rpow_const (by fun_prop) fun _ ↦ Or.inr hp₀.le).continuousOn.circleIntegrable'
+  -- Positive radius: shift the angle by `arg (a - c)` and use periodicity
+  have main {s : ℝ} (hs : 0 < s) : CircleIntegrable (‖· - a‖ ^ p) c s := by
+    have hper : Function.Periodic (fun θ ↦ ‖circleMap 0 s θ - (a - c)‖ ^ p) (2 * π) :=
+      fun θ ↦ by simp [periodic_circleMap 0 s θ]
+    have h := (IntervalIntegrable.comp_add_right_iff
+      (f := fun θ ↦ ‖circleMap 0 s θ - (a - c)‖ ^ p) (c := (a - c).arg) (a := 0) (b := 2 * π)).1
+      (intervalIntegrable_shifted hs hp hp₀)
+    rw [zero_add, add_comm (2 * π)] at h
+    simpa [CircleIntegrable, norm_circleMap_sub_eq c a s]
+      using (hper.intervalIntegrable_iff (t₂ := 0)).1 h
   rcases lt_trichotomy r 0 with hr | rfl | hr
-  · -- Negative radius: the parametrization is an angle-shift of the one with radius `-r`
-    have hmap : ∀ θ : ℝ, circleMap 0 r θ = circleMap 0 (-r) (θ + π) := by
-      intro θ
-      simp only [circleMap, zero_add]
-      push_cast
-      rw [add_mul, Complex.exp_add, Complex.exp_pi_mul_I]
-      ring
-    have hper : Function.Periodic (fun θ ↦ ‖circleMap 0 (-r) θ - a‖ ^ (-(2:ℝ)⁻¹)) (2 * π) :=
-      fun θ ↦ by simp [periodic_circleMap 0 (-r) θ]
-    have h₁ := intervalIntegrable_comp_add_of_periodic hper (main (-r) (by linarith)) π
-    have h₂ : (fun θ ↦ ‖circleMap 0 r θ - a‖ ^ (-(2:ℝ)⁻¹))
-        = fun θ ↦ ‖circleMap 0 (-r) (θ + π) - a‖ ^ (-(2:ℝ)⁻¹) := by
-      funext θ
-      rw [hmap θ]
-    simpa [CircleIntegrable, h₂] using h₁
-  · -- Zero radius: continuity on the degenerate sphere is trivial
-    apply ContinuousOn.circleIntegrable'
-    rw [abs_zero, Metric.sphere_zero]
-    exact continuousOn_singleton _ _
-  · exact main r hr
+  · rw [← neg_neg r, circleIntegrable_neg_radius]
+    exact main (neg_pos.2 hr)
+  · simp
+  · exact main hr
 
-/-- **C2, uniform circle-average bound**: uniformly in `a : ℂ`, the circle average of
-`‖· - a‖ ^ (-2⁻¹)` over the circle of radius `r > 0` is bounded by `4 * r ^ (-2⁻¹)`. -/
-theorem Real.circleAverage_norm_sub_rpow_le {a : ℂ} {r : ℝ} (hr : 0 < r) :
-    circleAverage (‖· - a‖ ^ (-(2:ℝ)⁻¹)) 0 r ≤ 4 * r ^ (-(2:ℝ)⁻¹) := by
-  rw [circleAverage_eq_integral_add (Complex.arg a)]
-  have hle : (∫ θ in (0:ℝ)..2 * π, ‖circleMap 0 r (θ + Complex.arg a) - a‖ ^ (-(2:ℝ)⁻¹))
-      ≤ ∫ θ in (0:ℝ)..2 * π, ((r / (2 * π) * θ) ^ (-(2:ℝ)⁻¹)
-        + (r / (2 * π) * (2 * π - θ)) ^ (-(2:ℝ)⁻¹)) := by
-    apply intervalIntegral.integral_mono_on_of_le_Ioo (by positivity)
-      (intervalIntegrable_shifted hr) (intervalIntegrable_majorant hr)
-    exact fun θ hθ ↦ rpow_norm_circleMap_le hr hθ
-  calc (2 * π)⁻¹ • ∫ θ in (0:ℝ)..2 * π, ‖circleMap 0 r (θ + Complex.arg a) - a‖ ^ (-(2:ℝ)⁻¹)
-      ≤ (2 * π)⁻¹ * (8 * π * r ^ (-(2:ℝ)⁻¹)) := by
-        rw [smul_eq_mul]
-        exact mul_le_mul_of_nonneg_left (le_trans hle (le_of_eq (integral_majorant hr)))
-          (by positivity)
-    _ = 4 * r ^ (-(2:ℝ)⁻¹) := by
+/-- If `-1 < p ≤ 0`, then the circle average of `‖· - a‖ ^ p` over a circle of nonzero radius `r`
+is bounded by `2 / (p + 1) * |r| ^ p`, uniformly in the center and in `a`. -/
+theorem circleAverage_norm_sub_const_rpow_le (hr : r ≠ 0) (hp₁ : -1 < p) (hp₂ : p ≤ 0) :
+    circleAverage (‖· - a‖ ^ p) c r ≤ 2 / (p + 1) * |r| ^ p := by
+  have hr' : 0 < |r| := abs_pos.2 hr
+  rw [← circleAverage_abs_radius, circleAverage_eq_integral_add (a - c).arg, smul_eq_mul]
+  simp only [norm_circleMap_sub_eq c a |r|]
+  calc (2 * π)⁻¹ * ∫ θ in 0..2 * π, ‖circleMap 0 |r| (θ + (a - c).arg) - (a - c)‖ ^ p
+      ≤ (2 * π)⁻¹ * (4 * π / (p + 1) * |r| ^ p) := by
+        gcongr
+        rw [← integral_majorant hr' hp₁]
+        exact intervalIntegral.integral_mono_on_of_le_Ioo two_pi_pos.le
+          (intervalIntegrable_shifted hr' hp₁ hp₂)
+          ((intervalIntegrable_majorant_left hr' hp₁).add
+            (intervalIntegrable_majorant_right hr' hp₁))
+          fun θ hθ ↦ rpow_norm_circleMap_le hr' hp₂ hθ
+    _ = 2 / (p + 1) * |r| ^ p := by
         field_simp
         ring

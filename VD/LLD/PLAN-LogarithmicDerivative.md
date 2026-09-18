@@ -366,18 +366,22 @@ Difficulty: B6 medium-high (bookkeeping), everything else low-medium.
 
 ## 5. Work package C — circle-average estimates and the two-radius bound (T1)
 
-**✅ C1–C3 DONE (2026-07-07).** C1–C2 implemented in `VD/LLD/CircleAverageEstimates.lean`
-(~340 lines), C3 in `VD/LLD/CountingEstimate.lean` (~150 lines); both compile lint-clean.
-Deviations from the sketches below:
+**✅ C1–C3 DONE (2026-07-07).** C1 lives in `VD/MathlibSubmitted/JensenInequality.lean`, C2 in
+`VD/LLD/CircleAverageEstimates.lean` (~200 lines, rewritten 2026-09-18 against existing Mathlib
+API), C3 has been upstreamed. Deviations from the sketches below:
 
-- **C2** needs no case split at all: the estimate
-  `‖circleMap 0 r (θ + arg a) − a‖ ≥ (r/2)·|sin (θ/2)|` holds for **every** `a : ℂ`
-  (via `‖circleMap 0 r θ − s‖² = (r−s)² + 4rs·sin²(θ/2)` for `s = ‖a‖ ≥ 0`, linear in `sin²`),
-  so a single Jordan-inequality majorant
-  `(r/(2π)·θ)^(−1/2) + (r/(2π)·(2π−θ))^(−1/2)` covers all base points. Its integral is exactly
-  `8π·r^(−1/2)`, giving the explicit absolute constant `C = 4`. Integrability for arbitrary
-  radii (`r < 0`, `r = 0`) is reduced to `r > 0` via `Function.Periodic.intervalIntegrable₀`
-  and angle shifts.
+- **C2** needs no case split at all. The law of cosines
+  `‖circleMap 0 r θ − a‖² = (r−‖a‖)² + 4r‖a‖·sin²((θ − arg a)/2)` gives the sharp universal bound
+  `‖circleMap 0 r θ − a‖ ≥ r·|sin ((θ − arg a)/2)|` (from
+  `(r−s)² + 4rs·t = (1−t)(r−s)² + t(r+s)²`), valid for **every** `a : ℂ`. The chord lemmas
+  (`norm_circleMap_zero_sub_sq`, `norm_circleMap_zero_sub_sq'`,
+  `mul_abs_sin_le_norm_circleMap_zero_sub`) target `Mathlib/.../Complex/CircleMap.lean`, where
+  they also replace the private `h_cos_law` in `JensenFormula.lean` and a 16-line `calc` in
+  `PosLogEqCircleAverage.lean`. A single Jordan-inequality majorant
+  `(r/(2π)·θ)^p + (r/(2π)·(2π−θ))^p` covers all base points; its integral is exactly
+  `4π/(p+1)·r^p`, so the statement is proved for general `-1 < p ≤ 0` with constant `2/(p+1)`
+  (`= 4` at `p = −1/2`). Negative and zero radii are handled by Mathlib's
+  `circleIntegrable_neg_radius` / `circleIntegrable_zero_radius` / `circleAverage_abs_radius`.
 - **C3** is stated in the `Function.locallyFinsuppWithin` namespace (where `logCounting` for
   divisors actually lives); the helper `Real.sub_div_le_log_div : (r − ρ)/r ≤ log (r/ρ)` is
   included there. The FMT specialisation is deferred to C4, where characteristic/proximity are
@@ -404,20 +408,16 @@ all satisfied here.
 ### C2. Uniform bound for the singular sum (the exponent-1/2 trick)
 
 ```lean
-/-- Uniformly in `a : ℂ`, the circle average of `‖· − a‖^(−1/2)` over the circle of
-radius `r > 0` is bounded by `C / √r` for an absolute constant `C`. -/
-theorem Real.circleIntegrable_norm_sub_rpow (a : ℂ) (r : ℝ) :
-    CircleIntegrable (‖· - a‖ ^ (-(2: ℝ)⁻¹)) 0 r
+@[fun_prop]
+theorem circleIntegrable_norm_sub_const_rpow (hp : -1 < p) (r : ℝ) :
+    CircleIntegrable (‖· - a‖ ^ p) c r
 
-theorem Real.circleAverage_norm_sub_rpow_le {a : ℂ} (hr : 0 < r) :
-    circleAverage (‖· - a‖ ^ (-(2: ℝ)⁻¹)) 0 r ≤ C * r ^ (-(2: ℝ)⁻¹)
+theorem circleAverage_norm_sub_const_rpow_le (hr : r ≠ 0) (hp₁ : -1 < p) (hp₂ : p ≤ 0) :
+    circleAverage (‖· - a‖ ^ p) c r ≤ 2 / (p + 1) * |r| ^ p
 ```
 
-Proof sketch: split on `|‖a‖ − r| ≥ r/2` (then `‖z − a‖ ≥ r/2` on the circle, trivial)
-vs. `r/2 < ‖a‖ < 3r/2`; in the latter case
-`‖circleMap 0 r θ − a‖² = r² + ‖a‖² − 2r‖a‖cos(θ − θ₀) ≥ 4r‖a‖ sin²((θ−θ₀)/2) ≥ 2r² sin²((θ−θ₀)/2)`,
-then `Real.mul_le_sin` (Jordan) and `intervalIntegrable_rpow'` (exponent `−1/2 > −1`)
-finish. This is where the classical proof's `|Σ 1/(z−a)|^{1/2} ≤ Σ |z−a|^{−1/2}`
+Proof: see the note at the top of this section. Consumers need `fun_prop (disch := norm_num)`
+to discharge `-1 < -2⁻¹`. This is where the classical proof's `|Σ 1/(z−a)|^{1/2} ≤ Σ |z−a|^{−1/2}`
 device pays off: the bound is *uniform in `a`*, unlike the average of `‖·−a‖⁻¹`.
 
 ### C3. Unintegrated counting function
@@ -575,7 +575,7 @@ one local file per future Mathlib target:
 | 4 | `CauchyIntegralDeriv.lean` ✅ | `MeasureTheory/Integral/CircleIntegral.lean` (extend) | B1–B3 (done) | — |
 | 5 | `PoissonSchwarzDeriv.lean` ✅ | `Analysis/Complex/Poisson.lean` (extend) | B4, B5 (done) | 4, **Poisson–Jensen chain** |
 | 6 | `PoissonJensenDeriv.lean` ✅ | `Analysis/Complex/PoissonJensenDeriv.lean` | B6 (done) | 1, 5 |
-| 7 | `CircleAverageEstimates.lean` ✅ | `MeasureTheory/Integral/CircleAverage.lean` (extend) + `PosLog…` | C1, C2 (done) | — |
+| 7 | `CircleAverageEstimates.lean` ✅ | chord lemmas → `Analysis/SpecialFunctions/Complex/CircleMap.lean`; rest → `MeasureTheory/Integral/CircleAverage.lean` (extend) | C2 (done; C1 is in `MathlibSubmitted/JensenInequality.lean`) | — |
 | 8 | `CountingEstimate.lean` ✅ | `…/ValueDistribution/LogCounting/Basic.lean` (extend) | C3 (done) | — |
 | 9 | `LogDerivTwoRadius.lean` ✅ | `…/ValueDistribution/LogDerivLemma.lean` (part 1) | C4 (T1, done) | 1, 6, 7, 8 |
 | 10 | `LogDerivLemma.lean` ✅ | `…/ValueDistribution/LogDerivLemma.lean` (part 2) | E (T3 + corollaries, done) | 3, 9 |
