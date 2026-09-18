@@ -65,5 +65,5 @@ one along `codiscreteWithin U`.
 theorem MeromorphicOn.self_mul_inv_eventuallyEq_one_codiscreteWithin (hs : MeromorphicOn s U)
     (h : ∀ x ∈ U, meromorphicOrderAt s x ≠ ⊤) :
     s * s⁻¹ =ᶠ[codiscreteWithin U] 1 :=
-  (MeromorphicAt.MeromorphicOn.codiscreteWithin_setOfPred_ne_zero hs h).mono
+  (hs.codiscreteWithin_setOfPred_ne_zero h).mono
     fun _ hz ↦ mul_inv_cancel₀ hz

@@ -98,7 +98,10 @@ theorem MeromorphicOn.log_norm_meromorphicTrailingCoeffAt₀ (h₁w : w ∈ ball
     fun_prop
   have ρ₂ : ∀ i ∈ h₂f.toFinset, CircleIntegrable ((divisor f (sphere 0 R)) i •
       re ∘ herglotzRieszKernel 0 w • (Real.log ‖· - i‖)) 0 R :=
-    fun i _ ↦ by fun_prop
+    fun i _ ↦ by
+      --WARNING!
+      have := circleIntegrable_log_norm_sub_const (c := 0) (a := i) R
+      fun_prop
   -- The Poisson–Jensen identity for the circle average of `log ‖f‖`, obtained by replacing `f` with
   -- its canonical decomposition and integrating term by term.
   have key : circleAverage (re ∘ herglotzRieszKernel 0 w • (Real.log ‖f ·‖)) 0 R =

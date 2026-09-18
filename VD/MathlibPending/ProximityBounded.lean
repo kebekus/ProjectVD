@@ -216,7 +216,7 @@ theorem proximity_isBigO_one_iff_exists_eq_const (h₁f : AnalyticOnNhd ℂ f un
     have hdiff : Differentiable ℂ f := fun x ↦ (h₁f x (mem_univ x)).differentiableAt
     exact ⟨f 0, funext fun x ↦ hdiff.apply_eq_apply_of_bounded hbdd x 0⟩
   · rintro ⟨c, hc⟩
-    rw [hc, show proximity (fun _ ↦ c) ⊤ = fun _ ↦ log⁺ ‖c‖ from funext fun _ ↦ proximity_const]
+    rw [hc, proximity_const]
     exact isBigO_const_const _ one_ne_zero atTop
 
 /-!
