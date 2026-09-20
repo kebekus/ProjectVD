@@ -9,16 +9,18 @@ import Mathlib.Analysis.Complex.CanonicalDecomposition
 /-!
 # Further API for the Canonical Factor
 
-Submitted to Mathlib as PR #TODO, "feat: the logarithmic derivative of the canonical factor, and a
-norm bound on the open ball", https://github.com/leanprover-community/mathlib4/pull/TODO.
+Submitted to Mathlib as PR #43985 (draft), "feat: API for working with canonical
+decompositions", https://github.com/leanprover-community/mathlib4/pull/43985.
 
-Mathlib target: `Mathlib/Analysis/Complex/CanonicalDecomposition.lean`. The lemma
-`one_lt_norm_canonicalFactor` belongs in the existing section "Canonical Factors", directly after
-`norm_canonicalFactor_eval_circle_eq_one`; the two `logDeriv` lemmas form a new section, placed
-after the canonical-factor lemmas and before "Canonical Decomposition". The target file must gain
-the import `Mathlib.Analysis.Calculus.LogDeriv`; this is safe, since no Mathlib file imports
+Mathlib target: `Mathlib/Analysis/Complex/CanonicalDecomposition.lean`. In the submitted version,
+`one_lt_norm_canonicalFactor` sits in the existing section "Canonical Factors", directly after
+`norm_canonicalFactor_eval_circle_eq_one`, and the two `logDeriv` lemmas form the new subsection
+"The Logarithmic Derivative" after "Orders and Divisors". The target file gains the import
+`Mathlib.Analysis.Calculus.LogDeriv`, which costs nothing: `LogDeriv` already sits below that file
+in the import graph, and no Mathlib file imports
 `Mathlib.Analysis.Complex.CanonicalDecomposition`. The declarations below are the submitted text,
-verbatim.
+except that there `R` and `w` come from the target file's `variable` block and the redundant
+`Complex.` prefixes are dropped.
 
 Once the PR is merged, delete this file and remove the import from
 `VD/LLD/PoissonSchwarzDeriv.lean` and `VD/MathlibPending/ProximityBounded.lean`, which then receive

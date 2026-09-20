@@ -595,7 +595,7 @@ one local file per future Mathlib target:
 | 3 | *(merged)* | `MeasureTheory/Function/BorelGrowth.lean` | package D (T2, done, in Mathlib) | — |
 | 4 | *(merged)* | `MeasureTheory/Integral/CircleIntegral.lean` (extend) | B1–B3 (done, in Mathlib) | — |
 | 5 | `PoissonSchwarzDeriv.lean` ✅ | `Analysis/Complex/Poisson.lean` (extend) | B4 (done) | 4, **Poisson–Jensen chain** |
-| 5a | `MathlibSubmitted/CanonicalFactor.lean` 🚀 | `Analysis/Complex/CanonicalDecomposition.lean` (extend) | B5: `logDeriv` of the canonical factor and its norm bound, plus `one_lt_norm_canonicalFactor` — **ready to submit** | — |
+| 5a | `MathlibSubmitted/CanonicalFactor.lean` 🚀 | `Analysis/Complex/CanonicalDecomposition.lean` (extend) | B5: `logDeriv` of the canonical factor and its norm bound, plus `one_lt_norm_canonicalFactor`, **submitted as PR #43985 (draft)** | — |
 | 6 | `PoissonJensenDeriv.lean` ✅ | `Analysis/Complex/PoissonJensenDeriv.lean` | B6 + the pointwise estimate `MeromorphicOn.eventually_norm_logDeriv_le` (done) | 1, 5 |
 | 7 | `CircleAverageEstimates.lean` ✅ | new file `Analysis/SpecialFunctions/Integrals/CircleAverageRpow.lean` | C2 (done; C1 is in `MathlibSubmitted/JensenInequality.lean`) | 7a |
 | 7a | `MathlibSubmitted/ChordLength.lean` 🚀 | `Analysis/SpecialFunctions/Complex/CircleMap.lean` (extend) | chord lemmas for `circleMap`, **submitted as PR #43958** | — |
@@ -605,8 +605,8 @@ one local file per future Mathlib target:
 | 10 | `LogDerivLemma.lean` ✅ | `…/ValueDistribution/LogDerivLemma.lean` (part 2) | E (T3 + corollaries, done) | 3, 9 |
 
 - Items 1–4, 7, 8 are **fully parallel** and independently PR-able today; 7a is in review as
-  PR #43958, and 7 depends on it. Item 5a is independent of the Poisson–Jensen chain and is
-  ready to submit; 5 depends on it.
+  PR #43958, and 7 depends on it. Item 5a is independent of the Poisson–Jensen chain and is in
+  review as PR #43985 (draft); 5 depends on it.
 - The **critical path** is the pending Poisson–Jensen upstream chain (the canonical
   decomposition has landed in Mathlib; `PoissonJensen` is in review as PR #42475)
   → 5 → 6 → 9 → 10.
