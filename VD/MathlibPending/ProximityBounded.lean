@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import VD.MathlibPending.PoissonJensen
+import VD.MathlibSubmitted.CanonicalFactor
 import VD.MathlibSubmitted.Liouville
 import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
 import Mathlib.Analysis.Complex.Liouville
@@ -26,12 +27,14 @@ The proof rests on a Poisson–Jensen estimate bounding `log ‖f w‖` by a fix
 proximity function (the private lemmas `log_norm_le_circleAverage_posLog_norm` and
 `log_norm_le_three_mul_proximity`), combined with Liouville's theorem.
 
-Along the way this file also collects a few supporting results:
-* lemmas on divisors and trailing coefficients of meromorphic functions;
-* a lower bound for the norm of the canonical factor on the open ball.
+Along the way this file also collects lemmas on divisors and trailing coefficients of meromorphic
+functions.
 
-The equivalences between bounded range and `IsBigO` asymptotics for functions `ℝ → ℝ` used in the
-final argument live in `VD.MathlibSubmitted.BoundedRangeIsBigO`.
+The lower bound `1 < ‖canonicalFactor R w z‖` on the open ball, used in the Poisson–Jensen
+estimate below, has been split off into `VD/MathlibSubmitted/CanonicalFactor.lean` and is in
+review; this file imports it. The equivalences between bounded range and `IsBigO` asymptotics for
+functions `ℝ → ℝ` used in the final argument are now in Mathlib, in
+`Mathlib/Analysis/Asymptotics/SpecificAsymptotics.lean`.
 -/
 
 open Asymptotics Bornology Complex ComplexConjugate Filter Function MeromorphicOn Metric Real Set
@@ -56,29 +59,6 @@ is just the value `f x`. -/
     meromorphicTrailingCoeffAt f x = f x := by
   apply h₁.meromorphicTrailingCoeffAt_of_ne_zero
   rwa [h₁.meromorphicOrderAt_eq, ENat.map_natCast_eq_zero, h₁.analyticOrderAt_eq_zero] at h₂
-
-/-!
-## The Canonical Factor on the Open Ball
--/
-
-/-- The canonical factor `canonicalFactor R w` has norm strictly greater than one at every
-point `z` of the open ball `ball 0 R` other than its pole `w`. -/
-theorem one_lt_norm_canonicalFactor (hw : w ∈ ball 0 R) (hz : z ∈ ball 0 R) (hzw : z ≠ w) :
-    1 < ‖canonicalFactor R w z‖ := by
-  have h_norm : R * ‖z - w‖ < ‖R ^ 2 - conj w * z‖ := by
-    simp_all only [mem_ball, dist_zero_right, norm_def, normSq, MonoidWithZeroHom.coe_mk,
-      ZeroHom.coe_mk, ne_eq, sub_re, sub_im, mul_re, conj_re, conj_im, neg_mul, sub_neg_eq_add,
-      mul_im]
-    rw [Real.sqrt_lt' (lt_of_le_of_lt (Real.sqrt_nonneg _) hw)] at *
-    apply Real.lt_sqrt_of_sq_lt
-    norm_cast
-    rw [mul_pow, Real.sq_sqrt (by nlinarith)]
-    nlinarith
-  have hR : 0 < R := pos_of_mem_ball hw
-  simp_all only [mem_ball, dist_zero_right, ne_eq,
-    canonicalFactor, Complex.norm_div, Complex.norm_mul, norm_real, norm_eq_abs, gt_iff_lt]
-  rwa [one_lt_div (mul_pos (abs_pos.mpr hR.ne') (norm_pos_iff.mpr (sub_ne_zero.mpr hzw))),
-    abs_of_pos hR]
 
 /-!
 ## Boundedness of the Proximity Function

@@ -14,8 +14,9 @@ See `VD/SMT/PLAN-SecondMainTheorem.md`, §6.
 
 Mathlib target: `Mathlib/Analysis/Complex/ValueDistribution/SecondMainTheorem.lean`
 (part 1 of 3).
-Dependencies: `VD/SMT/SeparationLemma.lean` (package C) and the Lemma on the Logarithmic
-Derivative (`VD/LLD/LogDerivLemma.lean`).
+Dependencies: the separation lemma (package C, now in Mathlib, in
+`Mathlib/Analysis/Complex/ValueDistribution/SecondMainTheorem.lean`) and the Lemma on the
+Logarithmic Derivative (`VD/LLD/LogDerivLemma.lean`).
 
 This file collects the four proximity estimates from which the Second Main Theorem of
 value distribution theory is assembled:

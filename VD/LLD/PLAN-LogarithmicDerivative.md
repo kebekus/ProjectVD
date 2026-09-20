@@ -74,7 +74,7 @@ theorem ValueDistribution.isBigO_proximity_logDeriv_of_isBigO_rpow {f : ℂ → 
    codiscrete open set, `proximity (logDeriv f) ⊤ r = 0` for `r ≠ 0`, and all statements
    hold trivially. Handle this case first in the proofs
    (`Meromorphic.exists_meromorphicOrderAt_eq_top_iff_forall`, already in
-   `VD/MathlibPending/CharacteristicMoebius.lean`, does the case split).
+   `Mathlib/Analysis/Meromorphic/RCLike.lean`, does the case split).
 
 4. **Right-hand side uses `log⁺ (characteristic …)`,** not `log (characteristic …)`:
    `characteristic` is only eventually nonnegative and can be bounded (rational `f`),
@@ -106,7 +106,7 @@ theorem ValueDistribution.isBigO_proximity_logDeriv_of_isBigO_rpow {f : ℂ → 
 | `logDeriv` calculus | `logDeriv_apply/_mul/_div/_prod/_fun_zpow/_comp`, `Meromorphic.logDeriv`, `MeromorphicOn.logDeriv` |
 | Meromorphic derivatives | `MeromorphicAt.deriv`, `meromorphicOrderAt_deriv_eq_sub_one`, `meromorphicOrderAt_div/_inv/_mul` |
 | Canonical factors | `Complex.canonicalFactor` + full API (`norm_canonicalFactor_eval_circle_eq_one`, `divisor_canonicalFactor`, …), `CanonicalDecomp`, `MeromorphicOn.exists_canonicalDecomp` |
-| Extended decomposition | `ECanonicalDecomp`, `exists_ecanonicalDecomp` (local, `VD/MathlibSubmitted/BlaschkeDecomp2.lean` — PR in flight) |
+| Extended decomposition | `ECanonicalDecomp`, `exists_ecanonicalDecomp` (in Mathlib, `Mathlib/Analysis/Complex/CanonicalDecomposition.lean`) |
 | Poisson–Jensen | `MeromorphicOn.log_norm_meromorphicTrailingCoeffAt` (local, `VD/MathlibPending/PoissonJensen.lean`) |
 | Herglotz–Riesz kernel | `herglotzRieszKernel` + bounds `re_herglotzRieszKernel_le`, `le_re_herglotzRieszKernel`; Poisson representation for `DiffContOnCl` and `HarmonicOnNhd` |
 | Cauchy integrals of L¹ data | `Complex.hasFPowerSeriesOn_cauchy_integral` (analyticity in the pole for merely `CircleIntegrable f`) |
@@ -126,7 +126,8 @@ theorem ValueDistribution.isBigO_proximity_logDeriv_of_isBigO_rpow {f : ℂ → 
 - ~~`posLog_rpow`, `abs_log_eq_posLog_add_posLog_inv` (A)~~ ✅ done;
 - ~~derivative of the Cauchy integral in the pole variable (B1)~~ ✅ done (with B2–B3);
 - ~~differentiated Poisson(–Schwarz) representation for ball-nonvanishing functions (B4)~~ ✅ done;
-- ~~`logDeriv` of `canonicalFactor` + bounds (B5)~~ ✅ done;
+- ~~`logDeriv` of `canonicalFactor` + bounds (B5)~~ ✅ done; split off into
+  `VD/MathlibSubmitted/CanonicalFactor.lean`, in review;
 - ~~differentiated Poisson–Jensen formula (B6)~~ ✅ done;
 - ~~uniform circle-average bound for `‖· − a‖^(−1/2)` (C2)~~ ✅ done;
 - ~~concavity estimate `circleAverage log⁺ u ≤ log⁺ (circleAverage u) + log 2` (C1)~~ ✅ done;
@@ -142,15 +143,16 @@ fully formalized.** Remaining: upstreaming (see §8) and the post-LLD items (§1
 
 ## 3. Work package A — meromorphic API for `logDeriv`
 
-**✅ DONE (2026-07-07).** Implemented in `VD/LLD/MeromorphicLogDeriv.lean` and
-`VD/LLD/PosLog.lean`; compiles lint-clean. Deviations from the sketch below: statements are in
+**✅ DONE (2026-07-07), now merged into Mathlib** as
+`Mathlib/Analysis/Meromorphic/LogDeriv.lean` and
+`Mathlib/Analysis/SpecialFunctions/Log/PosLog.lean`; the local files have been deleted. Deviations from the sketch below: statements are in
 Mathlib-ready generality (`𝕜 → 𝕜'` where possible; order lemmas over `𝕜 → 𝕜` with
 `[CompleteSpace 𝕜] [CharZero 𝕜]`); added the helper `MeromorphicOn.ne_zero_mem_codiscreteWithin`
 and, beyond `logDeriv_mul_eventuallyEq`, the `Finset`/`finprod`/`zpow` versions including the
 B6-shaped `logDeriv_finprod_zpow_eventuallyEq` (divisor-style `ℤ`-exponents).
 
-*New file, eventually `Mathlib/Analysis/Meromorphic/LogDeriv.lean`
-(locally: `VD/LLD/MeromorphicLogDeriv.lean`). Independent of everything else.*
+*Now in Mathlib as `Mathlib/Analysis/Meromorphic/LogDeriv.lean`. Independent of everything
+else.*
 
 ```lean
 -- pointwise meromorphy (one-liner: h.deriv.div h)
@@ -224,9 +226,10 @@ Sign check (`f = id`, `R = 1`): `divisor = δ₀`, `canonicalFactor 1 0 = (·)�
 (The sign is `−Σ` because `ECanonicalDecomp` uses `canonicalFactor ^ (−divisor)`.)
 
 The classical shape is recovered via B5:
-`logDeriv (canonicalFactor R a) w = −((w − a)⁻¹ + conj a / (R² − conj a * w))`.
+`logDeriv (canonicalFactor R w) z = −((z − w)⁻¹ + conj w / (R² − conj w * z))`.
 
-**✅ B1–B3 DONE (2026-07-07).** Implemented in `VD/LLD/CauchyIntegralDeriv.lean`; compiles
+**✅ B1–B3 DONE (2026-07-07), now in Mathlib** as part of
+`Mathlib/MeasureTheory/Integral/CircleIntegral.lean`; compiled
 lint-clean, ~230 lines. Deviations from the sketch below: B2/B3 are stated for the integrand
 `fun ζ ↦ herglotzRieszKernel 0 w ζ • g ζ` with `g` valued in a complex Banach space (B4 will
 instantiate `g := fun ζ ↦ (log ‖h ζ‖ : ℂ)`); B3 carries the extra hypothesis `w ∈ ball 0 R`
@@ -321,14 +324,14 @@ which yields the boundary-divisor correction for free:
 ### B5. `logDeriv` of the canonical factor
 
 ```lean
-theorem Complex.logDeriv_canonicalFactor {a w : ℂ} (hw₁ : w ≠ a)
-    (hw₂ : (R:ℂ)^2 - conj a * w ≠ 0) :
-    logDeriv (canonicalFactor R a) w = -((w - a)⁻¹ + conj a / (R ^ 2 - conj a * w))
+theorem Complex.logDeriv_canonicalFactor {R : ℝ} {w z : ℂ} (hR : R ≠ 0) (h₁z : z ≠ w)
+    (h₂z : (R:ℂ)^2 - conj w * z ≠ 0) :
+    logDeriv (canonicalFactor R w) z = -((z - w)⁻¹ + conj w / (R ^ 2 - conj w * z))
 
--- the bound used in C4: for ‖a‖ < ρ and ‖w‖ = r < ρ,
+-- the bound used in C4: for ‖w‖ < R and ‖z‖ = r < R,
 theorem Complex.norm_logDeriv_canonicalFactor_le … :
-    ‖logDeriv (canonicalFactor ρ a) w‖ ≤ ‖w - a‖⁻¹ + (ρ - r)⁻¹
-  -- since ‖ρ² − conj a * w‖ ≥ ρ² − ‖a‖·r > ρ(ρ − r)
+    ‖logDeriv (canonicalFactor R w) z‖ ≤ ‖z - w‖⁻¹ + (R - r)⁻¹
+  -- since ‖R² − conj w * z‖ ≥ R² − ‖w‖·r > R(R − r)
 ```
 
 ### B6. Assembly of the differentiated Poisson–Jensen formula
@@ -471,7 +474,7 @@ for `0 < p ≤ 1` over finite sums), `CircleIntegrable.norm`, `circleAverage_mon
 `ball 0 ρ`, weighted by `log (R/ρ)`, are `≤ N(R,0) + N(R,∞)`). The final constant is
 `c := 6 + 24·log 2 + 4·log⁺ c_f`. The degenerate case uses
 `Meromorphic.exists_meromorphicOrderAt_eq_top_iff_eventually_zero`, now in Mathlib, so the T1 file
-no longer depends on the CharacteristicMoebius pending chain.
+no longer depends on the Möbius-invariance chain, which has since landed in Mathlib.
 
 Fix `1 ≤ r < R`, set `ρ := (r + R)/2`, `n := ∑ᶠ |divisor f (ball 0 ρ)|`,
 `K := (2ρ/(ρ−r)²) · circleAverage |log ‖f ·‖| 0 ρ`. Chain of estimates, each a
@@ -507,7 +510,8 @@ Difficulty: C4 medium (long but mechanical once 1–6 are in place).
 
 ## 6. Work package D — the Borel growth lemma (T2)
 
-**✅ DONE (2026-07-07).** Implemented in `VD/LLD/BorelGrowth.lean`; compiles lint-clean, ~120
+**✅ DONE (2026-07-07), now in Mathlib** as
+`Mathlib/MeasureTheory/Function/BorelGrowth.lean`; compiled lint-clean, ~120
 lines. The proof deviates from the Vitali recommendation below: it slices the bad set `E` into
 dyadic pieces `Eₙ = {r ∈ E | 2ⁿ · S a ≤ S r < 2ⁿ⁺¹ · S a}`. Any two points `x ≤ y` of `Eₙ`
 satisfy `y − x < (S x)⁻¹ ≤ 2⁻ⁿ` (else monotonicity forces `S y ≥ S (x + (S x)⁻¹) > 2 · S x ≥
@@ -586,23 +590,25 @@ one local file per future Mathlib target:
 
 | # | Local file (`VD/LLD/`) | Mathlib target | Contents | Depends on |
 |---|---|---|---|---|
-| 1 | `MeromorphicLogDeriv.lean` ✅ | `Analysis/Meromorphic/LogDeriv.lean` | package A (done) | — |
-| 2 | `PosLog.lean` ✅ | `Analysis/SpecialFunctions/Log/PosLog.lean` (extend) | `posLog_rpow`, `abs_log_…` (done) | — |
-| 3 | `BorelGrowth.lean` ✅ | `MeasureTheory/Function/BorelGrowth.lean` | package D (T2, done) | — |
-| 4 | `CauchyIntegralDeriv.lean` ✅ | `MeasureTheory/Integral/CircleIntegral.lean` (extend) | B1–B3 (done) | — |
-| 5 | `PoissonSchwarzDeriv.lean` ✅ | `Analysis/Complex/Poisson.lean` (extend) | B4, B5 (done) | 4, **Poisson–Jensen chain** |
+| 1 | *(merged)* | `Analysis/Meromorphic/LogDeriv.lean` | package A (done, in Mathlib) | — |
+| 2 | *(merged)* | `Analysis/SpecialFunctions/Log/PosLog.lean` (extend) | `posLog_rpow`, `abs_log_…` (done, in Mathlib) | — |
+| 3 | *(merged)* | `MeasureTheory/Function/BorelGrowth.lean` | package D (T2, done, in Mathlib) | — |
+| 4 | *(merged)* | `MeasureTheory/Integral/CircleIntegral.lean` (extend) | B1–B3 (done, in Mathlib) | — |
+| 5 | `PoissonSchwarzDeriv.lean` ✅ | `Analysis/Complex/Poisson.lean` (extend) | B4 (done) | 4, **Poisson–Jensen chain** |
+| 5a | `MathlibSubmitted/CanonicalFactor.lean` 🚀 | `Analysis/Complex/CanonicalDecomposition.lean` (extend) | B5: `logDeriv` of the canonical factor and its norm bound, plus `one_lt_norm_canonicalFactor` — **ready to submit** | — |
 | 6 | `PoissonJensenDeriv.lean` ✅ | `Analysis/Complex/PoissonJensenDeriv.lean` | B6 + the pointwise estimate `MeromorphicOn.eventually_norm_logDeriv_le` (done) | 1, 5 |
 | 7 | `CircleAverageEstimates.lean` ✅ | new file `Analysis/SpecialFunctions/Integrals/CircleAverageRpow.lean` | C2 (done; C1 is in `MathlibSubmitted/JensenInequality.lean`) | 7a |
 | 7a | `MathlibSubmitted/ChordLength.lean` 🚀 | `Analysis/SpecialFunctions/Complex/CircleMap.lean` (extend) | chord lemmas for `circleMap`, **submitted as PR #43958** | — |
-| 8 | `CountingEstimate.lean` ✅ | `…/ValueDistribution/LogCounting/Basic.lean` (extend) | C3 (done) | — |
+| 8 | *(merged)* | `…/ValueDistribution/LogCounting/Basic.lean` (extend) | C3 (done, in Mathlib) | — |
 | 8a | `LogDerivEstimates.lean` ✅ | several; see the file's upstreaming notes | C4, general part (done): `rpow` subadditivity, circle-average monotonicity modulo discrete sets, VD comparison lemmas, zero/pole count in a ball, the exponent-`1/2` trick | 7, C1 |
 | 9 | `LogDerivTwoRadius.lean` ✅ | `…/ValueDistribution/LogDerivLemma.lean` (part 1) | C4 (T1, done) | 6, 8a |
 | 10 | `LogDerivLemma.lean` ✅ | `…/ValueDistribution/LogDerivLemma.lean` (part 2) | E (T3 + corollaries, done) | 3, 9 |
 
 - Items 1–4, 7, 8 are **fully parallel** and independently PR-able today; 7a is in review as
-  PR #43958, and 7 depends on it.
-- The **critical path** is the pending Poisson–Jensen upstream chain
-  (`BlaschkeDecomp2` [submitted] → `BlaschkeDecomp3`, `PoissonJensen` [pending])
+  PR #43958, and 7 depends on it. Item 5a is independent of the Poisson–Jensen chain and is
+  ready to submit; 5 depends on it.
+- The **critical path** is the pending Poisson–Jensen upstream chain (the canonical
+  decomposition has landed in Mathlib; `PoissonJensen` is in review as PR #42475)
   → 5 → 6 → 9 → 10.
 - Every PR stays under ~400 lines. New Mathlib files must use the module system
   (`module` / `public import` / `@[expose] public section`) as in the current

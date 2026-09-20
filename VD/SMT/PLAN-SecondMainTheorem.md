@@ -189,7 +189,7 @@ exponential, with defects `δ(0) = δ(∞) = 1` summing exactly to `2`.
 | FMT part 2 (shift) | `abs_characteristic_sub_characteristic_shift_le` (constant `log⁺ ‖a₀‖ + log 2`) |
 | Monotonicity, positivity of `T` | `characteristic_monotoneOn` (Cartan.lean), `characteristic_nonneg` (`1 ≤ r`), `proximity_nonneg`, `logCounting_nonneg` |
 | THE LLD (T3) | `ValueDistribution.isBigO_proximity_logDeriv` (`VD/LLD/LogDerivLemma.lean`), hypothesis-free |
-| `logDeriv` meromorphic API | `MeromorphicAt.logDeriv`, `meromorphicOrderAt_logDeriv_eq_neg_one/_nonneg`, `logDeriv_congr_codiscreteWithin`, `MeromorphicOn.ne_zero_mem_codiscreteWithin`, product→sum converters (`VD/LLD/MeromorphicLogDeriv.lean`) |
+| `logDeriv` meromorphic API | `MeromorphicAt.logDeriv`, `meromorphicOrderAt_logDeriv_eq_neg_one/_nonneg`, `logDeriv_congr_codiscreteWithin`, `MeromorphicOn.ne_zero_mem_codiscreteWithin`, product→sum converters (`Mathlib/Analysis/Meromorphic/LogDeriv.lean`) |
 | Order of the derivative (pointwise) | `meromorphicOrderAt_deriv_eq_sub_one` (Order.lean, needs `(n : 𝕜) ≠ 0` — automatic over `ℂ`), `MeromorphicAt.deriv`, `Meromorphic.deriv`, `deriv_sub_const` |
 | Order arithmetic | `meromorphicOrderAt_add_eq_left_of_lt`, `meromorphicOrderAt_const`, `meromorphicOrderAt_mul/_inv/_zpow` |
 | Divisors | `MeromorphicOn.divisor` (`z ↦ (meromorphicOrderAt f z).untop₀`), lattice with `⁺`/`⁻` (`posPart_apply`, `negPart_apply`), `divisor_inv`, `divisor_congr_codiscreteWithin` |
@@ -197,7 +197,7 @@ exponential, with defects `δ(0) = δ(∞) = 1` summing exactly to `2`.
 | Proximity arithmetic | `proximity_mul_top_le`, `proximity_sum_top_le` (error `log s.card`), `proximity_congr_codiscrete` (`r ≠ 0`) |
 | `log⁺` toolkit | `posLog_mul`, `posLog_add`, `posLog_sum`, `posLog_le_posLog`, `Real.posLog_rpow`, `Real.abs_log_eq_posLog_add_posLog_inv` |
 | Circle averages | `circleAverage_sum`, `circleAverage_mono`, `circleAverage_congr_codiscreteWithin`, `MeromorphicOn.circleIntegrable_posLog_norm` |
-| Degeneracy tools | `Meromorphic.exists_meromorphicOrderAt_eq_top_iff_forall/_iff_eventually_zero` (`VD/MathlibPending/CharacteristicMoebius.lean`), `toMeromorphicNFOn` machinery, identity theorem `AnalyticOnNhd.eqOn_zero_of_preconnected_of_frequently_eq_zero`, `IsOpen.is_const_of_fderiv_eq_zero` |
+| Degeneracy tools | `Meromorphic.exists_meromorphicOrderAt_eq_top_iff_forall/_iff_eventually_zero` (in Mathlib, `Mathlib/Analysis/Meromorphic/RCLike.lean`), `toMeromorphicNFOn` machinery, identity theorem `AnalyticOnNhd.eqOn_zero_of_preconnected_of_frequently_eq_zero`, `IsOpen.is_const_of_fderiv_eq_zero` |
 | Growth characterizations (pending) | `characteristic_isBigO_one_iff_constant` (`VD/MathlibPending/BoundednessCharacteristic.lean`), `rational_iff_characteristic_isBigO_log` (`VD/MathlibPending/CharacteristicIsBigOLog.lean`) |
 | Fundamental thm. of algebra | `Complex.isAlgClosed`, `Polynomial.exists_root` |
 
@@ -206,7 +206,7 @@ exponential, with defects `δ(0) = δ(∞) = 1` summing exactly to `2`.
 - truncated divisor `trunc` + truncated counting function `truncatedLogCounting` (A);
 - divisor of the derivative: `N(r, f′) = N(r, f) + N̄(r, ∞)` and
   `Σⱼ (N − N̄)(r, aⱼ) ≤ N(r, 1/f′)` (B) — the material explicitly reserved for the SMT
-  by the docstring of `VD/LLD/MeromorphicLogDeriv.lean`;
+  by the docstring of `Mathlib/Analysis/Meromorphic/LogDeriv.lean`;
 - the pointwise separation lemma
   `Σⱼ log⁺ ‖w − aⱼ‖⁻¹ ≤ log⁺ ‖Σⱼ (w − aⱼ)⁻¹‖ + C(s)` (C);
 - proximity estimates: constancy dichotomy, `m(r, f′/(f − a)) = S(r)` for each target,
@@ -221,7 +221,7 @@ exponential, with defects `δ(0) = δ(∞) = 1` summing exactly to `2`.
 
 *New: ~40 lines extending `Mathlib/Topology/LocallyFinsupp.lean` + new file
 `Mathlib/Analysis/Complex/ValueDistribution/LogCounting/Truncated.lean`
-(locally: `VD/SMT/TruncatedCounting.lean`). Independent of everything else.*
+(locally: `VD/MathlibSubmitted/TruncatedCounting.lean`, in review). Independent of everything else.*
 
 ```lean
 namespace Function.locallyFinsuppWithin
@@ -289,7 +289,7 @@ Estimated size: ~280 lines. Difficulty: low.
 
 *New file, eventually `Mathlib/Analysis/Meromorphic/DivisorDeriv.lean`
 (locally: `VD/SMT/DivisorDeriv.lean`). Depends on A. This is the material explicitly
-reserved for the SMT by the docstring of `VD/LLD/MeromorphicLogDeriv.lean`.*
+reserved for the SMT by the docstring of `Mathlib/Analysis/Meromorphic/LogDeriv.lean`.*
 
 Order-level lemmas (generality `f : 𝕜 → E` with `[CompleteSpace E]`, `[CharZero 𝕜]` where
 division matters, mirroring the LLD order section):
@@ -298,7 +298,7 @@ division matters, mirroring the LLD order section):
 /-- Derivatives of locally vanishing functions vanish locally. -/
 theorem meromorphicOrderAt_deriv_eq_top {f : 𝕜 → E} (h : meromorphicOrderAt f x = ⊤) :
     meromorphicOrderAt (deriv f) x = ⊤
-  -- f =ᶠ[𝓝[≠] x] 0 ⇒ deriv f =ᶠ[𝓝[≠] x] 0, same device as in MeromorphicLogDeriv.lean
+  -- f =ᶠ[𝓝[≠] x] 0 ⇒ deriv f =ᶠ[𝓝[≠] x] 0, same device as in Meromorphic/LogDeriv.lean
 
 /-- Where a meromorphic function has nonnegative order, so does its derivative. -/
 theorem meromorphicOrderAt_deriv_nonneg {f : 𝕜 → E} (hf : MeromorphicAt f x)
@@ -371,9 +371,9 @@ Difficulty: medium.
 
 ## 5. Work package C — the separation lemma ✅ **DONE**
 
-*Pure elementary analysis, no meromorphy. Locally `VD/SMT/SeparationLemma.lean`; Mathlib
-target: extend `Mathlib/Analysis/SpecialFunctions/Log/PosLog.lean` (fallback: fold into
-the SMT file, see §12). Independent of everything else. Stated over a general
+*Pure elementary analysis, no meromorphy. Now in Mathlib, in
+`Mathlib/Analysis/Complex/ValueDistribution/SecondMainTheorem.lean` — the fallback of
+§12 was taken, folding it into the SMT file rather than extending `PosLog.lean`. Independent of everything else. Stated over a general
 `NormedField` (weaker than the planned `NontriviallyNormedField` — the proof only uses
 the triangle inequality and multiplicativity of the norm), in `namespace Real` following
 the precedent of `posLog_norm_sum_le`. Implemented with one public helper,
@@ -421,7 +421,8 @@ pressure to optimize).
 
 *Locally `VD/SMT/ProximityEstimates.lean`; Mathlib target
 `Analysis/Complex/ValueDistribution/SecondMainTheorem.lean` (part 1). Depends on C,
-the LLD, FMT part 2, and (D1 only) the pending `CharacteristicMoebius` chain. Implementation
+the LLD, FMT part 2, and (D1 only) the Möbius-invariance results, now in Mathlib's
+`FirstMainTheorem.lean`. Implementation
 notes: package B turned out not to be needed — the only order-level input is
 `meromorphicOrderAt_deriv_eq_sub_one`, which is already in Mathlib. The "15-line adaptation of
 `logDeriv_congr_codiscreteWithin`" anticipated for D1 was written as the public lemma
@@ -809,7 +810,7 @@ Proof: extract from `h₂` a bad set `E` with `volume E =: M < ∞` and a thresh
 `r ≥ max R₀ (M + 2)`: the interval `[r, r + M + 1]` has measure `M + 1 > volume E`, so it
 contains a good point `r′ ≥ r ≥ R₀`; then
 `u r ≤ u r′ ≤ C · log r′ ≤ C · log (r + M + 1) ≤ 2C · log r`. Same measure-theoretic
-device as the Borel lemma (`VD/MathlibSubmitted/BorelGrowth.lean`), but simpler — no
+device as the Borel lemma (`Mathlib/MeasureTheory/Function/BorelGrowth.lean`), but simpler — no
 dyadic slicing. Reusable beyond Picard (any "monotone + exceptional set" cleanup); Mathlib
 target near the Borel lemma.
 
@@ -881,7 +882,7 @@ local file per future Mathlib PR target, each registered by an import line in th
 | 1 | `TruncatedCounting.lean` | `Topology/LocallyFinsupp.lean` (extend) + **new** `…/ValueDistribution/LogCounting/Truncated.lean` | package A | — |
 | 2 | `DivisorDeriv.lean` | **new** `Analysis/Meromorphic/DivisorDeriv.lean` | package B | 1 |
 | 3 | `SeparationLemma.lean` | `Analysis/SpecialFunctions/Log/PosLog.lean` (extend) | package C | — |
-| 4 | `ProximityEstimates.lean` | `…/ValueDistribution/SecondMainTheorem.lean` (part 1) | package D | 3, **LLD (T3)**, pending `CharacteristicMoebius` |
+| 4 | `ProximityEstimates.lean` | `…/ValueDistribution/SecondMainTheorem.lean` (part 1) | package D | 3, **LLD (T3)** |
 | 5 | `SecondMainTheoremRamification.lean` | `…/ValueDistribution/SecondMainTheorem.lean` (part 2) | package E (S1) | 4 |
 | 6 | `SecondMainTheorem.lean` | `…/ValueDistribution/SecondMainTheorem.lean` (part 3) | package F (S2, S2′) | 1, 2, 5 |
 | 7 | `Deficiency.lean` | **new** `…/ValueDistribution/Deficiency.lean` | package G (S3) | 6 |
@@ -914,7 +915,7 @@ Total new code estimate: ≈ 2200–2500 lines of Lean.
    transfer + identity theorem). Fallback: state S1/S2 first with the hypothesis
    `∀ x, meromorphicOrderAt (deriv f) x ≠ ⊤` and add the hypothesis-free wrappers in a
    follow-up — the package structure supports this (D1 is isolated). Like the LLD's T1,
-   it depends on the *pending* `CharacteristicMoebius` chain — no new upstream exposure.
+   the Möbius-invariance results it depends on are now in Mathlib — no new upstream exposure.
 4. **`WithTop ℤ` order arithmetic in B** (`untop₀`, three-way case splits) is mechanical
    but verbose. Mitigation: mirror the LLD order-section style; keep every divisor
    identity pointwise-first, then lift with `locallyFinsuppWithin` extensionality.

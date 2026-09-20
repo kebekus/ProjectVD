@@ -12,7 +12,7 @@ See `VD/SMT/PLAN-SecondMainTheorem.md`, §8.
 
 Mathlib target: `Mathlib/Analysis/Complex/ValueDistribution/SecondMainTheorem.lean`
 (part 3 of 3).
-Dependencies: `VD/SMT/TruncatedCounting.lean` (package A), `VD/SMT/DivisorDeriv.lean`
+Dependencies: `VD/MathlibSubmitted/TruncatedCounting.lean` (package A), `VD/SMT/DivisorDeriv.lean`
 (package B), `VD/SMT/SecondMainTheoremRamification.lean` (package E).
 
 This file proves the **Second Main Theorem** of value distribution theory in its classical
@@ -24,8 +24,9 @@ targets,
 ```
 
 as `r → ∞` outside a set of finite Lebesgue measure, where `N̄` denotes the truncated
-counting function introduced in `VD/SMT/TruncatedCounting.lean`.  The result carries **no**
-hypothesis beyond meromorphy of `f`: there is no nondegeneracy assumption on `f`, no
+counting function introduced in `VD/MathlibSubmitted/TruncatedCounting.lean`.  The result
+carries **no** hypothesis beyond meromorphy of `f`: there is no nondegeneracy assumption on
+`f`, no
 distinctness assumption on the targets (a `Finset` is distinct by construction), and no
 cardinality assumption on `S`.
 

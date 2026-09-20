@@ -6,17 +6,18 @@ Authors: Stefan Kebekus
 import Mathlib.Analysis.Complex.HasPrimitives
 import Mathlib.Analysis.Complex.OpenMapping
 import VD.MathlibPending.PoissonJensen
+import VD.MathlibSubmitted.CanonicalFactor
 
 /-!
-# Differentiated Poisson Representation — LLD work packages B4–B5
+# Differentiated Poisson Representation — LLD work package B4
 
 See `VD/LLD/PLAN-LogarithmicDerivative.md`, §4.
 
-Mathlib target: extend `Mathlib/Analysis/Complex/Poisson.lean` (B4) and
-`Mathlib/Analysis/Complex/CanonicalDecomposition.lean` (B5).
+Mathlib target: extend `Mathlib/Analysis/Complex/Poisson.lean` (B4).
 Dependencies: the derivative of the Herglotz–Riesz kernel integral (B1–B3, now in Mathlib:
 `hasDerivAt_circleAverage_herglotzRieszKernel_smul` in `Mathlib/Analysis/Complex/Poisson.lean`)
-and the Poisson–Jensen chain (`VD/MathlibSubmitted/BlaschkeDecomp2.lean`,
+and the Poisson–Jensen chain (the extended canonical decomposition is now in Mathlib, in
+`Mathlib/Analysis/Complex/CanonicalDecomposition.lean`; see also
 `VD/MathlibPending/PoissonJensen.lean`).
 
 - `MeromorphicOn.logDeriv_eq_circleAverage` (B4): if `h` is meromorphic on the closed ball,
@@ -33,75 +34,12 @@ and the Poisson–Jensen chain (`VD/MathlibSubmitted/BlaschkeDecomp2.lean`,
   sphere**, yielding the boundary-divisor correction
   `circleAverage (fun ζ ↦ (2ζ/(ζ-w)²) • log ‖ζ - u‖) 0 R = (w - u)⁻¹` for free.
 
-- `Complex.logDeriv_canonicalFactor`, `Complex.norm_logDeriv_canonicalFactor_le` (B5): the
-  logarithmic derivative of the canonical factor is
-  `-((w - a)⁻¹ + conj a / (R² - conj a * w))` away from the singularities, with the norm bound
-  `‖logDeriv (canonicalFactor ρ a) w‖ ≤ ‖w - a‖⁻¹ + (ρ - r)⁻¹` on the circle `‖w‖ = r < ρ`.
+Work package B5, the logarithmic derivative of the canonical factor
+(`Complex.logDeriv_canonicalFactor`, `Complex.norm_logDeriv_canonicalFactor_le`), has been split
+off into `VD/MathlibSubmitted/CanonicalFactor.lean` and is in review; this file imports it.
 -/
 
 open Complex ComplexConjugate Filter Function MeromorphicOn Metric Real Set
-
-/-!
-## B5: The Logarithmic Derivative of the Canonical Factor
--/
-
-namespace Complex
-
-/-- The logarithmic derivative of the canonical factor, away from its zero and pole. -/
-theorem logDeriv_canonicalFactor {R : ℝ} {a w : ℂ} (hR : R ≠ 0) (hw₁ : w ≠ a)
-    (hw₂ : R ^ 2 - conj a * w ≠ 0) :
-    logDeriv (canonicalFactor R a) w = -((w - a)⁻¹ + conj a / (R ^ 2 - conj a * w)) := by
-  have h₁ : HasDerivAt (fun z : ℂ ↦ R ^ 2 - conj a * z) (-conj a) w := by
-    simpa using ((hasDerivAt_id w).const_mul (conj a)).const_sub ((R : ℂ) ^ 2)
-  have h₂ : HasDerivAt (fun z : ℂ ↦ R * (z - a)) (R * 1) w :=
-    ((hasDerivAt_id w).sub_const a).const_mul _
-  have h₃ : (R : ℂ) * (w - a) ≠ 0 :=
-    mul_ne_zero (Complex.ofReal_ne_zero.2 hR) (sub_ne_zero.2 hw₁)
-  rw [canonicalFactor_def,
-    logDeriv_fun_div w hw₂ h₃ h₁.differentiableAt h₂.differentiableAt,
-    logDeriv_const_mul w _ (Complex.ofReal_ne_zero.2 hR)]
-  have h₄ : HasDerivAt (· - a) 1 w := by
-    simpa using (hasDerivAt_id w).sub_const a
-  rw [logDeriv_apply, logDeriv_apply, h₁.deriv, h₄.deriv, neg_div]
-  field_simp [sub_ne_zero.2 hw₁]
-  ring
-
-/--
-Norm bound for the logarithmic derivative of the canonical factor on interior circles: for `‖a‖ < ρ`
-and `‖w‖ = r < ρ`, we have `‖logDeriv (canonicalFactor ρ a) w‖ ≤ ‖w - a‖⁻¹ + (ρ - r)⁻¹`.
--/
-theorem norm_logDeriv_canonicalFactor_le {ρ r : ℝ} {a w : ℂ}
-    (ha : ‖a‖ < ρ) (hw : ‖w‖ = r) (hr : r < ρ) :
-    ‖logDeriv (canonicalFactor ρ a) w‖ ≤ ‖w - a‖⁻¹ + (ρ - r)⁻¹ := by
-  have hr₀ : 0 ≤ r := hw ▸ norm_nonneg w
-  have hρ : 0 < ρ := lt_of_le_of_lt hr₀ hr
-  rcases eq_or_ne w a with rfl | hw₁
-  · rw [logDeriv_apply, canonicalFactor_apply_self, div_zero, norm_zero]
-    exact add_nonneg (inv_nonneg.2 (norm_nonneg _)) (inv_nonneg.2 (by linarith))
-  · have hw₂ : (ρ : ℂ) ^ 2 - conj a * w ≠ 0 := by
-      intro hcon
-      have h₁ : ‖((ρ : ℂ) ^ 2)‖ = ‖conj a * w‖ := by rw [sub_eq_zero.1 hcon]
-      rw [norm_pow, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hρ, norm_mul,
-        Complex.norm_conj, hw] at h₁
-      nlinarith
-    rw [logDeriv_canonicalFactor hρ.ne' hw₁ hw₂, norm_neg]
-    refine le_trans (norm_add_le _ _) ?_
-    rw [norm_inv]
-    gcongr
-    -- ‖conj a / (ρ² - conj a * w)‖ ≤ (ρ - r)⁻¹
-    rw [norm_div, Complex.norm_conj]
-    have hD : ρ ^ 2 - ‖a‖ * r ≤ ‖(ρ : ℂ) ^ 2 - conj a * w‖ := by
-      have h₁ := norm_sub_norm_le ((ρ : ℂ) ^ 2) (conj a * w)
-      rwa [norm_pow, Complex.norm_real, Real.norm_eq_abs, abs_of_pos hρ, norm_mul,
-        Complex.norm_conj, hw] at h₁
-    have hD₀ : 0 < ρ ^ 2 - ‖a‖ * r := by nlinarith [norm_nonneg a]
-    calc ‖a‖ / ‖(ρ : ℂ) ^ 2 - conj a * w‖
-        ≤ ‖a‖ / (ρ ^ 2 - ‖a‖ * r) := by gcongr
-      _ ≤ (ρ - r)⁻¹ := by
-          rw [← one_div, div_le_div_iff₀ hD₀ (by linarith)]
-          nlinarith [norm_nonneg a]
-
-end Complex
 
 /-!
 ## The Derived Herglotz–Riesz Kernel

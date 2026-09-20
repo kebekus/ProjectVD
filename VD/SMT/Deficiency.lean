@@ -13,7 +13,7 @@ import VD.SMT.SecondMainTheorem
 See `VD/SMT/PLAN-SecondMainTheorem.md`, §9.
 
 Mathlib target: new file `Mathlib/Analysis/Complex/ValueDistribution/Deficiency.lean`.
-Dependencies: `VD/SMT/TruncatedCounting.lean` (package A),
+Dependencies: `VD/MathlibSubmitted/TruncatedCounting.lean` (package A),
 `VD/SMT/SecondMainTheorem.lean` (package F); uses the pending
 `VD/MathlibPending/BoundednessCharacteristic.lean` for the nonconstancy bridge.
 

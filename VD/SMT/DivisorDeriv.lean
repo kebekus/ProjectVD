@@ -12,12 +12,12 @@ import VD.MathlibSubmitted.TruncatedCounting
 See `VD/SMT/PLAN-SecondMainTheorem.md`, §4.
 
 Mathlib target: new file `Mathlib/Analysis/Meromorphic/DivisorDeriv.lean`.
-Dependencies: `VD/SMT/TruncatedCounting.lean` (package A).
+Dependencies: `VD/MathlibSubmitted/TruncatedCounting.lean` (package A).
 
 This is the material explicitly reserved for the Second Main Theorem by the docstring of
-`VD/LLD/MeromorphicLogDeriv.lean`.  It computes the zero- and pole-divisors of `deriv f` in
-terms of those of `f`, and converts the ramification term of the Second Main Theorem into
-truncated counting functions.
+`Mathlib/Analysis/Meromorphic/LogDeriv.lean` (work package A, now in Mathlib).  It computes
+the zero- and pole-divisors of `deriv f` in terms of those of `f`, and converts the
+ramification term of the Second Main Theorem into truncated counting functions.
 
 ## Main results
 

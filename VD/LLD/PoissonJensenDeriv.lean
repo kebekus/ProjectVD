@@ -12,8 +12,9 @@ import VD.LLD.PoissonSchwarzDeriv
 See `VD/LLD/PLAN-LogarithmicDerivative.md`, §4.
 
 Mathlib target: new file `Mathlib/Analysis/Complex/PoissonJensenDeriv.lean`.
-Dependencies: `VD/LLD/MeromorphicLogDeriv.lean` (work package A) and
-`VD/LLD/PoissonSchwarzDeriv.lean` (work packages B4–B5).
+Dependencies: `Mathlib/Analysis/Meromorphic/LogDeriv.lean` (work package A, now in Mathlib),
+`VD/LLD/PoissonSchwarzDeriv.lean` (work package B4) and `VD/MathlibSubmitted/CanonicalFactor.lean`
+(work package B5, in review).
 
 This file establishes the **differentiated Poisson–Jensen formula**
 `MeromorphicOn.logDeriv_eventuallyEq_circleAverage_sub_finsum`: for `f` meromorphic on
@@ -42,11 +43,6 @@ open Complex Filter Function MeromorphicOn Metric Real Set Topology
 /-!
 ## Auxiliary Lemmas
 -/
-
-@[fun_prop]
-lemma meromorphicAt_canonicalFactor {R : ℝ} {x w : ℂ} : MeromorphicAt (canonicalFactor R w) x := by
-  rw [canonicalFactor_def]
-  fun_prop
 
 /-- The derived Herglotz–Riesz kernel `ζ ↦ 2ζ/(ζ-w)²` is continuous on the circle
 `sphere 0 |R|` whenever `w ∈ ball 0 R`. -/
@@ -116,7 +112,7 @@ theorem MeromorphicOn.logDeriv_eventuallyEq_circleAverage_sub_finsum {f : ℂ �
   -- Meromorphy of the three factors of the decomposition on the ball
   have hBmero : MeromorphicOn
       (∏ᶠ u, canonicalFactor R u ^ (-divisor f (ball 0 R) u)) (ball 0 R) := by
-    fun_prop [meromorphicAt_canonicalFactor]
+    fun_prop [meromorphic_canonicalFactor]
   have hSmero : MeromorphicOn
       (∏ᶠ v, (· - v) ^ divisor f (sphere 0 R) v) (ball 0 R) := by fun_prop
   have hhmero : MeromorphicOn h (ball 0 R) :=
@@ -126,10 +122,10 @@ theorem MeromorphicOn.logDeriv_eventuallyEq_circleAverage_sub_finsum {f : ℂ �
       meromorphicOrderAt (∏ᶠ u, canonicalFactor R u ^ (-divisor f (ball 0 R) u)) x ≠ ⊤ := by
     intro x hx
     rw [finprod_eq_prod_of_mulSupport_subset (s := h₄f.toFinset) _ (by aesop),
-      meromorphicOrderAt_prod (fun u _ ↦ meromorphicAt_canonicalFactor.zpow _),
+      meromorphicOrderAt_prod (fun u _ ↦ (meromorphic_canonicalFactor _ _ _).zpow _),
       WithTop.sum_ne_top]
     intro u _
-    rw [meromorphicOrderAt_zpow meromorphicAt_canonicalFactor]
+    rw [meromorphicOrderAt_zpow (meromorphic_canonicalFactor _ _ _)]
     exact WithTop.mul_ne_top WithTop.coe_ne_top (meromorphicOrderAt_canonicalFactor_ne_top u hR)
   have hSord : ∀ x ∈ ball (0 : ℂ) R,
       meromorphicOrderAt (∏ᶠ v, (· - v) ^ divisor f (sphere 0 R) v) x ≠ ⊤ := by
@@ -180,7 +176,7 @@ theorem MeromorphicOn.logDeriv_eventuallyEq_circleAverage_sub_finsum {f : ℂ �
       fun z ↦ ∑ᶠ u, (-divisor f (ball 0 R) u) • logDeriv (canonicalFactor R u) z := by
     apply logDeriv_finprod_zpow_eventuallyEq
       (h₄f.subset fun u hu ↦ mem_support.2 (neg_ne_zero.1 (mem_support.1 hu)))
-      (fun u x _ ↦ meromorphicAt_canonicalFactor)
+      (fun u x _ ↦ meromorphic_canonicalFactor _ _ _)
       (fun u x _ ↦ meromorphicOrderAt_canonicalFactor_ne_top u hR)
   have e₃ : logDeriv (∏ᶠ v, (· - v) ^ divisor f (sphere 0 R) v)
       =ᶠ[codiscreteWithin (ball 0 R)]

@@ -16,6 +16,7 @@ import VD.MathlibPending.BoundednessCharacteristic
 import VD.MathlibPending.CharacteristicIsBigOLog
 import VD.MathlibPending.PoissonJensen
 import VD.MathlibPending.ProximityBounded
+import VD.MathlibSubmitted.CanonicalFactor
 import VD.MathlibSubmitted.ChordLength
 import VD.MathlibSubmitted.JensenInequality
 import VD.MathlibSubmitted.Liouville
