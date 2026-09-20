@@ -104,6 +104,21 @@ theorem norm_logDeriv_canonicalFactor_le {ρ r : ℝ} {a w : ℂ}
 end Complex
 
 /-!
+## The Derived Herglotz–Riesz Kernel
+-/
+
+/-- The `w`-derivative `2ζ/(ζ - w)²` of the Herglotz–Riesz kernel `herglotzRieszKernel 0 w ζ`
+centred at the origin; see `hasDerivAt_circleAverage_herglotzRieszKernel_smul`. Integrating
+`log ‖f ·‖` against it over a circle produces the logarithmic derivative of `f`. -/
+noncomputable def derivHerglotzRieszKernel (w ζ : ℂ) : ℂ := 2 * ζ / (ζ - w) ^ 2
+
+lemma derivHerglotzRieszKernel_def (w ζ : ℂ) :
+    derivHerglotzRieszKernel w ζ = 2 * ζ / (ζ - w) ^ 2 := rfl
+
+lemma derivHerglotzRieszKernel_fun_def (w : ℂ) :
+    derivHerglotzRieszKernel w = fun ζ ↦ 2 * ζ / (ζ - w) ^ 2 := rfl
+
+/-!
 ## B4: The Differentiated Poisson Representation
 -/
 
@@ -114,7 +129,7 @@ theorem MeromorphicOn.logDeriv_eq_circleAverage {h : ℂ → ℂ} {R : ℝ} {w :
     (h₁ : MeromorphicOn h (closedBall 0 R)) (h₂ : AnalyticOnNhd ℂ h (ball 0 R))
     (h₃ : ∀ z ∈ ball 0 R, h z ≠ 0) (hw : w ∈ ball 0 R) :
     logDeriv h w
-      = circleAverage (fun ζ ↦ (2 * ζ / (ζ - w) ^ 2) • (Real.log ‖h ζ‖ : ℂ)) 0 R := by
+      = circleAverage (fun ζ ↦ derivHerglotzRieszKernel w ζ • (Real.log ‖h ζ‖ : ℂ)) 0 R := by
   have hR : 0 < R := pos_of_mem_ball hw
   -- Points of the open ball lie off the circle
   have hball : ∀ z ∈ ball (0 : ℂ) R, z ∉ sphere 0 |R| := fun z hz hs ↦ by
@@ -220,7 +235,8 @@ and `w` inside, the circle average of `log ‖· - u‖` against the derived Her
 formula. -/
 theorem circleAverage_smul_log_norm_sub_sphere {u w : ℂ} {R : ℝ}
     (hu : u ∈ sphere (0 : ℂ) R) (hw : w ∈ ball (0 : ℂ) R) :
-    circleAverage (fun ζ ↦ (2 * ζ / (ζ - w) ^ 2) • (Real.log ‖ζ - u‖ : ℂ)) 0 R = (w - u)⁻¹ := by
+    circleAverage (fun ζ ↦ derivHerglotzRieszKernel w ζ • (Real.log ‖ζ - u‖ : ℂ)) 0 R
+      = (w - u)⁻¹ := by
   have h₂ : AnalyticOnNhd ℂ (fun ζ : ℂ ↦ ζ - u) (ball 0 R) := by fun_prop
   have h₃ : ∀ z ∈ ball (0 : ℂ) R, z - u ≠ 0 := by
     intro z hz
