@@ -373,8 +373,9 @@ Difficulty: B6 medium-high (bookkeeping), everything else low-medium.
 ## 5. Work package C — circle-average estimates and the two-radius bound (T1)
 
 **✅ C1–C3 DONE (2026-07-07).** C1 lives in `VD/MathlibSubmitted/JensenInequality.lean`, C2 in
-`VD/LLD/CircleAverageEstimates.lean` (~200 lines, rewritten 2026-09-18 against existing Mathlib
-API), C3 has been upstreamed. Deviations from the sketches below:
+`VD/LLD/CircleAverageEstimates.lean` (rewritten 2026-09-18 against existing Mathlib API), C3 has
+been upstreamed. The chord lemmas underlying C2 were submitted on 2026-09-20 as PR #43958 and moved
+to `VD/MathlibSubmitted/ChordLength.lean`. Deviations from the sketches below:
 
 - **C2** needs no case split at all. The law of cosines
   `‖circleMap 0 r θ − a‖² = (r−‖a‖)² + 4r‖a‖·sin²((θ − arg a)/2)` gives the sharp universal bound
@@ -383,7 +384,7 @@ API), C3 has been upstreamed. Deviations from the sketches below:
   (`norm_circleMap_zero_sub_sq`, `norm_circleMap_zero_sub_sq'`,
   `mul_abs_sin_le_norm_circleMap_zero_sub`) target `Mathlib/.../Complex/CircleMap.lean`, where
   they also replace the private `h_cos_law` in `JensenFormula.lean` and a 16-line `calc` in
-  `PosLogEqCircleAverage.lean`. A single Jordan-inequality majorant
+  `PosLog.lean`; this is PR #43958. A single Jordan-inequality majorant
   `(r/(2π)·θ)^p + (r/(2π)·(2π−θ))^p` covers all base points; its integral is exactly
   `4π/(p+1)·r^p`, so the statement is proved for general `-1 < p ≤ 0` with constant `2/(p+1)`
   (`= 4` at `p = −1/2`). Negative and zero radii are handled by Mathlib's
@@ -591,13 +592,15 @@ one local file per future Mathlib target:
 | 4 | `CauchyIntegralDeriv.lean` ✅ | `MeasureTheory/Integral/CircleIntegral.lean` (extend) | B1–B3 (done) | — |
 | 5 | `PoissonSchwarzDeriv.lean` ✅ | `Analysis/Complex/Poisson.lean` (extend) | B4, B5 (done) | 4, **Poisson–Jensen chain** |
 | 6 | `PoissonJensenDeriv.lean` ✅ | `Analysis/Complex/PoissonJensenDeriv.lean` | B6 + the pointwise estimate `MeromorphicOn.eventually_norm_logDeriv_le` (done) | 1, 5 |
-| 7 | `CircleAverageEstimates.lean` ✅ | chord lemmas → `Analysis/SpecialFunctions/Complex/CircleMap.lean`; rest → `MeasureTheory/Integral/CircleAverage.lean` (extend) | C2 (done; C1 is in `MathlibSubmitted/JensenInequality.lean`) | — |
+| 7 | `CircleAverageEstimates.lean` ✅ | new file `Analysis/SpecialFunctions/Integrals/CircleAverageRpow.lean` | C2 (done; C1 is in `MathlibSubmitted/JensenInequality.lean`) | 7a |
+| 7a | `MathlibSubmitted/ChordLength.lean` 🚀 | `Analysis/SpecialFunctions/Complex/CircleMap.lean` (extend) | chord lemmas for `circleMap`, **submitted as PR #43958** | — |
 | 8 | `CountingEstimate.lean` ✅ | `…/ValueDistribution/LogCounting/Basic.lean` (extend) | C3 (done) | — |
 | 8a | `LogDerivEstimates.lean` ✅ | several; see the file's upstreaming notes | C4, general part (done): `rpow` subadditivity, circle-average monotonicity modulo discrete sets, VD comparison lemmas, zero/pole count in a ball, the exponent-`1/2` trick | 7, C1 |
 | 9 | `LogDerivTwoRadius.lean` ✅ | `…/ValueDistribution/LogDerivLemma.lean` (part 1) | C4 (T1, done) | 6, 8a |
 | 10 | `LogDerivLemma.lean` ✅ | `…/ValueDistribution/LogDerivLemma.lean` (part 2) | E (T3 + corollaries, done) | 3, 9 |
 
-- Items 1–4, 7, 8 are **fully parallel** and independently PR-able today.
+- Items 1–4, 7, 8 are **fully parallel** and independently PR-able today; 7a is in review as
+  PR #43958, and 7 depends on it.
 - The **critical path** is the pending Poisson–Jensen upstream chain
   (`BlaschkeDecomp2` [submitted] → `BlaschkeDecomp3`, `PoissonJensen` [pending])
   → 5 → 6 → 9 → 10.

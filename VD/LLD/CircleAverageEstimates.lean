@@ -5,6 +5,7 @@ Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.MeasureTheory.Integral.CircleAverage
+import VD.MathlibSubmitted.ChordLength
 
 /-!
 # Circle Averages of Negative Powers of the Distance to a Point — LLD work package C2
@@ -19,16 +20,14 @@ Derivative uses the exponent-`1/2` trick: the average of `‖· - a‖⁻¹` is 
 
 ## Main results
 
-- `norm_circleMap_zero_sub_sq`, `norm_circleMap_zero_sub_sq'`: the law of cosines for the chord from
-  a point of the circle `circleMap 0 r` to an arbitrary point `a`, in cosine and in half-angle form.
-- `mul_abs_sin_le_norm_circleMap_zero_sub`: the sharp universal lower bound
-  `r * |sin ((θ - arg a) / 2)| ≤ ‖circleMap 0 r θ - a‖`.
 - `circleIntegrable_norm_sub_const_rpow`: `‖· - a‖ ^ p` is circle integrable for `-1 < p`.
 - `circleAverage_norm_sub_const_rpow_le`: the uniform bound described above.
 
 ## Implementation notes
 
-The chord lemmas need no measure theory. See the upstreaming notes below for where the material of
+The chord lemmas that this file builds on (`norm_circleMap_zero_sub_sq'` and
+`mul_abs_sin_le_norm_circleMap_zero_sub`) have been submitted to Mathlib as PR #43958 and live in
+`VD/MathlibSubmitted/ChordLength.lean`. See the upstreaming notes below for where the material of
 this file belongs in Mathlib.
 
 For the average, rotate the circle by `arg a` and combine the chord bound with the Jordan inequality
@@ -39,92 +38,19 @@ whose integral is computed exactly.
 /-
 # Upstreaming notes
 
-The material of this file is meant to go to Mathlib in two PRs. The second depends on the first.
-Everything below was checked against the Mathlib revision pinned in `lake-manifest.json`
-(`f61f3ed7`, 2026-09-17). Mathlib itself was *not* modified: the rewritten Mathlib proofs quoted
-below were compiled as standalone copies in a scratch file that imports this file. In that test,
-the private Mathlib lemma `circleAverage_log_norm_sub_const₁_integral` was replaced by a hypothesis
-of the same statement.
+The chord lemmas that this file builds on have been submitted to Mathlib as PR #43958; they now live
+in `VD/MathlibSubmitted/ChordLength.lean`, which also records what else that PR changes. What is
+left here is the second, dependent PR, described below. It was checked against the Mathlib revision
+pinned in `lake-manifest.json` (`f61f3ed7`, 2026-09-17).
 
-## PR 1: chord lemmas in `Mathlib/Analysis/SpecialFunctions/Complex/CircleMap.lean`
+## New file `Mathlib/Analysis/SpecialFunctions/Integrals/CircleAverageRpow.lean`
 
-Move `norm_circleMap_zero_sub_sq`, `norm_circleMap_zero_sub_sq'` and
-`mul_abs_sin_le_norm_circleMap_zero_sub` verbatim to `CircleMap.lean`, directly after
-`circleMap_zero_re` (which the first proof uses) and `circleMap_zero_im`. They need no measure
-theory and compile with only `import Mathlib.Analysis.SpecialFunctions.Complex.CircleMap`. This was
-checked in classic mode; recheck under the module system, because the proofs use
-`linear_combination`, `nlinarith` and `positivity`.
-
-The first lemma is not new mathematics in Mathlib, only a new *statement*: its proof is lifted from
-the inline `have h_cos_law` in `JensenFormula.lean`, with the hypothesis `‖ρ‖ = R` removed (it was
-only used to rename `‖ρ‖` to `R`). The existing lemma `Complex.norm_exp_I_mul_ofReal_sub_one` in
-`Mathlib/Analysis/Complex/Trigonometric.lean` is the special case `r = 1`, `a = 1` of the
-half-angle form. It sits below `CircleMap.lean` in the import hierarchy and therefore stays where it
-is, but the docstrings should point to each other.
-
-PR 1 should also simplify the two Mathlib proofs that currently contain their own copies of the law
-of cosines. Together they shrink from about 60 lines to about 20.
-
-### `Mathlib/Analysis/Complex/JensenFormula.lean`
-
-The private lemma `const_mul_norm_sub_circleMap_le_norm_sub_circleMap` (15 lines) proves the law of
-cosines inline, then needs `nlinarith` with six hints to compare the chords of radius `r` and `R`.
-In half-angle form, with `t = sin ((θ - arg ρ) / 2) ^ 2`, the squared inequality becomes
-`4 * r₀ * R ^ 2 * t ≤ R * (r - R) ^ 2 + 4 * r * R ^ 2 * t`, which is immediate from `r₀ ≤ r`. The
-lemma becomes:
-
-    private lemma const_mul_norm_sub_circleMap_le_norm_sub_circleMap {r₀ r R : ℝ} {ρ : ℂ}
-        (hρ : ‖ρ‖ = R) (hr₀ : 0 < r₀) (hR : 0 < R) (hr₀r : r₀ ≤ r) (θ : ℝ) :
-        sqrt (r₀ / R) * ‖circleMap 0 R θ - ρ‖ ≤ ‖circleMap 0 r θ - ρ‖ := by
-      have : (r₀ / R) * ‖circleMap 0 R θ - ρ‖ ^ 2 ≤ ‖circleMap 0 r θ - ρ‖ ^ 2 := by
-        rw [norm_circleMap_zero_sub_sq', norm_circleMap_zero_sub_sq', hρ, div_mul_eq_mul_div,
-          div_le_iff₀ hR]
-        nlinarith [mul_nonneg (mul_nonneg (sq_nonneg R) (sq_nonneg (sin ((θ - ρ.arg) / 2))))
-          (sub_nonneg.2 hr₀r), mul_nonneg hR.le (sq_nonneg (r - R))]
-      grw [← sqrt_sq (norm_nonneg _), ← sqrt_mul (by positivity), this, sqrt_sq (norm_nonneg _)]
-
-The hypothesis `hrR : r ≤ R` is no longer needed and should be dropped. Its only caller,
-`norm_herglotzLogIntegrand_circleMap_le`, then omits `hrR` from the call. The caller keeps `hrR` in
-its own signature, because it uses it elsewhere. A more conservative alternative keeps the proof as
-it is and only replaces the seven-line `h_cos_law` by `rw [norm_circleMap_zero_sub_sq, hρ]`.
-
-### `Mathlib/Analysis/SpecialFunctions/Integrals/PosLogEqCircleAverage.lean`
-
-The proof of `circleAverage_log_norm_sub_const₁` (45 lines) first rotates the circle to move `a` to
-`1`. It does this by hand, with `circleMap_zero_mul`, `Function.Periodic.intervalIntegral_add_eq`
-and `integral_comp_add_left`. It then computes `normSq (circleMap 0 1 x - 1) = 4 * sin (x / 2) ^ 2`
-in a 16-line `calc`. The rotation is exactly `Real.circleAverage_eq_integral_add` (in
-`CircleAverage.lean`, which the file already imports), and the computation is the half-angle form
-at `r = ‖a‖ = 1`. The theorem becomes:
-
-    theorem circleAverage_log_norm_sub_const₁ (h : ‖a‖ = 1) :
-        circleAverage (log ‖· - a‖) 0 1 = 0 := by
-      -- Rotate by `arg a`. By the law of cosines,
-      -- `‖circleMap 0 1 (x + arg a) - a‖ ^ 2 = 4 * sin (x / 2) ^ 2`.
-      rw [circleAverage_eq_integral_add a.arg,
-        integral_congr (g := fun x ↦ log (4 * sin (x / 2) ^ 2) / 2),
-        circleAverage_log_norm_sub_const₁_integral, smul_zero]
-      intro x _
-      have := norm_circleMap_zero_sub_sq' 1 (x + a.arg) a
-      norm_num [h] at this
-      simp only [← this, log_pow]
-      ring
-
-The private lemma `circleAverage_log_norm_sub_const₁_integral` is unchanged. A more conservative
-alternative keeps the rotation and only replaces the 16-line `calc` by
-`Complex.normSq_eq_norm_sq _` followed by `simp [norm_circleMap_zero_sub_sq']`.
-
-No other Mathlib file computes chord lengths of `circleMap` by hand, as far as a search for
-`normSq (circleMap`, `cos (θ - … arg …)` and `sin (x / 2) ^ 2` shows.
-
-## PR 2: new file `Mathlib/Analysis/SpecialFunctions/Integrals/CircleAverageRpow.lean`
-
-Everything from the section "The Majorant" onwards goes into a new file next to
-`PosLogEqCircleAverage.lean`. It cannot go into `Mathlib/MeasureTheory/Integral/CircleAverage.lean`
+Everything in this file goes into a new file next to `PosLog.lean`. It cannot go into
+`Mathlib/MeasureTheory/Integral/CircleAverage.lean`
 itself: that file does not import `integral_rpow` and `intervalIntegrable_rpow'` (from
 `Mathlib/Analysis/SpecialFunctions/Integrals/Basic.lean`), and it should stay light. Appending to
-`PosLogEqCircleAverage.lean` would work but mixes themes and pulls in its heavy harmonic-function
-imports for no reason. The new file needs the module-system header
+`PosLog.lean` would work but mixes themes and pulls in its heavy harmonic-function imports for no
+reason. The new file needs the module-system header
 
     module
 
@@ -133,7 +59,7 @@ imports for no reason. The new file needs the module-system header
 
     public section
 
-and receives the chord lemmas of PR 1 transitively through `CircleAverage.lean`,
+and receives the chord lemmas of PR #43958 transitively through `CircleAverage.lean`,
 `CircleIntegral.lean` and `CircleMap.lean`. The file's name is a suggestion; any name matching the
 file's theme works.
 
@@ -158,9 +84,6 @@ Where the material ends up:
 
 | Declaration                                   | Mathlib target                | Visibility |
 | --------------------------------------------- | ----------------------------- | ---------- |
-| `norm_circleMap_zero_sub_sq`                  | `…/Complex/CircleMap.lean`    | public     |
-| `norm_circleMap_zero_sub_sq'`                 | `…/Complex/CircleMap.lean`    | public     |
-| `mul_abs_sin_le_norm_circleMap_zero_sub`      | `…/Complex/CircleMap.lean`    | public     |
 | `norm_circleMap_sub_eq`                       | new file, or `CircleMap.lean` | private    |
 | majorant lemmas, `intervalIntegrable_shifted` | new file                      | private    |
 | `circleIntegrable_norm_sub_const_rpow`        | new file                      | public     |
@@ -170,41 +93,6 @@ Where the material ends up:
 open Complex Filter MeasureTheory Real Set
 
 variable {a c : ℂ} {r p θ : ℝ}
-
-/-!
-## Chord Lengths
--/
-
-/-- Law of cosines for the chord from a point of the circle `circleMap 0 r` to an arbitrary point
-`a`. -/
-theorem norm_circleMap_zero_sub_sq (r θ : ℝ) (a : ℂ) :
-    ‖circleMap 0 r θ - a‖ ^ 2 = r ^ 2 + ‖a‖ ^ 2 - 2 * r * ‖a‖ * Real.cos (θ - a.arg) := by
-  rw [← ofReal_inj, ← normSq_eq_norm_sq, normSq_sub]
-  suffices (circleMap 0 r θ * (starRingEnd ℂ) a).re = r * ‖a‖ * Real.cos (θ - a.arg) by
-    simp [normSq_eq_norm_sq, -mul_re, this, mul_assoc]
-  conv_lhs => rw [← norm_mul_exp_arg_mul_I a, ← circleMap_zero, conj_circleMap_zero,
-    circleMap_zero_mul, circleMap_zero_re, ← sub_eq_add_neg]
-
-/-- Law of cosines for the chord from a point of the circle `circleMap 0 r` to an arbitrary point
-`a`, half-angle form. -/
-theorem norm_circleMap_zero_sub_sq' (r θ : ℝ) (a : ℂ) :
-    ‖circleMap 0 r θ - a‖ ^ 2
-      = (r - ‖a‖) ^ 2 + 4 * r * ‖a‖ * Real.sin ((θ - a.arg) / 2) ^ 2 := by
-  have h := Real.sin_sq_eq_half_sub ((θ - a.arg) / 2)
-  rw [show 2 * ((θ - a.arg) / 2) = θ - a.arg by ring] at h
-  rw [norm_circleMap_zero_sub_sq]
-  linear_combination (-(4 * r * ‖a‖)) * h
-
-/-- Points of the circle `circleMap 0 r` keep distance at least `r * |sin ((θ - arg a) / 2)|` from
-any point `a`. The bound is sharp: equality holds for `a = 0` and `θ = π`. -/
-theorem mul_abs_sin_le_norm_circleMap_zero_sub (hr : 0 ≤ r) (θ : ℝ) (a : ℂ) :
-    r * |Real.sin ((θ - a.arg) / 2)| ≤ ‖circleMap 0 r θ - a‖ := by
-  refine le_of_pow_le_pow_left₀ two_ne_zero (norm_nonneg _) ?_
-  rw [mul_pow, sq_abs, norm_circleMap_zero_sub_sq']
-  nlinarith [mul_nonneg (sub_nonneg.2 (Real.sin_sq_le_one ((θ - a.arg) / 2)))
-      (sq_nonneg (r - ‖a‖)),
-    mul_nonneg (mul_nonneg (sq_nonneg (Real.sin ((θ - a.arg) / 2))) (norm_nonneg a))
-      (by positivity : (0:ℝ) ≤ 2 * r + ‖a‖)]
 
 /-!
 ## The Majorant
