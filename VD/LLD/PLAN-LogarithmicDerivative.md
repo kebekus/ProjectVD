@@ -31,7 +31,7 @@ This is the key analytic input for the Second Main Theorem. References:
 ```lean
 -- (T1) Two-radius estimate: fully exceptional-set-free, the analytic core.
 theorem ValueDistribution.exists_proximity_logDeriv_le {f : ℂ → ℂ} (hf : Meromorphic f) :
-    ∃ c, ∀ r R, 1 ≤ r → r < R →
+    ∃ c, 0 ≤ c ∧ ∀ r R, 1 ≤ r → r < R →
       proximity (logDeriv f) ⊤ r
         ≤ c * (log⁺ (characteristic f ⊤ R) + log R + log⁺ (R - r)⁻¹ + 1)
 
@@ -211,11 +211,11 @@ value distribution needs; general center can be added later by translation):*
 logarithmic derivative of a meromorphic function on `closedBall 0 R` is the circle
 average of `log ‖f ·‖` against the `w`-derivative of the Herglotz–Riesz kernel,
 corrected by the logarithmic derivatives of the canonical factors. -/
-theorem MeromorphicOn.logDeriv_eqOn_codiscrete {f : ℂ → ℂ} {R : ℝ}
+theorem MeromorphicOn.logDeriv_eventuallyEq_circleAverage_sub_finsum {f : ℂ → ℂ} {R : ℝ}
     (h₁f : MeromorphicOn f (closedBall 0 R))
-    (h₂f : ∀ u : closedBall (0 : ℂ) R, meromorphicOrderAt f u ≠ ⊤) :
+    (h₂f : ∀ u ∈ closedBall (0 : ℂ) R, meromorphicOrderAt f u ≠ ⊤) :
     logDeriv f =ᶠ[codiscreteWithin (ball 0 R)]
-      fun w ↦ circleAverage (fun ζ ↦ (2 * ζ / (ζ - w) ^ 2) • Real.log ‖f ζ‖) 0 R
+      fun w ↦ circleAverage (fun ζ ↦ derivHerglotzRieszKernel w ζ • Real.log ‖f ζ‖) 0 R
         - ∑ᶠ a, (divisor f (ball 0 R) a) • logDeriv (canonicalFactor R a) w
 ```
 
@@ -344,6 +344,12 @@ integrability of the derived kernel `2ζ/(ζ−w)²` on the sphere, `meromorphic
 and `logDeriv (· - v) w = (w - v)⁻¹`. The sphere-divisor cancellation works as predicted via
 `circleAverage_smul_log_norm_sub_sphere`.
 
+Renamed 2026-09-20 (the statement is an `=ᶠ`, not a `Set.EqOn`), and the hypothesis `h₂f` now
+quantifies over `u ∈ closedBall 0 R` rather than over the subtype. The derived kernel `2ζ/(ζ−w)²` is
+now the def `derivHerglotzRieszKernel` (in `PoissonSchwarzDeriv.lean`, with `_def`/`_fun_def`
+lemmas mirroring `herglotzRieszKernel_def`), used in the statements of B4, B5's boundary case, B6
+and the pointwise estimate.
+
 Mirror the proof of `poissonJensen₀` in `VD/MathlibPending/PoissonJensen.lean`:
 
 1. Take the extended decomposition
@@ -442,19 +448,29 @@ the error terms `log R + log⁺ (R − ρ)⁻¹`.
 
 ### C4. The two-radius estimate (theorem T1)
 
-**✅ DONE (2026-07-08).** Implemented in `VD/LLD/LogDerivTwoRadius.lean` (~690 lines); compiles
-lint-clean. `ValueDistribution.exists_proximity_logDeriv_le` is stated exactly as T1. Deviations
-from the sketch below: steps 1–4 are packaged into one private lemma `proximity_logDeriv_le`
-producing `m(r) ≤ 2·log⁺(√K + n·(4 + (ρ−r)^(−1/2))) + 2 log 2` (the constant `4` is C2's explicit
-constant); steps 5 and 6 are separate private lemmas (`circleAverage_abs_log_norm_le`,
-`finsum_abs_divisor_le`), both bounding by `2·T(R) + c_f` with `c_f` the FMT constant. A private
-helper `circleAverage_mono_codiscreteWithin` compares circle averages of functions that satisfy
-`≤` only away from a discrete set (needed since B6 holds only codiscretely); further private
-helpers: `√`-subadditivity (binary and over `Finset.sum`, absent from Mathlib and worth
-upstreaming), `norm_circleAverage_le`, and `posLog_le_abs` (duplicated from C1's private part).
-The final constant is `c := 5 + 22·log 2 + 3·log⁺ c_f`. The degenerate case uses
-`exists_meromorphicOrderAt_eq_top_iff_eventually_zero` from `VD/MathlibPending/`, so the T1 file
-currently depends on the CharacteristicMoebius pending chain in addition to files 1, 6, 7, 8.
+**✅ DONE (2026-07-08); restructured 2026-09-20.** `ValueDistribution.exists_proximity_logDeriv_le`
+is stated as T1, with the harmless strengthening `0 ≤ c` (so that E uses it directly). The proof
+in `VD/LLD/LogDerivTwoRadius.lean` (~280 lines, down from ~690) now reads as the textbook argument:
+
+- step 1 is the public corollary `MeromorphicOn.eventually_norm_logDeriv_le` of B6, in
+  `PoissonJensenDeriv.lean`;
+- steps 2–4 are one general lemma, `circleAverage_posLog_norm_le_of_le_add_sum_inv_norm_sub` (the
+  exponent-`1/2` trick): if `‖F‖` is bounded on the circle by a constant `K` plus a finite sum of
+  simple poles `m a * ‖· − a‖⁻¹` with `m a ≥ 1`, then
+  `circleAverage (log⁺ ‖F‖) ≤ log⁺ K + 2 log⁺ (∑ m a) + log⁺ r⁻¹ + 8 log 2`;
+- steps 5 and 6 are the private lemmas `circleAverage_abs_log_norm_le` and `finsum_abs_divisor_le`
+  (both `≤ 2·T(R) + c_f` with `c_f` the FMT constant), the latter now a five-line wrapper around
+  the general `finsum_abs_divisor_ball_mul_log_le`.
+
+The general-interest ingredients live in `VD/LLD/LogDerivEstimates.lean`, grouped by Mathlib
+target (see the file's upstreaming notes): `Real.rpow_sum_le_sum_rpow` (subadditivity of `x ^ p`
+for `0 < p ≤ 1` over finite sums), `CircleIntegrable.norm`, `circleAverage_mono_codiscreteWithin`
+(arbitrary centre), `proximity_add_proximity_inv_eq_circleAverage`, `proximity_le_characteristic`,
+`logCounting_le_characteristic`, and `finsum_abs_divisor_ball_mul_log_le` (zeros and poles in
+`ball 0 ρ`, weighted by `log (R/ρ)`, are `≤ N(R,0) + N(R,∞)`). The final constant is
+`c := 6 + 24·log 2 + 4·log⁺ c_f`. The degenerate case uses
+`Meromorphic.exists_meromorphicOrderAt_eq_top_iff_eventually_zero`, now in Mathlib, so the T1 file
+no longer depends on the CharacteristicMoebius pending chain.
 
 Fix `1 ≤ r < R`, set `ρ := (r + R)/2`, `n := ∑ᶠ |divisor f (ball 0 ρ)|`,
 `K := (2ρ/(ρ−r)²) · circleAverage |log ‖f ·‖| 0 ρ`. Chain of estimates, each a
@@ -574,10 +590,11 @@ one local file per future Mathlib target:
 | 3 | `BorelGrowth.lean` ✅ | `MeasureTheory/Function/BorelGrowth.lean` | package D (T2, done) | — |
 | 4 | `CauchyIntegralDeriv.lean` ✅ | `MeasureTheory/Integral/CircleIntegral.lean` (extend) | B1–B3 (done) | — |
 | 5 | `PoissonSchwarzDeriv.lean` ✅ | `Analysis/Complex/Poisson.lean` (extend) | B4, B5 (done) | 4, **Poisson–Jensen chain** |
-| 6 | `PoissonJensenDeriv.lean` ✅ | `Analysis/Complex/PoissonJensenDeriv.lean` | B6 (done) | 1, 5 |
+| 6 | `PoissonJensenDeriv.lean` ✅ | `Analysis/Complex/PoissonJensenDeriv.lean` | B6 + the pointwise estimate `MeromorphicOn.eventually_norm_logDeriv_le` (done) | 1, 5 |
 | 7 | `CircleAverageEstimates.lean` ✅ | chord lemmas → `Analysis/SpecialFunctions/Complex/CircleMap.lean`; rest → `MeasureTheory/Integral/CircleAverage.lean` (extend) | C2 (done; C1 is in `MathlibSubmitted/JensenInequality.lean`) | — |
 | 8 | `CountingEstimate.lean` ✅ | `…/ValueDistribution/LogCounting/Basic.lean` (extend) | C3 (done) | — |
-| 9 | `LogDerivTwoRadius.lean` ✅ | `…/ValueDistribution/LogDerivLemma.lean` (part 1) | C4 (T1, done) | 1, 6, 7, 8 |
+| 8a | `LogDerivEstimates.lean` ✅ | several; see the file's upstreaming notes | C4, general part (done): `rpow` subadditivity, circle-average monotonicity modulo discrete sets, VD comparison lemmas, zero/pole count in a ball, the exponent-`1/2` trick | 7, C1 |
+| 9 | `LogDerivTwoRadius.lean` ✅ | `…/ValueDistribution/LogDerivLemma.lean` (part 1) | C4 (T1, done) | 6, 8a |
 | 10 | `LogDerivLemma.lean` ✅ | `…/ValueDistribution/LogDerivLemma.lean` (part 2) | E (T3 + corollaries, done) | 3, 9 |
 
 - Items 1–4, 7, 8 are **fully parallel** and independently PR-able today.

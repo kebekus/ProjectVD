@@ -4,6 +4,7 @@ import VD.Field.GermField
 import VD.Field.GermFieldAPI
 import VD.Field.MeromorphicGermZero
 import VD.LLD.CircleAverageEstimates
+import VD.LLD.LogDerivEstimates
 import VD.LLD.LogDerivLemma
 import VD.LLD.LogDerivTwoRadius
 import VD.LLD.PoissonJensenDeriv

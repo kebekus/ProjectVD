@@ -44,23 +44,6 @@ gives `proximity (logDeriv f) ⊤ =O[atTop] Real.log` whenever
 open Asymptotics Complex Filter MeasureTheory Metric Real Set ValueDistribution
 
 /-!
-## Preliminaries
--/
-
-/-- Variant of the two-radius estimate with a nonnegative constant. -/
-private lemma exists_nonneg_proximity_logDeriv_le {f : ℂ → ℂ} (hf : Meromorphic f) :
-    ∃ c, 0 ≤ c ∧ ∀ r R : ℝ, 1 ≤ r → r < R →
-      proximity (logDeriv f) ⊤ r
-        ≤ c * (log⁺ (characteristic f ⊤ R) + Real.log R + log⁺ (R - r)⁻¹ + 1) := by
-  obtain ⟨c₀, hc₀⟩ := exists_proximity_logDeriv_le hf
-  refine ⟨max c₀ 0, le_max_right _ _, fun r R hr hrR ↦ ?_⟩
-  refine (hc₀ r R hr hrR).trans (mul_le_mul_of_nonneg_right (le_max_left _ _) ?_)
-  have h₁ := posLog_nonneg (x := characteristic f ⊤ R)
-  have h₂ := posLog_nonneg (x := (R - r)⁻¹)
-  have h₃ : (0:ℝ) ≤ Real.log R := Real.log_nonneg (by linarith)
-  linarith
-
-/-!
 ## The Lemma on the Logarithmic Derivative
 -/
 
@@ -71,7 +54,7 @@ Lebesgue measure. -/
 theorem ValueDistribution.isBigO_proximity_logDeriv {f : ℂ → ℂ} (hf : Meromorphic f) :
     proximity (logDeriv f) ⊤ =O[volume.cofinite ⊓ atTop]
       fun r ↦ log⁺ (characteristic f ⊤ r) + Real.log r := by
-  obtain ⟨c, hc₁, hc⟩ := exists_nonneg_proximity_logDeriv_le hf
+  obtain ⟨c, hc₁, hc⟩ := exists_proximity_logDeriv_le hf
   -- The comparison function `S`, monotone and `≥ 1`
   set S : ℝ → ℝ := fun r ↦ max 1 (characteristic f ⊤ r) with hS_def
   have hS1 : ∀ r, 1 ≤ S r := fun r ↦ le_max_left _ _
@@ -152,7 +135,7 @@ of a meromorphic function `f` grows at most like a power of the radius, then
 theorem ValueDistribution.isBigO_proximity_logDeriv_of_isBigO_rpow {f : ℂ → ℂ} {ρ : ℝ}
     (hf : Meromorphic f) (h : characteristic f ⊤ =O[atTop] (· ^ ρ)) :
     proximity (logDeriv f) ⊤ =O[atTop] Real.log := by
-  obtain ⟨c, hc₁, hc⟩ := exists_nonneg_proximity_logDeriv_le hf
+  obtain ⟨c, hc₁, hc⟩ := exists_proximity_logDeriv_le hf
   -- Upgrade the growth hypothesis to a nonnegative exponent
   set p := max ρ 0 with hp_def
   have hp₀ : 0 ≤ p := le_max_right _ _
