@@ -218,7 +218,7 @@ lemma Omits.truncatedLogCounting_eq_zero {a : WithTop ℂ} (hf : Meromorphic f)
       intro z
       rw [MeromorphicOn.divisor_apply (meromorphicOn_univ.2 hf) (Set.mem_univ z)]
       simpa using WithTop.untop₀_nonneg.mpr ((omits_top_iff.1 h) z)
-    have h₂ : (MeromorphicOn.divisor f Set.univ)⁻.trunc = 0 := by
+    have h₂ : (MeromorphicOn.divisor f Set.univ)⁻.truncate₁ = 0 := by
       rw [h₁]
       ext z
       simp
@@ -231,7 +231,7 @@ lemma Omits.truncatedLogCounting_eq_zero {a : WithTop ℂ} (hf : Meromorphic f)
       intro z
       rw [MeromorphicOn.divisor_apply (meromorphicOn_univ.2 hfa) (Set.mem_univ z)]
       simpa using WithTop.untop₀_le_untop₀ (by simp) ((omits_coe_iff.1 h) z)
-    have h₂ : (MeromorphicOn.divisor (f · - b₀) Set.univ)⁺.trunc = 0 := by
+    have h₂ : (MeromorphicOn.divisor (f · - b₀) Set.univ)⁺.truncate₁ = 0 := by
       rw [h₁]
       ext z
       simp

@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
 import Mathlib.Analysis.Meromorphic.Order
-import VD.MathlibSubmitted.TruncatedCounting
+import Mathlib.Analysis.Complex.ValueDistribution.LogCounting.Truncated
 
 /-!
 # The Divisor of the Derivative — SMT work package B
@@ -12,7 +12,8 @@ import VD.MathlibSubmitted.TruncatedCounting
 See `VD/SMT/PLAN-SecondMainTheorem.md`, §4.
 
 Mathlib target: new file `Mathlib/Analysis/Meromorphic/DivisorDeriv.lean`.
-Dependencies: `VD/MathlibSubmitted/TruncatedCounting.lean` (package A).
+Dependencies: `Mathlib/Analysis/Complex/ValueDistribution/LogCounting/Truncated.lean`
+(package A, now in Mathlib).
 
 This is the material explicitly reserved for the Second Main Theorem by the docstring of
 `Mathlib/Analysis/Meromorphic/LogDeriv.lean` (work package A, now in Mathlib).  It computes
@@ -101,20 +102,20 @@ with multiplicity increased by exactly one. -/
 theorem negPart_divisor_deriv [CompleteSpace 𝕜] [CharZero 𝕜]
     {E : Type*} [NormedAddCommGroup E] [NormedSpace 𝕜 E] [CompleteSpace E] {f : 𝕜 → E}
     (hf : MeromorphicOn f U) :
-    (divisor (deriv f) U)⁻ = (divisor f U)⁻ + ((divisor f U)⁻).trunc := by
+    (divisor (deriv f) U)⁻ = (divisor f U)⁻ + ((divisor f U)⁻).truncate₁ := by
   ext z
   by_cases hz : z ∈ U
   · by_cases htop : meromorphicOrderAt f z = ⊤
     · have hd := meromorphicOrderAt_deriv_eq_top htop
-      simp [locallyFinsuppWithin.negPart_apply, locallyFinsuppWithin.trunc_apply,
-        divisor_apply hf hz, divisor_apply hf.deriv hz, htop, hd]
+      simp [locallyFinsuppWithin.negPart_apply, divisor_apply hf hz,
+        divisor_apply hf.deriv hz, htop, hd]
     · obtain ⟨n, hn⟩ := WithTop.ne_top_iff_exists.1 htop
       by_cases hsign : 0 ≤ n
       · have hd : 0 ≤ meromorphicOrderAt (deriv f) z :=
           meromorphicOrderAt_deriv_nonneg (hf z hz) (by rw [← hn]; exact_mod_cast hsign)
         have h2 : 0 ≤ (meromorphicOrderAt (deriv f) z).untop₀ := WithTop.untop₀_nonneg.mpr hd
         simp only [locallyFinsuppWithin.negPart_apply, locallyFinsuppWithin.coe_add,
-          Pi.add_apply, locallyFinsuppWithin.trunc_apply, divisor_apply hf hz,
+          Pi.add_apply, locallyFinsuppWithin.truncate_apply, divisor_apply hf hz,
           divisor_apply hf.deriv hz, ← hn, WithTop.untop₀_coe]
         simp only [negPart]
         omega
@@ -123,7 +124,7 @@ theorem negPart_divisor_deriv [CompleteSpace 𝕜] [CharZero 𝕜]
         have hd : meromorphicOrderAt (deriv f) z = ↑(n - 1) :=
           meromorphicOrderAt_deriv_eq_sub_one hne hn.symm
         simp only [locallyFinsuppWithin.negPart_apply, locallyFinsuppWithin.coe_add,
-          Pi.add_apply, locallyFinsuppWithin.trunc_apply, divisor_apply hf hz,
+          Pi.add_apply, locallyFinsuppWithin.truncate_apply, divisor_apply hf hz,
           divisor_apply hf.deriv hz, ← hn, hd, WithTop.untop₀_coe]
         simp only [negPart]
         omega
@@ -133,28 +134,27 @@ theorem negPart_divisor_deriv [CompleteSpace 𝕜] [CharZero 𝕜]
 a zero of `deriv f` of multiplicity `m - 1`. -/
 theorem posPart_divisor_sub_trunc_le_divisor_deriv [CompleteSpace 𝕜] [CharZero 𝕜]
     {f : 𝕜 → 𝕜} {a : 𝕜} (hf : MeromorphicOn f U) :
-    (divisor (f · - a) U)⁺ - ((divisor (f · - a) U)⁺).trunc ≤ (divisor (deriv f) U)⁺ := by
+    (divisor (f · - a) U)⁺ - ((divisor (f · - a) U)⁺).truncate₁ ≤ (divisor (deriv f) U)⁺ := by
   have hfa : MeromorphicOn (f · - a) U := by fun_prop
   have hderiv : deriv (f · - a) = deriv f := funext fun z ↦ deriv_sub_const a
   rw [Function.locallyFinsuppWithin.le_def]
   intro z
   by_cases hz : z ∈ U
   · by_cases htop : meromorphicOrderAt (f · - a) z = ⊤
-    · simp [locallyFinsuppWithin.posPart_apply, locallyFinsuppWithin.trunc_apply,
-        divisor_apply hfa hz, htop]
+    · simp [locallyFinsuppWithin.posPart_apply, divisor_apply hfa hz, htop]
     · obtain ⟨n, hn⟩ := WithTop.ne_top_iff_exists.1 htop
       by_cases hn1 : 1 ≤ n
       · have hne : (n : 𝕜) ≠ 0 := by exact_mod_cast (by omega : n ≠ 0)
         have hd : meromorphicOrderAt (deriv f) z = ↑(n - 1) := by
           rw [← hderiv]; exact meromorphicOrderAt_deriv_eq_sub_one hne hn.symm
         simp only [locallyFinsuppWithin.coe_sub, Pi.sub_apply, locallyFinsuppWithin.posPart_apply,
-          locallyFinsuppWithin.trunc_apply, divisor_apply hfa hz, divisor_apply hf.deriv hz,
+          locallyFinsuppWithin.truncate_apply, divisor_apply hfa hz, divisor_apply hf.deriv hz,
           ← hn, hd, WithTop.untop₀_coe]
         simp only [posPart]
         omega
       · rw [not_le] at hn1
         simp only [locallyFinsuppWithin.coe_sub, Pi.sub_apply, locallyFinsuppWithin.posPart_apply,
-          locallyFinsuppWithin.trunc_apply, divisor_apply hfa hz, ← hn, WithTop.untop₀_coe]
+          locallyFinsuppWithin.truncate_apply, divisor_apply hfa hz, ← hn, WithTop.untop₀_coe]
         simp only [posPart]
         omega
   · simp [locallyFinsuppWithin.apply_eq_zero_of_notMem _ hz]
@@ -163,7 +163,7 @@ theorem posPart_divisor_sub_trunc_le_divisor_deriv [CompleteSpace 𝕜] [CharZer
 of `deriv f`, since at most one target is attained at any given point. -/
 theorem sum_posPart_divisor_sub_trunc_le_divisor_deriv [CompleteSpace 𝕜] [CharZero 𝕜]
     {f : 𝕜 → 𝕜} (hf : MeromorphicOn f U) (s : Finset 𝕜) :
-    ∑ a ∈ s, ((divisor (f · - a) U)⁺ - ((divisor (f · - a) U)⁺).trunc)
+    ∑ a ∈ s, ((divisor (f · - a) U)⁺ - ((divisor (f · - a) U)⁺).truncate₁)
       ≤ (divisor (deriv f) U)⁺ := by
   rw [Function.locallyFinsuppWithin.le_def]
   intro z
@@ -178,8 +178,7 @@ theorem sum_posPart_divisor_sub_trunc_le_divisor_deriv [CompleteSpace 𝕜] [Cha
         have hfb : MeromorphicOn (f · - b) U := by fun_prop
         have : meromorphicOrderAt (f · - b) z = 0 :=
           meromorphicOrderAt_sub_const_eq_zero_of_ne hba₀ ha₀
-        simp [locallyFinsuppWithin.posPart_apply, locallyFinsuppWithin.trunc_apply,
-          divisor_apply hfb hz, this]
+        simp [locallyFinsuppWithin.posPart_apply, divisor_apply hfb hz, this]
       · intro h; exact absurd ha₀s h
     · simp only [not_exists, not_and, not_lt] at H
       apply le_trans (le_of_eq (Finset.sum_eq_zero ?_))
@@ -191,7 +190,7 @@ theorem sum_posPart_divisor_sub_trunc_le_divisor_deriv [CompleteSpace 𝕜] [Cha
           rw [divisor_apply hfa hz]
           simpa using WithTop.untop₀_le_untop₀ (by simp) hle
         simp only [locallyFinsuppWithin.coe_sub, Pi.sub_apply, locallyFinsuppWithin.posPart_apply,
-          locallyFinsuppWithin.trunc_apply]
+          locallyFinsuppWithin.truncate_apply]
         simp only [posPart]
         omega
   · rw [Finset.sum_eq_zero (fun a _ ↦ locallyFinsuppWithin.apply_eq_zero_of_notMem _ hz)]
@@ -218,7 +217,7 @@ theorem sum_logCounting_sub_truncatedLogCounting_le {f : ℂ → ℂ} (hf : Mero
     (s : Finset ℂ) {r : ℝ} (hr : 1 ≤ r) :
     ∑ a ∈ s, (logCounting f a r - truncatedLogCounting f a r) ≤ logCounting (deriv f) 0 r := by
   have key : ∀ a : ℂ, logCounting f a r - truncatedLogCounting f a r
-      = ((divisor (f · - a) univ)⁺ - ((divisor (f · - a) univ)⁺.trunc)).logCounting r := by
+      = ((divisor (f · - a) univ)⁺ - ((divisor (f · - a) univ)⁺.truncate₁)).logCounting r := by
     intro a
     rw [logCounting_coe, truncatedLogCounting_coe, map_sub]
     rfl

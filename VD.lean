@@ -21,7 +21,6 @@ import VD.MathlibSubmitted.ChordLength
 import VD.MathlibSubmitted.JensenInequality
 import VD.MathlibSubmitted.Liouville
 import VD.MathlibSubmitted.PoissonJensen
-import VD.MathlibSubmitted.TruncatedCounting
 import VD.SMT.Deficiency
 import VD.SMT.DivisorDeriv
 import VD.SMT.Picard
