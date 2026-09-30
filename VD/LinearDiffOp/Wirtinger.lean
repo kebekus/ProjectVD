@@ -3,9 +3,11 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Analysis.Calculus.FDeriv.RestrictScalars
-import Mathlib.Analysis.SpecialFunctions.Complex.Circle
-import VD.LinearDiffOp.Basic
+module
+
+public import Mathlib.Analysis.Calculus.FDeriv.RestrictScalars
+public import Mathlib.Analysis.SpecialFunctions.Complex.Circle
+public import VD.LinearDiffOp.Basic
 
 /-!
 # Wirtinger Operators
@@ -33,6 +35,8 @@ Being linear differential operators, the Wirtinger operators inherit the generic
   `wirtingerDeriv` computes the complex derivative.
 - `DifferentiableAt.wirtingerDerivBar_eq_zero`: the Cauchy–Riemann equations.
 -/
+
+@[expose] public section
 
 open Complex
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Analysis.Meromorphic.Divisor
-import Mathlib.Analysis.Meromorphic.NormalForm
-import VD.Field.GermField
+module
+
+public import Mathlib.Analysis.Meromorphic.Divisor
+public import Mathlib.Analysis.Meromorphic.NormalForm
+public import VD.Field.GermField
 
 /-!
 # Supporting API for the Field of Meromorphic Functions
@@ -25,6 +27,8 @@ meromorphic germs:
 The definitions choose a meromorphic representative of the germ; the accompanying congruence
 lemmas show independence of that choice on preperfect sets.
 -/
+
+@[expose] public section
 
 open Filter Set Topology
 

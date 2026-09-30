@@ -3,8 +3,10 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Analysis.Meromorphic.Order
-import Mathlib.Analysis.Complex.ValueDistribution.LogCounting.Truncated
+module
+
+public import Mathlib.Analysis.Meromorphic.Order
+public import Mathlib.Analysis.Complex.ValueDistribution.LogCounting.Truncated
 
 /-!
 # The Divisor of the Derivative — SMT work package B
@@ -33,6 +35,8 @@ ramification term of the Second Main Theorem into truncated counting functions.
   `ValueDistribution.sum_logCounting_sub_truncatedLogCounting_le`: the counting-function
   form used by the Second Main Theorem.
 -/
+
+@[expose] public section
 
 open Filter Function MeromorphicOn Metric Real Set Topology
 

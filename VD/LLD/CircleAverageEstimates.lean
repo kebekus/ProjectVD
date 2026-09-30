@@ -3,9 +3,11 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
-import Mathlib.MeasureTheory.Integral.CircleAverage
-import VD.MathlibSubmitted.ChordLength
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
+public import Mathlib.MeasureTheory.Integral.CircleAverage
+public import VD.MathlibSubmitted.ChordLength
 
 /-!
 # Circle Averages of Negative Powers of the Distance to a Point — LLD work package C2
@@ -34,6 +36,8 @@ For the average, rotate the circle by `arg a` and combine the chord bound with t
 `Real.mul_le_sin`. This majorizes the integrand by `(r/(2π) * θ) ^ p + (r/(2π) * (2π - θ)) ^ p`,
 whose integral is computed exactly.
 -/
+
+@[expose] public section
 
 /-
 # Upstreaming notes

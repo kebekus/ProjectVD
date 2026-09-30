@@ -3,11 +3,13 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
-import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
-import Mathlib.Algebra.Polynomial.Eval.Defs
-import Mathlib.Analysis.Calculus.Deriv.Polynomial
-import VD.MathlibPending.BoundednessCharacteristic
+module
+
+public import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
+public import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
+public import Mathlib.Algebra.Polynomial.Eval.Defs
+public import Mathlib.Analysis.Calculus.Deriv.Polynomial
+public import VD.MathlibPending.BoundednessCharacteristic
 
 /-!
 # Rational Functions and the Growth of the Characteristic Function
@@ -23,6 +25,8 @@ functions established in `VD.MathlibPending.BoundednessCharacteristic`, and form
 characterization of rational functions discussed in Theorem 2.6 on p. 170 of [Lang, *Introduction to
 Complex Hyperbolic Spaces*][MR886677].
 -/
+
+@[expose] public section
 
 open Asymptotics Filter Function MeromorphicOn Real Set Topology
 

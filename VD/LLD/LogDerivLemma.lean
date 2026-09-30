@@ -3,9 +3,11 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
-import Mathlib.MeasureTheory.Function.BorelGrowth
-import VD.LLD.LogDerivTwoRadius
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
+public import Mathlib.MeasureTheory.Function.BorelGrowth
+public import VD.LLD.LogDerivTwoRadius
 
 /-!
 # The Lemma on the Logarithmic Derivative — LLD work package E (theorem T3)
@@ -40,6 +42,8 @@ For functions of **finite order**, the exceptional set can be avoided entirely
 gives `proximity (logDeriv f) ⊤ =O[atTop] Real.log` whenever
 `characteristic f ⊤ =O[atTop] (· ^ ρ)`. The Borel lemma is not needed there.
 -/
+
+@[expose] public section
 
 open Asymptotics Complex Filter MeasureTheory Metric Real Set ValueDistribution
 

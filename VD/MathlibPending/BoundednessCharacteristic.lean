@@ -3,9 +3,11 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
-import Mathlib.Analysis.Complex.ValueDistribution.LogCounting.Asymptotic
-import VD.MathlibPending.ProximityBounded
+module
+
+public import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
+public import Mathlib.Analysis.Complex.ValueDistribution.LogCounting.Asymptotic
+public import VD.MathlibPending.ProximityBounded
 
 /-!
 # Asymptotic Behavior of the Characteristic Function
@@ -14,6 +16,8 @@ If `f` is complex-meromorphic, we show that the characteristic function for the 
 asymptotically bounded if and only if `f` is constant.  See Page 170f of [Lang, *Introduction to
 Complex Hyperbolic Spaces*][MR886677] for a detailed discussion.
 -/
+
+@[expose] public section
 
 open Filter Function Metric Real Set Topology ValueDistribution
 

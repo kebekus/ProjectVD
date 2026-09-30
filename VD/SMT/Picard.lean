@@ -3,11 +3,13 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Analysis.Complex.Polynomial.Basic
-import Mathlib.RingTheory.PrincipalIdealDomain
-import Mathlib.RingTheory.UniqueFactorizationDomain.Basic
-import VD.MathlibPending.CharacteristicIsBigOLog
-import VD.SMT.SecondMainTheorem
+module
+
+public import Mathlib.Analysis.Complex.Polynomial.Basic
+public import Mathlib.RingTheory.PrincipalIdealDomain
+public import Mathlib.RingTheory.UniqueFactorizationDomain.Basic
+public import VD.MathlibPending.CharacteristicIsBigOLog
+public import VD.SMT.SecondMainTheorem
 
 /-!
 # Picard's Little Theorem — SMT work package H
@@ -50,6 +52,8 @@ omitted values always exist.)
 References: [Lang, *Introduction to Complex Hyperbolic Spaces*][MR886677], Ch. VII, §3;
 [Hayman, *Meromorphic Functions*][MR164038], §2.5.
 -/
+
+@[expose] public section
 
 open Asymptotics Filter Function MeasureTheory Metric Real Set Topology
 

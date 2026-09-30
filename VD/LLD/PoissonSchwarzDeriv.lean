@@ -3,10 +3,12 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Analysis.Complex.HasPrimitives
-import Mathlib.Analysis.Complex.OpenMapping
-import VD.MathlibPending.PoissonJensen
-import VD.MathlibSubmitted.CanonicalFactor
+module
+
+public import Mathlib.Analysis.Complex.HasPrimitives
+public import Mathlib.Analysis.Complex.OpenMapping
+public import VD.MathlibPending.PoissonJensen
+public import VD.MathlibSubmitted.CanonicalFactor
 
 /-!
 # Differentiated Poisson Representation — LLD work package B4
@@ -38,6 +40,8 @@ Work package B5, the logarithmic derivative of the canonical factor
 (`Complex.logDeriv_canonicalFactor`, `Complex.norm_logDeriv_canonicalFactor_le`), has been split
 off into `VD/MathlibSubmitted/CanonicalFactor.lean` and is in review; this file imports it.
 -/
+
+@[expose] public section
 
 open Complex ComplexConjugate Filter Function MeromorphicOn Metric Real Set
 

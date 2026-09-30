@@ -3,8 +3,10 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Topology.DiscreteSubset
-import Mathlib.Topology.Perfect
+module
+
+public import Mathlib.Topology.DiscreteSubset
+public import Mathlib.Topology.Perfect
 
 /-!
 # Nontriviality of the Filter `codiscreteWithin`
@@ -17,6 +19,8 @@ preconnected with more than one point.
 Nontriviality of `codiscreteWithin S` guarantees that the germ ring
 `Filter.Germ (codiscreteWithin S) 𝕜` is nontrivial.
 -/
+
+@[expose] public section
 
 open Filter Set Topology
 

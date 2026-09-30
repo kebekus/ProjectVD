@@ -3,17 +3,19 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import VD.MathlibPending.PoissonJensen
-import VD.MathlibSubmitted.CanonicalFactor
-import VD.MathlibSubmitted.Liouville
-import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
-import Mathlib.Analysis.Complex.Liouville
-import Mathlib.Analysis.Polynomial.Basic
-import Mathlib.Analysis.Complex.ValueDistribution.Proximity.Basic
-import Mathlib.Analysis.Analytic.IsolatedZeros
-import Mathlib.Analysis.Calculus.DSlope
-import Mathlib.Algebra.Polynomial.Eval.Degree
-import Mathlib.Topology.Algebra.Polynomial
+module
+
+public import VD.MathlibPending.PoissonJensen
+public import VD.MathlibSubmitted.CanonicalFactor
+public import VD.MathlibSubmitted.Liouville
+public import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
+public import Mathlib.Analysis.Complex.Liouville
+public import Mathlib.Analysis.Polynomial.Basic
+public import Mathlib.Analysis.Complex.ValueDistribution.Proximity.Basic
+public import Mathlib.Analysis.Analytic.IsolatedZeros
+public import Mathlib.Analysis.Calculus.DSlope
+public import Mathlib.Algebra.Polynomial.Eval.Degree
+public import Mathlib.Topology.Algebra.Polynomial
 
 /-!
 # Boundedness of the Proximity Function
@@ -36,6 +38,8 @@ review; this file imports it. The equivalences between bounded range and `IsBigO
 functions `ℝ → ℝ` used in the final argument are now in Mathlib, in
 `Mathlib/Analysis/Asymptotics/SpecificAsymptotics.lean`.
 -/
+
+@[expose] public section
 
 open Asymptotics Bornology Complex ComplexConjugate Filter Function MeromorphicOn Metric Real Set
 open scoped Topology
@@ -112,7 +116,8 @@ private theorem log_norm_le_circleAverage_posLog_norm
           simp only [mem_ball, dist_zero_right] at h₁w
           exact div_nonneg (sub_nonneg.2 h₁w.le)
             (add_nonneg ((norm_nonneg w).trans h₁w.le) (norm_nonneg w))
-        · apply le_re_herglotzRieszKernel _ h₁w
+        · rw [herglotzRieszKernel_def]
+          apply le_re_herglotzRieszKernel _ h₁w
           rwa [abs_of_pos (pos_of_mem_ball h₁w)] at hx
       · rw [posLog_apply]
         exact le_max_right _ _
@@ -124,7 +129,7 @@ private theorem log_norm_le_circleAverage_posLog_norm
       simp only [Pi.mul_apply, comp_apply]
       gcongr
       · exact posLog_nonneg
-      · simpa [herglotzRieszKernel] using re_herglotzRieszKernel_le hx h₁w
+      · simpa [herglotzRieszKernel_def] using re_herglotzRieszKernel_le hx h₁w
     _ = ((R + ‖w‖) / (R - ‖w‖)) * circleAverage (log⁺ ‖f ·‖) 0 R := circleAverage_smul
 
 /-- For an entire function `f`, `log ‖f w‖` is bounded by three times the proximity function

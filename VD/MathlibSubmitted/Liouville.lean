@@ -3,9 +3,11 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Analysis.Complex.Liouville
-import Mathlib.Analysis.Polynomial.Basic
-import Mathlib.Analysis.Complex.ValueDistribution.Proximity.Basic
+module
+
+public import Mathlib.Analysis.Complex.Liouville
+public import Mathlib.Analysis.Polynomial.Basic
+public import Mathlib.Analysis.Complex.ValueDistribution.Proximity.Basic
 
 /-!
 ## Polynomial Growth and Liouville-type Rigidity
@@ -13,6 +15,8 @@ import Mathlib.Analysis.Complex.ValueDistribution.Proximity.Basic
 General complex-analysis facts, independent of value distribution theory: a polynomial grows at
 most polynomially, and conversely an entire function of polynomial growth is a polynomial.
 -/
+
+@[expose] public section
 
 open Asymptotics Bornology Complex ComplexConjugate Filter Function MeromorphicOn Metric Real Set
 open scoped Topology

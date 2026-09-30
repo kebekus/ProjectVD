@@ -3,7 +3,9 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Analysis.SpecialFunctions.Complex.CircleMap
+module
+
+public import Mathlib.Analysis.SpecialFunctions.Complex.CircleMap
 
 /-!
 # Chord Lengths for `circleMap`
@@ -44,6 +46,8 @@ Once the PR is merged, delete this file and remove the import from
 `Mathlib/MeasureTheory/Integral/CircleAverage.lean`. The companion work package C2, which builds on
 these lemmas and is not part of this PR, stays in `VD/LLD/CircleAverageEstimates.lean`.
 -/
+
+@[expose] public section
 
 open Complex ComplexConjugate
 

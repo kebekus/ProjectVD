@@ -3,9 +3,11 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Analysis.Complex.ValueDistribution.Cartan
-import VD.LLD.LogDerivEstimates
-import VD.LLD.PoissonJensenDeriv
+module
+
+public import Mathlib.Analysis.Complex.ValueDistribution.Cartan
+public import VD.LLD.LogDerivEstimates
+public import VD.LLD.PoissonJensenDeriv
 
 /-!
 # The Two-Radius Estimate — LLD work package C4 (theorem T1)
@@ -44,6 +46,8 @@ intermediate radius `ρ := (r + R) / 2`:
 The degenerate case where `f` vanishes away from a discrete set is handled separately: there,
 `logDeriv f` vanishes away from a discrete set and the proximity function is zero.
 -/
+
+@[expose] public section
 
 open Complex Filter Function MeromorphicOn Metric Real Set Topology ValueDistribution
 

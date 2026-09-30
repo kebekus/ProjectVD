@@ -3,10 +3,12 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
-import Mathlib.Analysis.MeanInequalitiesPow
-import VD.LLD.CircleAverageEstimates
-import VD.MathlibSubmitted.JensenInequality
+module
+
+public import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
+public import Mathlib.Analysis.MeanInequalitiesPow
+public import VD.LLD.CircleAverageEstimates
+public import VD.MathlibSubmitted.JensenInequality
 
 /-!
 # Estimates for the Two-Radius Bound — LLD work package C4, general part
@@ -59,6 +61,8 @@ the Logarithmic Derivative (`VD/LLD/LogDerivTwoRadius.lean`) rests. None of them
 The private lemma `circleIntegrable_posLog_comp` duplicates a private lemma of
 `VD/MathlibSubmitted/JensenInequality.lean` (C1, in review); expose it there once that PR is merged.
 -/
+
+@[expose] public section
 
 open Complex Filter Function MeasureTheory MeromorphicOn Metric Real Set Topology
 

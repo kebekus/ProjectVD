@@ -3,8 +3,10 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Analysis.Meromorphic.IsolatedZeros
-import VD.Field.CodiscreteWithinEventually
+module
+
+public import Mathlib.Analysis.Meromorphic.IsolatedZeros
+public import VD.Field.CodiscreteWithinEventually
 
 /-!
 # Vanishing Germs of Meromorphic Functions
@@ -18,6 +20,8 @@ point suffices. As a complement, a function of finite order everywhere satisfies
 These are the key ingredients in the construction of the field of meromorphic functions on a
 connected set, where they identify the invertible germs.
 -/
+
+@[expose] public section
 
 open Filter Set Topology
 

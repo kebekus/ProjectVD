@@ -3,7 +3,9 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Analysis.Calculus.ContDiff.Operations
+module
+
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
 
 /-!
 # Linear Differential Operators
@@ -24,6 +26,8 @@ up to order `n`.
 
 - Leibniz rule
 -/
+
+@[expose] public section
 open Filter Function Metric Real Set Topology
 
 variable

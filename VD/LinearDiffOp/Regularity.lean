@@ -3,9 +3,11 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Mihai Iancu, Stefan Kebekus, Sebastian Schleissinger, Aristotle AI
 -/
-import Mathlib.Analysis.Calculus.ContDiff.Operations
-import Mathlib.Analysis.Calculus.FDeriv.Symmetric
-import VD.LinearDiffOp.Basic
+module
+
+public import Mathlib.Analysis.Calculus.ContDiff.Operations
+public import Mathlib.Analysis.Calculus.FDeriv.Symmetric
+public import VD.LinearDiffOp.Basic
 
 /-!
 # Lie Derivatives as Linear Differential Operators
@@ -23,6 +25,8 @@ operator of order at most one, together with the associated Lie bracket of vecto
 - `lieBracket_apply`: the commutator of two Lie derivatives is the Lie derivative along the Lie
   bracket.
 -/
+
+@[expose] public section
 
 open Filter Function Metric Real Set Topology
 

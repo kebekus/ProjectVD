@@ -3,8 +3,10 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Analysis.Meromorphic.LogDeriv
-import VD.LLD.PoissonSchwarzDeriv
+module
+
+public import Mathlib.Analysis.Meromorphic.LogDeriv
+public import VD.LLD.PoissonSchwarzDeriv
 
 /-!
 # The Differentiated Poisson–Jensen Formula — LLD work package B6
@@ -37,6 +39,8 @@ vanish (`norm_canonicalFactor_eval_circle_eq_one`), and each boundary-divisor te
 to `(w - v)⁻¹` (`circleAverage_smul_log_norm_sub_sphere`), cancelling exactly against the
 logarithmic derivatives of the boundary factors.
 -/
+
+@[expose] public section
 
 open Complex Filter Function MeromorphicOn Metric Real Set Topology
 

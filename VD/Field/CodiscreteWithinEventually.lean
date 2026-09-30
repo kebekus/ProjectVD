@@ -3,7 +3,9 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Topology.DiscreteSubset
+module
+
+public import Mathlib.Topology.DiscreteSubset
 
 /-!
 # Eventual Statements along the Filter `codiscreteWithin`
@@ -13,6 +15,8 @@ statements along the punctured neighborhoods of points of `U`: a predicate that 
 along every punctured neighborhood of every point of `U` holds eventually along
 `codiscreteWithin U`, for arbitrary sets `U`. For open `U`, the converse holds as well.
 -/
+
+@[expose] public section
 
 open Filter Set Topology
 

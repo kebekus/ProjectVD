@@ -3,9 +3,11 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Analysis.Convex.Integral
-import Mathlib.Analysis.SpecialFunctions.Log.PosLog
-import Mathlib.MeasureTheory.Integral.CircleAverage
+module
+
+public import Mathlib.Analysis.Convex.Integral
+public import Mathlib.Analysis.SpecialFunctions.Log.PosLog
+public import Mathlib.MeasureTheory.Integral.CircleAverage
 
 /-!
 # Jensen's Inequality for Circle Averages of `log⁺` — LLD work package C1
@@ -24,6 +26,8 @@ Mathlib target: extend `Mathlib/MeasureTheory/Integral/CircleAverage.lean`. Depe
   `log (1 + ·) - log 2` and applies `ConcaveOn.le_map_set_average` to the concave function
   `log (1 + ·)` on `Set.Ici 0`.
 -/
+
+@[expose] public section
 
 open Complex Filter MeasureTheory Metric Real Set
 

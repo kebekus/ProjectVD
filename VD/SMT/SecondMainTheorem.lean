@@ -3,7 +3,9 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import VD.SMT.SecondMainTheoremRamification
+module
+
+public import VD.SMT.SecondMainTheoremRamification
 
 /-!
 # The Second Main Theorem, Truncated Form — SMT work package F
@@ -52,6 +54,8 @@ package B.
 References: [Lang, *Introduction to Complex Hyperbolic Spaces*][MR886677], Theorem
 VII.2.2; [Hayman, *Meromorphic Functions*][MR164038], §2.3.
 -/
+
+@[expose] public section
 
 open Asymptotics Filter MeasureTheory Metric Real Set Topology
 

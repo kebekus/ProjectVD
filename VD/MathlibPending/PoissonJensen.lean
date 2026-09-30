@@ -3,7 +3,9 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import VD.MathlibSubmitted.PoissonJensen
+module
+
+public import VD.MathlibSubmitted.PoissonJensen
 
 /-!
 # The Poisson–Jensen Formula
@@ -21,6 +23,8 @@ the role of the Poisson kernel.
 The file also collects analytic and integrability properties of the Herglotz–Riesz kernel that are
 needed along the way.
 -/
+
+@[expose] public section
 
 open Complex Filter Function MeromorphicOn Metric Real Set Topology
 

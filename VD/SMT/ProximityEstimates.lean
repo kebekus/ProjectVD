@@ -3,9 +3,11 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import VD.Field.CodiscreteWithinEventually
-import VD.LLD.LogDerivLemma
-import Mathlib.Analysis.Complex.ValueDistribution.SecondMainTheorem
+module
+
+public import VD.Field.CodiscreteWithinEventually
+public import VD.LLD.LogDerivLemma
+public import Mathlib.Analysis.Complex.ValueDistribution.SecondMainTheorem
 
 /-!
 # Proximity Estimates for the Second Main Theorem — SMT work package D
@@ -45,6 +47,8 @@ identities are asserted only up to equality away from codiscrete sets and consum
 References: [Lang, *Introduction to Complex Hyperbolic Spaces*][MR886677], Ch. VII, §2;
 [Hayman, *Meromorphic Functions*][MR164038], §2.1.
 -/
+
+@[expose] public section
 
 open Asymptotics Filter MeasureTheory Metric Real Set Topology ValueDistribution
 

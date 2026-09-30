@@ -3,9 +3,11 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Topology.Algebra.Order.LiminfLimsup
-import VD.MathlibPending.BoundednessCharacteristic
-import VD.SMT.SecondMainTheorem
+module
+
+public import Mathlib.Topology.Algebra.Order.LiminfLimsup
+public import VD.MathlibPending.BoundednessCharacteristic
+public import VD.SMT.SecondMainTheorem
 
 /-!
 # Deficiency and the Defect Relation — SMT work package G
@@ -49,6 +51,8 @@ out of scope (see design decision 8 of the plan).
 References: [Lang, *Introduction to Complex Hyperbolic Spaces*][MR886677], Ch. VII, §3;
 [Hayman, *Meromorphic Functions*][MR164038], §2.5; [Noguchi–Winkelmann][MR3156076], §2.3.
 -/
+
+@[expose] public section
 
 open Asymptotics Filter MeasureTheory Metric Real Set Topology
 

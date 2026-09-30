@@ -3,9 +3,11 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Order.Filter.Germ.Basic
-import VD.Field.CodiscreteWithinNeBot
-import VD.Field.MeromorphicGermZero
+module
+
+public import Mathlib.Order.Filter.Germ.Basic
+public import VD.Field.CodiscreteWithinNeBot
+public import VD.Field.MeromorphicGermZero
 
 /-!
 # The Field of Meromorphic Functions on a Connected Set
@@ -23,6 +25,8 @@ meromorphic function whose germ is nonzero has finite order everywhere
 within `U` and the pointwise inverse is a genuine inverse
 (`MeromorphicOn.self_mul_inv_eventuallyEq_one_codiscreteWithin`).
 -/
+
+@[expose] public section
 
 open Filter Set Topology
 

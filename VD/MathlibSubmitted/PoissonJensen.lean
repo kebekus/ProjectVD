@@ -3,8 +3,11 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Analysis.Complex.CanonicalDecomposition
-import Mathlib.Analysis.Complex.JensenFormula
+module
+
+public import Mathlib.Analysis.Complex.CanonicalDecomposition
+public import Mathlib.Analysis.Complex.JensenFormula
+import Mathlib.Analysis.Normed.Module.Connected
 
 /-!
 # The Poisson–Jensen Formula
@@ -23,6 +26,8 @@ The file also collects analytic and continuity properties of the Herglotz–Ries
 needed along the way.
 -/
 
+@[expose] public section
+
 open Complex Filter Function MeromorphicOn Metric Real Set Topology
 
 /-!
@@ -33,7 +38,7 @@ open Complex Filter Function MeromorphicOn Metric Real Set Topology
 theorem analyticOnNhd_herglotzRieszKernel_compl {c w : ℂ} :
     AnalyticOnNhd ℂ (herglotzRieszKernel c w) {w}ᶜ := by
   intro x hx
-  unfold herglotzRieszKernel
+  rw [herglotzRieszKernel_fun_def]
   have : x - w ≠ 0 := by grind
   fun_prop (disch := aesop)
 

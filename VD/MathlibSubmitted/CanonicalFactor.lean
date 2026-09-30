@@ -3,8 +3,10 @@ Copyright (c) 2026 Stefan Kebekus. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Stefan Kebekus
 -/
-import Mathlib.Analysis.Calculus.LogDeriv
-import Mathlib.Analysis.Complex.CanonicalDecomposition
+module
+
+public import Mathlib.Analysis.Calculus.LogDeriv
+public import Mathlib.Analysis.Complex.CanonicalDecomposition
 
 /-!
 # Further API for the Canonical Factor
@@ -36,6 +38,8 @@ the lemmas transitively through `Mathlib/Analysis/Complex/CanonicalDecomposition
   logarithmic derivative on interior circles. This is the form in which the estimate enters the
   two-radius estimate for the Lemma on the Logarithmic Derivative.
 -/
+
+@[expose] public section
 
 open Metric Set
 
