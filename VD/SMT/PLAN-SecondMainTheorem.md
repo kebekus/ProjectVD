@@ -287,9 +287,13 @@ Estimated size: ~280 lines. Difficulty: low.
 
 ## 4. Work package B — the divisor of the derivative ✅ **DONE**
 
-*New file, eventually `Mathlib/Analysis/Meromorphic/DivisorDeriv.lean`
-(locally: `VD/SMT/DivisorDeriv.lean`). Depends on A. This is the material explicitly
-reserved for the SMT by the docstring of `Mathlib/Analysis/Meromorphic/LogDeriv.lean`.*
+*Locally: `VD/SMT/DivisorDeriv.lean`. Depends on A. Mathlib targets (one PR, no new file,
+prepared on the branch `kebekus/divisorDeriv`): order-level lemmas →
+`Mathlib/Analysis/Meromorphic/Order.lean`, divisor-level results →
+`Mathlib/Analysis/Meromorphic/Divisor.lean`, counting corollaries →
+`…/ValueDistribution/LogCounting/Truncated.lean`. The signatures below are the original
+sketch; the local file and the PR state everything for `f : 𝕜 → E`, write `truncate` for
+`trunc`, and drop `[CharZero 𝕜]` from `meromorphicOrderAt_deriv_nonneg`.*
 
 Order-level lemmas (generality `f : 𝕜 → E` with `[CompleteSpace E]`, `[CharZero 𝕜]` where
 division matters, mirroring the LLD order section):
@@ -880,7 +884,7 @@ local file per future Mathlib PR target, each registered by an import line in th
 | # | Local file (`VD/SMT/`) | Mathlib target | Contents | Depends on |
 |---|---|---|---|---|
 | 1 | `TruncatedCounting.lean` | `Topology/LocallyFinsupp.lean` (extend) + **new** `…/ValueDistribution/LogCounting/Truncated.lean` | package A | — |
-| 2 | `DivisorDeriv.lean` | **new** `Analysis/Meromorphic/DivisorDeriv.lean` | package B | 1 |
+| 2 | `DivisorDeriv.lean` | `Analysis/Meromorphic/Order.lean` + `Analysis/Meromorphic/Divisor.lean` + `…/ValueDistribution/LogCounting/Truncated.lean` (extend) | package B | 1 |
 | 3 | `SeparationLemma.lean` | `Analysis/SpecialFunctions/Log/PosLog.lean` (extend) | package C | — |
 | 4 | `ProximityEstimates.lean` | `…/ValueDistribution/SecondMainTheorem.lean` (part 1) | package D | 3, **LLD (T3)** |
 | 5 | `SecondMainTheoremRamification.lean` | `…/ValueDistribution/SecondMainTheorem.lean` (part 2) | package E (S1) | 4 |
