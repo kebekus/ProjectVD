@@ -238,11 +238,23 @@ theorem MeromorphicOn.GermRing.exists_abs_characteristic_aeval_div_sub_le {l G}
 
 ---
 
-## 3. Work package A — pointwise estimates
+## 3. Work package A — pointwise estimates ✅ **DONE** (2026-10-06, except G2)
 
-*New file `VD/AlgebraicDependence/PointwiseEstimates.lean`. Pure `NormedField` algebra, no
+*File `VD/AlgebraicDependence/PointwiseEstimates.lean`. Pure `NormedField` algebra, no
 meromorphy, no integration. Mathlib target: `Mathlib/Analysis/SpecialFunctions/Log/PosLog.lean`
 (or a new `PosLog/Polynomial.lean`). Independent of everything else.*
+
+*Implementation notes.* All four lemmas below are proved with exactly the planned statements
+and constants (~230 lines, builds warning-free). Two public helpers carry the norm estimates:
+`Real.norm_sum_mul_pow_le_of_norm_le_one` (`‖w‖ ≤ 1 ⟹ ‖Σ aⱼ wʲ‖ ≤ Σ ‖aⱼ‖`) and
+`Real.norm_sum_mul_pow_le_of_one_le_norm` (`1 ≤ ‖w‖ ⟹ ‖Σ_{j≤d} aⱼ wʲ‖ ≤ (Σ ‖aⱼ‖)·‖w‖^d`); every
+case split in A reduces to one of them plus `posLog_sum`/`posLog_mul`. The degree-zero cases
+are dispatched by `rcases d with _ | d` up front (the hypothesis is then `1 = 0`, or the
+statement is `0 ≤ log⁺ ‖g‖`). The constant `log (1 + S) ≤ log (d + 2) + Σ log⁺ ‖aⱼ‖` is proved
+through `Finset.exists_max_image` as sketched; `Real.log_one_add_le_posLog` would give the
+weaker `d·log(4d)` and was not used. Lean trivia: `Σ` is a reserved token and cannot appear in
+identifiers such as `hΣ₀`. The Bezout estimate G2 is deferred to package G, where its exact
+shape is fixed.
 
 ```lean
 namespace Real
