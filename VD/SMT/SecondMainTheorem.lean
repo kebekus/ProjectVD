@@ -15,7 +15,7 @@ See `VD/SMT/PLAN-SecondMainTheorem.md`, §8.
 Mathlib target: `Mathlib/Analysis/Complex/ValueDistribution/SecondMainTheorem.lean`
 (part 3 of 3).
 Dependencies: `Mathlib/Analysis/Complex/ValueDistribution/LogCounting/Truncated.lean`
-(package A, now in Mathlib), `VD/SMT/DivisorDeriv.lean` (package B),
+(package A, now in Mathlib), `VD/MathlibSubmitted/DivisorDeriv.lean` (package B, PR #44428),
 `VD/SMT/SecondMainTheoremRamification.lean` (package E).
 
 This file proves the **Second Main Theorem** of value distribution theory in its classical

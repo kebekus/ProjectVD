@@ -221,7 +221,8 @@ exponential, with defects `δ(0) = δ(∞) = 1` summing exactly to `2`.
 
 *New: ~40 lines extending `Mathlib/Topology/LocallyFinsupp.lean` + new file
 `Mathlib/Analysis/Complex/ValueDistribution/LogCounting/Truncated.lean`
-(locally: `VD/MathlibSubmitted/TruncatedCounting.lean`, in review). Independent of everything else.*
+(merged into Mathlib as PR #41809; the local file has been removed). Independent of everything
+else.*
 
 ```lean
 namespace Function.locallyFinsuppWithin
@@ -287,9 +288,9 @@ Estimated size: ~280 lines. Difficulty: low.
 
 ## 4. Work package B — the divisor of the derivative ✅ **DONE**
 
-*Locally: `VD/SMT/DivisorDeriv.lean`. Depends on A. Mathlib targets (one PR, no new file,
-prepared on the branch `kebekus/divisorDeriv`): order-level lemmas →
-`Mathlib/Analysis/Meromorphic/Order.lean`, divisor-level results →
+*Locally: `VD/MathlibSubmitted/DivisorDeriv.lean`, submitted as PR #44428 (in review). Depends on
+A. Mathlib targets (one PR, no new file, on the branch `kebekus/divisorDeriv`): order-level
+lemmas → `Mathlib/Analysis/Meromorphic/Order.lean`, divisor-level results →
 `Mathlib/Analysis/Meromorphic/Divisor.lean`, counting corollaries →
 `…/ValueDistribution/LogCounting/Truncated.lean`. The signatures below are the original
 sketch; the local file and the PR state everything for `f : 𝕜 → E`, write `truncate` for
@@ -883,22 +884,23 @@ local file per future Mathlib PR target, each registered by an import line in th
 
 | # | Local file (`VD/SMT/`) | Mathlib target | Contents | Depends on |
 |---|---|---|---|---|
-| 1 | `TruncatedCounting.lean` | `Topology/LocallyFinsupp.lean` (extend) + **new** `…/ValueDistribution/LogCounting/Truncated.lean` | package A | — |
-| 2 | `DivisorDeriv.lean` | `Analysis/Meromorphic/Order.lean` + `Analysis/Meromorphic/Divisor.lean` + `…/ValueDistribution/LogCounting/Truncated.lean` (extend) | package B | 1 |
-| 3 | `SeparationLemma.lean` | `Analysis/SpecialFunctions/Log/PosLog.lean` (extend) | package C | — |
+| 1 | `TruncatedCounting.lean` ✅ (merged as **PR #41809**, removed locally) | `Topology/LocallyFinsupp.lean` (extend) + **new** `…/ValueDistribution/LogCounting/Truncated.lean` | package A | — |
+| 2 | `DivisorDeriv.lean` 🚀 (now `VD/MathlibSubmitted/`, **PR #44428**) | `Analysis/Meromorphic/Order.lean` + `Analysis/Meromorphic/Divisor.lean` + `…/ValueDistribution/LogCounting/Truncated.lean` (extend) | package B | 1 |
+| 3 | `SeparationLemma.lean` ✅ (merged as **PR #42020**, into `…/ValueDistribution/SecondMainTheorem.lean` instead of `PosLog.lean`; removed locally) | `Analysis/SpecialFunctions/Log/PosLog.lean` (extend) | package C | — |
 | 4 | `ProximityEstimates.lean` | `…/ValueDistribution/SecondMainTheorem.lean` (part 1) | package D | 3, **LLD (T3)** |
-| 5 | `SecondMainTheoremRamification.lean` | `…/ValueDistribution/SecondMainTheorem.lean` (part 2) | package E (S1) | 4 |
+| 5 | `SecondMainTheoremRamification.lean` | `…/ValueDistribution/SecondMainTheorem.lean` (part 2) | package E (S1) | 2, 4 |
 | 6 | `SecondMainTheorem.lean` | `…/ValueDistribution/SecondMainTheorem.lean` (part 3) | package F (S2, S2′) | 1, 2, 5 |
 | 7 | `Deficiency.lean` | **new** `…/ValueDistribution/Deficiency.lean` | package G (S3) | 6 |
 | 8 | `Picard.lean` | **new** `Analysis/Complex/Picard.lean` | package H (S4) | 6, pending `CharacteristicIsBigOLog` |
 
-- Items 1 and 3 are **fully parallel** and independently PR-able today; 2 follows 1.
+- Status (2026-10-06): items 1 and 3 are merged into Mathlib; item 2 is in review as
+  PR #44428 (local copy in `VD/MathlibSubmitted/DivisorDeriv.lean`).
 - The **critical path** is 4 → 5 → 6 → {7, 8}, gated locally by nothing (the LLD is done)
-  but gated *upstream* by the LLD PR chain (PoissonJensen → LogDerivTwoRadius →
-  LogDerivLemma); schedule PRs 1–3 while that chain is in review.
+  but gated *upstream* by the LLD PR chain (PoissonJensen, in review as PR #42475 →
+  LogDerivTwoRadius → LogDerivLemma). Items 5 and 6 additionally wait for item 2.
 - Every PR stays under ~400 lines. New Mathlib files must use the module system
   (`module` / `public import` / `@[expose] public section`) as in the current
-  ValueDistribution files; the local VD copies can stay in classic mode until upstreaming.
+  ValueDistribution files; the local VD files already do so.
 - Doc-string style: follow `FirstMainTheorem.lean` (references to [MR886677] Ch. VII and
   [MR3156076]; quantitative statement with explicit constant + qualitative corollary).
 

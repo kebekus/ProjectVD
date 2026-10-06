@@ -20,11 +20,11 @@ public import VD.MathlibPending.PoissonJensen
 public import VD.MathlibPending.ProximityBounded
 public import VD.MathlibSubmitted.CanonicalFactor
 public import VD.MathlibSubmitted.ChordLength
+public import VD.MathlibSubmitted.DivisorDeriv
 public import VD.MathlibSubmitted.JensenInequality
 public import VD.MathlibSubmitted.Liouville
 public import VD.MathlibSubmitted.PoissonJensen
 public import VD.SMT.Deficiency
-public import VD.SMT.DivisorDeriv
 public import VD.SMT.Picard
 public import VD.SMT.ProximityEstimates
 public import VD.SMT.SecondMainTheorem

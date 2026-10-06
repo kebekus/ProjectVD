@@ -5,7 +5,7 @@ Authors: Stefan Kebekus
 -/
 module
 
-public import VD.SMT.DivisorDeriv
+public import VD.MathlibSubmitted.DivisorDeriv
 public import VD.SMT.ProximityEstimates
 
 /-!
@@ -15,7 +15,7 @@ See `VD/SMT/PLAN-SecondMainTheorem.md`, §7.
 
 Mathlib target: `Mathlib/Analysis/Complex/ValueDistribution/SecondMainTheorem.lean`
 (part 2 of 3).
-Dependencies: `VD/SMT/DivisorDeriv.lean` (package B) and
+Dependencies: `VD/MathlibSubmitted/DivisorDeriv.lean` (package B, PR #44428) and
 `VD/SMT/ProximityEstimates.lean` (package D).
 
 This file proves the **Second Main Theorem** of value distribution theory in Lang's form,

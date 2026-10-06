@@ -13,7 +13,7 @@ public import Mathlib.Analysis.Complex.ValueDistribution.LogCounting.Truncated
 
 See `VD/SMT/PLAN-SecondMainTheorem.md`, §4.
 
-Mathlib targets (one PR, no new file):
+Mathlib targets (one PR, no new file; submitted as PR #44428):
 - order-level lemmas: `Mathlib/Analysis/Meromorphic/Order.lean`,
 - divisor-level results: `Mathlib/Analysis/Meromorphic/Divisor.lean`,
 - counting-function corollaries:
