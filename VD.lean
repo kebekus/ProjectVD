@@ -1,5 +1,13 @@
 module
 
+public import VD.AlgebraicDependence.ClunieMohonko
+public import VD.AlgebraicDependence.DivisorEstimates
+public import VD.AlgebraicDependence.GermCharacteristic
+public import VD.AlgebraicDependence.GrowthField
+public import VD.AlgebraicDependence.MonicRelation
+public import VD.AlgebraicDependence.PointwiseEstimates
+public import VD.AlgebraicDependence.PolynomialCharacteristic
+public import VD.AlgebraicDependence.RationalCharacteristic
 public import VD.Field.CodiscreteWithinEventually
 public import VD.Field.CodiscreteWithinNeBot
 public import VD.Field.GermField
