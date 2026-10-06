@@ -316,11 +316,25 @@ Estimated size: ~250 lines. Difficulty: low (case analyses with `Finset.sum_le_s
 
 ---
 
-## 4. Work package B — divisor estimates
+## 4. Work package B — divisor estimates ✅ **DONE** (2026-10-06, except B3)
 
-*New file `VD/AlgebraicDependence/DivisorEstimates.lean`. Order arithmetic in `WithTop ℤ`,
+*File `VD/AlgebraicDependence/DivisorEstimates.lean`. Order arithmetic in `WithTop ℤ`,
 mirroring `VD/MathlibSubmitted/DivisorDeriv.lean`. Mathlib targets:
 `Mathlib/Analysis/Meromorphic/Order.lean` (B1), `…/Divisor.lean` (B2–B3). Independent of A.*
+
+*Implementation notes.* B1 and B2 are proved as stated (~180 lines, builds warning-free). The
+order-level core of B2 is split off as a public lemma,
+`exists_meromorphicOrderAt_le_of_monic_lt` (`𝕜`-valued `f`, `a j`, no `U`): if `f` has order
+`n` at `x` and the monic expression has order `> d·n`, then some `a j` has order
+`≤ (d − j)·n`. Its proof is the contradiction sketched below, run through B1 with the uniform
+bound `d·n + 1` (a private `WithTop ℤ` helper `coe_add_one_le_of_coe_lt` converts `<` into
+`+ 1 ≤`). The divisor-level statement then is the planned two-case analysis; the "small
+divisors" side goes through `Finset.single_le_sum`. Lean trivia: `nsmul_eq_mul` must be applied
+*after* `locallyFinsuppWithin.coe_nsmul`/`Pi.smul_apply`, otherwise it rewrites the
+function-level `ℕ`-action into a `Pi` product and the evaluation lemmas no longer fire; the
+`ℤ`-arithmetic with the nonlinear atom `↑d * n` is closed by `nlinarith`/`linarith` after
+`negPart_eq_neg`, not by `omega`. B3 (the Bezout divisor estimate) is deferred to package G,
+where its exact shape is fixed.
 
 ```lean
 /-- B1. The order of a finite sum is at least the minimum of the orders. -/
