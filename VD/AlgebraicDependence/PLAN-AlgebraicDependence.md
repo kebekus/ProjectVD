@@ -394,11 +394,29 @@ B3 medium-high (many cases; keep each case a separate private lemma).
 
 ---
 
-## 5. Work package C — the master inequality and algebraic dependence
+## 5. Work package C — the master inequality and algebraic dependence ✅ **DONE** (2026-10-06)
 
-*New file `VD/AlgebraicDependence/MonicRelation.lean`. Depends on A, B. Mathlib target:
+*File `VD/AlgebraicDependence/MonicRelation.lean`. Depends on A, B. Mathlib target:
 new file `Mathlib/Analysis/Complex/ValueDistribution/AlgebraicDependence.lean`; C0 goes to
 `CharacteristicFunction.lean`.*
+
+*Implementation notes.* C0, C1, C2, T1, T2 and both C5 corollaries are proved as stated
+(~230 lines, builds warning-free), plus a helper `Meromorphic.monic` (meromorphy of the monic
+expression) and a shared big-O bound `characteristic_isBigO_sum_characteristic_add_log` from
+which the `=O`/`=o` corollaries are two lines each. Deviations from the sketch: (i) T1 does
+not need `hg : Meromorphic g` — `characteristic_congr_codiscrete` is hypothesis-free — so the
+argument was dropped; (ii) T2 does need the codiscrete-monotonicity lemma
+`circleAverage_mono_codiscreteWithin` after all (the unweighted pointwise bound requires the
+relation *at the point*), so the file imports `VD/LLD/LogDerivEstimates.lean`; the alternative
+of deriving T2 from T1 with `g = 0` would only give the constant `log (2(d+1))`; (iii) T2 also
+needs `d ≠ 0`, which follows from the relation because `codiscrete ℂ` is `NeBot`
+(`IsPreconnected.codiscreteWithin_neBot` from `VD/Field/CodiscreteWithinNeBot.lean`) — for
+`d = 0` the hypothesis reads `1 =ᶠ 0`. Lean trivia: all circle-average algebra is done with the
+`Pi`-forms `(d : ℝ) • F`, `F + G`, `∑ j, F j` (so that `circleAverage_smul/_add/_sum` rewrite
+syntactically), and pointwise evaluation is restored with `Pi.add_apply`, `Pi.smul_apply`,
+`Finset.sum_apply`; `CircleIntegrable` of a constant multiple is `IntervalIntegrable.const_mul`
+by unfolding, but the expected type must be stated explicitly. In the asymptotic statements,
+`f =O[l] g + h` parses as `(f =O[l] g) + h` — parenthesize.
 
 ### C0. Hypothesis-free product bound
 
