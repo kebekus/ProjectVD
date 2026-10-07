@@ -57,6 +57,58 @@ theorem out_eventuallyEq {a : germRing 𝕜 U}
     (hfa : (f : Germ (codiscreteWithin U) 𝕜) = a) : f =ᶠ[codiscreteWithin U] out a :=
   Germ.coe_eq.1 (by rw [hfa, coe_out])
 
+/-- A germ vanishes if and only if its chosen representative is zero along
+`codiscreteWithin U`. -/
+theorem eq_zero_iff_out_eventuallyEq_zero {a : germRing 𝕜 U} :
+    a = 0 ↔ out a =ᶠ[codiscreteWithin U] 0 := by
+  rw [Subtype.ext_iff, ← coe_out a, ← Germ.coe_eq]
+  rfl
+
+/-!
+### Representatives of Sums, Products, Powers, Inverses and Constants
+
+The chosen representative of a sum, product, power or inverse of germs agrees with the sum,
+product, power or inverse of the chosen representatives along `codiscreteWithin U`.
+-/
+
+theorem out_zero : out (0 : germRing 𝕜 U) =ᶠ[codiscreteWithin U] 0 :=
+  (out_eventuallyEq (by simp)).symm
+
+theorem out_one : out (1 : germRing 𝕜 U) =ᶠ[codiscreteWithin U] 1 :=
+  (out_eventuallyEq (by simp)).symm
+
+theorem out_add (a b : germRing 𝕜 U) : out (a + b) =ᶠ[codiscreteWithin U] out a + out b :=
+  (out_eventuallyEq (by simp)).symm
+
+theorem out_neg (a : germRing 𝕜 U) : out (-a) =ᶠ[codiscreteWithin U] -out a :=
+  (out_eventuallyEq (by simp)).symm
+
+theorem out_mul (a b : germRing 𝕜 U) : out (a * b) =ᶠ[codiscreteWithin U] out a * out b :=
+  (out_eventuallyEq (by simp)).symm
+
+theorem out_pow (a : germRing 𝕜 U) (n : ℕ) : out (a ^ n) =ᶠ[codiscreteWithin U] out a ^ n :=
+  (out_eventuallyEq (by simp)).symm
+
+theorem out_inv (a : germRing 𝕜 U) : out a⁻¹ =ᶠ[codiscreteWithin U] (out a)⁻¹ :=
+  (out_eventuallyEq (by simp)).symm
+
+/-- Eventual equality is compatible with finite sums. -/
+theorem _root_.Filter.EventuallyEq.finset_sum {α ι M : Type*} [AddCommMonoid M] {l : Filter α}
+    {s : Finset ι} {f g : ι → α → M} (h : ∀ i ∈ s, f i =ᶠ[l] g i) :
+    ∑ i ∈ s, f i =ᶠ[l] ∑ i ∈ s, g i :=
+  ((eventually_all_finset s).2 h).mono fun x hx ↦ by
+    simp only [Finset.sum_apply]
+    exact Finset.sum_congr rfl hx
+
+theorem out_sum {ι : Type*} (s : Finset ι) (c : ι → germRing 𝕜 U) :
+    out (∑ i ∈ s, c i) =ᶠ[codiscreteWithin U] ∑ i ∈ s, out (c i) := by
+  classical
+  induction s using Finset.induction with
+  | empty => simpa using out_zero
+  | insert i s hi ih =>
+    rw [Finset.sum_insert hi, Finset.sum_insert hi]
+    exact (out_add _ _).trans ((EventuallyEq.refl _ _).add ih)
+
 /-!
 ## The Embedding of Constants
 -/
@@ -84,6 +136,12 @@ noncomputable instance : Algebra 𝕜 (germRing 𝕜 U) := (constRingHom 𝕜 U)
 
 theorem algebraMap_eq_constRingHom :
     algebraMap 𝕜 (germRing 𝕜 U) = constRingHom 𝕜 U := rfl
+
+/-- The chosen representative of a constant germ is the constant function along
+`codiscreteWithin U`. -/
+theorem out_algebraMap (c : 𝕜) :
+    out (algebraMap 𝕜 (germRing 𝕜 U) c) =ᶠ[codiscreteWithin U] fun _ ↦ c :=
+  (out_eventuallyEq rfl).symm
 
 /-!
 ## Order at a Point
