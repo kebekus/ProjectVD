@@ -25,6 +25,8 @@ Mathlib targets: `Mathlib/Analysis/Meromorphic/Order.lean` (B1),
   coefficient `a j` has order at most `(d - j) * n`.
 - B2, `MeromorphicOn.nsmul_negPart_divisor_le_of_monic_eq`: the **pole divisor under a monic
   relation**, `d • (div f)⁻ ≤ (div (f ^ d + Σ_{j<d} a j * f ^ j))⁻ + d • Σ_{j<d} (div (a j))⁻`.
+- `MeromorphicOn.negPart_divisor_sum_mul_pow_le` (for package D): the **pole divisor of a
+  polynomial expression**, `(div (Σ_{j≤d} a j * f ^ j))⁻ ≤ Σ_{j≤d} (div (a j))⁻ + d • (div f)⁻`.
 
 The divisor estimate B3 for quotients with a Bezout certificate (plan §4, needed for the
 rational Valiron–Mohon'ko identity) will be added together with package G.
@@ -182,5 +184,93 @@ theorem nsmul_negPart_divisor_le_of_monic_eq {f : 𝕜 → 𝕜} {a : ℕ → �
     have : (d : ℤ) * -n ≤ (d : ℤ) * ∑ i ∈ range d, ((meromorphicOrderAt (a i) z).untop₀)⁻ :=
       mul_le_mul_of_nonneg_left (hmn.trans hsingle) (Nat.cast_nonneg d)
     linarith
+
+/-!
+## The Pole Divisor of a Polynomial Expression
+-/
+
+/-- In `WithTop ℤ`, every element is bounded below by minus the negative part of its
+`untop₀`. -/
+private lemma neg_negPart_untop₀_le (y : WithTop ℤ) : ((-(y.untop₀)⁻ : ℤ) : WithTop ℤ) ≤ y := by
+  cases y with
+  | top => exact le_top
+  | coe k =>
+    rw [WithTop.untop₀_coe, WithTop.coe_le_coe]
+    rcases le_or_gt 0 k with h | h
+    · simp [h]
+    · simp [negPart_eq_neg.2 h.le]
+
+/-- **Pole divisor of a polynomial expression**: the pole divisor of `Σ_{j≤d} a j * f ^ j` is
+bounded by the sum of the pole divisors of the coefficients plus `d` times the pole divisor of
+`f`. Note the factor `d` (and not `Σ_{j≤d} j`). -/
+theorem negPart_divisor_sum_mul_pow_le {f : 𝕜 → 𝕜} {a : ℕ → 𝕜 → 𝕜} {d : ℕ}
+    (hf : MeromorphicOn f U) (ha : ∀ j, MeromorphicOn (a j) U) :
+    (divisor (∑ j ∈ range (d + 1), a j * f ^ j) U)⁻
+      ≤ ∑ j ∈ range (d + 1), (divisor (a j) U)⁻ + d • (divisor f U)⁻ := by
+  have hh : MeromorphicOn (∑ j ∈ range (d + 1), a j * f ^ j) U :=
+    MeromorphicOn.sum fun j _ ↦ (ha j).mul (hf.pow j)
+  rw [locallyFinsuppWithin.le_def]
+  intro z
+  by_cases hz : z ∈ U
+  swap
+  · simp [hz]
+  have hdiv : ∀ j, divisor (a j) U z = (meromorphicOrderAt (a j) z).untop₀ :=
+    fun j ↦ divisor_apply (ha j) hz
+  simp only [locallyFinsuppWithin.coe_nsmul, Pi.smul_apply, locallyFinsuppWithin.coe_add,
+    Pi.add_apply, locallyFinsuppWithin.negPart_apply, locallyFinsuppWithin.coe_sum,
+    Finset.sum_apply, divisor_apply hf hz, divisor_apply hh hz, hdiv]
+  simp only [nsmul_eq_mul]
+  have hsum₀ : 0 ≤ ∑ j ∈ range (d + 1), ((meromorphicOrderAt (a j) z).untop₀)⁻ :=
+    sum_nonneg fun _ _ ↦ negPart_nonneg _
+  have hdX : 0 ≤ (d : ℤ) * ((meromorphicOrderAt f z).untop₀)⁻ :=
+    mul_nonneg (Nat.cast_nonneg d) (negPart_nonneg _)
+  -- Every term `a j * f ^ j` has order at least `N := -(Σ (ord a j)⁻ + d (ord f)⁻)`.
+  set N : ℤ := -(∑ j ∈ range (d + 1), ((meromorphicOrderAt (a j) z).untop₀)⁻
+    + d * ((meromorphicOrderAt f z).untop₀)⁻) with hN
+  have hterms : ∀ j ∈ range (d + 1), MeromorphicAt (a j * f ^ j) z :=
+    fun j _ ↦ (ha j z hz).mul ((hf z hz).pow j)
+  have hterm : ∀ j ∈ range (d + 1), (N : WithTop ℤ) ≤ meromorphicOrderAt (a j * f ^ j) z := by
+    intro j hj
+    have hjd : (j : ℤ) ≤ d := by exact_mod_cast Nat.lt_succ_iff.1 (mem_range.1 hj)
+    have hsingle := single_le_sum (f := fun i ↦ ((meromorphicOrderAt (a i) z).untop₀)⁻)
+      (fun _ _ ↦ negPart_nonneg _) hj
+    rw [meromorphicOrderAt_mul (ha j z hz) ((hf z hz).pow j), meromorphicOrderAt_pow (hf z hz)]
+    cases hm : meromorphicOrderAt (a j) z with
+    | top => simp
+    | coe m =>
+    simp only [hm, WithTop.untop₀_coe] at hsingle
+    have h₁ := neg_negPart_untop₀_le (m : WithTop ℤ)
+    rw [WithTop.untop₀_coe, WithTop.coe_le_coe] at h₁
+    cases hn : meromorphicOrderAt f z with
+    | top =>
+      rcases Nat.eq_zero_or_pos j with hj0 | hj0
+      · subst hj0
+        simp only [Nat.cast_zero, zero_mul, add_zero, WithTop.coe_le_coe]
+        linarith
+      · rw [WithTop.mul_top (by exact_mod_cast hj0.ne')]
+        simp
+    | coe n =>
+    simp only [hn, WithTop.untop₀_coe] at hN hdX
+    rw [← WithTop.coe_natCast, ← WithTop.coe_mul, ← WithTop.coe_add, WithTop.coe_le_coe]
+    have h₂ := neg_negPart_untop₀_le (n : WithTop ℤ)
+    rw [WithTop.untop₀_coe, WithTop.coe_le_coe] at h₂
+    have hn₀ : 0 ≤ n⁻ := negPart_nonneg _
+    have h₃ : -(j : ℤ) * n⁻ ≤ j * n := by nlinarith
+    have h₄ : -(d : ℤ) * n⁻ ≤ -(j : ℤ) * n⁻ := by nlinarith
+    linarith
+  have hsum : (N : WithTop ℤ) ≤ meromorphicOrderAt (∑ j ∈ range (d + 1), a j * f ^ j) z :=
+    le_meromorphicOrderAt_sum hterms hterm
+  cases hs : meromorphicOrderAt (∑ j ∈ range (d + 1), a j * f ^ j) z with
+  | top =>
+    simp only [WithTop.untop₀_top, negPart_zero]
+    linarith
+  | coe s =>
+    rw [hs, WithTop.coe_le_coe] at hsum
+    rw [WithTop.untop₀_coe]
+    rcases le_or_gt 0 s with h | h
+    · simp only [negPart_eq_zero.2 h]
+      linarith
+    · simp only [negPart_eq_neg.2 h.le]
+      linarith
 
 end MeromorphicOn

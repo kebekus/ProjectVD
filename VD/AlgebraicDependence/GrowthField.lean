@@ -8,6 +8,7 @@ module
 public import Mathlib.FieldTheory.IntermediateField.Adjoin.Basic
 public import Mathlib.RingTheory.Algebraic.Integral
 public import VD.AlgebraicDependence.GermCharacteristic
+public import VD.AlgebraicDependence.GrowthClass
 public import VD.AlgebraicDependence.PolynomialCharacteristic
 
 /-!
@@ -19,11 +20,11 @@ Mathlib target: follows the germ field `VD/Field/` upstream. Dependencies: packa
 
 Planned content:
 
-- F2: `IsGrowthClass l G`, a class of real functions closed under constants, sums and eventual
-  domination; instances `isGrowthClass_isBigO` and `isGrowthClass_isLittleO`. The **growth
-  field** `MeromorphicOn.GermRing.growthField hG : IntermediateField ℂ (germRing ℂ univ)` of
-  germs whose characteristic lies in `G`; the classical field of small functions `S(f)` as the
-  little-o instance along `volume.cofinite ⊓ atTop`.
+- F2: the **growth field** `MeromorphicOn.GermRing.growthField hG : IntermediateField ℂ
+  (germRing ℂ univ)` of germs whose characteristic lies in a growth class `G` (the structure
+  `IsGrowthClass l G` and its instances `isGrowthClass_isBigO`, `isGrowthClass_isLittleO`
+  live in `VD/AlgebraicDependence/GrowthClass.lean`, package D); the classical field of small
+  functions `S(f)` as the little-o instance along `volume.cofinite ⊓ atTop`.
 - F3 = T6, `mem_growthField_of_isAlgebraic`: **growth fields are relatively algebraically
   closed** in the field of meromorphic germs.
 - F4 = T7, `ValueDistribution.exists_characteristic_le_of_isAlgebraic_adjoin`: if `f` is

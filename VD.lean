@@ -3,6 +3,7 @@ module
 public import VD.AlgebraicDependence.ClunieMohonko
 public import VD.AlgebraicDependence.DivisorEstimates
 public import VD.AlgebraicDependence.GermCharacteristic
+public import VD.AlgebraicDependence.GrowthClass
 public import VD.AlgebraicDependence.GrowthField
 public import VD.AlgebraicDependence.MonicRelation
 public import VD.AlgebraicDependence.PointwiseEstimates

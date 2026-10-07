@@ -30,6 +30,8 @@ of a polynomial expression in `w`) is estimated in terms of `log⁺` of the coef
   `log d`, for `g = 0`.
 - `Real.posLog_norm_le_of_pow_mul_eq`: Clunie's lemma, pointwise.
 - `Real.posLog_norm_inv_le_of_eq_zero`: Mohon'ko's lemma, pointwise (needs `a 0 ≠ 0`).
+- `Real.posLog_norm_sum_mul_pow_le` (for package D): the upper bound
+  `log⁺ ‖Σ_{j≤d} a j * w ^ j‖ ≤ d · log⁺ ‖w‖ + Σ_{j≤d} log⁺ ‖a j‖ + log (d + 1)`.
 
 The Bezout estimate for the lower bound of the rational Valiron–Mohon'ko identity (plan §9,
 G2) will be added here together with package G.
@@ -64,6 +66,31 @@ lemma norm_sum_mul_pow_le_of_one_le_norm {d : ℕ} (hw : 1 ≤ ‖w‖) :
   rw [norm_mul, norm_pow]
   exact mul_le_mul_of_nonneg_left (pow_le_pow_right₀ hw (Nat.lt_succ_iff.1 (mem_range.1 hj)))
     (norm_nonneg _)
+
+/--
+**Upper bound for polynomial expressions.** `log⁺ ‖Σ_{j≤d} a j * w ^ j‖` is bounded by
+`d · log⁺ ‖w‖ + Σ_{j≤d} log⁺ ‖a j‖ + log (d + 1)`. Note the factor `d` (and not
+`Σ_{j≤d} j = d (d + 1) / 2`, which termwise estimation would give). -/
+theorem posLog_norm_sum_mul_pow_le {d : ℕ} (a : ℕ → 𝕜) (w : 𝕜) :
+    log⁺ ‖∑ j ∈ range (d + 1), a j * w ^ j‖
+      ≤ d * log⁺ ‖w‖ + ∑ j ∈ range (d + 1), log⁺ ‖a j‖ + log (d + 1) := by
+  have hS : log⁺ (∑ j ∈ range (d + 1), ‖a j‖)
+      ≤ log (d + 1) + ∑ j ∈ range (d + 1), log⁺ ‖a j‖ := by
+    simpa using posLog_sum (range (d + 1)) fun j ↦ ‖a j‖
+  have hw0 : 0 ≤ d * log⁺ ‖w‖ := mul_nonneg (Nat.cast_nonneg d) posLog_nonneg
+  rcases le_or_gt ‖w‖ 1 with hw | hw
+  · calc log⁺ ‖∑ j ∈ range (d + 1), a j * w ^ j‖
+        ≤ log⁺ (∑ j ∈ range (d + 1), ‖a j‖) :=
+          posLog_le_posLog (by linarith [norm_nonneg (∑ j ∈ range (d + 1), a j * w ^ j)])
+            (norm_sum_mul_pow_le_of_norm_le_one hw)
+      _ ≤ _ := by linarith
+  · calc log⁺ ‖∑ j ∈ range (d + 1), a j * w ^ j‖
+        ≤ log⁺ ((∑ j ∈ range (d + 1), ‖a j‖) * ‖w‖ ^ d) :=
+          posLog_le_posLog (by linarith [norm_nonneg (∑ j ∈ range (d + 1), a j * w ^ j)])
+            (norm_sum_mul_pow_le_of_one_le_norm hw.le)
+      _ ≤ log⁺ (∑ j ∈ range (d + 1), ‖a j‖) + log⁺ (‖w‖ ^ d) := posLog_mul
+      _ = log⁺ (∑ j ∈ range (d + 1), ‖a j‖) + d * log⁺ ‖w‖ := by rw [posLog_pow]
+      _ ≤ _ := by linarith
 
 /-!
 ## Root Bounds
