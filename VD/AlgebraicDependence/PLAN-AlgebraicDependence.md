@@ -239,7 +239,7 @@ theorem MeromorphicOn.GermRing.exists_abs_characteristic_aeval_div_sub_le {l G}
 
 ---
 
-## 3. Work package A — pointwise estimates ✅ **DONE** (2026-10-06, except G2)
+## 3. Work package A — pointwise estimates ✅ **DONE** (2026-10-06; G2 added 2026-10-08)
 
 *File `VD/AlgebraicDependence/PointwiseEstimates.lean`. Pure `NormedField` algebra, no
 meromorphy, no integration. Mathlib target: `Mathlib/Analysis/SpecialFunctions/Log/PosLog.lean`
@@ -254,8 +254,8 @@ are dispatched by `rcases d with _ | d` up front (the hypothesis is then `1 = 0`
 statement is `0 ≤ log⁺ ‖g‖`). The constant `log (1 + S) ≤ log (d + 2) + Σ log⁺ ‖aⱼ‖` is proved
 through `Finset.exists_max_image` as sketched; `Real.log_one_add_le_posLog` would give the
 weaker `d·log(4d)` and was not used. Lean trivia: `Σ` is a reserved token and cannot appear in
-identifiers such as `hΣ₀`. The Bezout estimate G2 is deferred to package G, where its exact
-shape is fixed.
+identifiers such as `hΣ₀`. The Bezout estimate G2 was added with package G, see §9 (it is
+stated for *monic* `P, Q`; the normalization to monic polynomials happens at the field level).
 
 ```lean
 namespace Real
@@ -317,7 +317,7 @@ Estimated size: ~250 lines. Difficulty: low (case analyses with `Finset.sum_le_s
 
 ---
 
-## 4. Work package B — divisor estimates ✅ **DONE** (2026-10-06, except B3) 🚀 **PR #44629**
+## 4. Work package B — divisor estimates ✅ **DONE** (2026-10-06; B3 at germ level with package G, 2026-10-08) 🚀 **PR #44629**
 
 *File `VD/MathlibSubmitted/DivisorEstimates.lean`, submitted as PR #44629 (2026-10-08, in
 review; B1 and B2 in one PR). Order arithmetic in `WithTop ℤ`, mirroring
@@ -337,8 +337,11 @@ divisors" side goes through `Finset.single_le_sum`. Lean trivia: `nsmul_eq_mul` 
 *after* `locallyFinsuppWithin.coe_nsmul`/`Pi.smul_apply`, otherwise it rewrites the
 function-level `ℕ`-action into a `Pi` product and the evaluation lemmas no longer fire; the
 `ℤ`-arithmetic with the nonlinear atom `↑d * n` is closed by `nlinarith`/`linarith` after
-`negPart_eq_neg`, not by `omega`. B3 (the Bezout divisor estimate) is deferred to package G,
-where its exact shape is fixed.
+`negPart_eq_neg`, not by `omega`. B3 (the Bezout divisor estimate) was implemented with
+package G *at the level of germs* (`RationalCharacteristic.lean`,
+`GermRing.nsmul_negPart_divisor_add_posPart_divisor_le_of_bezout`), not as sketched below for
+functions: the Bezout identity is an exact identity in the field `K`, and the orders of nonzero
+germs are integers, which removes all `⊤`-cases from the argument. See §9.
 
 ```lean
 /-- B1. The order of a finite sum is at least the minimum of the orders. -/
@@ -791,10 +794,70 @@ Estimated size: F0–F1 ~250, F2 ~200, F3 ~120, F4 ~80, F5 ~120 lines. Difficult
 
 ---
 
-## 9. Work package G — the sharp rational identity (T8, T9)
+## 9. Work package G — the sharp rational identity (T8, T9) ✅ **DONE** (2026-10-08)
 
 *New file `VD/AlgebraicDependence/RationalCharacteristic.lean`. Depends on A (Bezout
 pointwise lemma, to be added to A), B3, F. The mathematically heaviest package; implement last.*
+
+*Implementation notes.* G1–G5 are proved as planned: G2 in `PointwiseEstimates.lean` (~240
+lines), the `orderAt`-valuation lemmas in `VD/Field/GermFieldAPI.lean` (~70 lines), B3, the
+integration, G1, G3, T8, T9 in `RationalCharacteristic.lean` (~900 lines); all warning-free.
+Deviations and findings:
+
+1. **Monic normalization at the field level.** G2 and B3 are stated for *monic* `P, Q`
+   (`w ^ p + Σ_{j<p} a j * w ^ j`, the shape of package A); the terms `log⁺ ‖a_p‖⁻¹`,
+   `(div a_p)⁺` of the sketches disappear. G3 normalizes `P' := P * C (lc P)⁻¹`
+   (`monic_mul_leadingCoeff_inv`, `natDegree_mul_leadingCoeff_inv`, `isCoprime_mul_units_right`)
+   and pays `T(r, (lc P)⁻¹ lc Q) ∈ G` once.
+2. **G2 has two regions, not three.** The scalar lemma
+   `Real.posLog_norm_inv_le_of_bezout : u x + v y = 1 → log⁺ ‖y‖⁻¹ ≤ log⁺ ‖x/y‖ + log⁺ ‖u‖ + log⁺ ‖v‖ + log 2`
+   contains the whole Bezout argument; on `‖w‖ < R := max 1 (max (2A) (2B))` it is combined with
+   `posLog_norm_sum_mul_pow_le` for `U(w)`, `V(w)`, on `‖w‖ ≥ R` the leading terms dominate
+   (`pow_le_two_mul_norm_monic`). Constant: `(p + m + n + 3) · Λ` with `Λ` the sum of all
+   `log⁺ ‖coefficients‖` and `log 2 + log p + log q + log (m+1) + log (n+1)`; `m, n` are the
+   degrees of `U, V` (any degrees, no reduction modulo `P, Q` needed).
+3. **B3 at germ level, as a valuation argument.** With `ν := ord a`, `ρ := ord P(a)`,
+   `κ := ord Q(a)` (integers, `orderAt_ne_top`), `s :=` the sum of the pole orders of all
+   coefficients: the Bezout identity gives `κ⁺ ≤ (ρ − κ)⁻ + s + (m + n) ν⁻`
+   (`orderAt_add_eq_left_of_lt` applied to `U(a) P(a) = 1 + (−V(a) Q(a))`); then either `ν⁻ ≤ s`
+   (everything is `≤ (p + m + n + 1) s`) or `ν⁻ > s` (the leading terms dominate, `ρ = p ν`,
+   `κ = q ν`, both sides equal `(p − q) ν⁻`). Needs `1 ≤ q` (for the strict domination of
+   `a ^ q`), `a ≠ 0`, `P(a) ≠ 0`, `Q(a) ≠ 0` — all free in G3 after the case `a ∈ F` is
+   dispatched. Constant `(p + m + n + 1)`.
+4. **Integration** (`nsmul_characteristic_add_characteristic_inv_le_of_bezout`, explicit
+   coefficient families in `K`): `T(r, Q(a)⁻¹) = m(r, 1/Q(a)) + N(r, 1/Q(a))` via `out_inv`,
+   `proximity_inv`, `logCounting_inv`; the pointwise estimate is integrated with
+   `circleAverage_mono_codiscreteWithin` on the codiscrete set where all representatives
+   satisfy the identities (`out_monic`, `out_sum_mul_pow`, `out_div`, `out_one`). The small terms
+   must be combined through the *equality* `Σ T(c) = Σ m(c) + Σ N(c)`, not through one-sided
+   bounds (which count the small term twice).
+5. **Eventual nonnegativity of the error terms.** Growth classes are not closed under positive
+   parts, so one-sided bounds `x ≤ u₁`, `−x ≤ u₂` with `u₁, u₂ ∈ G` do not give `|x| ≤ u ∈ G`
+   without `0 ≤ u₁, u₂`. G1 (`characteristic_aeval_div_le_aux`) and G3 therefore carry
+   `∀ᶠ r, 0 ≤ u r ∧ …` in their conclusions; every constructed `u` is a sum of characteristics,
+   `log`-constants, FMT constants `c₀` (nonnegative, as a bound for an absolute value) and `u`'s
+   from F5 (eventually nonnegative, for the same reason).
+6. **G1 bookkeeping.** `Nat.strong_induction_on` on `deg Q` with the statement quantified over
+   `P, Q`; the case `Q(a) = 0` (`a` algebraic over `F`) is `T(0) = 0`; `deg (P / Q)` is computed
+   through `Polynomial.div_def` + `natDegree_divByMonic` (Mathlib has no `natDegree_div`);
+   `P = Q * (P / Q) + P % Q` is `EuclideanDomain.div_add_mod`; the remainder term needs a case
+   split `P % Q = 0` (the induction hypothesis requires a nonzero denominator).
+7. **G3 case `a ∈ F`** (`aeval_mem_growthField` via `aeval_algebraMap_apply_eq_algebraMap_eval`):
+   `u := p • T(a)`. Case `a ∉ F`: `P(a), Q(a) ≠ 0` by T6 (`aeval_ne_zero_of_notMem_growthField`);
+   `deg Q = 0` is F5 plus `T(P(a)) ≤ T(P(a)/c) + T(c)`.
+8. **T9** is stated for `smallFunctions hl hf` with general `l ≤ atTop` (as in F2) and derived
+   from T8 by `IsBigO.of_bound 1` + `IsBigO.trans_isLittleO`.
+
+Lean trivia: `π` is reserved (`Real.pi` notation under `open Real`) — use `ρ`. Inside
+`namespace MeromorphicOn.GermRing`, `div_eq_mul_inv` resolves to the germ-ring lemma; for
+functions write `_root_.div_eq_mul_inv`. `nsmul_eq_mul` must again be applied *after*
+`Pi.smul_apply` (two `simp only` calls), both for `locallyFinsuppWithin` and for `ℝ → ℝ`.
+`fun _ ↦ c + f` parses the lambda body greedily — parenthesize `(fun _ ↦ c) + f`. `linarith`
+treats products of atoms as monomials and distributes, but a `ℕ`-cast coefficient
+`↑(p + m + n + 3)` must be `push_cast` to match `↑p + ↑m + ↑n + 3`; `set … with h` hypotheses
+slow `linarith`/`nlinarith` down considerably (timeouts) — use `linarith only [...]` or prove
+the needed products by `mul_le_mul_of_nonneg_left` and `ring`. `single_le_sum` does not unify
+with a `set`-variable abbreviating the sum; `rw [hS]` first.
 
 Notation: `F := growthField hG`, `K := germRing ℂ univ`, `P, Q : F[X]`, `p := P.natDegree`,
 `q := Q.natDegree`, `g := aeval a P / aeval a Q`, "`≤ₛ`" means "`≤` up to an additive function in
@@ -862,7 +925,8 @@ for the coprimality of numerator and denominator of a reduced fraction; or take 
 hypothesis and let the user reduce — recommended).
 
 Estimated size: G1 ~200, G2 ~300, G3 ~250, G4–G5 ~80 lines. Difficulty: G1 medium (induction
-bookkeeping), G2 medium-high (branches), G3 medium.
+bookkeeping), G2 medium-high (branches), G3 medium. (Actual: G2 ~240, B3 ~170, integration
+~150, G1 ~130, G3 ~190, T8–T9 ~35 lines.)
 
 ---
 
@@ -900,7 +964,7 @@ VD/AlgebraicDependence/
   ClunieMohonko.lean               E  (T4, T5)
   GermCharacteristic.lean          F0–F1
   GrowthField.lean                 F2–F5 (T6, T7)
-  RationalCharacteristic.lean      G  (T8, T9)
+  RationalCharacteristic.lean      G  (B3, G1, G3, T8, T9)
 ```
 
 Dependency graph: `A, B` independent; `C ← A, B`; `D ← C`; `E ← A`; `F ← D, VD/Field`;
@@ -954,7 +1018,8 @@ PRs 1–6 need nothing from `VD/Field/`.
    long; both are elementary and purely local. If G3 stalls, T8 remains available as a one-sided
    statement (G1 upper bound, coprimality-free) plus the lower bound
    `T(r, f) ≤ T(r, g) + S` from (AD) — enough for many applications (e.g. "if `g = R(f)` is
-   small then `f` is small"). Document that fallback in the file if used.
+   small then `f` is small"). Document that fallback in the file if used. *(Resolved: G3 went
+   through as planned; the fallback was not needed. See §9, implementation notes.)*
 8. **Naming.** `nsmul_characteristic_le_of_monic_eq`, `growthField`, `IsGrowthClass`,
    `smallFunctions` are placeholders; expect review bikeshedding. Nothing downstream depends on
    them.
@@ -966,5 +1031,5 @@ PRs 1–6 need nothing from `VD/Field/`.
 - **M3** (E): T4, T5 — Clunie, Mohon'ko (algebraic case). ✅ 2026-10-07
 - **M4** (F): T6, T7 — "algebraic over the field generated by `f₁, …, fₙ`" in the literal
   sense, and the growth-field machinery. ✅ 2026-10-07
-- **M5** (G): T8, T9 — the sharp rational identity.
+- **M5** (G): T8, T9 — the sharp rational identity. ✅ 2026-10-08
 - **M6** PRs 1–6 submitted.
