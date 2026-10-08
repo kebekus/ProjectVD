@@ -188,6 +188,72 @@ theorem orderAt_ne_top (h₁U : IsPreconnected U) (h₂U : U.Nontrivial) {a : ge
     ⟨h₂U.nonempty, h₁U⟩).1 ⟨y, hy, hne⟩ x hx
 
 /-!
+### Order of Sums, Powers and Inverses
+
+On preperfect sets, `orderAt · x` behaves like a valuation on the ring of germs.
+-/
+
+/-- On a preperfect set, the order of a germ at a point of `U` equals the order of any
+meromorphic function that agrees with the chosen representative along `codiscreteWithin U`. -/
+theorem orderAt_eq_of_out_eventuallyEq (hU : Preperfect U) (hx : x ∈ U) {a : germRing 𝕜 U}
+    (hf : MeromorphicOn f U) (h : out a =ᶠ[codiscreteWithin U] f) :
+    orderAt a x = meromorphicOrderAt f x :=
+  orderAt_coe hU hf hx (by rw [← coe_out a]; exact (Germ.coe_eq.2 h).symm)
+
+theorem orderAt_zero (hU : Preperfect U) (hx : x ∈ U) :
+    orderAt (0 : germRing 𝕜 U) x = ⊤ := by
+  rw [orderAt_eq_of_out_eventuallyEq hU hx (fun z _ ↦ MeromorphicAt.const 0 z) out_zero]
+  exact meromorphicOrderAt_eq_top_iff.2 (by simp)
+
+theorem orderAt_one (hU : Preperfect U) (hx : x ∈ U) :
+    orderAt (1 : germRing 𝕜 U) x = 0 := by
+  classical
+  rw [orderAt_eq_of_out_eventuallyEq hU hx (fun z _ ↦ MeromorphicAt.const 1 z) out_one]
+  simpa using meromorphicOrderAt_const x (1 : 𝕜)
+
+theorem orderAt_neg (hU : Preperfect U) (hx : x ∈ U) (a : germRing 𝕜 U) :
+    orderAt (-a) x = orderAt a x := by
+  rw [orderAt_eq_of_out_eventuallyEq hU hx (meromorphicOn_out a).neg (out_neg a)]
+  exact meromorphicOrderAt_neg.symm
+
+theorem orderAt_pow (hU : Preperfect U) (hx : x ∈ U) (a : germRing 𝕜 U) (n : ℕ) :
+    orderAt (a ^ n) x = n * orderAt a x := by
+  rw [orderAt_eq_of_out_eventuallyEq hU hx ((meromorphicOn_out a).pow n) (out_pow a n)]
+  exact meromorphicOrderAt_pow (meromorphicOn_out a x hx)
+
+theorem orderAt_inv (hU : Preperfect U) (hx : x ∈ U) (a : germRing 𝕜 U) :
+    orderAt a⁻¹ x = -orderAt a x := by
+  rw [orderAt_eq_of_out_eventuallyEq hU hx (meromorphicOn_out a).inv (out_inv a)]
+  exact meromorphicOrderAt_inv
+
+theorem min_orderAt_le_orderAt_add (hU : Preperfect U) (hx : x ∈ U) (a b : germRing 𝕜 U) :
+    min (orderAt a x) (orderAt b x) ≤ orderAt (a + b) x := by
+  rw [orderAt_eq_of_out_eventuallyEq hU hx ((meromorphicOn_out a).add (meromorphicOn_out b))
+    (out_add a b)]
+  exact meromorphicOrderAt_add (meromorphicOn_out a x hx) (meromorphicOn_out b x hx)
+
+/-- If `a` has strictly smaller order than `b` at `x`, then `a + b` has the order of `a`. -/
+theorem orderAt_add_eq_left_of_lt (hU : Preperfect U) (hx : x ∈ U) {a b : germRing 𝕜 U}
+    (h : orderAt a x < orderAt b x) : orderAt (a + b) x = orderAt a x := by
+  rw [orderAt_eq_of_out_eventuallyEq hU hx ((meromorphicOn_out a).add (meromorphicOn_out b))
+    (out_add a b)]
+  exact meromorphicOrderAt_add_eq_left_of_lt (meromorphicOn_out b x hx) h
+
+/-- The order of a finite sum is at least the minimum of the orders of the summands. -/
+theorem le_orderAt_sum (hU : Preperfect U) (hx : x ∈ U) {ι : Type*} {s : Finset ι}
+    {c : ι → germRing 𝕜 U} {n : WithTop ℤ} (h : ∀ i ∈ s, n ≤ orderAt (c i) x) :
+    n ≤ orderAt (∑ i ∈ s, c i) x := by
+  classical
+  induction s using Finset.induction with
+  | empty =>
+    rw [Finset.sum_empty, orderAt_zero hU hx]
+    exact le_top
+  | insert i s hi ih =>
+    rw [Finset.sum_insert hi]
+    exact le_trans (le_min (h i (Finset.mem_insert_self i s))
+      (ih fun j hj ↦ h j (Finset.mem_insert_of_mem hj))) (min_orderAt_le_orderAt_add hU hx _ _)
+
+/-!
 ## The Divisor of a Germ
 -/
 

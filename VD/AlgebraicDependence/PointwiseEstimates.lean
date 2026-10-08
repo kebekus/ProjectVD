@@ -32,9 +32,9 @@ of a polynomial expression in `w`) is estimated in terms of `log⁺` of the coef
 - `Real.posLog_norm_inv_le_of_eq_zero`: Mohon'ko's lemma, pointwise (needs `a 0 ≠ 0`).
 - `Real.posLog_norm_sum_mul_pow_le` (for package D): the upper bound
   `log⁺ ‖Σ_{j≤d} a j * w ^ j‖ ≤ d · log⁺ ‖w‖ + Σ_{j≤d} log⁺ ‖a j‖ + log (d + 1)`.
-
-The Bezout estimate for the lower bound of the rational Valiron–Mohon'ko identity (plan §9,
-G2) will be added here together with package G.
+- `Real.nsmul_posLog_norm_add_posLog_norm_inv_le_of_bezout` (G2, for package G): Mohon'ko's
+  **Bezout estimate** for a quotient of monic polynomial expressions with a Bezout certificate,
+  the pointwise input for the lower bound of the rational Valiron–Mohon'ko identity.
 -/
 
 @[expose] public section
@@ -297,5 +297,224 @@ theorem posLog_norm_inv_le_of_eq_zero {d : ℕ}
       _ ≤ log⁺ ‖a 0‖⁻¹ + (log #(range (d + 1)) + ∑ i ∈ range (d + 1), log⁺ ‖a (i + 1)‖) := by
           gcongr; exact posLog_sum _ _
       _ = _ := by simp only [card_range]; push_cast; ring
+
+/-!
+## The Bezout Estimate
+
+The pointwise input for the lower bound of the rational Valiron–Mohon'ko identity (plan §9,
+G2). If `P` and `Q` are monic polynomial expressions of degrees `p ≥ q` with a Bezout
+certificate `U * P + V * Q = 1`, then `(p - q) · log⁺ ‖w‖ + log⁺ ‖Q(w)‖⁻¹` is bounded by
+`log⁺ ‖P(w) / Q(w)‖` up to `log⁺` of the coefficients of `P`, `Q`, `U`, `V`. For large `‖w‖`
+the leading terms dominate; for bounded `‖w‖` the Bezout identity shows that `Q(w)` can only be
+small where `P(w)` is not.
+-/
+
+/-- **Bezout estimate, scalar form.** If `u * x + v * y = 1`, then
+`log⁺ ‖y‖⁻¹ ≤ log⁺ ‖x / y‖ + log⁺ ‖u‖ + log⁺ ‖v‖ + log 2`: `y` can only be small where `x / y`
+is large, up to the size of the Bezout coefficients. -/
+theorem posLog_norm_inv_le_of_bezout {x y u v : 𝕜} (h : u * x + v * y = 1) :
+    log⁺ ‖y‖⁻¹ ≤ log⁺ ‖x / y‖ + log⁺ ‖u‖ + log⁺ ‖v‖ + log 2 := by
+  have hu : 0 ≤ log⁺ ‖u‖ := posLog_nonneg
+  have hv : 0 ≤ log⁺ ‖v‖ := posLog_nonneg
+  have hxy : 0 ≤ log⁺ ‖x / y‖ := posLog_nonneg
+  have h2 : 0 ≤ log 2 := log_nonneg one_le_two
+  have hlog2 : log⁺ (2 : ℝ) = log 2 := posLog_eq_log (by norm_num)
+  rcases le_or_gt 1 ‖y‖ with hy | hy
+  · -- `1 ≤ ‖y‖`: the left-hand side vanishes.
+    rw [(posLog_eq_zero_iff _).2
+      (by rw [abs_of_nonneg (inv_nonneg.2 (norm_nonneg _))]; exact inv_le_one_of_one_le₀ hy)]
+    linarith
+  rcases eq_or_ne y 0 with rfl | hy0
+  · simp only [norm_zero, inv_zero, posLog_zero]
+    linarith
+  have hypos : 0 < ‖y‖ := norm_pos_iff.2 hy0
+  rcases le_or_gt (1 / 2) ‖v * y‖ with hvy | hvy
+  · -- `‖v y‖ ≥ 1/2`: then `‖y‖⁻¹ ≤ 2 ‖v‖`.
+    have h₁ : ‖y‖⁻¹ ≤ 2 * ‖v‖ := by
+      rw [norm_mul] at hvy
+      rw [inv_le_iff_one_le_mul₀ hypos]
+      linarith
+    calc log⁺ ‖y‖⁻¹ ≤ log⁺ (2 * ‖v‖) :=
+          posLog_le_posLog (by linarith [inv_nonneg.2 (norm_nonneg y)]) h₁
+      _ ≤ log⁺ 2 + log⁺ ‖v‖ := posLog_mul
+      _ ≤ _ := by rw [hlog2]; linarith
+  · -- `‖v y‖ < 1/2`: then `‖u x‖ ≥ 1/2` and `‖y‖⁻¹ ≤ 2 ‖u‖ ‖x / y‖`.
+    have hux : 1 / 2 ≤ ‖u * x‖ := by
+      rw [eq_sub_of_add_eq h]
+      have := norm_sub_norm_le (1 : 𝕜) (v * y)
+      rw [norm_one] at this
+      linarith
+    have h₁ : ‖y‖⁻¹ ≤ 2 * ‖u‖ * ‖x / y‖ := by
+      rw [norm_mul] at hux
+      rw [norm_div, ← mul_div_assoc, le_div_iff₀ hypos, inv_mul_cancel₀ hypos.ne']
+      linarith
+    calc log⁺ ‖y‖⁻¹ ≤ log⁺ (2 * ‖u‖ * ‖x / y‖) :=
+          posLog_le_posLog (by linarith [inv_nonneg.2 (norm_nonneg y)]) h₁
+      _ ≤ log⁺ (2 * ‖u‖) + log⁺ ‖x / y‖ := posLog_mul
+      _ ≤ log⁺ 2 + log⁺ ‖u‖ + log⁺ ‖x / y‖ := by linarith [posLog_mul (x := 2) (y := ‖u‖)]
+      _ ≤ _ := by rw [hlog2]; linarith
+
+/-- For `1 ≤ ‖w‖`, a polynomial expression in `w` with exponents at most `d` is bounded by
+`‖w‖ ^ d` times the sum of the norms of its coefficients. -/
+lemma norm_sum_mul_pow_le_of_one_le_norm' {s : Finset ℕ} {d : ℕ} (hw : 1 ≤ ‖w‖)
+    (hs : ∀ j ∈ s, j ≤ d) :
+    ‖∑ j ∈ s, a j * w ^ j‖ ≤ (∑ j ∈ s, ‖a j‖) * ‖w‖ ^ d := by
+  rw [sum_mul]
+  refine (norm_sum_le _ _).trans (sum_le_sum fun j hj ↦ ?_)
+  rw [norm_mul, norm_pow]
+  exact mul_le_mul_of_nonneg_left (pow_le_pow_right₀ hw (hs j hj)) (norm_nonneg _)
+
+/-- For `‖w‖ ≥ max 1 (2 Σ_{j<d} ‖a j‖)`, the leading term of a monic polynomial expression
+dominates: `‖w‖ ^ d ≤ 2 ‖w ^ d + Σ_{j<d} a j * w ^ j‖`. -/
+lemma pow_le_two_mul_norm_monic {d : ℕ} (hw₁ : 1 ≤ ‖w‖)
+    (hw₂ : 2 * ∑ j ∈ range d, ‖a j‖ ≤ ‖w‖) :
+    ‖w‖ ^ d ≤ 2 * ‖w ^ d + ∑ j ∈ range d, a j * w ^ j‖ := by
+  rcases d with _ | d
+  · simp
+  have h₁ : ‖∑ j ∈ range (d + 1), a j * w ^ j‖ ≤ (∑ j ∈ range (d + 1), ‖a j‖) * ‖w‖ ^ d :=
+    norm_sum_mul_pow_le_of_one_le_norm hw₁
+  have h₂ : (∑ j ∈ range (d + 1), ‖a j‖) * ‖w‖ ^ d ≤ ‖w‖ ^ (d + 1) / 2 := by
+    rw [pow_succ]
+    nlinarith [pow_nonneg (norm_nonneg w) d]
+  have h₃ := norm_le_norm_add_norm_sub' (w ^ (d + 1))
+    (w ^ (d + 1) + ∑ j ∈ range (d + 1), a j * w ^ j)
+  rw [sub_add_cancel_left, norm_neg, norm_pow] at h₃
+  linarith
+
+/--
+**Bezout estimate for monic polynomial expressions** (G2). Let `P(w) = w ^ p + Σ_{j<p} a j * w ^ j`
+and `Q(w) = w ^ q + Σ_{k<q} b k * w ^ k` be monic polynomial expressions of degrees `q ≤ p`, and let
+`U(w) = Σ_{i≤m} u i * w ^ i`, `V(w) = Σ_{i≤n} v i * w ^ i` satisfy the Bezout identity
+`U(w) P(w) + V(w) Q(w) = 1`. Then
+`(p - q) · log⁺ ‖w‖ + log⁺ ‖Q(w)‖⁻¹ ≤ log⁺ ‖P(w) / Q(w)‖ + (p + m + n + 3) · Λ`, where `Λ` is the
+sum of `log⁺` of all coefficients of `P`, `Q`, `U`, `V` plus `log 2 + log p + log q + log (m + 1)
++ log (n + 1)`.
+
+This is Mohon'ko's pointwise estimate: integrated over a circle and combined with the
+corresponding divisor estimate, it gives the lower bound `max p q · T(r, f) ≤ T(r, P(f)/Q(f)) + S`
+of the rational Valiron–Mohon'ko identity. The constants are not optimized.
+-/
+theorem nsmul_posLog_norm_add_posLog_norm_inv_le_of_bezout {p q m n : ℕ} (hqp : q ≤ p)
+    {b u v : ℕ → 𝕜}
+    (h : (∑ i ∈ range (m + 1), u i * w ^ i) * (w ^ p + ∑ j ∈ range p, a j * w ^ j)
+      + (∑ i ∈ range (n + 1), v i * w ^ i) * (w ^ q + ∑ k ∈ range q, b k * w ^ k) = 1) :
+    ((p - q : ℕ) : ℝ) * log⁺ ‖w‖ + log⁺ ‖w ^ q + ∑ k ∈ range q, b k * w ^ k‖⁻¹
+      ≤ log⁺ ‖(w ^ p + ∑ j ∈ range p, a j * w ^ j) / (w ^ q + ∑ k ∈ range q, b k * w ^ k)‖
+        + (p + m + n + 3) * (∑ j ∈ range p, log⁺ ‖a j‖ + ∑ k ∈ range q, log⁺ ‖b k‖
+          + ∑ i ∈ range (m + 1), log⁺ ‖u i‖ + ∑ i ∈ range (n + 1), log⁺ ‖v i‖
+          + log 2 + log p + log q + log (m + 1) + log (n + 1)) := by
+  set Pw := w ^ p + ∑ j ∈ range p, a j * w ^ j with hPw
+  set Qw := w ^ q + ∑ k ∈ range q, b k * w ^ k with hQw
+  set Uw := ∑ i ∈ range (m + 1), u i * w ^ i with hUw
+  set Vw := ∑ i ∈ range (n + 1), v i * w ^ i with hVw
+  set A := ∑ j ∈ range p, ‖a j‖ with hA
+  set B := ∑ k ∈ range q, ‖b k‖ with hB
+  set Sa := ∑ j ∈ range p, log⁺ ‖a j‖ with hSa
+  set Sb := ∑ k ∈ range q, log⁺ ‖b k‖ with hSb
+  set Su := ∑ i ∈ range (m + 1), log⁺ ‖u i‖ with hSu
+  set Sv := ∑ i ∈ range (n + 1), log⁺ ‖v i‖ with hSv
+  set Λ := Sa + Sb + Su + Sv + log 2 + log p + log q + log (m + 1) + log (n + 1) with hΛ
+  -- Nonnegativity of everything in sight.
+  have hA₀ : 0 ≤ A := sum_nonneg fun _ _ ↦ norm_nonneg _
+  have hB₀ : 0 ≤ B := sum_nonneg fun _ _ ↦ norm_nonneg _
+  have hSa₀ : 0 ≤ Sa := sum_nonneg fun _ _ ↦ posLog_nonneg
+  have hSb₀ : 0 ≤ Sb := sum_nonneg fun _ _ ↦ posLog_nonneg
+  have hSu₀ : 0 ≤ Su := sum_nonneg fun _ _ ↦ posLog_nonneg
+  have hSv₀ : 0 ≤ Sv := sum_nonneg fun _ _ ↦ posLog_nonneg
+  have hlog2 : 0 ≤ log 2 := log_nonneg one_le_two
+  have hlogp : 0 ≤ log (p : ℝ) := log_natCast_nonneg p
+  have hlogq : 0 ≤ log (q : ℝ) := log_natCast_nonneg q
+  have hlogm : 0 ≤ log ((m : ℝ) + 1) := log_nonneg (by linarith [Nat.cast_nonneg (α := ℝ) m])
+  have hlogn : 0 ≤ log ((n : ℝ) + 1) := log_nonneg (by linarith [Nat.cast_nonneg (α := ℝ) n])
+  have hΛ₀ : 0 ≤ Λ := by positivity
+  have hK₀ : (0 : ℝ) ≤ p + m + n := by positivity
+  have hpq : ((p - q : ℕ) : ℝ) = p - q := Nat.cast_sub hqp
+  have hpq₀ : (0 : ℝ) ≤ p - q := by rw [← hpq]; positivity
+  have hg₀ : 0 ≤ log⁺ ‖Pw / Qw‖ := posLog_nonneg
+  -- `log⁺` of the coefficient sums.
+  have hlogA : log⁺ A ≤ log p + Sa := by simpa using posLog_sum (range p) fun j ↦ ‖a j‖
+  have hlogB : log⁺ B ≤ log q + Sb := by simpa using posLog_sum (range q) fun k ↦ ‖b k‖
+  -- The radius separating the two regions.
+  set R := max 1 (max (2 * A) (2 * B)) with hR
+  have hR1 : 1 ≤ R := le_max_left _ _
+  have hlogR : log R ≤ Λ := by
+    have h₁ : R ≤ 2 * max 1 (max A B) := by
+      simp only [hR, max_le_iff]
+      refine ⟨by linarith [le_max_left 1 (max A B)], ?_, ?_⟩
+      · linarith [le_max_left A B, le_max_right 1 (max A B)]
+      · linarith [le_max_right A B, le_max_right 1 (max A B)]
+    have h₂ : log⁺ (max A B) ≤ log⁺ A + log⁺ B := by
+      rcases le_total A B with h | h
+      · rw [max_eq_right h]; linarith [posLog_nonneg (x := A)]
+      · rw [max_eq_left h]; linarith [posLog_nonneg (x := B)]
+    calc log R ≤ log (2 * max 1 (max A B)) := log_le_log (by positivity) h₁
+      _ = log 2 + log (max 1 (max A B)) := log_mul two_ne_zero (by positivity)
+      _ = log 2 + log⁺ (max A B) := by rw [posLog_eq_log_max_one (le_max_of_le_left hA₀)]
+      _ ≤ _ := by linarith
+  rcases le_or_gt R ‖w‖ with hw | hw
+  · -- Region `‖w‖ ≥ R`: the leading terms dominate.
+    have hw1 : 1 ≤ ‖w‖ := hR1.trans hw
+    have hwA : 2 * A ≤ ‖w‖ := ((le_max_left _ _).trans (le_max_right _ _)).trans hw
+    have hwB : 2 * B ≤ ‖w‖ := ((le_max_right _ _).trans (le_max_right _ _)).trans hw
+    have hP := pow_le_two_mul_norm_monic (a := a) (d := p) hw1 hwA
+    have hQ := pow_le_two_mul_norm_monic (a := b) (d := q) hw1 hwB
+    have hwp : 1 ≤ ‖w‖ ^ p := one_le_pow₀ hw1
+    have hwq : 1 ≤ ‖w‖ ^ q := one_le_pow₀ hw1
+    have hPpos : 0 < ‖Pw‖ := by linarith
+    have hQpos : 0 < ‖Qw‖ := by linarith
+    have hQup : ‖Qw‖ ≤ (1 + B) * ‖w‖ ^ q := by
+      calc ‖Qw‖ ≤ ‖w ^ q‖ + ‖∑ k ∈ range q, b k * w ^ k‖ := norm_add_le _ _
+        _ ≤ ‖w‖ ^ q + B * ‖w‖ ^ q := by
+            rw [norm_pow]
+            gcongr
+            exact norm_sum_mul_pow_le_of_one_le_norm' hw1 fun k hk ↦ (mem_range.1 hk).le
+        _ = _ := by ring
+    -- `log⁺ ‖Qw‖⁻¹ ≤ log 2`.
+    have h₁ : log⁺ ‖Qw‖⁻¹ ≤ log 2 := by
+      have : ‖Qw‖⁻¹ ≤ 2 := by
+        rw [inv_le_comm₀ hQpos two_pos]
+        linarith
+      calc log⁺ ‖Qw‖⁻¹ ≤ log⁺ 2 :=
+            posLog_le_posLog (by linarith [inv_nonneg.2 (norm_nonneg Qw)]) this
+        _ = log 2 := posLog_eq_log (by norm_num)
+    -- `(p - q) log ‖w‖ ≤ log⁺ ‖Pw / Qw‖ + 2 log 2 + log⁺ B`.
+    have h₂ : ((p : ℝ) - q) * log ‖w‖ ≤ log⁺ ‖Pw / Qw‖ + 2 * log 2 + log⁺ B := by
+      have hdiv : ‖w‖ ^ p / (2 * ((1 + B) * ‖w‖ ^ q)) ≤ ‖Pw / Qw‖ := by
+        rw [norm_div]
+        calc ‖w‖ ^ p / (2 * ((1 + B) * ‖w‖ ^ q)) ≤ 2 * ‖Pw‖ / (2 * ‖Qw‖) :=
+              div_le_div₀ (by positivity) hP (by positivity) (by linarith)
+          _ = ‖Pw‖ / ‖Qw‖ := mul_div_mul_left _ _ two_ne_zero
+      have hlog := log_le_log (by positivity) hdiv
+      rw [log_div (by positivity) (by positivity), log_pow, log_mul two_ne_zero (by positivity),
+        log_mul (by positivity) (by positivity), log_pow] at hlog
+      have h₁ := log_one_add_le_posLog (x := B)
+      have h₂ : log ‖Pw / Qw‖ ≤ log⁺ ‖Pw / Qw‖ := le_max_right _ _
+      linarith
+    rw [posLog_eq_log (by rwa [abs_norm]), hpq]
+    have h₃ : 3 * Λ ≤ (p + m + n + 3) * Λ := by nlinarith
+    linarith
+  · -- Region `‖w‖ < R`: `log⁺ ‖w‖` is bounded, and the Bezout identity controls `Qw`.
+    have hlogw : log⁺ ‖w‖ ≤ Λ := by
+      calc log⁺ ‖w‖ ≤ log⁺ R := posLog_le_posLog (by linarith [norm_nonneg w]) hw.le
+        _ = log R := posLog_eq_log (by rw [abs_of_pos (by linarith)]; exact hR1)
+        _ ≤ Λ := hlogR
+    have hbez := posLog_norm_inv_le_of_bezout h
+    have hU : log⁺ ‖Uw‖ ≤ m * log⁺ ‖w‖ + Su + log (m + 1) := posLog_norm_sum_mul_pow_le u w
+    have hV : log⁺ ‖Vw‖ ≤ n * log⁺ ‖w‖ + Sv + log (n + 1) := posLog_norm_sum_mul_pow_le v w
+    have hlogw₀ : 0 ≤ log⁺ ‖w‖ := posLog_nonneg
+    have h₁ : ((p : ℝ) - q) * log⁺ ‖w‖ ≤ ((p : ℝ) - q) * Λ :=
+      mul_le_mul_of_nonneg_left hlogw hpq₀
+    have h₂ : (m : ℝ) * log⁺ ‖w‖ ≤ m * Λ :=
+      mul_le_mul_of_nonneg_left hlogw (Nat.cast_nonneg m)
+    have h₃ : (n : ℝ) * log⁺ ‖w‖ ≤ n * Λ :=
+      mul_le_mul_of_nonneg_left hlogw (Nat.cast_nonneg n)
+    have h₄ : ((p : ℝ) - q) * Λ + m * Λ + n * Λ + Λ ≤ (p + m + n + 3) * Λ := by
+      have e : (p + m + n + 3) * Λ - (((p : ℝ) - q) * Λ + m * Λ + n * Λ + Λ) = (q + 2) * Λ := by
+        ring
+      have : 0 ≤ ((q : ℝ) + 2) * Λ := by positivity
+      linarith
+    have h₅ : Su + Sv + log (m + 1) + log (n + 1) + log 2 ≤ Λ := by rw [hΛ]; linarith
+    rw [hpq]
+    linarith only [hbez, hU, hV, h₁, h₂, h₃, h₄, h₅]
 
 end Real
