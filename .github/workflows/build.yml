@@ -1,0 +1,34 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Cancel superseded runs on the same branch or pull request.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and check
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # Installs elan from `lean-toolchain`, fetches the Mathlib olean cache,
+      # caches `.lake` between runs, and runs `lake build`.
+      # `--wfail` turns linter warnings into errors.
+      - name: Build VD
+        uses: leanprover/lean-action@v1
+        with:
+          build-args: --wfail
+
+      # Fail if a `.lean` file under `VD/` is not imported from `VD.lean`.
+      # Fix locally with `lake exe mk_all --lib VD`.
+      - name: Check VD.lean imports every module
+        run: lake exe mk_all --lib VD --check
