@@ -1,7 +1,6 @@
 module
 
 public import VD.AlgebraicDependence.ClunieMohonko
-public import VD.AlgebraicDependence.DivisorEstimates
 public import VD.AlgebraicDependence.GermCharacteristic
 public import VD.AlgebraicDependence.GrowthClass
 public import VD.AlgebraicDependence.GrowthField
@@ -30,6 +29,7 @@ public import VD.MathlibPending.ProximityBounded
 public import VD.MathlibSubmitted.CanonicalFactor
 public import VD.MathlibSubmitted.ChordLength
 public import VD.MathlibSubmitted.DivisorDeriv
+public import VD.MathlibSubmitted.DivisorEstimates
 public import VD.MathlibSubmitted.JensenInequality
 public import VD.MathlibSubmitted.Liouville
 public import VD.MathlibSubmitted.PoissonJensen

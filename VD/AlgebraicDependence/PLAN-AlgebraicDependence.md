@@ -317,15 +317,18 @@ Estimated size: ~250 lines. Difficulty: low (case analyses with `Finset.sum_le_s
 
 ---
 
-## 4. Work package B — divisor estimates ✅ **DONE** (2026-10-06, except B3)
+## 4. Work package B — divisor estimates ✅ **DONE** (2026-10-06, except B3) 🚀 **PR #44629**
 
-*File `VD/AlgebraicDependence/DivisorEstimates.lean`. Order arithmetic in `WithTop ℤ`,
-mirroring `VD/MathlibSubmitted/DivisorDeriv.lean`. Mathlib targets:
-`Mathlib/Analysis/Meromorphic/Order.lean` (B1), `…/Divisor.lean` (B2–B3). Independent of A.*
+*File `VD/MathlibSubmitted/DivisorEstimates.lean`, submitted as PR #44629 (2026-10-08, in
+review; B1 and B2 in one PR). Order arithmetic in `WithTop ℤ`, mirroring
+`VD/MathlibSubmitted/DivisorDeriv.lean`. Mathlib targets:
+`Mathlib/Analysis/Meromorphic/Order.lean` (B1), `…/Divisor.lean` (B2–B3). Independent of A.
+The local file is kept verbatim in sync with the PR.*
 
 *Implementation notes.* B1 and B2 are proved as stated (~180 lines, builds warning-free). The
 order-level core of B2 is split off as a public lemma,
-`exists_meromorphicOrderAt_le_of_monic_lt` (`𝕜`-valued `f`, `a j`, no `U`): if `f` has order
+`exists_meromorphicOrderAt_le_of_monic_lt` (`f`, `a j : 𝕜 → 𝕜'` for a normed `𝕜`-algebra
+`𝕜'`, as in `Order.lean`; no `U`): if `f` has order
 `n` at `x` and the monic expression has order `> d·n`, then some `a j` has order
 `≤ (d − j)·n`. Its proof is the contradiction sketched below, run through B1 with the uniform
 bound `d·n + 1` (a private `WithTop ℤ` helper `coe_add_one_le_of_coe_lt` converts `<` into
@@ -890,7 +893,7 @@ algebroid characteristic theorem (requires the vector characteristic, decision 8
 VD/AlgebraicDependence/
   PLAN-AlgebraicDependence.md      this file
   PointwiseEstimates.lean          A  (+ G2)
-  DivisorEstimates.lean            B
+  DivisorEstimates.lean            B  🚀 (now `VD/MathlibSubmitted/`, PR #44629)
   MonicRelation.lean               C  (T1, T2, C0, C5)
   GrowthClass.lean                 D3 (IsGrowthClass; used by F2)
   PolynomialCharacteristic.lean    D  (T3, D3)
@@ -905,11 +908,12 @@ Dependency graph: `A, B` independent; `C ← A, B`; `D ← C`; `E ← A`; `F ←
 
 Mathlib PRs, in order:
 
-1. `le_meromorphicOrderAt_sum` (B1) → `Analysis/Meromorphic/Order.lean`. Tiny.
+1. `le_meromorphicOrderAt_sum` (B1) → `Analysis/Meromorphic/Order.lean`. Tiny. 🚀 Submitted
+   together with item 4 as **PR #44629** (2026-10-08).
 2. `characteristic_mul_top_le'`/`_zero'` (C0) → `ValueDistribution/CharacteristicFunction.lean`.
    Tiny; also upstream `circleAverage_mono_codiscreteWithin` if not yet merged with the LLD.
 3. Package A → `SpecialFunctions/Log/PosLog.lean` (or a new file). Independent.
-4. B2 → `Analysis/Meromorphic/Divisor.lean`.
+4. B2 → `Analysis/Meromorphic/Divisor.lean`. 🚀 Part of **PR #44629** (see item 1).
 5. C + D → new `ValueDistribution/AlgebraicDependence.lean` (T1, T2, T3). The citable core.
 6. E → new `ValueDistribution/Clunie.lean`.
 7. F, G, B3, G2: after `VD/Field/` is upstream (separate track; the germ field is the

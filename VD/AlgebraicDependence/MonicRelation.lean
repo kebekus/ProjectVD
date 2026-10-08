@@ -7,10 +7,10 @@ module
 
 public import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
 public import Mathlib.Analysis.Meromorphic.RCLike
-public import VD.AlgebraicDependence.DivisorEstimates
 public import VD.AlgebraicDependence.PointwiseEstimates
 public import VD.Field.CodiscreteWithinNeBot
 public import VD.LLD.LogDerivEstimates
+public import VD.MathlibSubmitted.DivisorEstimates
 
 /-!
 # The Master Inequality and Algebraic Dependence — Algebraic Dependence work package C
@@ -18,7 +18,8 @@ public import VD.LLD.LogDerivEstimates
 See `VD/AlgebraicDependence/PLAN-AlgebraicDependence.md`, §5.
 
 Mathlib target: new file `Mathlib/Analysis/Complex/ValueDistribution/AlgebraicDependence.lean`
-(C0 goes to `CharacteristicFunction.lean`). Dependencies: packages A and B, and
+(C0 goes to `CharacteristicFunction.lean`). Dependencies: packages A and B (the latter now
+`VD/MathlibSubmitted/DivisorEstimates.lean`, PR #44629), and
 `circleAverage_mono_codiscreteWithin` from `VD/LLD/LogDerivEstimates.lean`.
 
 Throughout, `f : ℂ → ℂ` is meromorphic, `a : ℕ → ℂ → ℂ` is a family of meromorphic
