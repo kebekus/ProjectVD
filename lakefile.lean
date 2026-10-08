@@ -22,7 +22,10 @@ abbrev mathlibLeanOptions : Array LeanOption := #[
     mathlibOnlyLinters.map fun s ↦ { s with name := `weak ++ s.name }
 
 package «VD» where
-  -- add any additional package configuration options here
+  -- `lake lint` runs the Batteries environment linters (`docBlame`, `unusedArguments`, `simpNF`,
+  -- ...) over the `VD` library, mirroring Mathlib's own configuration.
+  lintDriver := "batteries/runLinter"
+  lintDriverArgs := #["VD"]
 
 require mathlib from git
   "https://github.com/leanprover-community/mathlib4.git"

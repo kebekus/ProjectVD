@@ -1,0 +1,94 @@
+name: Update Mathlib
+
+# Twice a week, move to the current Mathlib master and its toolchain, build, and open a pull
+# request with the result. The PR title says whether the build passed.
+#
+# Pull requests opened with the default GITHUB_TOKEN do not trigger other workflows, so the build
+# is run here. Merging the PR triggers the regular Build workflow on main.
+
+on:
+  schedule:
+    - cron: "0 4 * * 1,4" # Monday and Thursday, 04:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-mathlib
+  cancel-in-progress: true
+
+jobs:
+  update:
+    name: Update Mathlib and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Record current versions
+        id: before
+        run: |
+          echo "toolchain=$(cat lean-toolchain)" >> "$GITHUB_OUTPUT"
+          echo "mathlib=$(python3 -I -c 'import json; print(next(p["rev"] for p in json.load(open("lake-manifest.json"))["packages"] if p["name"] == "mathlib"))')" >> "$GITHUB_OUTPUT"
+
+      - name: Install elan
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      # Mathlib's recommended procedure for downstream projects: take Mathlib's toolchain first,
+      # then update the manifest. The doc-gen4 pin in docbuild/ follows the toolchain version.
+      - name: Update toolchain and Mathlib
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover-community/mathlib4/master/lean-toolchain -o lean-toolchain
+          MATHLIB_NO_CACHE_ON_UPDATE=1 lake update mathlib
+          ver="$(sed 's|^leanprover/lean4:||' lean-toolchain)"
+          sed -i "s|^rev = \"v.*\"|rev = \"${ver}\"|" docbuild/lakefile.toml
+
+      - name: Detect changes
+        id: after
+        run: |
+          if git diff --quiet -- lean-toolchain lake-manifest.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "toolchain=$(cat lean-toolchain)" >> "$GITHUB_OUTPUT"
+          echo "mathlib=$(python3 -I -c 'import json; print(next(p["rev"] for p in json.load(open("lake-manifest.json"))["packages"] if p["name"] == "mathlib"))')" >> "$GITHUB_OUTPUT"
+
+      - name: Build, lint, and check imports
+        if: steps.after.outputs.changed == 'true'
+        id: build
+        continue-on-error: true
+        uses: leanprover/lean-action@v1
+        with:
+          build-args: --wfail
+          lint: true
+          mk_all-check: true
+          mk_all-args: --lib VD
+          use-github-cache: false
+
+      - name: Open or update pull request
+        if: steps.after.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          branch: ci/update-mathlib
+          delete-branch: true
+          commit-message: Update Mathlib
+          title: ${{ steps.build.outcome == 'success' && 'Update Mathlib' || 'Update Mathlib (build failing)' }}
+          labels: mathlib-update
+          body: |
+            Automated update to the current Mathlib master.
+
+            | | before | after |
+            |---|---|---|
+            | toolchain | `${{ steps.before.outputs.toolchain }}` | `${{ steps.after.outputs.toolchain }}` |
+            | Mathlib | [`${{ steps.before.outputs.mathlib }}`](https://github.com/leanprover-community/mathlib4/commit/${{ steps.before.outputs.mathlib }}) | [`${{ steps.after.outputs.mathlib }}`](https://github.com/leanprover-community/mathlib4/commit/${{ steps.after.outputs.mathlib }}) |
+
+            Build, lint, and `mk_all` check: **${{ steps.build.outcome }}**
+            ([workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})).
+
+            Mathlib changes: https://github.com/leanprover-community/mathlib4/compare/${{ steps.before.outputs.mathlib }}...${{ steps.after.outputs.mathlib }}

@@ -1,1 +1,4 @@
 /.lake
+/docbuild/.lake
+/docbuild/lake-manifest.json
+/docbuild/lean-toolchain

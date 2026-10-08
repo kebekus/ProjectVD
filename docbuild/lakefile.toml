@@ -1,0 +1,23 @@
+# Nested Lake project for building the HTML documentation of `VD` with doc-gen4.
+#
+# This follows the setup recommended in https://github.com/leanprover/doc-gen4#usage. Build the
+# documentation from inside this directory with
+#
+#   MATHLIB_NO_CACHE_ON_UPDATE=1 lake update doc-gen4
+#   lake build VD:docs
+#
+# The result is served from `docbuild/.lake/build/doc`. The `rev` below must match the Lean version
+# in `../lean-toolchain`; the `docs.yml` workflow rewrites it automatically.
+name = "docbuild"
+reservoir = false
+version = "0.1.0"
+packagesDir = "../.lake/packages"
+
+[[require]]
+scope = "leanprover"
+name = "doc-gen4"
+rev = "v4.35.0-rc3"
+
+[[require]]
+name = "VD"
+path = "../"

@@ -53,6 +53,8 @@ how such an operator acts on functions.
 -/
 @[ext]
 structure LinearDiffOp (n) where
+  /-- The tensor field defining the operator: at each point `e : E`, a continuous linear map
+  from tuples of multilinear maps `(E [×i]→L[𝕜] F)_{i ≤ n}` to `G`. -/
   tensorField : E → (∀ i : Fin (n + 1), E [×i]→L[𝕜] F) →L[𝕜] G
 
 /--

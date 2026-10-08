@@ -1,0 +1,69 @@
+name: Documentation
+
+# Build the HTML documentation with doc-gen4 and publish it to GitHub Pages.
+#
+# doc-gen4 documents VD together with everything it imports, so this builds the documentation of
+# Mathlib as well and takes well over an hour on a standard runner. It therefore runs only on
+# pushes to main and on manual dispatch.
+#
+# Requires GitHub Pages to be enabled for the repository with "GitHub Actions" as the source
+# (Settings -> Pages -> Build and deployment -> Source).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a deployment in progress finish; queue the next one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build documentation
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Build VD
+        uses: leanprover/lean-action@v1
+        with:
+          test: false
+          lint: false
+
+      # The doc-gen4 release tag must match the Lean version in `lean-toolchain`.
+      - name: Pin doc-gen4 to the toolchain version
+        run: |
+          ver="$(sed 's|^leanprover/lean4:||' lean-toolchain)"
+          sed -i "s|^rev = \"v.*\"|rev = \"${ver}\"|" docbuild/lakefile.toml
+
+      - name: Build documentation
+        working-directory: docbuild
+        run: |
+          MATHLIB_NO_CACHE_ON_UPDATE=1 lake update doc-gen4
+          lake build VD:docs
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: docbuild/.lake/build/doc
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5

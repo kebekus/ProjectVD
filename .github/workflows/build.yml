@@ -18,17 +18,18 @@ jobs:
     timeout-minutes: 90
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
-      # Installs elan from `lean-toolchain`, fetches the Mathlib olean cache,
-      # caches `.lake` between runs, and runs `lake build`.
-      # `--wfail` turns linter warnings into errors.
-      - name: Build VD
+      # Installs elan from `lean-toolchain`, fetches the Mathlib olean cache, caches `.lake`
+      # between runs (keyed on toolchain and manifest), and then runs
+      #   lake build --wfail          -- linter warnings are errors
+      #   lake lint                   -- Batteries environment linters, see `lintDriver` in lakefile
+      #   lake exe mk_all --check --lib VD   -- every file under VD/ is imported from VD.lean
+      # Fix a failing mk_all check locally with `lake exe mk_all --lib VD`.
+      - name: Build, lint, and check imports
         uses: leanprover/lean-action@v1
         with:
           build-args: --wfail
-
-      # Fail if a `.lean` file under `VD/` is not imported from `VD.lean`.
-      # Fix locally with `lake exe mk_all --lib VD`.
-      - name: Check VD.lean imports every module
-        run: lake exe mk_all --lib VD --check
+          lint: true
+          mk_all-check: true
+          mk_all-args: --lib VD
