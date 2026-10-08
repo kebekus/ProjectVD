@@ -45,8 +45,10 @@ section OrderLevel
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] {E : Type*} [NormedAddCommGroup E]
   [NormedSpace 𝕜 E] {x : 𝕜}
 
-/-- The order of a finite sum is at least the minimum of the orders of the summands: if every
-summand has order at least `n`, so does the sum. Finite-sum version of `meromorphicOrderAt_add`. -/
+/--
+The order of a finite sum is at least the minimum of the orders of the summands: if every summand
+has order at least `n`, so does the sum. Finite-sum version of `meromorphicOrderAt_add`.
+-/
 theorem le_meromorphicOrderAt_sum {ι : Type*} {s : Finset ι} {f : ι → 𝕜 → E} {n : WithTop ℤ}
     (hf : ∀ i ∈ s, MeromorphicAt (f i) x) (hn : ∀ i ∈ s, n ≤ meromorphicOrderAt (f i) x) :
     n ≤ meromorphicOrderAt (∑ i ∈ s, f i) x := by
@@ -73,9 +75,11 @@ private lemma coe_add_one_le_of_coe_lt {m : ℤ} {y : WithTop ℤ} (h : (m : Wit
 ## Cancellation of the Leading Term
 -/
 
-/-- If `f` has order `n` at `z` and the monic expression `f ^ d + Σ_{j<d} a j * f ^ j` has order
-greater than `d * n`, then the leading term `f ^ d` is cancelled by one of the other terms: some
-coefficient `a j` has order at most `(d - j) * n`. -/
+/--
+If `f` has order `n` at `z` and the monic expression `f ^ d + Σ_{j<d} a j * f ^ j` has order greater
+than `d * n`, then the leading term `f ^ d` is cancelled by one of the other terms: some coefficient
+`a j` has order at most `(d - j) * n`.
+-/
 theorem exists_meromorphicOrderAt_le_of_monic_lt {f : 𝕜 → 𝕜} {a : ℕ → 𝕜 → 𝕜} {d : ℕ} {n : ℤ}
     (hf : MeromorphicAt f x) (ha : ∀ j, MeromorphicAt (a j) x) (hn : meromorphicOrderAt f x = n)
     (hh : ((d * n : ℤ) : WithTop ℤ) < meromorphicOrderAt (f ^ d + ∑ j ∈ range d, a j * f ^ j) x) :
@@ -120,11 +124,12 @@ namespace MeromorphicOn
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] {U : Set 𝕜}
 
-/-- **Pole divisor under a monic relation**, weighted form: `d` times the pole divisor of `f`
-is bounded by the pole divisor of `f ^ d + Σ_{j<d} a j * f ^ j` plus `d` times the sum of the
-pole divisors of the coefficients. At a pole of order `k` of `f`, either the monic expression
-has a pole of order at least `d k`, or the leading term is cancelled and some coefficient has
-a pole of order at least `k`. -/
+/--
+**Pole divisor under a monic relation**, weighted form: `d` times the pole divisor of `f` is bounded
+by the pole divisor of `f ^ d + Σ_{j<d} a j * f ^ j` plus `d` times the sum of the pole divisors of
+the coefficients. At a pole of order `k` of `f`, either the monic expression has a pole of order at
+least `d k`, or the leading term is cancelled and some coefficient has a pole of order at least `k`.
+-/
 theorem nsmul_negPart_divisor_le_of_monic_eq {f : 𝕜 → 𝕜} {a : ℕ → 𝕜 → 𝕜} {d : ℕ}
     (hf : MeromorphicOn f U) (ha : ∀ j, MeromorphicOn (a j) U) :
     d • (divisor f U)⁻
@@ -200,9 +205,11 @@ private lemma neg_negPart_untop₀_le (y : WithTop ℤ) : ((-(y.untop₀)⁻ : �
     · simp [h]
     · simp [negPart_eq_neg.2 h.le]
 
-/-- **Pole divisor of a polynomial expression**: the pole divisor of `Σ_{j≤d} a j * f ^ j` is
-bounded by the sum of the pole divisors of the coefficients plus `d` times the pole divisor of
-`f`. Note the factor `d` (and not `Σ_{j≤d} j`). -/
+/--
+**Pole divisor of a polynomial expression**: the pole divisor of `Σ_{j≤d} a j * f ^ j` is bounded by
+the sum of the pole divisors of the coefficients plus `d` times the pole divisor of `f`. Note the
+factor `d` (and not `Σ_{j≤d} j`).
+-/
 theorem negPart_divisor_sum_mul_pow_le {f : 𝕜 → 𝕜} {a : ℕ → 𝕜 → 𝕜} {d : ℕ}
     (hf : MeromorphicOn f U) (ha : ∀ j, MeromorphicOn (a j) U) :
     (divisor (∑ j ∈ range (d + 1), a j * f ^ j) U)⁻
