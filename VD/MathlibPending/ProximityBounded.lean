@@ -7,7 +7,6 @@ module
 
 public import VD.MathlibPending.PoissonJensen
 public import VD.MathlibSubmitted.CanonicalFactor
-public import VD.MathlibSubmitted.Liouville
 public import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
 public import Mathlib.Analysis.Complex.Liouville
 public import Mathlib.Analysis.Polynomial.Basic

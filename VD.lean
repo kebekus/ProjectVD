@@ -31,7 +31,6 @@ public import VD.MathlibSubmitted.ChordLength
 public import VD.MathlibSubmitted.DivisorDeriv
 public import VD.MathlibSubmitted.DivisorEstimates
 public import VD.MathlibSubmitted.JensenInequality
-public import VD.MathlibSubmitted.Liouville
 public import VD.MathlibSubmitted.PoissonJensen
 public import VD.SMT.Deficiency
 public import VD.SMT.Picard
