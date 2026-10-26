@@ -30,8 +30,9 @@ variable {X : Type*} [TopologicalSpace X] {S : Set X} {x : X}
 theorem Filter.codiscreteWithin_neBot_iff : (codiscreteWithin S).NeBot ↔ ¬IsDiscrete S := by
   rw [neBot_iff, not_iff_not, codiscreteWithin_eq_bot_iff]
 
-/-- The filter `codiscreteWithin S` is nontrivial if some point of `S` is an accumulation point
-of `S`. -/
+/--
+The filter `codiscreteWithin S` is nontrivial if some point of `S` is an accumulation point of `S`.
+-/
 theorem AccPt.codiscreteWithin_neBot (hx : x ∈ S) (h : AccPt x (𝓟 S)) :
     (codiscreteWithin S).NeBot := by
   have := accPt_principal_iff_nhdsWithin.1 h
@@ -43,8 +44,9 @@ theorem Preperfect.codiscreteWithin_neBot (hS : Preperfect S) (hne : S.Nonempty)
   obtain ⟨x, hx⟩ := hne
   exact (hS x hx).codiscreteWithin_neBot hx
 
-/-- The filter `codiscreteWithin S` is nontrivial if `S` is preconnected and has at least two
-points. -/
+/--
+The filter `codiscreteWithin S` is nontrivial if `S` is preconnected and has at least two points.
+-/
 theorem IsPreconnected.codiscreteWithin_neBot [T1Space X] (hS : IsPreconnected S)
     (h2S : S.Nontrivial) : (codiscreteWithin S).NeBot :=
   (hS.preperfect_of_nontrivial h2S).codiscreteWithin_neBot h2S.nonempty
