@@ -10,6 +10,7 @@ public import VD.AlgebraicDependence.PolynomialCharacteristic
 public import VD.AlgebraicDependence.RationalCharacteristic
 public import VD.Field.CodiscreteWithinEventually
 public import VD.Field.CodiscreteWithinNeBot
+public import VD.Field.GermAlgebra
 public import VD.Field.GermField
 public import VD.Field.GermFieldAPI
 public import VD.Field.MeromorphicGermZero

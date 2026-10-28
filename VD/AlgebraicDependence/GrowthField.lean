@@ -18,7 +18,7 @@ See `VD/AlgebraicDependence/PLAN-AlgebraicDependence.md`, §8.
 
 Mathlib target: follows the germ field `VD/Field/` upstream. Dependencies: packages D and F1.
 
-Throughout, `K := MeromorphicOn.germRing ℂ Set.univ` is the field of meromorphic germs on `ℂ`,
+Throughout, `K := MeromorphicOn.germRing ℂ ℂ Set.univ` is the field of meromorphic germs on `ℂ`,
 `characteristic : K → ℝ → ℝ` is the Nevanlinna characteristic of a germ, and
 `IsGrowthClass l G` is a growth class (`VD/AlgebraicDependence/GrowthClass.lean`).
 
@@ -52,7 +52,7 @@ variable {l : Filter ℝ} {G : (ℝ → ℝ) → Prop}
 /-- The **growth field** of a growth class `G`: the meromorphic germs on `ℂ` whose
 characteristic lies in `G`. It is an intermediate field between the constants and the field of
 all meromorphic germs. -/
-def growthField (hG : IsGrowthClass l G) : IntermediateField ℂ (germRing ℂ univ) where
+def growthField (hG : IsGrowthClass l G) : IntermediateField ℂ (germRing ℂ ℂ univ) where
   carrier := {a | G (characteristic a)}
   add_mem' {a b} ha hb := by
     refine hG.of_le (v := characteristic a + characteristic b + fun _ ↦ log 2)
@@ -82,13 +82,13 @@ def growthField (hG : IsGrowthClass l G) : IntermediateField ℂ (germRing ℂ u
       change characteristic a⁻¹ r ≤ characteristic a r + c
       linarith [(abs_le.1 (hc r)).2]
 
-theorem mem_growthField_iff (hG : IsGrowthClass l G) {a : germRing ℂ univ} :
+theorem mem_growthField_iff (hG : IsGrowthClass l G) {a : germRing ℂ ℂ univ} :
     a ∈ growthField hG ↔ G (characteristic a) := Iff.rfl
 
 /-- The classical field `S(f)` of **small functions** with respect to a germ `f` whose
 characteristic tends to infinity along `l`: the germs `a` with `T(r, a) = o(T(r, f))`. -/
-noncomputable abbrev smallFunctions (hl : l ≤ atTop) {f : germRing ℂ univ}
-    (hf : Tendsto (characteristic f) l atTop) : IntermediateField ℂ (germRing ℂ univ) :=
+noncomputable abbrev smallFunctions (hl : l ≤ atTop) {f : germRing ℂ ℂ univ}
+    (hf : Tendsto (characteristic f) l atTop) : IntermediateField ℂ (germRing ℂ ℂ univ) :=
   growthField (isGrowthClass_isLittleO hl hf)
 
 /-!
@@ -97,16 +97,16 @@ noncomputable abbrev smallFunctions (hl : l ≤ atTop) {f : germRing ℂ univ}
 
 /-- **Growth fields are relatively algebraically closed** (T6): a meromorphic germ that is
 algebraic over the growth field of `G` lies in the growth field. -/
-theorem mem_growthField_of_isAlgebraic (hG : IsGrowthClass l G) {a : germRing ℂ univ}
+theorem mem_growthField_of_isAlgebraic (hG : IsGrowthClass l G) {a : germRing ℂ ℂ univ}
     (ha : IsAlgebraic (growthField hG) a) : a ∈ growthField hG := by
   obtain ⟨p, hp, hpa⟩ := isAlgebraic_iff_isIntegral.1 ha
   -- The monic relation, as a relation in the field of germs.
   have hrel : a ^ p.natDegree
-      + ∑ j ∈ range p.natDegree, (p.coeff j : germRing ℂ univ) * a ^ j = 0 := by
+      + ∑ j ∈ range p.natDegree, (p.coeff j : germRing ℂ ℂ univ) * a ^ j = 0 := by
     have := congrArg (aeval a) hp.as_sum
     rw [← aeval_def, this] at hpa
     simpa using hpa
-  refine hG.of_le (v := ∑ j ∈ range p.natDegree, characteristic (p.coeff j : germRing ℂ univ)
+  refine hG.of_le (v := ∑ j ∈ range p.natDegree, characteristic (p.coeff j : germRing ℂ ℂ univ)
       + fun _ ↦ log (p.natDegree : ℝ))
     (hG.add (hG.sum fun j _ ↦ (p.coeff j).2) (hG.const _)) ?_ ?_
   · filter_upwards [hG.le_atTop (eventually_ge_atTop 1)] with r hr
@@ -119,10 +119,10 @@ theorem mem_growthField_of_isAlgebraic (hG : IsGrowthClass l G) {a : germRing �
 -/
 
 /-- `aeval a P`, written as a polynomial expression in the chosen representatives. -/
-theorem out_aeval_eventuallyEq (hG : IsGrowthClass l G) (a : germRing ℂ univ)
+theorem out_aeval_eventuallyEq (hG : IsGrowthClass l G) (a : germRing ℂ ℂ univ)
     (P : (growthField hG)[X]) :
     out (aeval a P) =ᶠ[codiscrete ℂ]
-      ∑ j ∈ range (P.natDegree + 1), out (P.coeff j : germRing ℂ univ) * out a ^ j := by
+      ∑ j ∈ range (P.natDegree + 1), out (P.coeff j : germRing ℂ ℂ univ) * out a ^ j := by
   rw [aeval_eq_sum_range]
   simp only [Algebra.smul_def, IntermediateField.algebraMap_apply]
   exact (out_sum _ _).trans (EventuallyEq.finset_sum fun j _ ↦
@@ -130,11 +130,11 @@ theorem out_aeval_eventuallyEq (hG : IsGrowthClass l G) (a : germRing ℂ univ)
 
 /-- The upper bound of the polynomial Valiron–Mohon'ko identity for germs (D1 at germ level):
 `T(r, P(a)) ≤ deg P · T(r, a) + Σ_{j ≤ deg P} T(r, coeff j) + log (deg P + 1)` for `1 ≤ r`. -/
-theorem characteristic_aeval_le (hG : IsGrowthClass l G) (a : germRing ℂ univ)
+theorem characteristic_aeval_le (hG : IsGrowthClass l G) (a : germRing ℂ ℂ univ)
     (P : (growthField hG)[X]) {r : ℝ} (hr : 1 ≤ r) :
     characteristic (aeval a P) r
       ≤ P.natDegree * characteristic a r
-        + ∑ j ∈ range (P.natDegree + 1), characteristic (P.coeff j : germRing ℂ univ) r
+        + ∑ j ∈ range (P.natDegree + 1), characteristic (P.coeff j : germRing ℂ ℂ univ) r
         + log (P.natDegree + 1) := by
   rw [characteristic, ValueDistribution.characteristic_congr_codiscrete
     (out_aeval_eventuallyEq hG a P) (zero_lt_one.trans_le hr).ne']
@@ -144,18 +144,18 @@ theorem characteristic_aeval_le (hG : IsGrowthClass l G) (a : germRing ℂ univ)
 /-- **The polynomial Valiron–Mohon'ko identity for germs** (F5): for a nonzero polynomial `P`
 with coefficients in the growth field of `G`, `T(r, P(a)) = deg P · T(r, a) + u(r)` with
 `u ∈ G`. -/
-theorem exists_abs_characteristic_aeval_sub_le (hG : IsGrowthClass l G) (a : germRing ℂ univ)
+theorem exists_abs_characteristic_aeval_sub_le (hG : IsGrowthClass l G) (a : germRing ℂ ℂ univ)
     {P : (growthField hG)[X]} (hP : P ≠ 0) :
     ∃ u, G u ∧ ∀ᶠ r in l,
       |characteristic (aeval a P) r - P.natDegree * characteristic a r| ≤ u r := by
   -- The leading coefficient is not codiscretely zero.
-  have hd : ¬ out (P.coeff P.natDegree : germRing ℂ univ) =ᶠ[codiscrete ℂ] 0 := by
+  have hd : ¬ out (P.coeff P.natDegree : germRing ℂ ℂ univ) =ᶠ[codiscrete ℂ] 0 := by
     intro h
-    have : (P.coeff P.natDegree : germRing ℂ univ) = 0 :=
+    have : (P.coeff P.natDegree : germRing ℂ ℂ univ) = 0 :=
       eq_zero_iff_out_eventuallyEq_zero.2 h
     exact hP (leadingCoeff_eq_zero.1 (ZeroMemClass.coe_eq_zero.1 this))
   obtain ⟨u, hu, hu'⟩ := ValueDistribution.exists_abs_characteristic_polynomial_sub_mem hG
-    (meromorphic_out a) (fun j ↦ meromorphic_out (P.coeff j : germRing ℂ univ))
+    (meromorphic_out a) (fun j ↦ meromorphic_out (P.coeff j : germRing ℂ ℂ univ))
     (fun j _ ↦ (P.coeff j).2) hd
   refine ⟨u, hu, ?_⟩
   filter_upwards [hu', hG.le_atTop (eventually_ge_atTop 1)] with r hr hr₁
@@ -206,7 +206,7 @@ theorem exists_characteristic_le_of_isAlgebraic_adjoin {ι : Type*} [Fintype ι]
     let : Algebra (IntermediateField.adjoin ℂ (Set.range fun i ↦ toGerm (hg i)))
       (growthField hG) := (IntermediateField.inclusion hle).toAlgebra
     have : IsScalarTower (IntermediateField.adjoin ℂ (Set.range fun i ↦ toGerm (hg i)))
-      (growthField hG) (MeromorphicOn.germRing ℂ univ) := .of_algebraMap_eq fun _ ↦ rfl
+      (growthField hG) (MeromorphicOn.germRing ℂ ℂ univ) := .of_algebraMap_eq fun _ ↦ rfl
     exact h.extendScalars (IntermediateField.inclusion_injective hle)
   obtain ⟨C, hC⟩ := isBigO_iff.1 (mem_growthField_of_isAlgebraic hG h')
   refine ⟨C, ?_⟩
