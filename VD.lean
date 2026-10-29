@@ -8,12 +8,10 @@ public import VD.AlgebraicDependence.MonicRelation
 public import VD.AlgebraicDependence.PointwiseEstimates
 public import VD.AlgebraicDependence.PolynomialCharacteristic
 public import VD.AlgebraicDependence.RationalCharacteristic
-public import VD.Field.CodiscreteWithinEventually
 public import VD.Field.CodiscreteWithinNeBot
 public import VD.Field.GermAlgebra
 public import VD.Field.GermField
 public import VD.Field.GermFieldAPI
-public import VD.Field.MeromorphicGermZero
 public import VD.LLD.CircleAverageEstimates
 public import VD.LLD.LogDerivEstimates
 public import VD.LLD.LogDerivLemma
@@ -29,9 +27,11 @@ public import VD.MathlibPending.PoissonJensen
 public import VD.MathlibPending.ProximityBounded
 public import VD.MathlibSubmitted.CanonicalFactor
 public import VD.MathlibSubmitted.ChordLength
+public import VD.MathlibSubmitted.CodiscreteWithinEventually
 public import VD.MathlibSubmitted.DivisorDeriv
 public import VD.MathlibSubmitted.DivisorEstimates
 public import VD.MathlibSubmitted.JensenInequality
+public import VD.MathlibSubmitted.MeromorphicGermZero
 public import VD.MathlibSubmitted.PoissonJensen
 public import VD.SMT.Deficiency
 public import VD.SMT.Picard

@@ -7,7 +7,7 @@ module
 
 public import VD.Field.CodiscreteWithinNeBot
 public import VD.Field.GermAlgebra
-public import VD.Field.MeromorphicGermZero
+public import VD.MathlibSubmitted.MeromorphicGermZero
 
 /-!
 # The Field of Meromorphic Functions on a Connected Set

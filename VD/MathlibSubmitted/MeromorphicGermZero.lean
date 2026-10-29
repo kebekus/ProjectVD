@@ -6,7 +6,7 @@ Authors: Stefan Kebekus
 module
 
 public import Mathlib.Analysis.Meromorphic.IsolatedZeros
-public import VD.Field.CodiscreteWithinEventually
+public import VD.MathlibSubmitted.CodiscreteWithinEventually
 
 /-!
 # Vanishing Germs of Meromorphic Functions

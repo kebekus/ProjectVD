@@ -5,7 +5,7 @@ Authors: Stefan Kebekus
 -/
 module
 
-public import VD.Field.CodiscreteWithinEventually
+public import VD.MathlibSubmitted.CodiscreteWithinEventually
 public import VD.LLD.LogDerivLemma
 public import Mathlib.Analysis.Complex.ValueDistribution.SecondMainTheorem
 
