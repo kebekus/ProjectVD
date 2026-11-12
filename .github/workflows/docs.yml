@@ -27,7 +27,9 @@ concurrency:
 jobs:
   build:
     name: Build documentation
-    runs-on: ubuntu-latest
+    # Pinned: on ubuntu-26.04 (the current `ubuntu-latest`) the `srcUri.github` steps fail with
+    # "resource exhausted (error code: 12, not enough memory)" once the core docs are built.
+    runs-on: ubuntu-24.04
     timeout-minutes: 300
     steps:
       - name: Check out repository
