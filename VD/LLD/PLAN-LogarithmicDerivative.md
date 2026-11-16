@@ -377,17 +377,15 @@ Difficulty: B6 medium-high (bookkeeping), everything else low-medium.
 
 **✅ C1–C3 DONE (2026-07-07).** C1 lives in `VD/MathlibSubmitted/JensenInequality.lean`, C2 in
 `VD/LLD/CircleAverageEstimates.lean` (rewritten 2026-09-18 against existing Mathlib API), C3 has
-been upstreamed. The chord lemmas underlying C2 were submitted on 2026-09-20 as PR #43958 and moved
-to `VD/MathlibSubmitted/ChordLength.lean`. Deviations from the sketches below:
+been upstreamed. The chord lemmas underlying C2 were submitted on 2026-09-20 as PR #43958 and have
+been merged into Mathlib (2026-11). Deviations from the sketches below:
 
 - **C2** needs no case split at all. The law of cosines
   `‖circleMap 0 r θ − a‖² = (r−‖a‖)² + 4r‖a‖·sin²((θ − arg a)/2)` gives the sharp universal bound
   `‖circleMap 0 r θ − a‖ ≥ r·|sin ((θ − arg a)/2)|` (from
   `(r−s)² + 4rs·t = (1−t)(r−s)² + t(r+s)²`), valid for **every** `a : ℂ`. The chord lemmas
-  (`norm_circleMap_zero_sub_sq`, `norm_circleMap_zero_sub_sq'`,
-  `mul_abs_sin_le_norm_circleMap_zero_sub`) target `Mathlib/.../Complex/CircleMap.lean`, where
-  they also replace the private `h_cos_law` in `JensenFormula.lean` and a 16-line `calc` in
-  `PosLog.lean`; this is PR #43958. A single Jordan-inequality majorant
+  (`norm_circleMap_sub_circleMap_sq`, `mul_abs_sin_le_norm_circleMap_zero_sub`) are now in
+  `Mathlib/.../Complex/CircleMap.lean` (merged as PR #43958). A single Jordan-inequality majorant
   `(r/(2π)·θ)^p + (r/(2π)·(2π−θ))^p` covers all base points; its integral is exactly
   `4π/(p+1)·r^p`, so the statement is proved for general `-1 < p ≤ 0` with constant `2/(p+1)`
   (`= 4` at `p = −1/2`). Negative and zero radii are handled by Mathlib's
@@ -597,15 +595,15 @@ one local file per future Mathlib target:
 | 5 | `PoissonSchwarzDeriv.lean` ✅ | `Analysis/Complex/Poisson.lean` (extend) | B4 (done) | 4, **Poisson–Jensen chain** |
 | 5a | `MathlibSubmitted/CanonicalFactor.lean` 🚀 | `Analysis/Complex/CanonicalDecomposition.lean` (extend) | B5: `logDeriv` of the canonical factor and its norm bound, plus `one_lt_norm_canonicalFactor`, **submitted as PR #43985 (draft)** | — |
 | 6 | `PoissonJensenDeriv.lean` ✅ | `Analysis/Complex/PoissonJensenDeriv.lean` | B6 + the pointwise estimate `MeromorphicOn.eventually_norm_logDeriv_le` (done) | 1, 5 |
-| 7 | `CircleAverageEstimates.lean` ✅ | new file `Analysis/SpecialFunctions/Integrals/CircleAverageRpow.lean` | C2 (done; C1 is in `MathlibSubmitted/JensenInequality.lean`) | 7a |
-| 7a | `MathlibSubmitted/ChordLength.lean` 🚀 | `Analysis/SpecialFunctions/Complex/CircleMap.lean` (extend) | chord lemmas for `circleMap`, **submitted as PR #43958** | — |
+| 7 | `CircleAverageEstimates.lean` ✅ | new file `Analysis/SpecialFunctions/Integrals/CircleAverageRpow.lean` | C2 (done; C1 is in `MathlibSubmitted/JensenInequality.lean`) | — |
+| 7a | *(merged)* | `Analysis/SpecialFunctions/Complex/CircleMap.lean` (extend) | chord lemmas for `circleMap` (PR #43958, in Mathlib) | — |
 | 8 | *(merged)* | `…/ValueDistribution/LogCounting/Basic.lean` (extend) | C3 (done, in Mathlib) | — |
 | 8a | `LogDerivEstimates.lean` ✅ | several; see the file's upstreaming notes | C4, general part (done): `rpow` subadditivity, circle-average monotonicity modulo discrete sets, VD comparison lemmas, zero/pole count in a ball, the exponent-`1/2` trick | 7, C1 |
 | 9 | `LogDerivTwoRadius.lean` ✅ | `…/ValueDistribution/LogDerivLemma.lean` (part 1) | C4 (T1, done) | 6, 8a |
 | 10 | `LogDerivLemma.lean` ✅ | `…/ValueDistribution/LogDerivLemma.lean` (part 2) | E (T3 + corollaries, done) | 3, 9 |
 
-- Items 1–4, 7, 8 are **fully parallel** and independently PR-able today; 7a is in review as
-  PR #43958, and 7 depends on it. Item 5a is independent of the Poisson–Jensen chain and is in
+- Items 1–4, 7, 8 are **fully parallel** and independently PR-able today; 7a (PR #43958) has been
+  merged, so 7 is unblocked. Item 5a is independent of the Poisson–Jensen chain and is in
   review as PR #43985 (draft); 5 depends on it.
 - The **critical path** is the pending Poisson–Jensen upstream chain (the canonical
   decomposition has landed in Mathlib; `PoissonJensen` is in review as PR #42475)

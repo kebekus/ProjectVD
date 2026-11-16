@@ -26,7 +26,6 @@ public import VD.MathlibPending.CharacteristicIsBigOLog
 public import VD.MathlibPending.PoissonJensen
 public import VD.MathlibPending.ProximityBounded
 public import VD.MathlibSubmitted.CanonicalFactor
-public import VD.MathlibSubmitted.ChordLength
 public import VD.MathlibSubmitted.CodiscreteWithinEventually
 public import VD.MathlibSubmitted.DivisorDeriv
 public import VD.MathlibSubmitted.DivisorEstimates

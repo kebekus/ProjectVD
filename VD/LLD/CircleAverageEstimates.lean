@@ -7,7 +7,6 @@ module
 
 public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 public import Mathlib.MeasureTheory.Integral.CircleAverage
-public import VD.MathlibSubmitted.ChordLength
 
 /-!
 # Circle Averages of Negative Powers of the Distance to a Point — LLD work package C2
@@ -27,10 +26,9 @@ Derivative uses the exponent-`1/2` trick: the average of `‖· - a‖⁻¹` is 
 
 ## Implementation notes
 
-The chord lemmas that this file builds on (`norm_circleMap_zero_sub_sq'` and
-`mul_abs_sin_le_norm_circleMap_zero_sub`) have been submitted to Mathlib as PR #43958 and live in
-`VD/MathlibSubmitted/ChordLength.lean`. See the upstreaming notes below for where the material of
-this file belongs in Mathlib.
+The chord bound that this file builds on, `mul_abs_sin_le_norm_circleMap_zero_sub`, is in Mathlib
+(merged as PR #43958). See the upstreaming notes below for where the material of this file belongs
+in Mathlib.
 
 For the average, rotate the circle by `arg a` and combine the chord bound with the Jordan inequality
 `Real.mul_le_sin`. This majorizes the integrand by `(r/(2π) * θ) ^ p + (r/(2π) * (2π - θ)) ^ p`,
@@ -42,9 +40,8 @@ whose integral is computed exactly.
 /-
 # Upstreaming notes
 
-The chord lemmas that this file builds on have been submitted to Mathlib as PR #43958; they now live
-in `VD/MathlibSubmitted/ChordLength.lean`, which also records what else that PR changes. What is
-left here is the second, dependent PR, described below. It was checked against the Mathlib revision
+The chord lemmas that this file builds on have been merged into Mathlib as PR #43958. What is left
+here is the second, dependent PR, described below. It was checked against the Mathlib revision
 pinned in `lake-manifest.json` (`f61f3ed7`, 2026-09-17).
 
 ## New file `Mathlib/Analysis/SpecialFunctions/Integrals/CircleAverageRpow.lean`
@@ -63,9 +60,9 @@ reason. The new file needs the module-system header
 
     public section
 
-and receives the chord lemmas of PR #43958 transitively through `CircleAverage.lean`,
-`CircleIntegral.lean` and `CircleMap.lean`. The file's name is a suggestion; any name matching the
-file's theme works.
+and receives the chord bound `mul_abs_sin_le_norm_circleMap_zero_sub` transitively through
+`CircleAverage.lean`, `CircleIntegral.lean` and `CircleMap.lean`. The file's name is a suggestion;
+any name matching the file's theme works.
 
 Contents:
 - `circleIntegrable_norm_sub_const_rpow` is the real-exponent counterpart of
@@ -117,7 +114,7 @@ private lemma rpow_norm_circleMap_le (hr : 0 < r) (hp : p ≤ 0) (hθ : θ ∈ I
     ‖circleMap 0 r (θ + a.arg) - a‖ ^ p
       ≤ (r / (2 * π) * θ) ^ p + (r / (2 * π) * (2 * π - θ)) ^ p := by
   obtain ⟨h₁, h₂⟩ := hθ
-  have hlow := mul_abs_sin_le_norm_circleMap_zero_sub hr.le (θ + a.arg) a
+  have hlow := mul_abs_sin_le_norm_circleMap_zero_sub r (θ + a.arg) a
   rw [add_sub_cancel_right] at hlow
   rcases le_total θ π with h | h
   · refine le_add_of_le_of_nonneg ?_ (rpow_nonneg (mul_nonneg (by positivity) (by linarith)) _)
