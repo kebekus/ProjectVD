@@ -23,7 +23,6 @@ public import VD.LinearDiffOp.Regularity
 public import VD.LinearDiffOp.Wirtinger
 public import VD.MathlibPending.BoundednessCharacteristic
 public import VD.MathlibPending.CharacteristicIsBigOLog
-public import VD.MathlibPending.PoissonJensen
 public import VD.MathlibPending.ProximityBounded
 public import VD.MathlibSubmitted.CanonicalFactor
 public import VD.MathlibSubmitted.CodiscreteWithinEventually
@@ -31,7 +30,6 @@ public import VD.MathlibSubmitted.DivisorDeriv
 public import VD.MathlibSubmitted.DivisorEstimates
 public import VD.MathlibSubmitted.JensenInequality
 public import VD.MathlibSubmitted.MeromorphicGermZero
-public import VD.MathlibSubmitted.PoissonJensen
 public import VD.SMT.Deficiency
 public import VD.SMT.Picard
 public import VD.SMT.ProximityEstimates

@@ -80,7 +80,7 @@ theorem coe_mem_germRing (hf : MeromorphicOn f U) :
 /-- The surjective algebra homomorphism mapping a meromorphic function to its germ. -/
 def toGermAlgHom : subalgebra 𝕜 𝕜' U →ₐ[𝕜] germRing 𝕜 𝕜' U :=
   ((Germ.coeAlgHom 𝕜 _).comp (subalgebra 𝕜 𝕜' U).val).codRestrict _
-    fun f ↦ coe_mem_germRing f.2
+    fun f ↦ coe_mem_germRing f.property
 
 theorem toGermAlgHom_surjective :
     Function.Surjective (toGermAlgHom (𝕜 := 𝕜) (𝕜' := 𝕜') (U := U)) := by
@@ -100,7 +100,7 @@ so the subalgebra is closed under `Inv` without any hypotheses on `U`.
 
 noncomputable instance : Inv (germRing 𝕜 𝕜' U) where
   inv a := ⟨(a : Germ (codiscreteWithin U) 𝕜')⁻¹, by
-    obtain ⟨f, hf, hfa⟩ := mem_germRing_iff.1 a.2
+    obtain ⟨f, hf, hfa⟩ := mem_germRing_iff.1 a.property
     exact mem_germRing_iff.2 ⟨f⁻¹, hf.inv, by rw [Germ.coe_inv, hfa]⟩⟩
 
 @[simp, norm_cast]
@@ -161,7 +161,7 @@ with the pointwise inverse as its inverse.
 -/
 protected theorem mul_inv_cancel (h₁U : IsPreconnected U) (h₂U : U.Nontrivial)
     {a : germRing 𝕜 𝕜' U} (ha : a ≠ 0) : a * a⁻¹ = 1 := by
-  obtain ⟨f, hf, hfa⟩ := mem_germRing_iff.1 a.2
+  obtain ⟨f, hf, hfa⟩ := mem_germRing_iff.1 a.property
   have horder : ∀ x ∈ U, meromorphicOrderAt f x ≠ ⊤ := by
     by_contra hcon
     push Not at hcon

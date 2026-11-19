@@ -557,12 +557,12 @@ theorem characteristic_aeval_div_le_aux (hG : IsGrowthClass l G) (a : germRing �
     obtain ⟨c, rfl⟩ := natDegree_eq_zero.1 hq
     rw [aeval_C, natDegree_C, max_eq_left (Nat.zero_le _)]
     have hc : G (characteristic (algebraMap (growthField hG) (germRing ℂ ℂ univ) c)⁻¹) := by
-      have := (c⁻¹).2
+      have := (c⁻¹).property
       rwa [IntermediateField.coe_inv] at this
     refine ⟨(∑ j ∈ range (P.natDegree + 1), characteristic (P.coeff j : germRing ℂ ℂ univ))
       + (fun _ ↦ log (P.natDegree + 1))
       + characteristic (algebraMap (growthField hG) (germRing ℂ ℂ univ) c)⁻¹,
-      hG.add (hG.add (hG.sum fun j _ ↦ (P.coeff j).2) (hG.const _)) hc, ?_⟩
+      hG.add (hG.add (hG.sum fun j _ ↦ (P.coeff j).property) (hG.const _)) hc, ?_⟩
     filter_upwards [hG.le_atTop (eventually_ge_atTop 1)] with r hr
     simp only [Pi.add_apply, Finset.sum_apply]
     have h₁ := characteristic_aeval_le hG a P hr
@@ -613,8 +613,8 @@ theorem characteristic_aeval_div_le_aux (hG : IsGrowthClass l G) (a : germRing �
     obtain ⟨u₂, hu₂, h₂⟩ := hrem
     refine ⟨(∑ j ∈ range (S.natDegree + 1), characteristic (S.coeff j : germRing ℂ ℂ univ))
       + (fun _ ↦ log (S.natDegree + 1)) + u₂ + (fun _ ↦ log 2),
-      hG.add (hG.add (hG.add (hG.sum fun j _ ↦ (S.coeff j).2) (hG.const _)) hu₂) (hG.const _),
-      ?_⟩
+      hG.add (hG.add (hG.add (hG.sum fun j _ ↦ (S.coeff j).property) (hG.const _)) hu₂)
+        (hG.const _), ?_⟩
     filter_upwards [h₂, hG.le_atTop (eventually_ge_atTop 1)] with r ⟨hu₂r, hr₂⟩ hr
     simp only [Pi.add_apply, Finset.sum_apply]
     have h₁ := characteristic_aeval_le hG a S hr
@@ -719,9 +719,9 @@ theorem nsmul_characteristic_le_characteristic_aeval_div_of_monic (hG : IsGrowth
         + ∑ i ∈ range (U.natDegree + 1), characteristic (U.coeff i : germRing ℂ ℂ univ)
         + ∑ i ∈ range (V.natDegree + 1), characteristic (V.coeff i : germRing ℂ ℂ univ)
         + fun _ ↦ C) + u₀ + fun _ ↦ c₀,
-    hG.add (hG.add (hG.nsmul (hG.add (hG.add (hG.add (hG.add (hG.sum fun j _ ↦ (P.coeff j).2)
-      (hG.sum fun k _ ↦ (Q.coeff k).2)) (hG.sum fun i _ ↦ (U.coeff i).2))
-      (hG.sum fun i _ ↦ (V.coeff i).2)) (hG.const _)) _) hu₀) (hG.const _), ?_⟩
+    hG.add (hG.add (hG.nsmul (hG.add (hG.add (hG.add (hG.add (hG.sum fun j _ ↦ (P.coeff j).property)
+      (hG.sum fun k _ ↦ (Q.coeff k).property)) (hG.sum fun i _ ↦ (U.coeff i).property))
+      (hG.sum fun i _ ↦ (V.coeff i).property)) (hG.const _)) _) hu₀) (hG.const _), ?_⟩
   filter_upwards [h₀, hG.le_atTop (eventually_ge_atTop 1)] with r hr₀ hr
   have h₁ := hest r hr
   have h₂ := abs_le.1 (hc₀ r)
@@ -773,7 +773,7 @@ theorem nsmul_characteristic_le_characteristic_aeval_div_of_le (hG : IsGrowthCla
       exact ⟨le_rfl, by linarith⟩
     · obtain ⟨u₀, hu₀, h₀⟩ := exists_abs_characteristic_aeval_sub_le hG a hP0
       refine ⟨u₀ + characteristic (algebraMap (growthField hG) (germRing ℂ ℂ univ) c),
-        hG.add hu₀ c.2, ?_⟩
+        hG.add hu₀ c.property, ?_⟩
       filter_upwards [h₀, hG.le_atTop (eventually_ge_atTop 1)] with r hr₀ hr
       have hc' : algebraMap (growthField hG) (germRing ℂ ℂ univ) c ≠ 0 :=
         fun h ↦ hc (ZeroMemClass.coe_eq_zero.1 h)
@@ -813,7 +813,7 @@ theorem nsmul_characteristic_le_characteristic_aeval_div_of_le (hG : IsGrowthCla
       rw [div_eq_mul_inv, div_eq_mul_inv, mul_inv, inv_inv]
       ring
     refine ⟨u₀ + characteristic (algebraMap (growthField hG) (germRing ℂ ℂ univ) d),
-      hG.add hu₀ d.2, ?_⟩
+      hG.add hu₀ d.property, ?_⟩
     filter_upwards [h₀, hG.le_atTop (eventually_ge_atTop 1)] with r ⟨hr₀, hr₁⟩ hr
     rw [hdP, hg] at hr₁
     have h₁ := characteristic_mul_le (aeval a P / aeval a Q)

@@ -21,8 +21,6 @@ the Logarithmic Derivative (`VD/LLD/LogDerivTwoRadius.lean`) rests. None of them
 
 ## Main results
 
-- `NNReal.rpow_sum_le_sum_rpow`, `Real.rpow_sum_le_sum_rpow`: for `0 < p ≤ 1`, the function
-  `x ↦ x ^ p` is subadditive on finite sums of nonnegative reals.
 - `CircleIntegrable.norm`, `circleAverage_mono_codiscreteWithin`: circle averages respect
   inequalities that hold away from a discrete subset of the circle.
 - `ValueDistribution.proximity_add_proximity_inv_eq_circleAverage`: `m(r, f) + m(r, 1/f)` is the
@@ -39,9 +37,6 @@ the Logarithmic Derivative (`VD/LLD/LogDerivTwoRadius.lean`) rests. None of them
 
 ## Upstreaming notes
 
-- `NNReal.rpow_sum_le_sum_rpow`, `Real.rpow_sum_le_sum_rpow` →
-  `Mathlib/Analysis/MeanInequalitiesPow.lean`, after `NNReal.rpow_add_le_add_rpow` and
-  `Real.rpow_add_le_add_rpow`.
 - `CircleIntegrable.norm` → `Mathlib/MeasureTheory/Integral/CircleIntegral.lean`, next to
   `CircleIntegrable.abs`.
 - `circleAverage_mono_codiscreteWithin` → `Mathlib/MeasureTheory/Integral/CircleAverage.lean`,
@@ -65,38 +60,6 @@ The private lemma `circleIntegrable_posLog_comp` duplicates a private lemma of
 @[expose] public section
 
 open Complex Filter Function MeasureTheory MeromorphicOn Metric Real Set Topology
-
-/-!
-## Subadditivity of Real Powers
--/
-
-open scoped NNReal in
-/-- For `0 < p ≤ 1`, the function `x ↦ x ^ p` is subadditive on finite sums in `ℝ≥0`. The binary
-case is `NNReal.rpow_add_le_add_rpow`. The hypothesis `0 < p` cannot be weakened to `0 ≤ p` as in
-the binary case: for `p = 0` and `s = ∅` the left side is `1`. -/
-theorem NNReal.rpow_sum_le_sum_rpow {ι : Type*} (s : Finset ι) (f : ι → ℝ≥0) {p : ℝ}
-    (hp : 0 < p) (hp1 : p ≤ 1) :
-    (∑ i ∈ s, f i) ^ p ≤ ∑ i ∈ s, f i ^ p := by
-  induction s using Finset.cons_induction with
-  | empty => simp [NNReal.zero_rpow hp.ne']
-  | cons a s ha ih =>
-    rw [Finset.sum_cons, Finset.sum_cons]
-    calc (f a + ∑ i ∈ s, f i) ^ p
-        ≤ f a ^ p + (∑ i ∈ s, f i) ^ p := NNReal.rpow_add_le_add_rpow _ _ hp.le hp1
-      _ ≤ f a ^ p + ∑ i ∈ s, f i ^ p := by gcongr
-
-/-- For `0 < p ≤ 1`, the function `x ↦ x ^ p` is subadditive on finite sums of nonnegative reals.
-The binary case is `Real.rpow_add_le_add_rpow`; see `NNReal.rpow_sum_le_sum_rpow` for the
-hypothesis `0 < p`. -/
-theorem Real.rpow_sum_le_sum_rpow {ι : Type*} {s : Finset ι} {f : ι → ℝ} {p : ℝ}
-    (hf : ∀ i ∈ s, 0 ≤ f i) (hp : 0 < p) (hp1 : p ≤ 1) :
-    (∑ i ∈ s, f i) ^ p ≤ ∑ i ∈ s, f i ^ p := by
-  calc (∑ i ∈ s, f i) ^ p
-      = (∑ i ∈ s, ((f i).toNNReal : ℝ)) ^ p := by
-        rw [Finset.sum_congr rfl fun i hi ↦ (Real.coe_toNNReal _ (hf i hi)).symm]
-    _ ≤ ∑ i ∈ s, ((f i).toNNReal : ℝ) ^ p := by
-        exact_mod_cast NNReal.rpow_sum_le_sum_rpow s (fun i ↦ (f i).toNNReal) hp hp1
-    _ = ∑ i ∈ s, f i ^ p := Finset.sum_congr rfl fun i hi ↦ by rw [Real.coe_toNNReal _ (hf i hi)]
 
 /-!
 ## Circle Averages
@@ -264,7 +227,7 @@ theorem circleAverage_posLog_norm_le_of_le_add_sum_inv_norm_sub {E : Type*}
           Real.rpow_add_le_add_rpow hK (Finset.sum_nonneg hterm) (by norm_num) (by norm_num)
       _ ≤ K ^ (2⁻¹ : ℝ) + ∑ a ∈ s, (m a * ‖w - a‖⁻¹) ^ (2⁻¹ : ℝ) := by
           gcongr
-          exact Real.rpow_sum_le_sum_rpow hterm (by norm_num) (by norm_num)
+          exact Real.rpow_sum_le_sum_rpow s hterm (by norm_num) (by norm_num)
       _ ≤ K ^ (2⁻¹ : ℝ) + ∑ a ∈ s, m a * ‖w - a‖ ^ (-(2 : ℝ)⁻¹) := by
           gcongr with a ha
           rw [mul_rpow (hm₀ a ha) (inv_nonneg.2 (norm_nonneg _)), inv_rpow (norm_nonneg _),

@@ -7,7 +7,7 @@ module
 
 public import Mathlib.Analysis.Complex.HasPrimitives
 public import Mathlib.Analysis.Complex.OpenMapping
-public import VD.MathlibPending.PoissonJensen
+public import Mathlib.Analysis.Complex.JensenFormula
 public import VD.MathlibSubmitted.CanonicalFactor
 
 /-!
@@ -19,8 +19,9 @@ Mathlib target: extend `Mathlib/Analysis/Complex/Poisson.lean` (B4).
 Dependencies: the derivative of the Herglotz–Riesz kernel integral (B1–B3, now in Mathlib:
 `hasDerivAt_circleAverage_herglotzRieszKernel_smul` in `Mathlib/Analysis/Complex/Poisson.lean`)
 and the Poisson–Jensen chain (the extended canonical decomposition is now in Mathlib, in
-`Mathlib/Analysis/Complex/CanonicalDecomposition.lean`; see also
-`VD/MathlibPending/PoissonJensen.lean`).
+`Mathlib/Analysis/Complex/CanonicalDecomposition.lean`, and the Poisson–Jensen formula
+`MeromorphicOn.log_norm_meromorphicTrailingCoeffAt` is in
+`Mathlib/Analysis/Complex/JensenFormula.lean`).
 
 - `MeromorphicOn.logDeriv_eq_circleAverage` (B4): if `h` is meromorphic on the closed ball,
   analytic and nonvanishing on the **open** ball, then its logarithmic derivative at interior
@@ -115,7 +116,7 @@ theorem MeromorphicOn.logDeriv_eq_circleAverage {h : ℂ → ℂ} {R : ℝ} {w :
     have hsum : (∑ᶠ i, ((divisor h (ball 0 R)) i)
         * Real.log ‖Complex.canonicalFactor R (i - 0) (z - 0)‖) = 0 := by
       simp [hdiv]
-    rw [hsum, sub_zero] at hPJ
+    rw [hsum, sub_zero, poissonKernel_eq_re_herglotzRieszKernel] at hPJ
     exact hPJ.symm
   -- A primitive `G` of `logDeriv h` on the ball
   have hld_an : AnalyticOnNhd ℂ (logDeriv h) (ball 0 R) :=

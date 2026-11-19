@@ -107,7 +107,7 @@ theorem ValueDistribution.isBigO_proximity_logDeriv_of_isBigO_rpow {f : ℂ → 
 | Meromorphic derivatives | `MeromorphicAt.deriv`, `meromorphicOrderAt_deriv_eq_sub_one`, `meromorphicOrderAt_div/_inv/_mul` |
 | Canonical factors | `Complex.canonicalFactor` + full API (`norm_canonicalFactor_eval_circle_eq_one`, `divisor_canonicalFactor`, …), `CanonicalDecomp`, `MeromorphicOn.exists_canonicalDecomp` |
 | Extended decomposition | `ECanonicalDecomp`, `exists_ecanonicalDecomp` (in Mathlib, `Mathlib/Analysis/Complex/CanonicalDecomposition.lean`) |
-| Poisson–Jensen | `MeromorphicOn.log_norm_meromorphicTrailingCoeffAt` (local, `VD/MathlibPending/PoissonJensen.lean`) |
+| Poisson–Jensen | `MeromorphicOn.log_norm_meromorphicTrailingCoeffAt` (Mathlib, `Mathlib/Analysis/Complex/JensenFormula.lean`) |
 | Herglotz–Riesz kernel | `herglotzRieszKernel` + bounds `re_herglotzRieszKernel_le`, `le_re_herglotzRieszKernel`; Poisson representation for `DiffContOnCl` and `HarmonicOnNhd` |
 | Cauchy integrals of L¹ data | `Complex.hasFPowerSeriesOn_cauchy_integral` (analyticity in the pole for merely `CircleIntegrable f`) |
 | Differentiation under ∫ | `hasDerivAt_integral_of_dominated_loc_of_deriv_le` (`ParametricIntegral.lean`, `𝕜 = ℂ` via `RCLike`) |
@@ -353,7 +353,8 @@ now the def `derivHerglotzRieszKernel` (in `PoissonSchwarzDeriv.lean`, with `_de
 lemmas mirroring `herglotzRieszKernel_def`), used in the statements of B4, B5's boundary case, B6
 and the pointwise estimate.
 
-Mirror the proof of `poissonJensen₀` in `VD/MathlibPending/PoissonJensen.lean`:
+Mirror the proof of `MeromorphicOn.log_norm_meromorphicTrailingCoeffAt₀` in Mathlib's
+`Mathlib/Analysis/Complex/JensenFormula.lean`:
 
 1. Take the extended decomposition
    `f =ᶠ[codiscreteWithin closedBall] (∏ᶠ cF^(−D_ball)) * (∏ᶠ (· − u)^(D_sphere)) • h`
@@ -368,7 +369,7 @@ Mirror the proof of `poissonJensen₀` in `VD/MathlibPending/PoissonJensen.lean`
    existing Poisson–Jensen proof, with `logDeriv` in place of `log ‖·‖`.)
 
 Estimated size: B1–B3 ≈ 250 lines; B4–B5 ≈ 250 lines; B6 ≈ 300–400 lines
-(finsum/divisor bookkeeping dominates; the pattern is established in PoissonJensen.lean).
+(finsum/divisor bookkeeping dominates; the pattern is established in the Poisson–Jensen proof).
 Difficulty: B6 medium-high (bookkeeping), everything else low-medium.
 
 ---
@@ -465,11 +466,11 @@ in `VD/LLD/LogDerivTwoRadius.lean` (~280 lines, down from ~690) now reads as the
   the general `finsum_abs_divisor_ball_mul_log_le`.
 
 The general-interest ingredients live in `VD/LLD/LogDerivEstimates.lean`, grouped by Mathlib
-target (see the file's upstreaming notes): `Real.rpow_sum_le_sum_rpow` (subadditivity of `x ^ p`
-for `0 < p ≤ 1` over finite sums), `CircleIntegrable.norm`, `circleAverage_mono_codiscreteWithin`
+target (see the file's upstreaming notes): `CircleIntegrable.norm`, `circleAverage_mono_codiscreteWithin`
 (arbitrary centre), `proximity_add_proximity_inv_eq_circleAverage`, `proximity_le_characteristic`,
 `logCounting_le_characteristic`, and `finsum_abs_divisor_ball_mul_log_le` (zeros and poles in
-`ball 0 ρ`, weighted by `log (R/ρ)`, are `≤ N(R,0) + N(R,∞)`). The final constant is
+`ball 0 ρ`, weighted by `log (R/ρ)`, are `≤ N(R,0) + N(R,∞)`). Subadditivity of `x ^ p` for
+`0 < p ≤ 1` over finite sums (`Real.rpow_sum_le_sum_rpow`) is now in Mathlib. The final constant is
 `c := 6 + 24·log 2 + 4·log⁺ c_f`. The degenerate case uses
 `Meromorphic.exists_meromorphicOrderAt_eq_top_iff_eventually_zero`, now in Mathlib, so the T1 file
 no longer depends on the Möbius-invariance chain, which has since landed in Mathlib.
@@ -606,7 +607,7 @@ one local file per future Mathlib target:
   merged, so 7 is unblocked. Item 5a is independent of the Poisson–Jensen chain and is in
   review as PR #43985 (draft); 5 depends on it.
 - The **critical path** is the pending Poisson–Jensen upstream chain (the canonical
-  decomposition has landed in Mathlib; `PoissonJensen` is in review as PR #42475)
+  decomposition has landed in Mathlib; `PoissonJensen` was merged as PR #42475 on 2026-11-19)
   → 5 → 6 → 9 → 10.
 - Every PR stays under ~400 lines. New Mathlib files must use the module system
   (`module` / `public import` / `@[expose] public section`) as in the current
@@ -620,10 +621,9 @@ Total new code estimate: ≈ 2000–2400 lines of Lean.
 ## 9. Risks and fallbacks
 
 1. **B6 bookkeeping** (finsums over divisors, codiscrete filters) is the largest single
-   proof. Mitigation: it is structurally identical to the existing `poissonJensen₀`
-   proof; reuse its helper lemmas (`continuousOn_herglotzRieszKernel_sphere`,
-   integrability lemmas) — several already live in `VD/MathlibPending/PoissonJensen.lean`
-   and should be upstreamed with it.
+   proof. Mitigation: it is structurally identical to the existing Poisson–Jensen
+   proof; reuse its helper lemmas (`continuousOn_poissonKernel_sphere`,
+   `analyticOnNhd_herglotzRieszKernel_compl`, integrability lemmas), all now in Mathlib.
 2. **Boundary zeros/poles** (divisor on the sphere). Primary plan: handled by the B4
    special case `h = (· − u)`. Fallback: state B6 only for radii whose sphere carries
    no divisor points (only finitely many bad radii in `[r, R]`), and pick a good `ρ`

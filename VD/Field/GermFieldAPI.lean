@@ -41,16 +41,16 @@ namespace MeromorphicOn.GermRing
 -/
 
 /-- A choice of meromorphic representative of a germ in `germRing 𝕜 𝕜' U`. -/
-noncomputable def out (a : germRing 𝕜 𝕜' U) : 𝕜 → 𝕜' := (mem_germRing_iff.1 a.2).choose
+noncomputable def out (a : germRing 𝕜 𝕜' U) : 𝕜 → 𝕜' := (mem_germRing_iff.1 a.property).choose
 
 /-- The chosen representative is meromorphic on `U`. -/
 theorem meromorphicOn_out (a : germRing 𝕜 𝕜' U) : MeromorphicOn (out a) U :=
-  (mem_germRing_iff.1 a.2).choose_spec.1
+  (mem_germRing_iff.1 a.property).choose_spec.1
 
 @[simp]
 theorem coe_out (a : germRing 𝕜 𝕜' U) :
     ((out a : 𝕜 → 𝕜') : Germ (codiscreteWithin U) 𝕜') = a :=
-  (mem_germRing_iff.1 a.2).choose_spec.2
+  (mem_germRing_iff.1 a.property).choose_spec.2
 
 /-- Any representative of a germ agrees with the chosen one along `codiscreteWithin U`. -/
 theorem out_eventuallyEq {a : germRing 𝕜 𝕜' U}

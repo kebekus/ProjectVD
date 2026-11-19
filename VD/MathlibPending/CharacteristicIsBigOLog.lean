@@ -145,6 +145,7 @@ theorem rational_iff_characteristic_isBigO_log {f : ℂ → ℂ} (hf : Meromorph
           exact hu (by change (z - u) ^ ((divisor f univ)⁻ u) = 1; rw [hu2, zpow_zero])
         rw [show (∏ᶠ u, (· - u) ^ ((divisor f univ)⁻ u)) z
             = ∏ u ∈ hDfin.toFinset, (z - u) ^ ((divisor f univ)⁻ u) from by
+          change Function.factorizedRational (fun u ↦ (divisor f univ)⁻ u) z = _
           rw [Function.FactorizedRational.finprod_eq_fun hd]
           exact finprod_eq_prod_of_mulSupport_subset _ hsub]
         rw [hq_def, Polynomial.eval_prod]

@@ -108,7 +108,7 @@ theorem mem_growthField_of_isAlgebraic (hG : IsGrowthClass l G) {a : germRing �
     simpa using hpa
   refine hG.of_le (v := ∑ j ∈ range p.natDegree, characteristic (p.coeff j : germRing ℂ ℂ univ)
       + fun _ ↦ log (p.natDegree : ℝ))
-    (hG.add (hG.sum fun j _ ↦ (p.coeff j).2) (hG.const _)) ?_ ?_
+    (hG.add (hG.sum fun j _ ↦ (p.coeff j).property) (hG.const _)) ?_ ?_
   · filter_upwards [hG.le_atTop (eventually_ge_atTop 1)] with r hr
     exact characteristic_nonneg _ hr
   · filter_upwards [hG.le_atTop (eventually_ge_atTop 1)] with r hr
@@ -156,7 +156,7 @@ theorem exists_abs_characteristic_aeval_sub_le (hG : IsGrowthClass l G) (a : ger
     exact hP (leadingCoeff_eq_zero.1 (ZeroMemClass.coe_eq_zero.1 this))
   obtain ⟨u, hu, hu'⟩ := ValueDistribution.exists_abs_characteristic_polynomial_sub_mem hG
     (meromorphic_out a) (fun j ↦ meromorphic_out (P.coeff j : germRing ℂ ℂ univ))
-    (fun j _ ↦ (P.coeff j).2) hd
+    (fun j _ ↦ (P.coeff j).property) hd
   refine ⟨u, hu, ?_⟩
   filter_upwards [hu', hG.le_atTop (eventually_ge_atTop 1)] with r hr hr₁
   rwa [characteristic, ValueDistribution.characteristic_congr_codiscrete

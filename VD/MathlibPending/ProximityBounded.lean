@@ -5,7 +5,7 @@ Authors: Stefan Kebekus
 -/
 module
 
-public import VD.MathlibPending.PoissonJensen
+public import Mathlib.Analysis.Complex.JensenFormula
 public import VD.MathlibSubmitted.CanonicalFactor
 public import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
 public import Mathlib.Analysis.Complex.Liouville
@@ -90,12 +90,13 @@ private theorem log_norm_le_circleAverage_posLog_norm
   have h₃f : MeromorphicOn f (sphere 0 |R|) := by
     rw [abs_of_pos (pos_of_mem_ball h₁w)]
     exact (h₁f.mono sphere_subset_closedBall).meromorphicOn
+  have h₄w : w ∉ sphere 0 |R| := by grind [mem_sphere, mem_ball, le_abs_self R]
   calc Real.log ‖f w‖
     _ = Real.log ‖meromorphicTrailingCoeffAt f w‖ := by
       rw [AnalyticAt.meromorphicTrailingCoeffAt_of_meromorphicOrderAt_eq_zero
         (h₁f w (ball_subset_closedBall h₁w)) h₂w]
-    _ ≤ circleAverage (re ∘ herglotzRieszKernel 0 w * (Real.log ‖f ·‖)) 0 R := by
-      rw [MeromorphicOn.log_norm_meromorphicTrailingCoeffAt h₁f.meromorphicOn h₁w h₂w]
+    _ ≤ circleAverage (poissonKernel 0 w • (Real.log ‖f ·‖)) 0 R := by
+      rw [MeromorphicOn.log_norm_meromorphicTrailingCoeffAt h₁w h₂w h₁f.meromorphicOn]
       simp only [sub_zero]
       apply sub_le_self
       rw [finsum_eq_sum_of_support_subset (s := h₂f.toFinset) _ (fun _ _ ↦ by aesop)]
@@ -103,12 +104,12 @@ private theorem log_norm_le_circleAverage_posLog_norm
       · exact_mod_cast (h₁f.mono ball_subset_closedBall).divisor_nonneg i
       · have := (divisor f (ball 0 R)).supportWithinDomain
         exact log_nonneg (one_lt_norm_canonicalFactor (by aesop) h₁w (by aesop)).le
-    _ ≤ circleAverage (re ∘ herglotzRieszKernel 0 w * (log⁺ ‖f ·‖)) 0 R := by
-      apply circleAverage_mono ((circleIntegrable_log_norm h₃f).continuousOn_mul
-        (continuousOn_re_herglotzRieszKernel_sphere h₁w)) ((circleIntegrable_posLog_norm
-        h₃f).continuousOn_mul (continuousOn_re_herglotzRieszKernel_sphere h₁w))
+    _ ≤ circleAverage (poissonKernel 0 w • (log⁺ ‖f ·‖)) 0 R := by
+      apply circleAverage_mono ((circleIntegrable_log_norm h₃f).continuousOn_smul
+        (continuousOn_poissonKernel_sphere h₄w)) ((circleIntegrable_posLog_norm
+        h₃f).continuousOn_smul (continuousOn_poissonKernel_sphere h₄w))
       intro x hx
-      simp only [Pi.mul_apply, comp_apply]
+      simp only [Pi.smul_apply', smul_eq_mul, poissonKernel_eq_re_herglotzRieszKernel, comp_apply]
       gcongr
       · trans (R - ‖w - 0‖) / (R + ‖w - 0‖)
         · rw [sub_zero]
@@ -122,10 +123,12 @@ private theorem log_norm_le_circleAverage_posLog_norm
         exact le_max_right _ _
     _ ≤ circleAverage (((R + ‖w‖) / (R - ‖w‖)) • (log⁺ ‖f ·‖)) 0 R := by
       have hint : CircleIntegrable (log⁺ ‖f ·‖) 0 R := circleIntegrable_posLog_norm h₃f
-      apply circleAverage_mono (by fun_prop) (hint.continuousOn_mul (by fun_prop))
+      apply circleAverage_mono (hint.continuousOn_smul (continuousOn_poissonKernel_sphere h₄w))
+        (by fun_prop)
       intro x hx
       rw [abs_of_pos (pos_of_mem_ball h₁w)] at hx
-      simp only [Pi.mul_apply, comp_apply]
+      simp only [Pi.smul_apply', Pi.smul_apply, smul_eq_mul,
+        poissonKernel_eq_re_herglotzRieszKernel, comp_apply]
       gcongr
       · exact posLog_nonneg
       · simpa [herglotzRieszKernel_def] using re_herglotzRieszKernel_le hx h₁w

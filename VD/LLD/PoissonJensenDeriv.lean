@@ -31,7 +31,7 @@ agrees, away from a discrete subset of the open ball, with
 Sign check (`f = id`, `R = 1`): `divisor = δ₀`, `canonicalFactor 1 0 = (·)⁻¹`,
 `logDeriv (·)⁻¹ w = -1/w`, kernel term `= 0`; RHS `= 0 - (-1/w) = 1/w = logDeriv id w`. ✓
 
-The proof mirrors that of the Poisson–Jensen formula in `VD/MathlibPending/PoissonJensen.lean`:
+The proof mirrors that of the Poisson–Jensen formula (now in Mathlib's `JensenFormula.lean`):
 take the extended canonical decomposition (`exists_ecanonicalDecomp`), apply the codiscrete
 `logDeriv` arithmetic from work package A, and rewrite `logDeriv h` of the nonvanishing factor
 via the differentiated Poisson representation (B4). On the sphere the canonical-factor terms
@@ -110,7 +110,7 @@ theorem MeromorphicOn.logDeriv_eventuallyEq_circleAverage_sub_finsum {f : ℂ �
     simp [ball_eq_empty.2 (not_lt.1 hR)] at ha
   -- Write `f = (Blaschke product) • h` with `h` analytic and nowhere zero on the closed
   -- ball, where the Blaschke product collects the zeros and poles of `f`.
-  obtain ⟨h, D⟩ := h₁f.exists_ecanonicalDecomp fun u ↦ h₂f u u.2
+  obtain ⟨h, D⟩ := h₁f.exists_ecanonicalDecomp fun u ↦ h₂f u u.property
   have h₃f : (divisor f (sphere 0 R)).support.Finite := divisor_sphere_support_finite
   have h₄f : (divisor f (ball 0 R)).support.Finite := h₁f.divisor_ball_support_finite
   -- Meromorphy of the three factors of the decomposition on the ball
@@ -219,7 +219,7 @@ theorem MeromorphicOn.logDeriv_eventuallyEq_circleAverage_sub_finsum {f : ℂ �
           rw [abs_of_pos hR]
           filter_upwards [D.eventuallyEq.filter_mono
             (codiscreteWithin_mono sphere_subset_closedBall)] with a ha
-          simp only [ha]
+          simp only [ha, Function.factorizedRational]
       -- The canonical factors have norm one on the sphere
       _ = circleAverage (fun ζ ↦ derivHerglotzRieszKernel w ζ •
             (Real.log ‖((∏ᶠ v, (· - v) ^ divisor f (sphere 0 R) v) • h) ζ‖ : ℂ)) 0 R := by

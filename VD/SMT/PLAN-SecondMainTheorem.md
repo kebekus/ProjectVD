@@ -896,7 +896,7 @@ local file per future Mathlib PR target, each registered by an import line in th
 - Status (2026-10-06): items 1 and 3 are merged into Mathlib; item 2 is in review as
   PR #44428 (local copy in `VD/MathlibSubmitted/DivisorDeriv.lean`).
 - The **critical path** is 4 → 5 → 6 → {7, 8}, gated locally by nothing (the LLD is done)
-  but gated *upstream* by the LLD PR chain (PoissonJensen, in review as PR #42475 →
+  but gated *upstream* by the LLD PR chain (PoissonJensen, merged as PR #42475 on 2026-11-19 →
   LogDerivTwoRadius → LogDerivLemma). Items 5 and 6 additionally wait for item 2.
 - Every PR stays under ~400 lines. New Mathlib files must use the module system
   (`module` / `public import` / `@[expose] public section`) as in the current
