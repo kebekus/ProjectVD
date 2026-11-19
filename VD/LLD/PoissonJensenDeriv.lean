@@ -7,6 +7,7 @@ module
 
 public import Mathlib.Analysis.Meromorphic.LogDeriv
 public import VD.LLD.PoissonSchwarzDeriv
+public import VD.MathlibSubmitted.CanonicalFactor
 
 /-!
 # The Differentiated Poisson–Jensen Formula — LLD work package B6

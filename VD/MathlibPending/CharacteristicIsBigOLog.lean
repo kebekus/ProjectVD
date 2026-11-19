@@ -5,10 +5,10 @@ Authors: Stefan Kebekus
 -/
 module
 
-public import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
-public import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 public import Mathlib.Algebra.Polynomial.Eval.Defs
 public import Mathlib.Analysis.Calculus.Deriv.Polynomial
+public import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
+public import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 public import VD.MathlibPending.BoundednessCharacteristic
 
 /-!

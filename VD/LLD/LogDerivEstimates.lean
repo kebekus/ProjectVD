@@ -5,7 +5,7 @@ Authors: Stefan Kebekus
 -/
 module
 
-public import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
+public import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
 public import Mathlib.Analysis.MeanInequalitiesPow
 public import VD.LLD.CircleAverageEstimates
 public import VD.MathlibSubmitted.JensenInequality

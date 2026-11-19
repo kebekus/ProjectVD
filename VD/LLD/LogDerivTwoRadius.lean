@@ -6,6 +6,7 @@ Authors: Stefan Kebekus
 module
 
 public import Mathlib.Analysis.Complex.ValueDistribution.Cartan
+public import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 public import VD.LLD.LogDerivEstimates
 public import VD.LLD.PoissonJensenDeriv
 

@@ -5,7 +5,7 @@ Authors: Stefan Kebekus
 -/
 module
 
-public import Mathlib.FieldTheory.IntermediateField.Adjoin.Basic
+public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
 public import Mathlib.RingTheory.Algebraic.Integral
 public import VD.AlgebraicDependence.GermCharacteristic
 public import VD.AlgebraicDependence.GrowthClass

@@ -5,8 +5,8 @@ Authors: Stefan Kebekus
 -/
 module
 
-public import Mathlib.Analysis.Meromorphic.Order
 public import Mathlib.Analysis.Complex.ValueDistribution.LogCounting.Truncated
+public import Mathlib.Analysis.Meromorphic.Order
 
 /-!
 # The Divisor of the Derivative — SMT work package B

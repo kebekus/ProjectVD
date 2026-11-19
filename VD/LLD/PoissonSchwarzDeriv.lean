@@ -6,9 +6,8 @@ Authors: Stefan Kebekus
 module
 
 public import Mathlib.Analysis.Complex.HasPrimitives
-public import Mathlib.Analysis.Complex.OpenMapping
 public import Mathlib.Analysis.Complex.JensenFormula
-public import VD.MathlibSubmitted.CanonicalFactor
+public import Mathlib.Analysis.Complex.OpenMapping
 
 /-!
 # Differentiated Poisson Representation — LLD work package B4

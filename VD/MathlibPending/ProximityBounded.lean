@@ -5,16 +5,16 @@ Authors: Stefan Kebekus
 -/
 module
 
-public import Mathlib.Analysis.Complex.JensenFormula
-public import VD.MathlibSubmitted.CanonicalFactor
-public import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
-public import Mathlib.Analysis.Complex.Liouville
-public import Mathlib.Analysis.Polynomial.Basic
-public import Mathlib.Analysis.Complex.ValueDistribution.Proximity.Basic
-public import Mathlib.Analysis.Analytic.IsolatedZeros
-public import Mathlib.Analysis.Calculus.DSlope
 public import Mathlib.Algebra.Polynomial.Eval.Degree
+public import Mathlib.Analysis.Analytic.IsolatedZeros
+public import Mathlib.Analysis.Asymptotics.SpecificAsymptotics
+public import Mathlib.Analysis.Calculus.DSlope
+public import Mathlib.Analysis.Complex.JensenFormula
+public import Mathlib.Analysis.Complex.Liouville
+public import Mathlib.Analysis.Complex.ValueDistribution.Proximity.Basic
+public import Mathlib.Analysis.Polynomial.Basic
 public import Mathlib.Topology.Algebra.Polynomial
+public import VD.MathlibSubmitted.CanonicalFactor
 
 /-!
 # Boundedness of the Proximity Function

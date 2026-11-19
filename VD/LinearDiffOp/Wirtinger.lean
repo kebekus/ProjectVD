@@ -6,7 +6,9 @@ Authors: Stefan Kebekus
 module
 
 public import Mathlib.Analysis.Calculus.FDeriv.RestrictScalars
-public import Mathlib.Analysis.SpecialFunctions.Complex.Circle
+public import Mathlib.Analysis.SpecialFunctions.Log.Basic
+public import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+public import Mathlib.Data.Nat.Totient
 public import VD.LinearDiffOp.Basic
 
 /-!
