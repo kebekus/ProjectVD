@@ -3,6 +3,7 @@ module  -- shake: keep-all --deprecated_module: ignore
 public import VD.AlgebraicDependence.ClunieMohonko
 public import VD.AlgebraicDependence.GermCharacteristic
 public import VD.AlgebraicDependence.GrowthClass
+public import VD.AlgebraicDependence.GrowthClass'
 public import VD.AlgebraicDependence.GrowthField
 public import VD.AlgebraicDependence.MonicRelation
 public import VD.AlgebraicDependence.PointwiseEstimates
