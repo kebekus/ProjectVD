@@ -14,29 +14,29 @@ public import VD.AlgebraicDependence.GrowthField
 
 See `VD/AlgebraicDependence/PLAN-AlgebraicDependence.md`, §9.
 
-Mathlib target: follows the germ field `VD/Field/` upstream. Dependencies: package F, the
-pointwise Bezout estimate `Real.nsmul_posLog_norm_add_posLog_norm_inv_le_of_bezout` of
-package A (G2), and the divisor estimate B3 proved here at the level of germs.
+Mathlib target: follows the field of meromorphic functions `VD/Field/` upstream. Dependencies:
+package F, the pointwise Bezout estimate `Real.nsmul_posLog_norm_add_posLog_norm_inv_le_of_bezout`
+of package A (G2), and the divisor estimate B3 proved here in `K`.
 
-Throughout, `K := MeromorphicOn.germRing ℂ ℂ Set.univ` is the field of meromorphic germs on `ℂ`,
-`F := growthField hG` is the growth field of a growth class `G`, `P Q : F[X]`, and
-`aeval a P / aeval a Q` is the rational function `P/Q` evaluated at a germ `a`.
+Throughout, `K := MeromorphicOn.functionRing ℂ ℂ Set.univ` is the field of meromorphic functions
+on `ℂ`, `F := growthField hG` is the growth field of a growth class `G`, `P Q : F[X]`, and
+`aeval a P / aeval a Q` is the rational function `P/Q` evaluated at `a ∈ K`.
 
 ## Main results
 
-- B3, `MeromorphicOn.GermRing.nsmul_negPart_divisor_add_posPart_divisor_le_of_bezout`: the
+- B3, `MeromorphicOn.FunctionRing.nsmul_negPart_divisor_add_posPart_divisor_le_of_bezout`: the
   **divisor estimate** for a quotient of monic polynomial expressions with a Bezout
   certificate, `(p - q) • (div a)⁻ + (div Q(a))⁺ ≤ (div (P(a)/Q(a)))⁻ + C • (small divisors)`.
-- G1, `MeromorphicOn.GermRing.characteristic_aeval_div_le`: the **upper bound**
+- G1, `MeromorphicOn.FunctionRing.characteristic_aeval_div_le`: the **upper bound**
   `T(r, P(a)/Q(a)) ≤ max (deg P) (deg Q) · T(r, a) + u(r)`, `u ∈ G`, by induction along the
   Euclidean algorithm. No coprimality is needed.
-- G3, `MeromorphicOn.GermRing.nsmul_characteristic_le_characteristic_aeval_div`: the **lower
+- G3, `MeromorphicOn.FunctionRing.nsmul_characteristic_le_characteristic_aeval_div`: the **lower
   bound** `max (deg P) (deg Q) · T(r, a) ≤ T(r, P(a)/Q(a)) + u(r)` for coprime `P, Q`, from the
   integrated Bezout estimates.
-- T8, `MeromorphicOn.GermRing.exists_abs_characteristic_aeval_div_sub_le`: the
+- T8, `MeromorphicOn.FunctionRing.exists_abs_characteristic_aeval_div_sub_le`: the
   **Valiron–Mohon'ko identity** `T(r, R(a)) = deg R · T(r, a) + u(r)` with `u ∈ G`, for
   `R = P/Q` with coprime numerator and denominator in `F[X]`.
-- T9, `MeromorphicOn.GermRing.characteristic_aeval_div_sub_isLittleO`: the classical form,
+- T9, `MeromorphicOn.FunctionRing.characteristic_aeval_div_sub_isLittleO`: the classical form,
   `T(r, R(f)) = deg R · T(r, f) + o(T(r, f))` for `R` with coefficients in the field of small
   functions `S(f)` (Laine, Theorem 2.2.5).
 
@@ -61,7 +61,7 @@ then `P(a)/Q(a)` lies in the growth field as well, and both sides are small.
 
 open Asymptotics Filter Finset Function Polynomial Real Set Topology
 
-namespace MeromorphicOn.GermRing
+namespace MeromorphicOn.FunctionRing
 
 /-!
 ## Representatives of Polynomial Expressions
@@ -71,23 +71,23 @@ section Representatives
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] {U : Set 𝕜}
 
-/-- The chosen representative of a monic polynomial expression in germs agrees with the monic
+/-- The chosen representative of a monic polynomial expression agrees with the monic
 polynomial expression in the chosen representatives along `codiscreteWithin U`. -/
-theorem out_monic (a : germRing 𝕜 𝕜 U) (c : ℕ → germRing 𝕜 𝕜 U) (p : ℕ) :
+theorem out_monic (a : functionRing 𝕜 𝕜 U) (c : ℕ → functionRing 𝕜 𝕜 U) (p : ℕ) :
     out (a ^ p + ∑ j ∈ range p, c j * a ^ j)
       =ᶠ[codiscreteWithin U] out a ^ p + ∑ j ∈ range p, out (c j) * out a ^ j :=
   (out_add _ _).trans ((out_pow a p).add ((out_sum _ _).trans
     (EventuallyEq.finset_sum fun j _ ↦ (out_mul _ _).trans
       ((EventuallyEq.refl _ _).mul (out_pow a j)))))
 
-/-- The chosen representative of a polynomial expression in germs agrees with the polynomial
+/-- The chosen representative of a polynomial expression agrees with the polynomial
 expression in the chosen representatives along `codiscreteWithin U`. -/
-theorem out_sum_mul_pow (a : germRing 𝕜 𝕜 U) (c : ℕ → germRing 𝕜 𝕜 U) (s : Finset ℕ) :
+theorem out_sum_mul_pow (a : functionRing 𝕜 𝕜 U) (c : ℕ → functionRing 𝕜 𝕜 U) (s : Finset ℕ) :
     out (∑ j ∈ s, c j * a ^ j) =ᶠ[codiscreteWithin U] ∑ j ∈ s, out (c j) * out a ^ j :=
   (out_sum _ _).trans (EventuallyEq.finset_sum fun j _ ↦ (out_mul _ _).trans
     ((EventuallyEq.refl _ _).mul (out_pow a j)))
 
-theorem out_div (a b : germRing 𝕜 𝕜 U) : out (a / b) =ᶠ[codiscreteWithin U] out a / out b := by
+theorem out_div (a b : functionRing 𝕜 𝕜 U) : out (a / b) =ᶠ[codiscreteWithin U] out a / out b := by
   rw [div_eq_mul_inv]
   filter_upwards [out_mul a b⁻¹, out_inv b] with z h₁ h₂
   rw [h₁, Pi.mul_apply, h₂, Pi.inv_apply, Pi.div_apply, _root_.div_eq_mul_inv]
@@ -97,8 +97,8 @@ end Representatives
 /-!
 ## The Divisor Estimate (B3)
 
-At the level of germs, `orderAt · z` is a valuation on the field of germs, and the divisor of a
-germ at `z ∈ U` is `(orderAt a z).untop₀`. The divisor estimate for a quotient `P(a)/Q(a)` of
+On the field of meromorphic functions, `orderAt · z` is a valuation, and the divisor of an element
+`a` at `z ∈ U` is `(orderAt a z).untop₀`. The divisor estimate for a quotient `P(a)/Q(a)` of
 monic polynomial expressions with a Bezout certificate `U(a) P(a) + V(a) Q(a) = 1` is a case
 analysis in this valuation.
 -/
@@ -109,8 +109,8 @@ variable {𝕜 : Type*} [NontriviallyNormedField 𝕜] {U : Set 𝕜} [h₁U : F
   [h₂U : Fact U.Nontrivial] {z : 𝕜}
 
 omit h₁U h₂U in
-/-- The divisor of a germ, evaluated at a point of `U`. -/
-theorem divisor_apply (a : germRing 𝕜 𝕜 U) (hz : z ∈ U) : divisor a z = (orderAt a z).untop₀ :=
+/-- The divisor of an element, evaluated at a point of `U`. -/
+theorem divisor_apply (a : functionRing 𝕜 𝕜 U) (hz : z ∈ U) : divisor a z = (orderAt a z).untop₀ :=
   MeromorphicOn.divisor_apply (meromorphicOn_out a) hz
 
 /-- In `WithTop ℤ`, an element whose `untop₀` has negative part at most `s` is at least `-s`. -/
@@ -125,7 +125,7 @@ private lemma neg_le_of_negPart_untop₀_le {y : WithTop ℤ} {s : ℤ} (h : (y.
 /-- Lower bound for the order of a polynomial expression `Σ_{i∈s} x i * a ^ i` at `z`: if all
 coefficients have order at least `-t` and all exponents are at most `e`, the order is at least
 `-t - e · (ord a)⁻`. -/
-lemma le_orderAt_sum_mul_pow (hz : z ∈ U) {a : germRing 𝕜 𝕜 U} {x : ℕ → germRing 𝕜 𝕜 U}
+lemma le_orderAt_sum_mul_pow (hz : z ∈ U) {a : functionRing 𝕜 𝕜 U} {x : ℕ → functionRing 𝕜 𝕜 U}
     {s : Finset ℕ} {e : ℕ} {t ν : ℤ} (hν : orderAt a z = ν) (he : ∀ i ∈ s, i ≤ e)
     (hx : ∀ i ∈ s, ((-t : ℤ) : WithTop ℤ) ≤ orderAt (x i) z) :
     ((-t - e * ν⁻ : ℤ) : WithTop ℤ) ≤ orderAt (∑ i ∈ s, x i * a ^ i) z := by
@@ -144,7 +144,7 @@ lemma le_orderAt_sum_mul_pow (hz : z ∈ U) {a : germRing 𝕜 𝕜 U} {x : ℕ 
 /--
 **Divisor estimate for a quotient with a Bezout certificate** (B3). Let
 `P(a) = a ^ p + Σ_{j<p} c j * a ^ j` and `Q(a) = a ^ q + Σ_{k<q} b k * a ^ k` be monic polynomial
-expressions of degrees `1 ≤ q ≤ p` in a nonzero germ `a`, both nonzero, and let
+expressions of degrees `1 ≤ q ≤ p` in a nonzero element `a`, both nonzero, and let
 `U(a) = Σ_{i≤m} u i * a ^ i`, `V(a) = Σ_{i≤n} v i * a ^ i` satisfy `U(a) P(a) + V(a) Q(a) = 1`.
 Then
 `(p - q) • (div a)⁻ + (div Q(a))⁺ ≤ (div (P(a)/Q(a)))⁻ + (p + m + n + 1) • D`, where `D` is the
@@ -155,8 +155,8 @@ At a point where the coefficients are regular and `a` has a pole of order `k`, b
 identity forces `P(a)` to be regular, so `P(a)/Q(a)` has a pole of order at least `κ`; all other
 points are charged to the pole divisors of the coefficients.
 -/
-theorem nsmul_negPart_divisor_add_posPart_divisor_le_of_bezout {a : germRing 𝕜 𝕜 U} (ha : a ≠ 0)
-    {c b u v : ℕ → germRing 𝕜 𝕜 U} {p q m n : ℕ} (hq : 1 ≤ q) (hqp : q ≤ p)
+theorem nsmul_negPart_divisor_add_posPart_divisor_le_of_bezout {a : functionRing 𝕜 𝕜 U} (ha : a ≠ 0)
+    {c b u v : ℕ → functionRing 𝕜 𝕜 U} {p q m n : ℕ} (hq : 1 ≤ q) (hqp : q ≤ p)
     (hP : a ^ p + ∑ j ∈ range p, c j * a ^ j ≠ 0) (hQ : a ^ q + ∑ k ∈ range q, b k * a ^ k ≠ 0)
     (h : (∑ i ∈ range (m + 1), u i * a ^ i) * (a ^ p + ∑ j ∈ range p, c j * a ^ j)
       + (∑ i ∈ range (n + 1), v i * a ^ i) * (a ^ q + ∑ k ∈ range q, b k * a ^ k) = 1) :
@@ -311,7 +311,7 @@ end Divisor
 /-!
 ## The Integrated Bezout Estimate
 
-For germs on `ℂ`, the pointwise estimate G2 integrates to an estimate for the proximity
+For elements of `K`, the pointwise estimate G2 integrates to an estimate for the proximity
 functions, the divisor estimate B3 to one for the counting functions; together they give
 `(p - q) T(r, a) + T(r, 1/Q(a)) ≤ T(r, P(a)/Q(a)) + (p + m + n + 3) · (Σ T(r, coefficients) + c)`.
 -/
@@ -320,12 +320,12 @@ section Integration
 
 variable {r : ℝ}
 
-theorem characteristic_eq_proximity_add_logCounting (a : germRing ℂ ℂ univ) :
+theorem characteristic_eq_proximity_add_logCounting (a : functionRing ℂ ℂ univ) :
     characteristic a r
       = ValueDistribution.proximity (out a) ⊤ r + ValueDistribution.logCounting (out a) ⊤ r :=
   rfl
 
-theorem characteristic_inv_eq_proximity_add_logCounting (a : germRing ℂ ℂ univ) (hr : r ≠ 0) :
+theorem characteristic_inv_eq_proximity_add_logCounting (a : functionRing ℂ ℂ univ) (hr : r ≠ 0) :
     characteristic a⁻¹ r
       = ValueDistribution.proximity (out a) 0 r + ValueDistribution.logCounting (out a) 0 r := by
   rw [characteristic, ValueDistribution.characteristic_congr_codiscrete (out_inv a) hr,
@@ -334,13 +334,13 @@ theorem characteristic_inv_eq_proximity_add_logCounting (a : germRing ℂ ℂ un
 
 /--
 **The integrated Bezout estimate.** Let `P(a)`, `Q(a)` be monic polynomial expressions of
-degrees `1 ≤ q ≤ p` in a nonzero germ `a`, both nonzero, with a Bezout certificate
+degrees `1 ≤ q ≤ p` in a nonzero element `a`, both nonzero, with a Bezout certificate
 `U(a) P(a) + V(a) Q(a) = 1` of degrees `m`, `n`. Then for `1 ≤ r`,
 `(p - q) T(r, a) + T(r, 1/Q(a)) ≤ T(r, P(a)/Q(a)) + (p + m + n + 3) · (Σ T(r, coefficients) + c)`
 with `c = log 2 + log p + log q + log (m + 1) + log (n + 1)`.
 -/
-theorem nsmul_characteristic_add_characteristic_inv_le_of_bezout {a : germRing ℂ ℂ univ}
-    (ha : a ≠ 0) {c b u v : ℕ → germRing ℂ ℂ univ} {p q m n : ℕ} (hq : 1 ≤ q) (hqp : q ≤ p)
+theorem nsmul_characteristic_add_characteristic_inv_le_of_bezout {a : functionRing ℂ ℂ univ}
+    (ha : a ≠ 0) {c b u v : ℕ → functionRing ℂ ℂ univ} {p q m n : ℕ} (hq : 1 ≤ q) (hqp : q ≤ p)
     (hP : a ^ p + ∑ j ∈ range p, c j * a ^ j ≠ 0) (hQ : a ^ q + ∑ k ∈ range q, b k * a ^ k ≠ 0)
     (h : (∑ i ∈ range (m + 1), u i * a ^ i) * (a ^ p + ∑ j ∈ range p, c j * a ^ j)
       + (∑ i ∈ range (n + 1), v i * a ^ i) * (a ^ q + ∑ k ∈ range q, b k * a ^ k) = 1)
@@ -368,7 +368,7 @@ theorem nsmul_characteristic_add_characteristic_inv_le_of_bezout {a : germRing �
     rw [h] at h₁
     exact h₁.symm.trans out_one
   -- Integrability of all integrands.
-  have hint : ∀ x : germRing ℂ ℂ univ, CircleIntegrable (fun z ↦ log⁺ ‖out x z‖) 0 r :=
+  have hint : ∀ x : functionRing ℂ ℂ univ, CircleIntegrable (fun z ↦ log⁺ ‖out x z‖) 0 r :=
     fun x ↦ (meromorphic_out x).meromorphicOn.circleIntegrable_posLog_norm
   have hintQ : CircleIntegrable (fun z ↦ log⁺ ‖(out Q)⁻¹ z‖) 0 r :=
     (meromorphic_out Q).inv.meromorphicOn.circleIntegrable_posLog_norm
@@ -438,7 +438,7 @@ theorem nsmul_characteristic_add_characteristic_inv_le_of_bezout {a : germRing �
     have := locallyFinsuppWithin.logCounting_le
       (nsmul_negPart_divisor_add_posPart_divisor_le_of_bezout ha hq hqp hP hQ h) hr
     simp only [map_add, map_nsmul, map_sum, Pi.add_apply, Pi.smul_apply, Finset.sum_apply,
-      GermRing.divisor] at this
+      FunctionRing.divisor] at this
     simp only [nsmul_eq_mul] at this
     simpa only [ValueDistribution.logCounting_top, ValueDistribution.logCounting_zero] using this
   -- The characteristics of the coefficients are the sums of their proximity and counting parts.
@@ -488,39 +488,39 @@ theorem nsmul_characteristic_add_characteristic_inv_le_of_bezout {a : germRing �
 end Integration
 
 /-!
-## Polynomials over a Growth Field, Evaluated at a Germ
+## Polynomials over a Growth Field, Evaluated at Elements of `K`
 -/
 
 section Polynomials
 
 variable {l : Filter ℝ} {G : (ℝ → ℝ) → Prop}
 
-/-- `aeval a P`, as a sum over the coefficients of `P`, coerced to the field of germs. -/
-theorem aeval_eq_sum_range_coe (hG : IsGrowthClass l G) (a : germRing ℂ ℂ univ)
+/-- `aeval a P`, as a sum over the coefficients of `P`, coerced to `K`. -/
+theorem aeval_eq_sum_range_coe (hG : IsGrowthClass l G) (a : functionRing ℂ ℂ univ)
     (P : (growthField hG)[X]) :
-    aeval a P = ∑ j ∈ range (P.natDegree + 1), (P.coeff j : germRing ℂ ℂ univ) * a ^ j := by
+    aeval a P = ∑ j ∈ range (P.natDegree + 1), (P.coeff j : functionRing ℂ ℂ univ) * a ^ j := by
   rw [aeval_eq_sum_range]
   simp only [Algebra.smul_def, IntermediateField.algebraMap_apply]
 
 /-- `aeval a P` for monic `P`, in monic normal form. -/
-theorem aeval_eq_monic (hG : IsGrowthClass l G) (a : germRing ℂ ℂ univ) {P : (growthField hG)[X]}
-    (hP : P.Monic) :
+theorem aeval_eq_monic (hG : IsGrowthClass l G) (a : functionRing ℂ ℂ univ)
+    {P : (growthField hG)[X]} (hP : P.Monic) :
     aeval a P
-      = a ^ P.natDegree + ∑ j ∈ range P.natDegree, (P.coeff j : germRing ℂ ℂ univ) * a ^ j := by
+      = a ^ P.natDegree + ∑ j ∈ range P.natDegree, (P.coeff j : functionRing ℂ ℂ univ) * a ^ j := by
   have := congrArg (aeval a) hP.as_sum
   simpa using this
 
 /-- If `a` lies in the growth field, so does every polynomial expression in `a` with
 coefficients in the growth field. -/
-theorem aeval_mem_growthField (hG : IsGrowthClass l G) {a : germRing ℂ ℂ univ}
+theorem aeval_mem_growthField (hG : IsGrowthClass l G) {a : functionRing ℂ ℂ univ}
     (ha : a ∈ growthField hG) (P : (growthField hG)[X]) : aeval a P ∈ growthField hG := by
-  have : a = algebraMap (growthField hG) (germRing ℂ ℂ univ) ⟨a, ha⟩ := rfl
+  have : a = algebraMap (growthField hG) (functionRing ℂ ℂ univ) ⟨a, ha⟩ := rfl
   rw [this, aeval_algebraMap_apply_eq_algebraMap_eval]
   exact SetLike.coe_mem _
 
 /-- If `a` does not lie in the growth field, no nonzero polynomial with coefficients in the
 growth field vanishes at `a` (relative algebraic closedness, T6). -/
-theorem aeval_ne_zero_of_notMem_growthField (hG : IsGrowthClass l G) {a : germRing ℂ ℂ univ}
+theorem aeval_ne_zero_of_notMem_growthField (hG : IsGrowthClass l G) {a : functionRing ℂ ℂ univ}
     (ha : a ∉ growthField hG) {P : (growthField hG)[X]} (hP : P ≠ 0) : aeval a P ≠ 0 :=
   fun h ↦ ha (mem_growthField_of_isAlgebraic hG ⟨P, hP, h⟩)
 
@@ -537,7 +537,8 @@ variable {l : Filter ℝ} {G : (ℝ → ℝ) → Prop}
 /-- G1, auxiliary form: the upper bound of the rational Valiron–Mohon'ko identity, by strong
 induction on the degree of the denominator along the Euclidean algorithm. The error term is
 eventually nonnegative. -/
-theorem characteristic_aeval_div_le_aux (hG : IsGrowthClass l G) (a : germRing ℂ ℂ univ) (q : ℕ) :
+theorem characteristic_aeval_div_le_aux (hG : IsGrowthClass l G) (a : functionRing ℂ ℂ univ)
+    (q : ℕ) :
     ∀ P Q : (growthField hG)[X], Q ≠ 0 → Q.natDegree = q →
       ∃ u, G u ∧ ∀ᶠ r in l, 0 ≤ u r ∧
         characteristic (aeval a P / aeval a Q) r
@@ -556,20 +557,21 @@ theorem characteristic_aeval_div_le_aux (hG : IsGrowthClass l G) (a : germRing �
   · -- `Q` is a nonzero constant `c`: `T(P(a)/c) ≤ T(P(a)) + T(c⁻¹)`.
     obtain ⟨c, rfl⟩ := natDegree_eq_zero.1 hq
     rw [aeval_C, natDegree_C, max_eq_left (Nat.zero_le _)]
-    have hc : G (characteristic (algebraMap (growthField hG) (germRing ℂ ℂ univ) c)⁻¹) := by
+    have hc : G (characteristic (algebraMap (growthField hG) (functionRing ℂ ℂ univ) c)⁻¹) := by
       have := (c⁻¹).property
       rwa [IntermediateField.coe_inv] at this
-    refine ⟨(∑ j ∈ range (P.natDegree + 1), characteristic (P.coeff j : germRing ℂ ℂ univ))
+    refine ⟨(∑ j ∈ range (P.natDegree + 1), characteristic (P.coeff j : functionRing ℂ ℂ univ))
       + (fun _ ↦ log (P.natDegree + 1))
-      + characteristic (algebraMap (growthField hG) (germRing ℂ ℂ univ) c)⁻¹,
+      + characteristic (algebraMap (growthField hG) (functionRing ℂ ℂ univ) c)⁻¹,
       hG.add (hG.add (hG.sum fun j _ ↦ (P.coeff j).property) (hG.const _)) hc, ?_⟩
     filter_upwards [hG.le_atTop (eventually_ge_atTop 1)] with r hr
     simp only [Pi.add_apply, Finset.sum_apply]
     have h₁ := characteristic_aeval_le hG a P hr
     have h₂ := characteristic_mul_le (aeval a P)
-      (algebraMap (growthField hG) (germRing ℂ ℂ univ) c)⁻¹ hr
-    have h₃ := characteristic_nonneg (algebraMap (growthField hG) (germRing ℂ ℂ univ) c)⁻¹ hr
-    have h₄ : 0 ≤ ∑ j ∈ range (P.natDegree + 1), characteristic (P.coeff j : germRing ℂ ℂ univ) r :=
+      (algebraMap (growthField hG) (functionRing ℂ ℂ univ) c)⁻¹ hr
+    have h₃ := characteristic_nonneg (algebraMap (growthField hG) (functionRing ℂ ℂ univ) c)⁻¹ hr
+    have h₄ : 0 ≤
+        ∑ j ∈ range (P.natDegree + 1), characteristic (P.coeff j : functionRing ℂ ℂ univ) r :=
       sum_nonneg fun j _ ↦ characteristic_nonneg _ hr
     have h₅ : 0 ≤ log ((P.natDegree : ℝ) + 1) :=
       log_nonneg (by linarith [Nat.cast_nonneg (α := ℝ) P.natDegree])
@@ -611,7 +613,7 @@ theorem characteristic_aeval_div_le_aux (hG : IsGrowthClass l G) (a : germRing �
         simp only [Pi.add_apply]
         exact ⟨by linarith [(abs_nonneg _).trans (hc₀ r)], by linarith⟩
     obtain ⟨u₂, hu₂, h₂⟩ := hrem
-    refine ⟨(∑ j ∈ range (S.natDegree + 1), characteristic (S.coeff j : germRing ℂ ℂ univ))
+    refine ⟨(∑ j ∈ range (S.natDegree + 1), characteristic (S.coeff j : functionRing ℂ ℂ univ))
       + (fun _ ↦ log (S.natDegree + 1)) + u₂ + (fun _ ↦ log 2),
       hG.add (hG.add (hG.add (hG.sum fun j _ ↦ (S.coeff j).property) (hG.const _)) hu₂)
         (hG.const _), ?_⟩
@@ -619,7 +621,8 @@ theorem characteristic_aeval_div_le_aux (hG : IsGrowthClass l G) (a : germRing �
     simp only [Pi.add_apply, Finset.sum_apply]
     have h₁ := characteristic_aeval_le hG a S hr
     have h₃ := characteristic_add_le (aeval a S) (aeval a P₁ / aeval a Q) hr
-    have h₄ : 0 ≤ ∑ j ∈ range (S.natDegree + 1), characteristic (S.coeff j : germRing ℂ ℂ univ) r :=
+    have h₄ : 0 ≤
+        ∑ j ∈ range (S.natDegree + 1), characteristic (S.coeff j : functionRing ℂ ℂ univ) r :=
       sum_nonneg fun j _ ↦ characteristic_nonneg _ hr
     have h₅ : 0 ≤ log ((S.natDegree : ℝ) + 1) :=
       log_nonneg (by linarith [Nat.cast_nonneg (α := ℝ) S.natDegree])
@@ -650,7 +653,7 @@ theorem characteristic_aeval_div_le_aux (hG : IsGrowthClass l G) (a : germRing �
 `P, Q` with coefficients in the growth field of `G`, `Q ≠ 0`,
 `T(r, P(a)/Q(a)) ≤ max (deg P) (deg Q) · T(r, a) + u(r)` with `u ∈ G`. No coprimality is
 needed. -/
-theorem characteristic_aeval_div_le (hG : IsGrowthClass l G) (a : germRing ℂ ℂ univ)
+theorem characteristic_aeval_div_le (hG : IsGrowthClass l G) (a : functionRing ℂ ℂ univ)
     (P : (growthField hG)[X]) {Q : (growthField hG)[X]} (hQ : Q ≠ 0) :
     ∃ u, G u ∧ ∀ᶠ r in l,
       characteristic (aeval a P / aeval a Q) r
@@ -671,7 +674,7 @@ variable {l : Filter ℝ} {G : (ℝ → ℝ) → Prop}
 /-- G3 for monic `P, Q` with `1 ≤ deg Q ≤ deg P`: the integrated Bezout estimate, combined with
 the First Main Theorem for `Q(a)` and the polynomial identity F5. -/
 theorem nsmul_characteristic_le_characteristic_aeval_div_of_monic (hG : IsGrowthClass l G)
-    (a : germRing ℂ ℂ univ) {P Q : (growthField hG)[X]} (hP : P.Monic) (hQ : Q.Monic)
+    (a : functionRing ℂ ℂ univ) {P Q : (growthField hG)[X]} (hP : P.Monic) (hQ : Q.Monic)
     (hPQ : IsCoprime P Q) (hq : 1 ≤ Q.natDegree) (hqp : Q.natDegree ≤ P.natDegree) :
     ∃ u, G u ∧ ∀ᶠ r in l, 0 ≤ u r ∧
       P.natDegree * characteristic a r ≤ characteristic (aeval a P / aeval a Q) r + u r := by
@@ -714,10 +717,10 @@ theorem nsmul_characteristic_le_characteristic_aeval_div_of_monic (hG : IsGrowth
     rw [hC]
     linarith
   refine ⟨(P.natDegree + U.natDegree + V.natDegree + 3)
-      • (∑ j ∈ range P.natDegree, characteristic (P.coeff j : germRing ℂ ℂ univ)
-        + ∑ k ∈ range Q.natDegree, characteristic (Q.coeff k : germRing ℂ ℂ univ)
-        + ∑ i ∈ range (U.natDegree + 1), characteristic (U.coeff i : germRing ℂ ℂ univ)
-        + ∑ i ∈ range (V.natDegree + 1), characteristic (V.coeff i : germRing ℂ ℂ univ)
+      • (∑ j ∈ range P.natDegree, characteristic (P.coeff j : functionRing ℂ ℂ univ)
+        + ∑ k ∈ range Q.natDegree, characteristic (Q.coeff k : functionRing ℂ ℂ univ)
+        + ∑ i ∈ range (U.natDegree + 1), characteristic (U.coeff i : functionRing ℂ ℂ univ)
+        + ∑ i ∈ range (V.natDegree + 1), characteristic (V.coeff i : functionRing ℂ ℂ univ)
         + fun _ ↦ C) + u₀ + fun _ ↦ c₀,
     hG.add (hG.add (hG.nsmul (hG.add (hG.add (hG.add (hG.add (hG.sum fun j _ ↦ (P.coeff j).property)
       (hG.sum fun k _ ↦ (Q.coeff k).property)) (hG.sum fun i _ ↦ (U.coeff i).property))
@@ -733,31 +736,32 @@ theorem nsmul_characteristic_le_characteristic_aeval_div_of_monic (hG : IsGrowth
   rw [hpq] at h₁
   simp only [Pi.add_apply, Pi.smul_apply, Finset.sum_apply]
   simp only [nsmul_eq_mul]
-  have hT₀ : 0 ≤ ∑ j ∈ range P.natDegree, characteristic (P.coeff j : germRing ℂ ℂ univ) r
-      + ∑ k ∈ range Q.natDegree, characteristic (Q.coeff k : germRing ℂ ℂ univ) r
-      + ∑ i ∈ range (U.natDegree + 1), characteristic (U.coeff i : germRing ℂ ℂ univ) r
-      + ∑ i ∈ range (V.natDegree + 1), characteristic (V.coeff i : germRing ℂ ℂ univ) r + C := by
+  have hT₀ : 0 ≤ ∑ j ∈ range P.natDegree, characteristic (P.coeff j : functionRing ℂ ℂ univ) r
+      + ∑ k ∈ range Q.natDegree, characteristic (Q.coeff k : functionRing ℂ ℂ univ) r
+      + ∑ i ∈ range (U.natDegree + 1), characteristic (U.coeff i : functionRing ℂ ℂ univ) r
+      + ∑ i ∈ range (V.natDegree + 1), characteristic (V.coeff i : functionRing ℂ ℂ univ) r
+      + C := by
     have := sum_nonneg fun j (_ : j ∈ range P.natDegree) ↦ characteristic_nonneg (P.coeff j :
-      germRing ℂ ℂ univ) hr
+      functionRing ℂ ℂ univ) hr
     have := sum_nonneg fun k (_ : k ∈ range Q.natDegree) ↦ characteristic_nonneg (Q.coeff k :
-      germRing ℂ ℂ univ) hr
+      functionRing ℂ ℂ univ) hr
     have := sum_nonneg fun i (_ : i ∈ range (U.natDegree + 1)) ↦ characteristic_nonneg
-      (U.coeff i : germRing ℂ ℂ univ) hr
+      (U.coeff i : functionRing ℂ ℂ univ) hr
     have := sum_nonneg fun i (_ : i ∈ range (V.natDegree + 1)) ↦ characteristic_nonneg
-      (V.coeff i : germRing ℂ ℂ univ) hr
+      (V.coeff i : functionRing ℂ ℂ univ) hr
     linarith
   have hK : 0 ≤ ((P.natDegree + U.natDegree + V.natDegree + 3 : ℕ) : ℝ) * (∑ j ∈ range P.natDegree,
-      characteristic (P.coeff j : germRing ℂ ℂ univ) r
-      + ∑ k ∈ range Q.natDegree, characteristic (Q.coeff k : germRing ℂ ℂ univ) r
-      + ∑ i ∈ range (U.natDegree + 1), characteristic (U.coeff i : germRing ℂ ℂ univ) r
-      + ∑ i ∈ range (V.natDegree + 1), characteristic (V.coeff i : germRing ℂ ℂ univ) r + C) :=
+      characteristic (P.coeff j : functionRing ℂ ℂ univ) r
+      + ∑ k ∈ range Q.natDegree, characteristic (Q.coeff k : functionRing ℂ ℂ univ) r
+      + ∑ i ∈ range (U.natDegree + 1), characteristic (U.coeff i : functionRing ℂ ℂ univ) r
+      + ∑ i ∈ range (V.natDegree + 1), characteristic (V.coeff i : functionRing ℂ ℂ univ) r + C) :=
     mul_nonneg (Nat.cast_nonneg _) hT₀
   push_cast at hK h₁ ⊢
   exact ⟨by linarith, by linarith⟩
 
 /-- G3 for `deg Q ≤ deg P`: reduction to the monic case. -/
 theorem nsmul_characteristic_le_characteristic_aeval_div_of_le (hG : IsGrowthClass l G)
-    (a : germRing ℂ ℂ univ) {P Q : (growthField hG)[X]} (hPQ : IsCoprime P Q) (hQ : Q ≠ 0)
+    (a : functionRing ℂ ℂ univ) {P Q : (growthField hG)[X]} (hPQ : IsCoprime P Q) (hQ : Q ≠ 0)
     (hqp : Q.natDegree ≤ P.natDegree) :
     ∃ u, G u ∧ ∀ᶠ r in l, 0 ≤ u r ∧
       P.natDegree * characteristic a r ≤ characteristic (aeval a P / aeval a Q) r + u r := by
@@ -772,20 +776,20 @@ theorem nsmul_characteristic_le_characteristic_aeval_div_of_le (hG : IsGrowthCla
       simp only [natDegree_zero, Nat.cast_zero, zero_mul]
       exact ⟨le_rfl, by linarith⟩
     · obtain ⟨u₀, hu₀, h₀⟩ := exists_abs_characteristic_aeval_sub_le hG a hP0
-      refine ⟨u₀ + characteristic (algebraMap (growthField hG) (germRing ℂ ℂ univ) c),
+      refine ⟨u₀ + characteristic (algebraMap (growthField hG) (functionRing ℂ ℂ univ) c),
         hG.add hu₀ c.property, ?_⟩
       filter_upwards [h₀, hG.le_atTop (eventually_ge_atTop 1)] with r hr₀ hr
-      have hc' : algebraMap (growthField hG) (germRing ℂ ℂ univ) c ≠ 0 :=
+      have hc' : algebraMap (growthField hG) (functionRing ℂ ℂ univ) c ≠ 0 :=
         fun h ↦ hc (ZeroMemClass.coe_eq_zero.1 h)
       have h₁ : aeval a P = aeval a P / aeval a (C c)
-          * algebraMap (growthField hG) (germRing ℂ ℂ univ) c := by
+          * algebraMap (growthField hG) (functionRing ℂ ℂ univ) c := by
         rw [aeval_C, div_mul_cancel₀ _ hc']
       have h₂ := characteristic_mul_le (aeval a P / aeval a (C c))
-        (algebraMap (growthField hG) (germRing ℂ ℂ univ) c) hr
+        (algebraMap (growthField hG) (functionRing ℂ ℂ univ) c) hr
       rw [← h₁] at h₂
       have h₃ := abs_le.1 hr₀
       have hu₀' : 0 ≤ u₀ r := (abs_nonneg _).trans hr₀
-      have h₄ := characteristic_nonneg (algebraMap (growthField hG) (germRing ℂ ℂ univ) c) hr
+      have h₄ := characteristic_nonneg (algebraMap (growthField hG) (functionRing ℂ ℂ univ) c) hr
       simp only [Pi.add_apply]
       exact ⟨by linarith, by linarith⟩
   · -- Normalize `P` and `Q` to be monic.
@@ -808,17 +812,17 @@ theorem nsmul_characteristic_le_characteristic_aeval_div_of_le (hG : IsGrowthCla
     -- `P'(a)/Q'(a) = P(a)/Q(a) · d` with the small constant `d = (lc P)⁻¹ lc Q`.
     set d : growthField hG := (leadingCoeff P)⁻¹ * leadingCoeff Q with hd_def
     have hg : aeval a P' / aeval a Q'
-        = aeval a P / aeval a Q * algebraMap (growthField hG) (germRing ℂ ℂ univ) d := by
+        = aeval a P / aeval a Q * algebraMap (growthField hG) (functionRing ℂ ℂ univ) d := by
       simp only [hP'_def, hQ'_def, hd_def, map_mul, aeval_C, map_inv₀]
       rw [div_eq_mul_inv, div_eq_mul_inv, mul_inv, inv_inv]
       ring
-    refine ⟨u₀ + characteristic (algebraMap (growthField hG) (germRing ℂ ℂ univ) d),
+    refine ⟨u₀ + characteristic (algebraMap (growthField hG) (functionRing ℂ ℂ univ) d),
       hG.add hu₀ d.property, ?_⟩
     filter_upwards [h₀, hG.le_atTop (eventually_ge_atTop 1)] with r ⟨hr₀, hr₁⟩ hr
     rw [hdP, hg] at hr₁
     have h₁ := characteristic_mul_le (aeval a P / aeval a Q)
-      (algebraMap (growthField hG) (germRing ℂ ℂ univ) d) hr
-    have h₂ := characteristic_nonneg (algebraMap (growthField hG) (germRing ℂ ℂ univ) d) hr
+      (algebraMap (growthField hG) (functionRing ℂ ℂ univ) d) hr
+    have h₂ := characteristic_nonneg (algebraMap (growthField hG) (functionRing ℂ ℂ univ) d) hr
     simp only [Pi.add_apply]
     exact ⟨by linarith, by linarith⟩
 
@@ -826,7 +830,7 @@ theorem nsmul_characteristic_le_characteristic_aeval_div_of_le (hG : IsGrowthCla
 `P, Q` with coefficients in the growth field of `G`, `Q ≠ 0`,
 `max (deg P) (deg Q) · T(r, a) ≤ T(r, P(a)/Q(a)) + u(r)` with `u ∈ G`. -/
 theorem nsmul_characteristic_le_characteristic_aeval_div (hG : IsGrowthClass l G)
-    (a : germRing ℂ ℂ univ) {P Q : (growthField hG)[X]} (hPQ : IsCoprime P Q) (hQ : Q ≠ 0) :
+    (a : functionRing ℂ ℂ univ) {P Q : (growthField hG)[X]} (hPQ : IsCoprime P Q) (hQ : Q ≠ 0) :
     ∃ u, G u ∧ ∀ᶠ r in l, 0 ≤ u r ∧
       max P.natDegree Q.natDegree * characteristic a r
         ≤ characteristic (aeval a P / aeval a Q) r + u r := by
@@ -860,10 +864,10 @@ section Main
 variable {l : Filter ℝ} {G : (ℝ → ℝ) → Prop}
 
 /-- **The Valiron–Mohon'ko identity for rational functions** (T8): for coprime polynomials
-`P, Q` with coefficients in the growth field of `G`, `Q ≠ 0`, and any meromorphic germ `a`,
+`P, Q` with coefficients in the growth field of `G`, `Q ≠ 0`, and any `a ∈ K`,
 `T(r, P(a)/Q(a)) = max (deg P) (deg Q) · T(r, a) + u(r)` with `u ∈ G`. -/
 theorem exists_abs_characteristic_aeval_div_sub_le (hG : IsGrowthClass l G)
-    (a : germRing ℂ ℂ univ) {P Q : (growthField hG)[X]} (hPQ : IsCoprime P Q) (hQ : Q ≠ 0) :
+    (a : functionRing ℂ ℂ univ) {P Q : (growthField hG)[X]} (hPQ : IsCoprime P Q) (hQ : Q ≠ 0) :
     ∃ u, G u ∧ ∀ᶠ r in l,
       |characteristic (aeval a P / aeval a Q) r
         - max P.natDegree Q.natDegree * characteristic a r| ≤ u r := by
@@ -874,12 +878,12 @@ theorem exists_abs_characteristic_aeval_div_sub_le (hG : IsGrowthClass l G)
   rw [Pi.add_apply]
   exact abs_le.2 ⟨by linarith, by linarith⟩
 
-/-- **Laine, Theorem 2.2.5** (T9): if `f` is a meromorphic germ whose characteristic tends to
+/-- **Laine, Theorem 2.2.5** (T9): if `f` is a meromorphic function whose characteristic tends to
 infinity along `l ≤ atTop`, and `R = P/Q` is a rational function with coprime numerator and
 denominator in the field `S(f)` of small functions with respect to `f`, then
 `T(r, R(f)) = deg R · T(r, f) + o(T(r, f))` along `l`. The classical choice is
 `l = volume.cofinite ⊓ atTop`. -/
-theorem characteristic_aeval_div_sub_isLittleO (hl : l ≤ atTop) {f : germRing ℂ ℂ univ}
+theorem characteristic_aeval_div_sub_isLittleO (hl : l ≤ atTop) {f : functionRing ℂ ℂ univ}
     (hf : Tendsto (characteristic f) l atTop) {P Q : (smallFunctions hl hf)[X]}
     (hPQ : IsCoprime P Q) (hQ : Q ≠ 0) :
     (fun r ↦ characteristic (aeval f P / aeval f Q) r
@@ -893,4 +897,4 @@ theorem characteristic_aeval_div_sub_isLittleO (hl : l ≤ atTop) {f : germRing 
 
 end Main
 
-end MeromorphicOn.GermRing
+end MeromorphicOn.FunctionRing

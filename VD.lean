@@ -1,7 +1,7 @@
 module  -- shake: keep-all --deprecated_module: ignore
 
 public import VD.AlgebraicDependence.ClunieMohonko
-public import VD.AlgebraicDependence.GermCharacteristic
+public import VD.AlgebraicDependence.FunctionRingCharacteristic
 public import VD.AlgebraicDependence.GrowthClass
 public import VD.AlgebraicDependence.GrowthClass'
 public import VD.AlgebraicDependence.GrowthField
@@ -11,8 +11,8 @@ public import VD.AlgebraicDependence.PolynomialCharacteristic
 public import VD.AlgebraicDependence.RationalCharacteristic
 public import VD.Field.CodiscreteWithinNeBot
 public import VD.Field.GermAlgebra
-public import VD.Field.GermField
-public import VD.Field.GermFieldAPI
+public import VD.Field.MeromorphicFunctionField
+public import VD.Field.MeromorphicFunctionFieldAPI
 public import VD.LLD.CircleAverageEstimates
 public import VD.LLD.LogDerivEstimates
 public import VD.LLD.LogDerivLemma

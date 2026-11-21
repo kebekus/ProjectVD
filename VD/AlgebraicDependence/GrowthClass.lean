@@ -23,7 +23,7 @@ nonconstant meromorphic `f` is the little-o class with `φ = T(r, f)` along
 
 This file has no Nevanlinna-theoretic content; it only fixes the axioms and proves the two
 instances. Package D uses it to state the growth-class form of the polynomial Valiron–Mohon'ko
-identity; package F builds the growth *fields* of meromorphic germs on top of it.
+identity; package F builds the growth *fields* of meromorphic functions on top of it.
 
 ## Main definitions and results
 
