@@ -61,8 +61,8 @@ theorem mem_subalgebra_iff : f ∈ subalgebra 𝕜 𝕜' U ↔ MeromorphicOn f U
 variable (𝕜 𝕜' U) in
 /--
 The ring of meromorphic functions on `U`: functions meromorphic on `U`, modulo equality along the
-filter `codiscreteWithin U`, realized as a subalgebra of the algebra of germs along that filter.
-If `U` is preconnected with at least two points, this algebra is a field, see
+filter `codiscreteWithin U`, realized as a subalgebra of the algebra of germs along that filter. If
+`U` is preconnected with at least two points, this algebra is a field, see
 `MeromorphicOn.FunctionRing.instField`.
 -/
 def functionRing : Subalgebra 𝕜 (Germ (codiscreteWithin U) 𝕜') :=
@@ -97,8 +97,8 @@ namespace FunctionRing
 ## Inverses in the Ring of Meromorphic Functions
 
 The ring of meromorphic functions inherits the pointwise inverse of germs, using the junk-value
-convention `(0 : 𝕜')⁻¹ = 0`: the inverse of a function meromorphic on `U` is meromorphic on `U`,
-so the subalgebra is closed under `Inv` without any hypotheses on `U`.
+convention `(0 : 𝕜')⁻¹ = 0`: the inverse of a function meromorphic on `U` is meromorphic on `U`, so
+the subalgebra is closed under `Inv` without any hypotheses on `U`.
 -/
 
 noncomputable instance : Inv (functionRing 𝕜 𝕜' U) where
@@ -137,7 +137,8 @@ protected theorem inv_zero : (0 : functionRing 𝕜 𝕜' U)⁻¹ = 0 := by
 ## Nontriviality and the Field Structure
 -/
 
-/-- The ring of meromorphic functions is nontrivial whenever `codiscreteWithin U` is nontrivial.
+/--
+The ring of meromorphic functions is nontrivial whenever `codiscreteWithin U` is nontrivial.
 -/
 theorem nontrivial (h : (codiscreteWithin U).NeBot) : Nontrivial (functionRing 𝕜 𝕜' U) := by
   refine ⟨0, 1, fun hcon ↦ ?_⟩
@@ -151,8 +152,8 @@ instance [h₁U : Fact (IsPreconnected U)] [h₂U : Fact U.Nontrivial] :
   nontrivial (h₁U.out.codiscreteWithin_neBot h₂U.out)
 
 /--
-The germ of a function meromorphic on a preperfect set `U` vanishes iff the function has
-infinite order at every point of `U`.
+The germ of a function meromorphic on a preperfect set `U` vanishes iff the function has infinite
+order at every point of `U`.
 -/
 theorem coe_eq_zero_iff (hf : MeromorphicOn f U) (hU : Preperfect U) :
     (f : Germ (codiscreteWithin U) 𝕜') = 0 ↔ ∀ x ∈ U, meromorphicOrderAt f x = ⊤ := by
@@ -184,16 +185,15 @@ protected theorem mul_inv_cancel (h₁U : IsPreconnected U) (h₂U : U.Nontrivia
     show (1 : Germ (codiscreteWithin U) 𝕜') = ((1 : 𝕜 → 𝕜') : Germ _ 𝕜') from rfl, Germ.coe_eq]
   exact hf.self_mul_inv_eventuallyEq_one_codiscreteWithin horder
 
-/-- On a preconnected set with at least two points, the ring of meromorphic functions is a
-field. -/
+/-- On a preconnected set with at least two points, the ring of meromorphic functions is a field. -/
 theorem isField (h₁U : IsPreconnected U) (h₂U : U.Nontrivial) : IsField (functionRing 𝕜 𝕜' U) where
   exists_pair_ne := (nontrivial (h₁U.codiscreteWithin_neBot h₂U)).exists_pair_ne
   mul_comm := mul_comm
   mul_inv_cancel ha := ⟨_, FunctionRing.mul_inv_cancel h₁U h₂U ha⟩
 
 /--
-The field of meromorphic functions on a preconnected set with at least two points: field
-instance for the ring of meromorphic functions, with the pointwise inverse.
+The field of meromorphic functions on a preconnected set with at least two points: field instance
+for the ring of meromorphic functions, with the pointwise inverse.
 -/
 noncomputable instance instField [h₁U : Fact (IsPreconnected U)] [h₂U : Fact U.Nontrivial] :
     Field (functionRing 𝕜 𝕜' U) where
@@ -207,8 +207,9 @@ noncomputable instance instField [h₁U : Fact (IsPreconnected U)] [h₂U : Fact
   nnqsmul := _
   qsmul := _
 
-/-- On a preconnected set with at least two points, the ring of meromorphic functions is a
-domain. -/
+/--
+On a preconnected set with at least two points, the ring of meromorphic functions is a domain.
+-/
 theorem isDomain (h₁U : IsPreconnected U) (h₂U : U.Nontrivial) : IsDomain (functionRing 𝕜 𝕜' U) :=
   have : Fact (IsPreconnected U) := ⟨h₁U⟩
   have : Fact U.Nontrivial := ⟨h₂U⟩
