@@ -17,6 +17,21 @@ in the usual sense. If `A` is an `R`-algebra, then the ring of germs `Germ l A` 
 and the map sending a function to its germ is an algebra homomorphism `Filter.Germ.coeAlgHom`.
 -/
 
+/-
+UPSTREAMING INSTRUCTIONS (delete this comment when copying)
+
+Part of the PR "field of meromorphic functions", together with
+`VD/Field/CodiscreteWithinNeBot.lean` and `VD/Field/MeromorphicFunctionField.lean`.
+
+Mathlib target: new file `Mathlib/Order/Filter/Germ/Algebra.lean`. Copy this file verbatim; the
+imports are already the Mathlib ones. Then run `lake exe mk_all` to register the file in
+`Mathlib.lean`.
+
+Why a new file and not `Mathlib/Order/Filter/Germ/Basic.lean`: that file imports only
+`Mathlib.Algebra.Module.Pi`. The material here needs `Mathlib.Algebra.Algebra.Pi`, and adding that
+import to `Basic.lean` would enlarge the import closure of everything that uses germs.
+-/
+
 @[expose] public section
 
 namespace Filter.Germ

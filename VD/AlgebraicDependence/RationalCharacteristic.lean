@@ -88,9 +88,9 @@ theorem out_sum_mul_pow (a : functionRing 𝕜 𝕜 U) (c : ℕ → functionRing
     ((EventuallyEq.refl _ _).mul (out_pow a j)))
 
 theorem out_div (a b : functionRing 𝕜 𝕜 U) : out (a / b) =ᶠ[codiscreteWithin U] out a / out b := by
-  rw [div_eq_mul_inv]
+  rw [FunctionRing.div_eq_mul_inv]
   filter_upwards [out_mul a b⁻¹, out_inv b] with z h₁ h₂
-  rw [h₁, Pi.mul_apply, h₂, Pi.inv_apply, Pi.div_apply, _root_.div_eq_mul_inv]
+  rw [h₁, Pi.mul_apply, h₂, Pi.inv_apply, Pi.div_apply, div_eq_mul_inv]
 
 end Representatives
 

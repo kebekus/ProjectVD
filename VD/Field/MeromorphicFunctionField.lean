@@ -5,9 +5,9 @@ Authors: Stefan Kebekus
 -/
 module
 
+public import Mathlib.Analysis.Meromorphic.Order
 public import VD.Field.CodiscreteWithinNeBot
 public import VD.Field.GermAlgebra
-public import VD.MathlibSubmitted.MeromorphicGermZero
 
 /-!
 # The Field of Meromorphic Functions on a Connected Set
@@ -20,13 +20,45 @@ germs along the filter `Filter.codiscreteWithin U`: the image of the subalgebra 
 germs is the ring `MeromorphicOn.functionRing 𝕜 𝕜' U` of meromorphic functions on `U`. It carries
 a natural pointwise inverse, and if `U` is preconnected with at least two points, it is a field,
 with instance `MeromorphicOn.FunctionRing.instField` available under `Fact` assumptions on `U`.
-For `U = univ`, these `Fact` instances are provided whenever `𝕜` is preconnected.
 
-The key input is the identity theorem for meromorphic functions: on a preconnected set, a
-meromorphic function that does not vanish along `codiscreteWithin U` has finite order everywhere
-(`MeromorphicOn.exists_meromorphicOrderAt_ne_top_iff_forall`), so its zero set is codiscrete
-within `U` and the pointwise inverse is a genuine inverse
-(`MeromorphicOn.self_mul_inv_eventuallyEq_one_codiscreteWithin`).
+The key input is the identity theorem for meromorphic functions, in the form of
+`MeromorphicOn.mul_inv_eventuallyEq`: on a preconnected set, a meromorphic function `f` that does
+not vanish along `codiscreteWithin U` satisfies `f * f⁻¹ =ᶠ[codiscreteWithin U] 1`, so that the
+pointwise inverse is a genuine inverse.
+-/
+
+/-
+UPSTREAMING INSTRUCTIONS (delete this comment when copying)
+
+Main file of the PR "field of meromorphic functions". The PR has three parts:
+
+1. `VD/Field/GermAlgebra.lean` → new file `Mathlib/Order/Filter/Germ/Algebra.lean`;
+2. `VD/Field/CodiscreteWithinNeBot.lean` → four lemmas, inserted into
+   `Mathlib/Topology/DiscreteSubset.lean` and `Mathlib/Topology/Perfect.lean`;
+3. this file → new file `Mathlib/Analysis/Meromorphic/FunctionField.lean`.
+
+Details for parts 1 and 2 are in the respective files.
+
+When copying this file, replace the import block by
+
+  public import Mathlib.Analysis.Meromorphic.Order
+  public import Mathlib.Order.Filter.Germ.Algebra
+  public import Mathlib.Topology.Perfect
+
+and run `lake exe mk_all` to register the new files in `Mathlib.lean`. Nothing else changes.
+
+The file is independent of PR #45423 (`VD/MathlibSubmitted/MeromorphicGermZero.lean`). The one
+statement that needs #45423, `MeromorphicOn.FunctionRing.coe_eq_zero_iff`, has been moved to
+`VD/Field/MeromorphicFunctionFieldAPI.lean` and is not part of this PR.
+
+To keep the PR short, the case `U = univ` (the `Fact` instances that make
+`functionRing 𝕜 𝕜' univ` a field for preconnected `𝕜`, `mem_subalgebra_univ_iff`,
+`Meromorphic.coe_mem_functionRing`) has also been moved to
+`VD/Field/MeromorphicFunctionFieldAPI.lean`, section "The Global Case". It is not part of this PR.
+
+Related work, to be mentioned in the PR description: draft PR #39826 by wwylele, "feat(Analysis):
+field of meromorphic functions", constructs the same field as a quotient type. It is labelled
+`please-adopt` since 2026-10-10.
 -/
 
 @[expose] public section
@@ -73,7 +105,7 @@ def functionRing : Subalgebra 𝕜 (Germ (codiscreteWithin U) 𝕜') :=
 theorem mem_functionRing_iff {γ : Germ (codiscreteWithin U) 𝕜'} :
     γ ∈ functionRing 𝕜 𝕜' U ↔
       ∃ f : 𝕜 → 𝕜', MeromorphicOn f U ∧ (f : Germ (codiscreteWithin U) 𝕜') = γ :=
-  ⟨fun ⟨f, hf, h⟩ ↦ ⟨f, hf, h⟩, fun ⟨f, hf, h⟩ ↦ ⟨f, hf, h⟩⟩
+  Subalgebra.mem_map
 
 /-- The germ of a meromorphic function lies in `functionRing 𝕜 𝕜' U`. -/
 theorem coe_mem_functionRing (hf : MeromorphicOn f U) :
@@ -116,23 +148,16 @@ theorem coe_inv (a : functionRing 𝕜 𝕜' U) :
 noncomputable instance : Div (functionRing 𝕜 𝕜' U) where
   div a b := a * b⁻¹
 
-theorem div_eq_mul_inv (a b : functionRing 𝕜 𝕜' U) : a / b = a * b⁻¹ := rfl
+protected theorem div_eq_mul_inv (a b : functionRing 𝕜 𝕜' U) : a / b = a * b⁻¹ := rfl
 
 @[simp, norm_cast]
 theorem coe_div (a b : functionRing 𝕜 𝕜' U) :
     ((a / b : functionRing 𝕜 𝕜' U) : Germ (codiscreteWithin U) 𝕜') =
-      (a : Germ (codiscreteWithin U) 𝕜') / (b : Germ (codiscreteWithin U) 𝕜') := by
-  rw [div_eq_mul_inv, division_def]
-  push_cast
-  rfl
+      (a : Germ (codiscreteWithin U) 𝕜') / (b : Germ (codiscreteWithin U) 𝕜') :=
+  (div_eq_mul_inv _ _).symm
 
-protected theorem inv_zero : (0 : functionRing 𝕜 𝕜' U)⁻¹ = 0 := by
-  apply Subtype.ext
-  rw [coe_inv]
-  change ((0 : 𝕜 → 𝕜') : Germ (codiscreteWithin U) 𝕜')⁻¹ = ((0 : 𝕜 → 𝕜') : Germ _ 𝕜')
-  rw [← Germ.coe_inv, Germ.coe_eq]
-  filter_upwards with x
-  simp
+protected theorem inv_zero : (0 : functionRing 𝕜 𝕜' U)⁻¹ = 0 :=
+  Subtype.ext (congrArg Germ.ofFun (funext fun _ ↦ inv_zero))
 
 /-!
 ## Nontriviality and the Field Structure
@@ -141,56 +166,31 @@ protected theorem inv_zero : (0 : functionRing 𝕜 𝕜' U)⁻¹ = 0 := by
 /--
 The ring of meromorphic functions is nontrivial whenever `codiscreteWithin U` is nontrivial.
 -/
-theorem nontrivial (h : (codiscreteWithin U).NeBot) : Nontrivial (functionRing 𝕜 𝕜' U) := by
-  refine ⟨0, 1, fun hcon ↦ ?_⟩
-  have h₂ : ((0 : 𝕜 → 𝕜') : Germ (codiscreteWithin U) 𝕜') = ((1 : 𝕜 → 𝕜') : Germ _ 𝕜') :=
-    congrArg Subtype.val hcon
-  obtain ⟨x, hx⟩ := (Germ.coe_eq.1 h₂).exists
-  exact zero_ne_one (α := 𝕜') hx
+theorem nontrivial (h : (codiscreteWithin U).NeBot) : Nontrivial (functionRing 𝕜 𝕜' U) :=
+  ⟨0, 1, fun hcon ↦ zero_ne_one (α := 𝕜') (Germ.const_inj.1 (congrArg Subtype.val hcon))⟩
 
 instance [h₁U : Fact (IsPreconnected U)] [h₂U : Fact U.Nontrivial] :
     Nontrivial (functionRing 𝕜 𝕜' U) :=
   nontrivial (h₁U.out.codiscreteWithin_neBot h₂U.out)
 
 /--
-The germ of a function meromorphic on a preperfect set `U` vanishes iff the function has infinite
-order at every point of `U`.
+On a preconnected set, every nonzero element of `functionRing 𝕜 𝕜' U` is invertible, with the
+pointwise inverse as its inverse.
 -/
-theorem coe_eq_zero_iff (hf : MeromorphicOn f U) (hU : Preperfect U) :
-    (f : Germ (codiscreteWithin U) 𝕜') = 0 ↔ ∀ x ∈ U, meromorphicOrderAt f x = ⊤ := by
-  rw [show (0 : Germ (codiscreteWithin U) 𝕜') = ((0 : 𝕜 → 𝕜') : Germ _ 𝕜') from rfl, Germ.coe_eq]
-  exact hf.eventuallyEq_zero_codiscreteWithin_iff_forall_meromorphicOrderAt_eq_top hU
-
-/--
-On a preconnected set with at least two points, every nonzero element of `functionRing 𝕜 𝕜' U` is
-invertible, with the pointwise inverse as its inverse.
--/
-protected theorem mul_inv_cancel (h₁U : IsPreconnected U) (h₂U : U.Nontrivial)
-    {a : functionRing 𝕜 𝕜' U} (ha : a ≠ 0) : a * a⁻¹ = 1 := by
+protected theorem mul_inv_cancel (hU : IsPreconnected U) {a : functionRing 𝕜 𝕜' U} (ha : a ≠ 0) :
+    a * a⁻¹ = 1 := by
   obtain ⟨f, hf, hfa⟩ := mem_functionRing_iff.1 a.property
-  have horder : ∀ x ∈ U, meromorphicOrderAt f x ≠ ⊤ := by
-    by_contra hcon
-    push Not at hcon
-    obtain ⟨x, h₁x, h₂x⟩ := hcon
-    apply ha
-    apply Subtype.ext
-    rw [← hfa]
-    exact (coe_eq_zero_iff hf (h₁U.preperfect_of_nontrivial h₂U)).2
-      ((hf.eventuallyEq_zero_codiscreteWithin_iff_forall_meromorphicOrderAt_eq_top
-        (h₁U.preperfect_of_nontrivial h₂U)).1
-        ((hf.eventuallyEq_zero_codiscreteWithin_iff_exists_meromorphicOrderAt_eq_top
-          h₁U h₂U).2 ⟨x, h₁x, h₂x⟩))
+  have h0 : ¬ f =ᶠ[codiscreteWithin U] 0 := fun h ↦ ha (Subtype.ext (hfa ▸ Germ.coe_eq.2 h))
   apply Subtype.ext
   push_cast
-  rw [← hfa, ← Germ.coe_inv, ← Germ.coe_mul,
-    show (1 : Germ (codiscreteWithin U) 𝕜') = ((1 : 𝕜 → 𝕜') : Germ _ 𝕜') from rfl, Germ.coe_eq]
-  exact hf.self_mul_inv_eventuallyEq_one_codiscreteWithin horder
+  rw [← hfa, ← Germ.coe_inv, ← Germ.coe_mul]
+  exact Germ.coe_eq.2 (hf.mul_inv_eventuallyEq hU h0)
 
 /-- On a preconnected set with at least two points, the ring of meromorphic functions is a field. -/
 theorem isField (h₁U : IsPreconnected U) (h₂U : U.Nontrivial) : IsField (functionRing 𝕜 𝕜' U) where
   exists_pair_ne := (nontrivial (h₁U.codiscreteWithin_neBot h₂U)).exists_pair_ne
   mul_comm := mul_comm
-  mul_inv_cancel ha := ⟨_, FunctionRing.mul_inv_cancel h₁U h₂U ha⟩
+  mul_inv_cancel ha := ⟨_, FunctionRing.mul_inv_cancel h₁U ha⟩
 
 /--
 The field of meromorphic functions on a preconnected set with at least two points: field instance
@@ -203,7 +203,7 @@ noncomputable instance instField [h₁U : Fact (IsPreconnected U)] [h₂U : Fact
   div := Div.div
   div_eq_mul_inv _ _ := rfl
   exists_pair_ne := exists_pair_ne _
-  mul_inv_cancel _ ha := FunctionRing.mul_inv_cancel h₁U.out h₂U.out ha
+  mul_inv_cancel _ ha := FunctionRing.mul_inv_cancel h₁U.out ha
   inv_zero := FunctionRing.inv_zero
   nnqsmul := _
   qsmul := _
@@ -212,34 +212,8 @@ noncomputable instance instField [h₁U : Fact (IsPreconnected U)] [h₂U : Fact
 On a preconnected set with at least two points, the ring of meromorphic functions is a domain.
 -/
 theorem isDomain (h₁U : IsPreconnected U) (h₂U : U.Nontrivial) : IsDomain (functionRing 𝕜 𝕜' U) :=
-  have : Fact (IsPreconnected U) := ⟨h₁U⟩
-  have : Fact U.Nontrivial := ⟨h₂U⟩
-  inferInstance
+  (isField h₁U h₂U).isDomain
 
 end FunctionRing
 
 end MeromorphicOn
-
-/-!
-## The Global Case
-
-For `U = univ`, the ring `MeromorphicOn.functionRing 𝕜 𝕜' univ` is the ring of meromorphic
-functions on `𝕜`. The following `Fact` instances make it a field whenever `𝕜` is preconnected, for
-instance if `𝕜` is `ℝ` or `ℂ`. Over totally disconnected fields such as the `p`-adic numbers, it is
-not a field.
--/
-
-instance [PreconnectedSpace 𝕜] : Fact (IsPreconnected (univ : Set 𝕜)) :=
-  ⟨isPreconnected_univ⟩
-
-instance : Fact (univ : Set 𝕜).Nontrivial :=
-  ⟨nontrivial_univ⟩
-
-theorem MeromorphicOn.mem_subalgebra_univ_iff :
-    f ∈ MeromorphicOn.subalgebra 𝕜 𝕜' univ ↔ Meromorphic f :=
-  meromorphicOn_univ
-
-/-- The germ of a meromorphic function lies in `functionRing 𝕜 𝕜' univ`. -/
-theorem Meromorphic.coe_mem_functionRing (hf : Meromorphic f) :
-    (f : Germ (codiscreteWithin (univ : Set 𝕜)) 𝕜') ∈ MeromorphicOn.functionRing 𝕜 𝕜' univ :=
-  MeromorphicOn.coe_mem_functionRing hf.meromorphicOn

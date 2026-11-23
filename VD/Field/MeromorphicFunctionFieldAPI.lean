@@ -8,6 +8,7 @@ module
 public import Mathlib.Analysis.Meromorphic.Divisor
 public import Mathlib.Analysis.Meromorphic.NormalForm
 public import VD.Field.MeromorphicFunctionField
+public import VD.MathlibSubmitted.MeromorphicGermZero
 
 /-!
 # Supporting API for the Field of Meromorphic Functions
@@ -24,6 +25,9 @@ meromorphic functions on `U`:
   this is the unique normal-form representative, up to values outside of `U`. Since functions in
   normal form are not stable under addition or multiplication, this is a section of
   `MeromorphicOn.toFunctionRingAlgHom` as a map of sets, not an algebra homomorphism.
+
+For `U = univ`, the file provides the `Fact` instances that make `functionRing 𝕜 𝕜' univ` a field
+whenever `𝕜` is preconnected.
 
 The definitions choose a meromorphic representative of each element; the accompanying congruence
 lemmas show independence of that choice on preperfect sets.
@@ -189,6 +193,19 @@ theorem orderAt_mul (hU : Preperfect U) (hx : x ∈ U) (a b : functionRing 𝕜 
   rw [orderAt_coe hU ((meromorphicOn_out a).mul (meromorphicOn_out b)) hx
     (by push_cast [coe_out]; rfl)]
   exact meromorphicOrderAt_mul (meromorphicOn_out a x hx) (meromorphicOn_out b x hx)
+
+/--
+The germ of a function meromorphic on a preperfect set `U` vanishes iff the function has infinite
+order at every point of `U`.
+
+This statement depends on Mathlib PR #45423 (`VD/MathlibSubmitted/MeromorphicGermZero.lean`) and
+is therefore not part of the PR that upstreams `VD/Field/MeromorphicFunctionField.lean`. It can
+follow, together with the rest of this file, once #45423 is merged.
+-/
+theorem coe_eq_zero_iff (hf : MeromorphicOn f U) (hU : Preperfect U) :
+    (f : Germ (codiscreteWithin U) 𝕜') = 0 ↔ ∀ x ∈ U, meromorphicOrderAt f x = ⊤ := by
+  rw [show (0 : Germ (codiscreteWithin U) 𝕜') = ((0 : 𝕜 → 𝕜') : Germ _ 𝕜') from rfl, Germ.coe_eq]
+  exact hf.eventuallyEq_zero_codiscreteWithin_iff_forall_meromorphicOrderAt_eq_top hU
 
 /-- On a preperfect set, an element vanishes iff its order is infinite at every point of `U`. -/
 theorem eq_zero_iff_forall_orderAt_eq_top (hU : Preperfect U) {a : functionRing 𝕜 𝕜' U} :
@@ -361,19 +378,40 @@ theorem eqOn_toNF_of_meromorphicNFOn (hU : IsOpen U) {a : functionRing 𝕜 𝕜
     ((h₁g hx).eventuallyEq_nhdsNE_iff_eventuallyEq_nhds (meromorphicNFOn_toNF a hx)).1 h₂
   exact h₃.eq_of_nhds
 
+end MeromorphicOn.FunctionRing
+
 /-!
 ## The Global Case
+
+For `U = univ`, the ring `MeromorphicOn.functionRing 𝕜 𝕜' univ` is the ring of meromorphic
+functions on `𝕜`. The following `Fact` instances make it a field whenever `𝕜` is preconnected, for
+instance if `𝕜` is `ℝ` or `ℂ`. Over totally disconnected fields such as the `p`-adic numbers, it is
+not a field.
 -/
 
-/-- The chosen representative of an element of `functionRing 𝕜 𝕜' univ` is meromorphic. -/
-theorem meromorphic_out (a : functionRing 𝕜 𝕜' univ) : Meromorphic (out a) :=
-  meromorphicOn_univ.1 (meromorphicOn_out a)
+instance [PreconnectedSpace 𝕜] : Fact (IsPreconnected (univ : Set 𝕜)) :=
+  ⟨isPreconnected_univ⟩
 
-end MeromorphicOn.FunctionRing
+instance : Fact (univ : Set 𝕜).Nontrivial :=
+  ⟨nontrivial_univ⟩
+
+theorem MeromorphicOn.mem_subalgebra_univ_iff :
+    f ∈ MeromorphicOn.subalgebra 𝕜 𝕜' univ ↔ Meromorphic f :=
+  meromorphicOn_univ
+
+/-- The chosen representative of an element of `functionRing 𝕜 𝕜' univ` is meromorphic. -/
+theorem MeromorphicOn.FunctionRing.meromorphic_out (a : functionRing 𝕜 𝕜' univ) :
+    Meromorphic (out a) :=
+  meromorphicOn_univ.1 (meromorphicOn_out a)
 
 namespace Meromorphic
 
 open MeromorphicOn
+
+/-- The germ of a meromorphic function lies in `functionRing 𝕜 𝕜' univ`. -/
+theorem coe_mem_functionRing (hf : Meromorphic f) :
+    (f : Germ (codiscreteWithin (univ : Set 𝕜)) 𝕜') ∈ functionRing 𝕜 𝕜' univ :=
+  MeromorphicOn.coe_mem_functionRing hf.meromorphicOn
 
 /-- The element of `functionRing 𝕜 𝕜' univ` represented by a meromorphic function. -/
 def toFunctionRing (hf : Meromorphic f) : functionRing 𝕜 𝕜' univ :=
