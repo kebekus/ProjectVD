@@ -20,6 +20,7 @@ germs along the filter `Filter.codiscreteWithin U`: the image of the subalgebra 
 germs is the ring `MeromorphicOn.functionRing 𝕜 𝕜' U` of meromorphic functions on `U`. It carries
 a natural pointwise inverse, and if `U` is preconnected with at least two points, it is a field,
 with instance `MeromorphicOn.FunctionRing.instField` available under `Fact` assumptions on `U`.
+For `U = univ`, these `Fact` instances are provided whenever `𝕜` is preconnected.
 
 The key input is the identity theorem for meromorphic functions: on a preconnected set, a
 meromorphic function that does not vanish along `codiscreteWithin U` has finite order everywhere
@@ -218,3 +219,27 @@ theorem isDomain (h₁U : IsPreconnected U) (h₂U : U.Nontrivial) : IsDomain (f
 end FunctionRing
 
 end MeromorphicOn
+
+/-!
+## The Global Case
+
+For `U = univ`, the ring `MeromorphicOn.functionRing 𝕜 𝕜' univ` is the ring of meromorphic
+functions on `𝕜`. The following `Fact` instances make it a field whenever `𝕜` is preconnected, for
+instance if `𝕜` is `ℝ` or `ℂ`. Over totally disconnected fields such as the `p`-adic numbers, it is
+not a field.
+-/
+
+instance [PreconnectedSpace 𝕜] : Fact (IsPreconnected (univ : Set 𝕜)) :=
+  ⟨isPreconnected_univ⟩
+
+instance : Fact (univ : Set 𝕜).Nontrivial :=
+  ⟨nontrivial_univ⟩
+
+theorem MeromorphicOn.mem_subalgebra_univ_iff :
+    f ∈ MeromorphicOn.subalgebra 𝕜 𝕜' univ ↔ Meromorphic f :=
+  meromorphicOn_univ
+
+/-- The germ of a meromorphic function lies in `functionRing 𝕜 𝕜' univ`. -/
+theorem Meromorphic.coe_mem_functionRing (hf : Meromorphic f) :
+    (f : Germ (codiscreteWithin (univ : Set 𝕜)) 𝕜') ∈ MeromorphicOn.functionRing 𝕜 𝕜' univ :=
+  MeromorphicOn.coe_mem_functionRing hf.meromorphicOn

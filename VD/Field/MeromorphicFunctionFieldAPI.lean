@@ -15,6 +15,8 @@ public import VD.Field.MeromorphicFunctionField
 This file provides the basic objects attached to the ring `MeromorphicOn.functionRing 𝕜 𝕜' U` of
 meromorphic functions on `U`:
 
+- `MeromorphicOn.FunctionRing.mk`: the element represented by a function meromorphic on `U`, and
+  `Meromorphic.toFunctionRing`, its counterpart for functions meromorphic on all of `𝕜`;
 - `MeromorphicOn.FunctionRing.constRingHom`: the embedding of constants in `𝕜'`;
 - `MeromorphicOn.FunctionRing.orderAt`: the order at a point of `U`, additive on products;
 - `MeromorphicOn.FunctionRing.divisor`: the divisor, additive on products of nonzero elements;
@@ -64,6 +66,24 @@ theorem eq_zero_iff_out_eventuallyEq_zero {a : functionRing 𝕜 𝕜' U} :
     a = 0 ↔ out a =ᶠ[codiscreteWithin U] 0 := by
   rw [Subtype.ext_iff, ← coe_out a, ← Germ.coe_eq]
   rfl
+
+/-!
+## The Element Represented by a Meromorphic Function
+-/
+
+/-- The element of `functionRing 𝕜 𝕜' U` represented by a function meromorphic on `U`. -/
+def mk (hf : MeromorphicOn f U) : functionRing 𝕜 𝕜' U :=
+  ⟨(f : Germ (codiscreteWithin U) 𝕜'), coe_mem_functionRing hf⟩
+
+@[simp]
+theorem coe_mk (hf : MeromorphicOn f U) :
+    ((mk hf : functionRing 𝕜 𝕜' U) : Germ (codiscreteWithin U) 𝕜') = f :=
+  rfl
+
+/-- A meromorphic function agrees with the chosen representative of the element it represents,
+along `codiscreteWithin U`. -/
+theorem eventuallyEq_out_mk (hf : MeromorphicOn f U) : f =ᶠ[codiscreteWithin U] out (mk hf) :=
+  out_eventuallyEq rfl
 
 /-!
 ### Representatives of Sums, Products, Powers, Inverses and Constants
@@ -341,4 +361,34 @@ theorem eqOn_toNF_of_meromorphicNFOn (hU : IsOpen U) {a : functionRing 𝕜 𝕜
     ((h₁g hx).eventuallyEq_nhdsNE_iff_eventuallyEq_nhds (meromorphicNFOn_toNF a hx)).1 h₂
   exact h₃.eq_of_nhds
 
+/-!
+## The Global Case
+-/
+
+/-- The chosen representative of an element of `functionRing 𝕜 𝕜' univ` is meromorphic. -/
+theorem meromorphic_out (a : functionRing 𝕜 𝕜' univ) : Meromorphic (out a) :=
+  meromorphicOn_univ.1 (meromorphicOn_out a)
+
 end MeromorphicOn.FunctionRing
+
+namespace Meromorphic
+
+open MeromorphicOn
+
+/-- The element of `functionRing 𝕜 𝕜' univ` represented by a meromorphic function. -/
+def toFunctionRing (hf : Meromorphic f) : functionRing 𝕜 𝕜' univ :=
+  FunctionRing.mk hf.meromorphicOn
+
+@[simp]
+theorem coe_toFunctionRing (hf : Meromorphic f) :
+    ((hf.toFunctionRing : functionRing 𝕜 𝕜' univ) : Germ (codiscreteWithin (univ : Set 𝕜)) 𝕜') =
+      f :=
+  rfl
+
+/-- A meromorphic function agrees with the chosen representative of the element it represents,
+away from a discrete set. -/
+theorem eventuallyEq_out_toFunctionRing (hf : Meromorphic f) :
+    f =ᶠ[codiscrete 𝕜] FunctionRing.out hf.toFunctionRing :=
+  FunctionRing.eventuallyEq_out_mk hf.meromorphicOn
+
+end Meromorphic

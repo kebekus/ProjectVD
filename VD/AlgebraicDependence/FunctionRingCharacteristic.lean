@@ -25,11 +25,11 @@ transports to `K` verbatim.
 
 ## Main definitions and results
 
-- F0: `Fact` instances making `functionRing ℂ ℂ univ` a field and a `ℂ`-algebra globally;
-  `MeromorphicOn.FunctionRing.mk`, the element of `K` defined by a meromorphic function.
+- F0: provided by `VD/Field/`: the field structure on `K`, and `Meromorphic.toFunctionRing`, the
+  element of `K` represented by a meromorphic function.
 - F1: `MeromorphicOn.FunctionRing.characteristic : functionRing ℂ ℂ univ → ℝ → ℝ`, with
-  `characteristic_mk` (independence of the representative for `r ≠ 0`), and the transported
-  arithmetic `characteristic_nonneg`, `characteristic_add_le`, `characteristic_sum_le`,
+  `characteristic_toFunctionRing` (independence of the representative for `r ≠ 0`), and the
+  transported arithmetic `characteristic_nonneg`, `characteristic_add_le`, `characteristic_sum_le`,
   `characteristic_mul_le`, `characteristic_pow`, `exists_abs_characteristic_inv_sub_le`,
   `characteristic_algebraMap`, `characteristic_neg`.
 - The **algebraic dependence bound** in `K`
@@ -42,34 +42,18 @@ transports to `K` verbatim.
 open Filter Finset Function Real Set Topology
 
 /-!
-## Instances for `U = univ`
+## A Concrete Instance for `ℂ`
+
+The general instances in `VD/Field/MeromorphicFunctionField.lean` already make
+`functionRing ℂ ℂ univ` a field. The concrete instance below is only there for performance: it
+gives the `Fact` argument of the field structure a closed form. Without it, elaborating
+`characteristic_aeval_div_le_aux` in `RationalCharacteristic.lean` times out while unfolding the
+algebraic structure on germs.
 -/
 
-instance : Fact (IsPreconnected (Set.univ : Set ℂ)) := ⟨isPreconnected_univ⟩
-
-instance : Fact (Set.univ : Set ℂ).Nontrivial := ⟨Set.nontrivial_univ⟩
+instance : Fact (IsPreconnected (univ : Set ℂ)) := ⟨isPreconnected_univ⟩
 
 namespace MeromorphicOn.FunctionRing
-
-/-- The element of `functionRing ℂ ℂ univ` defined by a meromorphic function on `ℂ`. -/
-noncomputable abbrev mk {f : ℂ → ℂ} (hf : Meromorphic f) : functionRing ℂ ℂ univ :=
-  ⟨(f : Germ (codiscreteWithin (univ : Set ℂ)) ℂ), coe_mem_functionRing hf.meromorphicOn⟩
-
-@[simp]
-theorem coe_mk {f : ℂ → ℂ} (hf : Meromorphic f) :
-    ((mk hf : functionRing ℂ ℂ univ) : Germ (codiscreteWithin (univ : Set ℂ)) ℂ)
-      = (f : Germ (codiscreteWithin (univ : Set ℂ)) ℂ) := rfl
-
-/-- A meromorphic function `f` agrees with the chosen representative of `mk hf` away from a
-discrete set. -/
-theorem eventuallyEq_out_mk {f : ℂ → ℂ} (hf : Meromorphic f) :
-    f =ᶠ[codiscrete ℂ] out (mk hf) :=
-  out_eventuallyEq rfl
-
-/-- The chosen representative of an element of `functionRing ℂ ℂ univ` is meromorphic on `ℂ`.
--/
-theorem meromorphic_out (a : functionRing ℂ ℂ univ) : Meromorphic (out a) :=
-  meromorphicOn_univ.1 (meromorphicOn_out a)
 
 /-!
 ## The Characteristic
@@ -77,15 +61,15 @@ theorem meromorphic_out (a : functionRing ℂ ℂ univ) : Meromorphic (out a) :=
 
 /-- The Nevanlinna characteristic of an element of `functionRing ℂ ℂ univ`, defined through the
 chosen representative. For `r ≠ 0` it does not depend on the representative, see
-`characteristic_mk`. -/
+`characteristic_toFunctionRing`. -/
 noncomputable def characteristic (a : functionRing ℂ ℂ univ) : ℝ → ℝ :=
   ValueDistribution.characteristic (out a) ⊤
 
 /-- The characteristic of an element is the characteristic of any of its representatives, for
 `r ≠ 0`. -/
-theorem characteristic_mk {f : ℂ → ℂ} (hf : Meromorphic f) {r : ℝ} (hr : r ≠ 0) :
-    characteristic (mk hf) r = ValueDistribution.characteristic f ⊤ r :=
-  (ValueDistribution.characteristic_congr_codiscrete (eventuallyEq_out_mk hf) hr).symm
+theorem characteristic_toFunctionRing {f : ℂ → ℂ} (hf : Meromorphic f) {r : ℝ} (hr : r ≠ 0) :
+    characteristic hf.toFunctionRing r = ValueDistribution.characteristic f ⊤ r :=
+  (ValueDistribution.characteristic_congr_codiscrete hf.eventuallyEq_out_toFunctionRing hr).symm
 
 /-- The characteristic of an element, evaluated through any representative. -/
 theorem characteristic_eq_of_coe_eq {f : ℂ → ℂ} {a : functionRing ℂ ℂ univ}
