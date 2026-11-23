@@ -7,7 +7,7 @@ module
 
 public import Mathlib.Analysis.Meromorphic.Divisor
 public import Mathlib.Analysis.Meromorphic.NormalForm
-public import VD.Field.MeromorphicFunctionField
+public import VD.MathlibSubmitted.MeromorphicFunctionField
 public import VD.MathlibSubmitted.MeromorphicGermZero
 
 /-!

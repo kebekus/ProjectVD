@@ -6,8 +6,8 @@ Authors: Stefan Kebekus
 module
 
 public import Mathlib.Analysis.Meromorphic.Order
-public import VD.Field.CodiscreteWithinNeBot
-public import VD.Field.GermAlgebra
+public import VD.MathlibSubmitted.CodiscreteWithinNeBot
+public import VD.MathlibSubmitted.GermAlgebra
 
 /-!
 # The Field of Meromorphic Functions on a Connected Set

@@ -9,9 +9,6 @@ public import VD.AlgebraicDependence.MonicRelation
 public import VD.AlgebraicDependence.PointwiseEstimates
 public import VD.AlgebraicDependence.PolynomialCharacteristic
 public import VD.AlgebraicDependence.RationalCharacteristic
-public import VD.Field.CodiscreteWithinNeBot
-public import VD.Field.GermAlgebra
-public import VD.Field.MeromorphicFunctionField
 public import VD.Field.MeromorphicFunctionFieldAPI
 public import VD.LLD.CircleAverageEstimates
 public import VD.LLD.LogDerivEstimates
@@ -27,9 +24,12 @@ public import VD.MathlibPending.CharacteristicIsBigOLog
 public import VD.MathlibPending.ProximityBounded
 public import VD.MathlibSubmitted.CanonicalFactor
 public import VD.MathlibSubmitted.CodiscreteWithinEventually
+public import VD.MathlibSubmitted.CodiscreteWithinNeBot
 public import VD.MathlibSubmitted.DivisorDeriv
 public import VD.MathlibSubmitted.DivisorEstimates
+public import VD.MathlibSubmitted.GermAlgebra
 public import VD.MathlibSubmitted.JensenInequality
+public import VD.MathlibSubmitted.MeromorphicFunctionField
 public import VD.MathlibSubmitted.MeromorphicGermZero
 public import VD.SMT.Deficiency
 public import VD.SMT.Picard
