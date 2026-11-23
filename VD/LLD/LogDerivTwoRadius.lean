@@ -7,6 +7,7 @@ module
 
 public import Mathlib.Analysis.Complex.ValueDistribution.Cartan
 public import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
+public import Mathlib.Analysis.Meromorphic.RCLike
 public import VD.LLD.LogDerivEstimates
 public import VD.LLD.PoissonJensenDeriv
 
