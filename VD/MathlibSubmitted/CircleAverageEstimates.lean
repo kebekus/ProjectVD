@@ -9,35 +9,36 @@ public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 public import Mathlib.MeasureTheory.Integral.CircleAverage
 
 /-!
-# Circle Averages of Negative Powers of the Distance to a Point — LLD work package C2
+# Circle Averages of Negative Powers of the Distance to a Point
 
-See `VD/LLD/PLAN-LogarithmicDerivative.md`, §5. The companion work package C1 (Jensen's inequality
-for circle averages of `log⁺`) lives in `VD/MathlibSubmitted/JensenInequality.lean`.
-
-This file shows that for `-1 < p ≤ 0`, the circle average of `‖· - a‖ ^ p` over a circle of radius
-`r` is bounded by `|r| ^ p / (p + 1)`, **uniformly in `a : ℂ`**. The average of `‖· - a‖⁻¹`, in
-contrast, is *not* uniformly bounded. This is why the two-radius estimate for the Lemma on the
-Logarithmic Derivative uses the exponent-`1/2` trick: for `p = -2⁻¹` the bound reads
-`2 * |r| ^ (-2⁻¹)`.
+For a point `a : ℂ` and a real exponent `p`, this file studies the function `‖· - a‖ ^ p` on
+circles in the complex plane. If `p` is negative and `a` lies on the circle, then the function has
+a singularity there. The results of this file show that the singularity is harmless as long as
+`-1 < p`.
 
 ## Main results
 
-- `circleIntegrable_iff_intervalIntegrable_add`: circle integrability does not change when shifting
-  the angle.
-- `circleIntegrable_norm_sub_const_rpow`: `‖· - a‖ ^ p` is circle integrable for `-1 < p`.
-- `circleAverage_norm_sub_const_rpow_le`: the uniform bound described above.
+- `circleIntegrable_norm_sub_const_rpow`: if `-1 < p`, then `‖· - a‖ ^ p` is circle integrable,
+  for every circle and every point `a`.
+- `circleAverage_norm_sub_const_rpow_le`: if `-1 < p ≤ 0`, then the circle average of
+  `‖· - a‖ ^ p` over a circle of radius `r ≠ 0` is at most `|r| ^ p / (p + 1)`.
+
+The bound for the circle average depends neither on the center of the circle nor on `a`. In
+particular, it does not deteriorate when `a` approaches the circle. This is what makes the bound
+useful: it estimates circle averages of functions with finitely many singularities of this type,
+no matter where the singularities are.
+
+The assumption `-1 < p` is necessary. If `a` lies on a circle of nonzero radius, then `‖· - a‖⁻¹`
+is not circle integrable (compare `circleIntegrable_sub_inv_iff`), and the circle averages of
+`‖· - a‖⁻¹` are unbounded as `a` approaches the circle.
 
 ## Implementation notes
 
-The chord bound that this file builds on, `mul_abs_sin_le_norm_circleMap_zero_sub`, is in Mathlib
-(merged as PR #43958). See the upstreaming notes below for where the material of this file belongs
-in Mathlib.
-
-The proofs rotate the circle by `arg (a - c)` and combine the chord bound
-`mul_abs_sin_le_norm_circleMap_zero_sub` with Jordan's inequality `Real.mul_le_sin`. This majorizes
-the integrand on `(0, 2 * π)` by `(r / π * min θ (2 * π - θ)) ^ p`. The majorant is a power
-function on each half of the interval, so its integral is computed exactly. The resulting bound is
-an equality for `p = 0`.
+The proofs rotate the circle by `arg (a - c)`, so that the point of the circle that is closest to
+`a` sits at the angle zero. The chord bound `mul_abs_sin_le_norm_circleMap_zero_sub` and Jordan's
+inequality `Real.mul_le_sin` then majorize the integrand on `(0, 2 * π)` by
+`(r / π * min θ (2 * π - θ)) ^ p`. The majorant is a power function on each half of the interval,
+so its integral is computed exactly. The resulting bound is an equality for `p = 0`.
 
 `circleIntegrable_norm_sub_const_rpow` is tagged `@[fun_prop]`. To apply it, `fun_prop` needs a
 discharger for the hypothesis `-1 < p`, as in `fun_prop (disch := norm_num)`.
@@ -46,19 +47,27 @@ discharger for the hypothesis `-1 < p`, as in `fun_prop (disch := norm_num)`.
 @[expose] public section
 
 /-
-# Upstreaming notes
+# Upstreaming plan
 
-The chord lemmas that this file builds on have been merged into Mathlib as PR #43958. What is left
-here is the second, dependent PR, described below. It was checked against the Mathlib revision
-pinned in `lake-manifest.json` (`e62b985f`, 2026-11-24).
+Project context: this file is work package C2 of the Lemma on the Logarithmic Derivative, see
+`VD/LLD/PLAN-LogarithmicDerivative.md`, §5. Its consumer is the exponent-`1/2` trick
+`circleAverage_posLog_norm_le_of_le_add_sum_inv_norm_sub` in `VD/LLD/LogDerivEstimates.lean`. The
+companion work package C1 (Jensen's inequality for circle averages of `log⁺`) lives in
+`VD/MathlibSubmitted/JensenInequality.lean`.
 
-## Addition to `Mathlib/MeasureTheory/Integral/CircleIntegral.lean`
+Status: ready for submission as one PR that touches two Mathlib files. The material depends on
+Mathlib master only; the chord lemmas that it builds on were merged as PR #43958. It was checked
+against the Mathlib revision pinned in `lake-manifest.json` (`e62b985f`, 2026-11-24). On that
+day, no open Mathlib PR overlapped with it, and none of the project's open PRs (#43859, #43985,
+#44428, #44629, #45423, #46392) touched the two target files.
+
+## Step 1: add one lemma to `Mathlib/MeasureTheory/Integral/CircleIntegral.lean`
 
 `circleIntegrable_iff_intervalIntegrable_add` is the integrability counterpart of
 `circleAverage_eq_integral_add` in `Mathlib/MeasureTheory/Integral/CircleAverage.lean`. It goes
-directly before `circleIntegrable_neg_radius`. The target file declares `E` in its `variable`
-block, so the binders `{E : Type*} [NormedAddCommGroup E]` are dropped there. Nothing else changes;
-statement and proof were type-checked in the context of the target file.
+directly before `circleIntegrable_neg_radius`, with its docstring. The target file declares `E`
+in its `variable` block, so the binders `{E : Type*} [NormedAddCommGroup E]` are dropped there.
+Nothing else changes; statement and proof were type-checked in the context of the target file.
 
 The existing proof of `circleIntegrable_neg_radius` runs the same argument for the angle `π`. With
 the new lemma in front of it, that proof can be shortened to
@@ -66,46 +75,54 @@ the new lemma in front of it, that proof can be shortened to
     rw [circleIntegrable_iff_intervalIntegrable_add (R := R) π, circleIntegrable_def]
     simp only [circleMap_neg_radius]
 
-This is optional, but it shows that the new lemma is the statement behind the existing proof.
+This is optional. It shows reviewers that the new lemma is the statement behind an existing proof,
+but it also widens the diff; offer it in the PR description and apply it only on request.
 
-## New file `Mathlib/Analysis/SpecialFunctions/Integrals/CircleAverageRpow.lean`
+## Step 2: create `Mathlib/Analysis/SpecialFunctions/Integrals/CircleAverageRpow.lean`
 
-Everything else goes into a new file next to `PosLog.lean`. It cannot go into
-`Mathlib/MeasureTheory/Integral/CircleAverage.lean` itself: that file imports neither
-`integral_rpow` (`Mathlib/Analysis/SpecialFunctions/Integrals/Basic.lean`) nor
-`intervalIntegrable_rpow'` (`Mathlib/Analysis/SpecialFunctions/Integrability/Basic.lean`) nor
-`Real.mul_le_sin` (`Mathlib/Analysis/SpecialFunctions/Trigonometric/Bounds.lean`), and it should
-stay light. Appending to `PosLog.lean` would work but mixes themes and pulls in its heavy
-harmonic-function imports for no reason. The new file needs the module-system header
+Everything from the line `variable {a c : ℂ} {r p θ : ℝ}` to the end of this file goes into the
+new file, unchanged. The private helpers stay private. The new file starts with the copyright
+header, then
 
     module
 
     public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
     public import Mathlib.MeasureTheory.Integral.CircleAverage
 
+then the module docstring of this file, unchanged, then
+
     public section
 
-and receives the chord bound `mul_abs_sin_le_norm_circleMap_zero_sub` transitively through
-`CircleAverage.lean`, `CircleIntegral.lean` and `CircleMap.lean`. The file's name is a suggestion;
-any name matching the file's theme works.
+    open intervalIntegral MeasureTheory Real Set
 
-Contents:
-- `circleIntegrable_norm_sub_const_rpow` complements `circleIntegrable_sub_zpow_iff` in
-  `Mathlib/MeasureTheory/Integral/CircleIntegral.lean`, which covers integer powers of `· - a`.
-  Mathlib has no `rpow` version yet. Its docstring points to `circleIntegrable_sub_zpow_iff`; a
-  pointer in the other direction is optional.
-- `circleAverage_norm_sub_const_rpow_le` has no Mathlib counterpart. Its docstring says that the
-  bound is uniform in the center and in `a`, since that is the whole point, and that it is an
-  equality for `p = 0`.
-- The private helpers (`norm_circleMap_sub_rpow_le` and the four majorant lemmas) go along
-  unchanged and stay private.
-- In the module docstring, drop ` — LLD work package C2` from the title, the paragraph starting
-  with "See `VD/LLD/PLAN-LogarithmicDerivative.md`", the last sentence of the paragraph after it
-  (on the Lemma on the Logarithmic Derivative), the entry for
-  `circleIntegrable_iff_intervalIntegrable_add` in the list of main results, and the first
-  paragraph of the implementation notes. The rest goes along unchanged.
+Note `public section` instead of this project's `@[expose] public section`. A copy in this form
+compiles under Mathlib's linter set. Register the new file in `Mathlib.lean` with
+`lake exe mk_all`.
 
-Where the material ends up:
+Why this location. `Mathlib/Analysis/SpecialFunctions/Integrals/` holds computations and
+estimates of integrals of specific functions, and its file `PosLog.lean` already treats circle
+averages of `log ‖· - a‖`. The alternatives are worse:
+- `Mathlib/MeasureTheory/Integral/CircleAverage.lean` holds the general theory and should stay
+  light. It imports neither `integral_rpow`
+  (`Mathlib/Analysis/SpecialFunctions/Integrals/Basic.lean`) nor `intervalIntegrable_rpow'`
+  (`Mathlib/Analysis/SpecialFunctions/Integrability/Basic.lean`) nor `Real.mul_le_sin`
+  (`Mathlib/Analysis/SpecialFunctions/Trigonometric/Bounds.lean`).
+- Appending to `Mathlib/Analysis/SpecialFunctions/Integrals/PosLog.lean` mixes themes: that file
+  is about `log⁺`, and it imports the theory of harmonic functions, which is not needed here.
+- Splitting the material into `Integrability/…` and `Integrals/…`, as Mathlib does for `Log` and
+  `PosLog`, does not work well: both main results rest on the same private majorant lemmas, which
+  would have to become public.
+
+The file name is a suggestion. Reviewers may prefer another one; nothing depends on it.
+
+## Step 3: after the merge
+
+- Delete this file and remove `VD.LLD.CircleAverageEstimates` from `VD.lean`.
+- In `VD/LLD/LogDerivEstimates.lean`, replace the import of this file by
+  `Mathlib.Analysis.SpecialFunctions.Integrals.CircleAverageRpow`.
+- Mark row 7 of the upstreaming table in `VD/LLD/PLAN-LogarithmicDerivative.md` as merged.
+
+## Where the material ends up
 
 | Declaration                                   | Mathlib target        | Visibility |
 | --------------------------------------------- | --------------------- | ---------- |
@@ -117,12 +134,13 @@ Where the material ends up:
 
 open intervalIntegral MeasureTheory Real Set
 
-/-!
-## Rotation Invariance of Circle Integrability
--/
+-- The following lemma belongs in `Mathlib/MeasureTheory/Integral/CircleIntegral.lean`; see step 1
+-- of the upstreaming plan.
 
-/-- Circle integrability does not change when shifting the angle. See
-`Real.circleAverage_eq_integral_add` for the analogous statement about circle averages. -/
+/-- Circle integrability can be checked after shifting the angle: a function `f` is circle
+integrable if and only if `θ ↦ f (circleMap c R (θ + η))` is interval integrable over one period,
+for any angle `η`. See `Real.circleAverage_eq_integral_add` for the analogous statement about
+circle averages. -/
 theorem circleIntegrable_iff_intervalIntegrable_add {E : Type*} [NormedAddCommGroup E] {f : ℂ → E}
     {c : ℂ} {R : ℝ} (η : ℝ) :
     CircleIntegrable f c R ↔
@@ -195,8 +213,10 @@ private lemma integral_majorant (hr : 0 < r) (hp : -1 < p) :
 ## Main Results
 -/
 
-/-- If `-1 < p`, then `‖· - a‖ ^ p` is circle integrable, for every center, radius and point `a`.
-See `circleIntegrable_sub_zpow_iff` for integer powers of `· - a`. -/
+/-- If `-1 < p`, then the function `‖· - a‖ ^ p` is circle integrable, for every center `c`, every
+radius `r` and every point `a`. The point `a` may lie on the circle, where the function has a
+singularity if `p` is negative. See `circleIntegrable_sub_zpow_iff` for integer powers of
+`· - a`. -/
 @[fun_prop]
 theorem circleIntegrable_norm_sub_const_rpow (hp : -1 < p) :
     CircleIntegrable (‖· - a‖ ^ p) c r := by
@@ -215,8 +235,8 @@ theorem circleIntegrable_norm_sub_const_rpow (hp : -1 < p) :
     (norm_of_nonneg (by positivity)).trans_le (norm_circleMap_sub_rpow_le hr hp₀ hθ)
 
 /-- If `-1 < p ≤ 0`, then the circle average of `‖· - a‖ ^ p` over a circle of nonzero radius `r`
-is bounded by `|r| ^ p / (p + 1)`, uniformly in the center and in `a`. For `p = 0`, the bound is
-an equality. -/
+is at most `|r| ^ p / (p + 1)`. The bound depends neither on the center `c` nor on the point `a`,
+which may lie on the circle or arbitrarily close to it. For `p = 0`, the bound is an equality. -/
 theorem circleAverage_norm_sub_const_rpow_le (hr : r ≠ 0) (hp₁ : -1 < p) (hp₂ : p ≤ 0) :
     circleAverage (‖· - a‖ ^ p) c r ≤ |r| ^ p / (p + 1) := by
   have hr' : 0 < |r| := abs_pos.2 hr

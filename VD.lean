@@ -10,7 +10,6 @@ public import VD.AlgebraicDependence.PointwiseEstimates
 public import VD.AlgebraicDependence.PolynomialCharacteristic
 public import VD.AlgebraicDependence.RationalCharacteristic
 public import VD.Field.MeromorphicFunctionFieldAPI
-public import VD.LLD.CircleAverageEstimates
 public import VD.LLD.LogDerivEstimates
 public import VD.LLD.LogDerivLemma
 public import VD.LLD.LogDerivTwoRadius
@@ -23,6 +22,7 @@ public import VD.MathlibPending.BoundednessCharacteristic
 public import VD.MathlibPending.CharacteristicIsBigOLog
 public import VD.MathlibPending.ProximityBounded
 public import VD.MathlibSubmitted.CanonicalFactor
+public import VD.MathlibSubmitted.CircleAverageEstimates
 public import VD.MathlibSubmitted.CodiscreteWithinEventually
 public import VD.MathlibSubmitted.CodiscreteWithinNeBot
 public import VD.MathlibSubmitted.DivisorDeriv
