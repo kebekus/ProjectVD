@@ -154,7 +154,7 @@ theorem ValueDistribution.exists_proximity_logDeriv_le {f : ℂ → ℂ} (hf : M
   push Not at hdeg
   set c_f := max |Real.log ‖f 0‖| |Real.log ‖meromorphicTrailingCoeffAt f 0‖|
   have hlog2 : (0 : ℝ) ≤ Real.log 2 := Real.log_nonneg one_le_two
-  set C₀ : ℝ := 24 * Real.log 2 + 4 * log⁺ c_f with hC₀_def
+  set C₀ : ℝ := 22 * Real.log 2 + 4 * log⁺ c_f with hC₀_def
   have hC₀ : 0 ≤ C₀ := by
     have := posLog_nonneg (x := c_f)
     linarith
@@ -210,7 +210,7 @@ theorem ValueDistribution.exists_proximity_logDeriv_le {f : ℂ → ℂ} (hf : M
           ring
   -- Step 2: the exponent-`1/2` trick
   have step2 : proximity (logDeriv f) ⊤ r
-      ≤ log⁺ (K + N * β) + 2 * log⁺ N + log⁺ r⁻¹ + 8 * Real.log 2 := by
+      ≤ log⁺ (K + N * β) + 2 * log⁺ N + log⁺ r⁻¹ + 6 * Real.log 2 := by
     rw [proximity_top]
     exact circleAverage_posLog_norm_le_of_le_add_sum_inv_norm_sub hr₀
       (add_nonneg hK₀ (mul_nonneg hN₀ hβ₀))

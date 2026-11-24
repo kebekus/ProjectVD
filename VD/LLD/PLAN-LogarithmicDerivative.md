@@ -387,10 +387,16 @@ been merged into Mathlib (2026-11). Deviations from the sketches below:
   `(r−s)² + 4rs·t = (1−t)(r−s)² + t(r+s)²`), valid for **every** `a : ℂ`. The chord lemmas
   (`norm_circleMap_sub_circleMap_sq`, `mul_abs_sin_le_norm_circleMap_zero_sub`) are now in
   `Mathlib/.../Complex/CircleMap.lean` (merged as PR #43958). A single Jordan-inequality majorant
-  `(r/(2π)·θ)^p + (r/(2π)·(2π−θ))^p` covers all base points; its integral is exactly
-  `4π/(p+1)·r^p`, so the statement is proved for general `-1 < p ≤ 0` with constant `2/(p+1)`
-  (`= 4` at `p = −1/2`). Negative and zero radii are handled by Mathlib's
+  `(r/π·min(θ, 2π−θ))^p` covers all base points; its integral is exactly `2π/(p+1)·r^p`, so the
+  statement is proved for general `-1 < p ≤ 0` with constant `1/(p+1)` (`= 2` at `p = −1/2`,
+  equality at `p = 0`). Until 2026-11-24 the majorant was the sum
+  `(r/(2π)·θ)^p + (r/(2π)·(2π−θ))^p`, which gave the constant `2/(p+1)`; the sharper bound lowers
+  the constant of the exponent-`1/2` trick in `LogDerivEstimates.lean` from `8·log 2` to
+  `6·log 2`. Negative and zero radii are handled by Mathlib's
   `circleIntegrable_neg_radius` / `circleIntegrable_zero_radius` / `circleAverage_abs_radius`.
+  The rotation by `arg (a − c)` uses `circleAverage_eq_integral_add` and its integrability
+  counterpart `circleIntegrable_iff_intervalIntegrable_add`, a general lemma that is new in this
+  file (2026-11-24) and belongs in `Mathlib/MeasureTheory/Integral/CircleIntegral.lean`.
 - **C3** is stated in the `Function.locallyFinsuppWithin` namespace (where `logCounting` for
   divisors actually lives); the helper `Real.sub_div_le_log_div : (r − ρ)/r ≤ log (r/ρ)` is
   included there. The FMT specialisation is deferred to C4, where characteristic/proximity are
@@ -417,12 +423,16 @@ all satisfied here.
 ### C2. Uniform bound for the singular sum (the exponent-1/2 trick)
 
 ```lean
+theorem circleIntegrable_iff_intervalIntegrable_add (η : ℝ) :
+    CircleIntegrable f c R ↔
+      IntervalIntegrable (fun θ ↦ f (circleMap c R (θ + η))) volume 0 (2 * π)
+
 @[fun_prop]
-theorem circleIntegrable_norm_sub_const_rpow (hp : -1 < p) (r : ℝ) :
+theorem circleIntegrable_norm_sub_const_rpow (hp : -1 < p) :
     CircleIntegrable (‖· - a‖ ^ p) c r
 
 theorem circleAverage_norm_sub_const_rpow_le (hr : r ≠ 0) (hp₁ : -1 < p) (hp₂ : p ≤ 0) :
-    circleAverage (‖· - a‖ ^ p) c r ≤ 2 / (p + 1) * |r| ^ p
+    circleAverage (‖· - a‖ ^ p) c r ≤ |r| ^ p / (p + 1)
 ```
 
 Proof: see the note at the top of this section. Consumers need `fun_prop (disch := norm_num)`
@@ -596,7 +606,7 @@ one local file per future Mathlib target:
 | 5 | `PoissonSchwarzDeriv.lean` ✅ | `Analysis/Complex/Poisson.lean` (extend) | B4 (done) | 4, **Poisson–Jensen chain** |
 | 5a | `MathlibSubmitted/CanonicalFactor.lean` 🚀 | `Analysis/Complex/CanonicalDecomposition.lean` (extend) | B5: `logDeriv` of the canonical factor and its norm bound, plus `one_lt_norm_canonicalFactor`, **submitted as PR #43985 (draft)** | — |
 | 6 | `PoissonJensenDeriv.lean` ✅ | `Analysis/Complex/PoissonJensenDeriv.lean` | B6 + the pointwise estimate `MeromorphicOn.eventually_norm_logDeriv_le` (done) | 1, 5 |
-| 7 | `CircleAverageEstimates.lean` ✅ | new file `Analysis/SpecialFunctions/Integrals/CircleAverageRpow.lean` | C2 (done; C1 is in `MathlibSubmitted/JensenInequality.lean`) | — |
+| 7 | `CircleAverageEstimates.lean` ✅ | new file `Analysis/SpecialFunctions/Integrals/CircleAverageRpow.lean`; `circleIntegrable_iff_intervalIntegrable_add` goes to `MeasureTheory/Integral/CircleIntegral.lean` | C2 (done; C1 is in `MathlibSubmitted/JensenInequality.lean`) | — |
 | 7a | *(merged)* | `Analysis/SpecialFunctions/Complex/CircleMap.lean` (extend) | chord lemmas for `circleMap` (PR #43958, in Mathlib) | — |
 | 8 | *(merged)* | `…/ValueDistribution/LogCounting/Basic.lean` (extend) | C3 (done, in Mathlib) | — |
 | 8a | `LogDerivEstimates.lean` ✅ | several; see the file's upstreaming notes | C4, general part (done): `rpow` subadditivity, circle-average monotonicity modulo discrete sets, VD comparison lemmas, zero/pole count in a ball, the exponent-`1/2` trick | 7, C1 |

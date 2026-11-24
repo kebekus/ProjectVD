@@ -1,8 +1,15 @@
 #!/bin/bash
 
-# Delete outdated lean toolchains, leftover partial downloads
+echo "Delete outdated lean toolchains, leftover partial downloads"
 elan toolchain gc --delete
 rm -rf ~/.elan/tmp
+echo
 
-# Clear the cache of precompiled binaries
+echo "Clear the cache of precompiled binaries"
 lake exe cache clean
+echo
+
+echo "Update and rebuild"
+lake update
+lake build
+echo

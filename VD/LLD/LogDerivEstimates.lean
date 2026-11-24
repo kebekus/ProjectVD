@@ -194,8 +194,8 @@ average is bounded *uniformly* in the poles `a` (`circleAverage_norm_sub_const_r
 Jensen's inequality `Real.circleAverage_posLog_le_posLog_circleAverage` turns the average of
 `log⁺` of this bound into `log⁺` of its average.
 
-The constant `8 * log 2` is `2 * (log 2 + log 2 + log 4)`: one `log 2` from Jensen's inequality,
-one from `Real.posLog_add`, and `log 4` from the constant `4 = 2 / (p + 1)` in
+The constant `6 * log 2` is `2 * (log 2 + log 2 + log 2)`: one `log 2` from Jensen's inequality,
+one from `Real.posLog_add`, and one from the constant `2 = 1 / (p + 1)` in
 `circleAverage_norm_sub_const_rpow_le` at `p = -1/2`; the factor `2` undoes the square root. The
 term `log⁺ r⁻¹` is the radius dependence of that same bound; it vanishes for `1 ≤ r`. -/
 theorem circleAverage_posLog_norm_le_of_le_add_sum_inv_norm_sub {E : Type*}
@@ -204,7 +204,7 @@ theorem circleAverage_posLog_norm_le_of_le_add_sum_inv_norm_sub {E : Type*}
     (hF : CircleIntegrable (fun w ↦ log⁺ ‖F w‖) 0 r)
     (h : ∀ᶠ w in codiscreteWithin (sphere (0 : ℂ) r), ‖F w‖ ≤ K + ∑ a ∈ s, m a * ‖w - a‖⁻¹) :
     circleAverage (fun w ↦ log⁺ ‖F w‖) 0 r
-      ≤ log⁺ K + 2 * log⁺ (∑ a ∈ s, m a) + log⁺ r⁻¹ + 8 * Real.log 2 := by
+      ≤ log⁺ K + 2 * log⁺ (∑ a ∈ s, m a) + log⁺ r⁻¹ + 6 * Real.log 2 := by
   have hm₀ : ∀ a ∈ s, 0 ≤ m a := fun a ha ↦ zero_le_one.trans (hm a ha)
   -- The explicit bound function for `‖F ·‖ ^ (1/2)`
   set g : ℂ → ℝ := (fun _ ↦ K ^ (2⁻¹ : ℝ)) + ∑ a ∈ s, m a • (‖· - a‖ ^ (-(2 : ℝ)⁻¹)) with hg_def
@@ -243,7 +243,7 @@ theorem circleAverage_posLog_norm_le_of_le_add_sum_inv_norm_sub {E : Type*}
     linarith
   -- Integrability of the bound function and of `log⁺ ∘ g`
   have int_terms : ∀ a ∈ s, CircleIntegrable (m a • (‖· - a‖ ^ (-(2 : ℝ)⁻¹))) 0 r :=
-    fun a _ ↦ (circleIntegrable_norm_sub_const_rpow (by norm_num) r).const_smul
+    fun a _ ↦ (circleIntegrable_norm_sub_const_rpow (by norm_num)).const_smul
   have int_g : CircleIntegrable g 0 r := by
     rw [hg_def]
     exact (circleIntegrable_const _ _ _).add (CircleIntegrable.sum _ int_terms)
@@ -257,25 +257,26 @@ theorem circleAverage_posLog_norm_le_of_le_add_sum_inv_norm_sub {E : Type*}
           circleAverage_mono_codiscreteWithin hr.ne' hF (by fun_prop) (by rwa [abs_of_pos hr])
       _ = 2 * circleAverage (fun w ↦ log⁺ (g w)) 0 r := circleAverage_fun_smul (a := (2 : ℝ))
   -- Step 4: the circle average of `g`, using the uniform bound for the singular terms
-  have step4 : circleAverage g 0 r ≤ K ^ (2⁻¹ : ℝ) + 4 * (∑ a ∈ s, m a) * r ^ (-(2 : ℝ)⁻¹) := by
+  have step4 : circleAverage g 0 r ≤ K ^ (2⁻¹ : ℝ) + 2 * (∑ a ∈ s, m a) * r ^ (-(2 : ℝ)⁻¹) := by
     rw [hg_def, circleAverage_add (circleIntegrable_const _ _ _) (CircleIntegrable.sum _ int_terms),
       circleAverage_const, circleAverage_sum int_terms]
     gcongr
     calc ∑ a ∈ s, circleAverage (m a • (‖· - a‖ ^ (-(2 : ℝ)⁻¹))) 0 r
         = ∑ a ∈ s, m a * circleAverage (‖· - a‖ ^ (-(2 : ℝ)⁻¹)) 0 r := by
           simp only [circleAverage_smul, smul_eq_mul]
-      _ ≤ ∑ a ∈ s, m a * (4 * r ^ (-(2 : ℝ)⁻¹)) := by
+      _ ≤ ∑ a ∈ s, m a * (2 * r ^ (-(2 : ℝ)⁻¹)) := by
           gcongr with a ha
           · exact hm₀ a ha
           · have := circleAverage_norm_sub_const_rpow_le (a := a) (c := 0) hr.ne'
               (p := -(2 : ℝ)⁻¹) (by norm_num) (by norm_num)
-            rwa [abs_of_pos hr, show 2 / (-(2 : ℝ)⁻¹ + 1) = 4 by norm_num] at this
-      _ = 4 * (∑ a ∈ s, m a) * r ^ (-(2 : ℝ)⁻¹) := by rw [← Finset.sum_mul]; ring
+            rwa [abs_of_pos hr, show -(2 : ℝ)⁻¹ + 1 = 2⁻¹ by norm_num, div_inv_eq_mul,
+              mul_comm] at this
+      _ = 2 * (∑ a ∈ s, m a) * r ^ (-(2 : ℝ)⁻¹) := by rw [← Finset.sum_mul]; ring
   -- Step 5: Jensen's inequality, and expansion of `log⁺` of the resulting bound
   have hC1 : circleAverage (fun w ↦ log⁺ (g w)) 0 r ≤ log⁺ (circleAverage g 0 r) + Real.log 2 :=
     Real.circleAverage_posLog_le_posLog_circleAverage (fun z _ ↦ hg₀ z) int_g
   have hmono : log⁺ (circleAverage g 0 r)
-      ≤ log⁺ (K ^ (2⁻¹ : ℝ) + 4 * (∑ a ∈ s, m a) * r ^ (-(2 : ℝ)⁻¹)) :=
+      ≤ log⁺ (K ^ (2⁻¹ : ℝ) + 2 * (∑ a ∈ s, m a) * r ^ (-(2 : ℝ)⁻¹)) :=
     posLog_le_posLog (neg_one_lt_zero.le.trans (circleAverage_nonneg_of_nonneg fun z _ ↦ hg₀ z))
       step4
   have e₁ : log⁺ (K ^ (2⁻¹ : ℝ)) = 2⁻¹ * log⁺ K :=
@@ -283,20 +284,17 @@ theorem circleAverage_posLog_norm_le_of_le_add_sum_inv_norm_sub {E : Type*}
   have e₂ : log⁺ (r ^ (-(2 : ℝ)⁻¹)) = 2⁻¹ * log⁺ r⁻¹ := by
     rw [rpow_neg hr.le, ← inv_rpow hr.le,
       posLog_rpow (neg_one_lt_zero.le.trans (inv_nonneg.2 hr.le)) (by norm_num)]
-  have e₃ : log⁺ (4 * (∑ a ∈ s, m a) * r ^ (-(2 : ℝ)⁻¹))
-      ≤ 2 * Real.log 2 + log⁺ (∑ a ∈ s, m a) + 2⁻¹ * log⁺ r⁻¹ := by
-    have h₄ := posLog_nat_mul (n := 4) (x := ∑ a ∈ s, m a)
-    push_cast at h₄
-    have hlog4 : Real.log 4 = 2 * Real.log 2 := by
-      rw [show (4 : ℝ) = 2 ^ 2 by norm_num, Real.log_pow]
-      norm_num
-    calc log⁺ (4 * (∑ a ∈ s, m a) * r ^ (-(2 : ℝ)⁻¹))
-        ≤ log⁺ (4 * ∑ a ∈ s, m a) + log⁺ (r ^ (-(2 : ℝ)⁻¹)) := posLog_mul
-      _ ≤ 2 * Real.log 2 + log⁺ (∑ a ∈ s, m a) + 2⁻¹ * log⁺ r⁻¹ := by
+  have e₃ : log⁺ (2 * (∑ a ∈ s, m a) * r ^ (-(2 : ℝ)⁻¹))
+      ≤ Real.log 2 + log⁺ (∑ a ∈ s, m a) + 2⁻¹ * log⁺ r⁻¹ := by
+    have h₂ := posLog_nat_mul (n := 2) (x := ∑ a ∈ s, m a)
+    push_cast at h₂
+    calc log⁺ (2 * (∑ a ∈ s, m a) * r ^ (-(2 : ℝ)⁻¹))
+        ≤ log⁺ (2 * ∑ a ∈ s, m a) + log⁺ (r ^ (-(2 : ℝ)⁻¹)) := posLog_mul
+      _ ≤ Real.log 2 + log⁺ (∑ a ∈ s, m a) + 2⁻¹ * log⁺ r⁻¹ := by
           rw [e₂]
           linarith
-  have e₄ : log⁺ (K ^ (2⁻¹ : ℝ) + 4 * (∑ a ∈ s, m a) * r ^ (-(2 : ℝ)⁻¹))
-      ≤ Real.log 2 + log⁺ (K ^ (2⁻¹ : ℝ)) + log⁺ (4 * (∑ a ∈ s, m a) * r ^ (-(2 : ℝ)⁻¹)) :=
+  have e₄ : log⁺ (K ^ (2⁻¹ : ℝ) + 2 * (∑ a ∈ s, m a) * r ^ (-(2 : ℝ)⁻¹))
+      ≤ Real.log 2 + log⁺ (K ^ (2⁻¹ : ℝ)) + log⁺ (2 * (∑ a ∈ s, m a) * r ^ (-(2 : ℝ)⁻¹)) :=
     posLog_add
   rw [e₁] at e₄
   linarith
