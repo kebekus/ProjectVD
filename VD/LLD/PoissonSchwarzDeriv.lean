@@ -118,6 +118,48 @@ the private lemma and the two theorems that follow it open the new file
 creates a file of some 60 lines that stays this small until the differentiated Poisson–Jensen
 formula follows, and that PR is blocked by #43985.
 
+## PR title and description (draft)
+
+The description assumes the placement of steps 1–4, without the optional changes; the last
+paragraph but one offers them. The paragraphs are wrapped to fit this file. Join the lines of each
+paragraph before pasting, because GitHub renders line breaks in PR descriptions.
+
+Title:
+
+    feat(Analysis/Complex): the differentiated Poisson formula
+
+Description:
+
+    Let `f : ℂ → ℂ` be meromorphic on a closed ball, and analytic without zeros on the open ball.
+    Zeros and poles on the boundary circle are allowed. Establish the Poisson integral formula for
+    `log ‖f ·‖`, and differentiate it: the logarithmic derivative of `f` at a point `w` of the
+    open ball is the circle average of `log ‖f ·‖` against the derivative of the Herglotz–Riesz
+    kernel with respect to `w`. For `f = (· - ρ)` with `ρ` on the circle, this evaluates the
+    circle average to `(w - ρ)⁻¹`, the differentiated counterpart of
+    `circleAverage_poissonKernel_smul_log`.
+
+    To this end, add
+    - the kernel `derivHerglotzRieszKernel`, together with `hasDerivAt_herglotzRieszKernel`, which
+      identifies it as the derivative of `herglotzRieszKernel c w z` with respect to `w`,
+    - `AnalyticAt.logDeriv_eq_of_eventually_norm_eq`: holomorphic functions with the same norm
+      have the same logarithmic derivative, a consequence of the maximum modulus principle,
+    - `CircleIntegrable.ofReal`, the analogue of `MeasureTheory.Integrable.ofReal`.
+
+    The proof of the differentiated formula compares `f` with `Complex.exp ∘ F`, where `F` is the
+    Herglotz–Riesz integral of `log ‖f ·‖`. Both functions have the same norm by the Poisson
+    integral formula, so they have the same logarithmic derivative, which is the derivative of
+    `F`. No logarithm of `f` is needed.
+
+    Two existing declarations in `Mathlib/Analysis/Complex/Poisson.lean` could be adapted to the
+    new material: `hasDerivAt_circleAverage_herglotzRieszKernel_smul` could be restated in terms
+    of `derivHerglotzRieszKernel`, and the proof of `re_circleAverage_herglotzRieszKernel_smul`
+    could be shortened with `CircleIntegrable.ofReal`. Happy to do either here if wanted.
+
+    This material is typically used in complex analysis. The PR will be used in
+    [Project VD](https://github.com/kebekus/ProjectVD), formalizing Value Distribution Theory for
+    meromorphic functions on the complex plane, in order to establish a proof of the Lemma on the
+    Logarithmic Derivative. Claude Code was used to create this PR.
+
 ## Step 5: after the merge
 
 - Delete this file and remove `VD.LLD.PoissonSchwarzDeriv` from `VD.lean`.
