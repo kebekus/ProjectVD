@@ -1,5 +1,6 @@
 module -- shake: keep-all -- deprecated_module: ignore
 
+public import VD.AlgebraicDependence.BezoutEstimate
 public import VD.AlgebraicDependence.ClunieMohonko
 public import VD.AlgebraicDependence.FunctionRingCharacteristic
 public import VD.AlgebraicDependence.GrowthClass

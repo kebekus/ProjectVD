@@ -87,7 +87,7 @@ theorem proximity_le_of_pow_mul_eq (hf : Meromorphic f) (ha : ∀ j, Meromorphic
     apply circleAverage_mono_codiscreteWithin hr hP ((hSA.add hSB).add hC)
     filter_upwards [h.filter_mono (codiscreteWithin_mono (subset_univ _))] with z hz
     simp only [Pi.add_apply, Finset.sum_apply]
-    exact posLog_norm_le_of_pow_mul_eq (a := fun j ↦ a j z) (b := fun k ↦ b k z)
+    exact posLog_norm_sum_mul_pow_le_of_pow_mul_eq (a := fun j ↦ a j z) (b := fun k ↦ b k z)
       (by simpa [Finset.sum_apply] using hz)
   rwa [circleAverage_add (hSA.add hSB) hC, circleAverage_add hSA hSB, circleAverage_sum hA,
     circleAverage_sum hB, circleAverage_const] at key
@@ -155,7 +155,7 @@ theorem proximity_zero_le_of_eq_zero (hf : Meromorphic f) (ha : ∀ j, Meromorph
     filter_upwards [h.filter_mono (codiscreteWithin_mono (subset_univ _)),
       hne.filter_mono (codiscreteWithin_mono (subset_univ _))] with z hz hz₀
     simp only [Pi.add_apply, Pi.inv_apply, Finset.sum_apply, norm_inv]
-    exact posLog_norm_inv_le_of_eq_zero (a := fun j ↦ a j z)
+    exact posLog_inv_norm_le_of_sum_mul_pow_eq_zero (a := fun j ↦ a j z)
       (by simpa [Finset.sum_apply] using hz) hz₀
   rwa [circleAverage_add (hA₀.add hSA) hC, circleAverage_add hA₀ hSA, circleAverage_sum hA,
     circleAverage_const] at key

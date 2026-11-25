@@ -95,7 +95,7 @@ theorem proximity_polynomial_le (hf : Meromorphic f) (ha : ∀ j, Meromorphic (a
     intro z _
     simp only [Pi.add_apply, Pi.smul_apply, Finset.sum_apply, Pi.mul_apply, Pi.pow_apply,
       smul_eq_mul]
-    exact posLog_norm_sum_mul_pow_le (fun j ↦ a j z) (f z)
+    exact posLog_norm_sum_mul_pow_le d (fun j ↦ a j z) (f z)
   rwa [circleAverage_add (hF.add hB) hC, circleAverage_add hF hB, circleAverage_smul,
     circleAverage_sum hcoef, circleAverage_const, smul_eq_mul] at key
 
@@ -129,14 +129,14 @@ theorem characteristic_polynomial_le (hf : Meromorphic f) (ha : ∀ j, Meromorph
 codiscretely zero, then
 `d · T(r, f) ≤ T(r, Σ_{j≤d} a j * f ^ j) + (d² + 1) · Σ_{j≤d} T(r, a j) + c` for `1 ≤ r`, with
 the explicit constant
-`c = d · log (2 (d + 1)) + (d² + 1) · max |log ‖a d 0‖| |log ‖meromorphicTrailingCoeffAt (a d) 0‖|`.
+`c = d · log (2 d) + (d² + 1) · max |log ‖a d 0‖| |log ‖meromorphicTrailingCoeffAt (a d) 0‖|`.
 -/
 theorem nsmul_characteristic_le_characteristic_polynomial (hf : Meromorphic f)
     (ha : ∀ j, Meromorphic (a j)) (hd : ¬ a d =ᶠ[codiscrete ℂ] 0) {r : ℝ} (hr : 1 ≤ r) :
     d * characteristic f ⊤ r
       ≤ characteristic (∑ j ∈ range (d + 1), a j * f ^ j) ⊤ r
         + (d ^ 2 + 1) * ∑ j ∈ range (d + 1), characteristic (a j) ⊤ r
-        + (d * log (2 * (d + 1))
+        + (d * log (2 * d)
           + (d ^ 2 + 1) * max |log ‖a d 0‖| |log ‖meromorphicTrailingCoeffAt (a d) 0‖|) := by
   set c := max |log ‖a d 0‖| |log ‖meromorphicTrailingCoeffAt (a d) 0‖| with hc
   -- The leading coefficient does not vanish on a codiscrete set.
@@ -191,14 +191,14 @@ theorem exists_abs_characteristic_polynomial_sub_le (hf : Meromorphic f)
     ∃ c, ∀ r, 1 ≤ r →
       |characteristic (∑ j ∈ range (d + 1), a j * f ^ j) ⊤ r - d * characteristic f ⊤ r|
         ≤ (d ^ 2 + 1) * ∑ j ∈ range (d + 1), characteristic (a j) ⊤ r + c := by
-  refine ⟨log (d + 1) + (d * log (2 * (d + 1))
+  refine ⟨log (d + 1) + (d * log (2 * d)
     + (d ^ 2 + 1) * max |log ‖a d 0‖| |log ‖meromorphicTrailingCoeffAt (a d) 0‖|), fun r hr ↦ ?_⟩
   have hS₀ : 0 ≤ ∑ j ∈ range (d + 1), characteristic (a j) ⊤ r :=
     sum_nonneg fun j _ ↦ characteristic_nonneg hr
   have hd₀ : (0 : ℝ) ≤ d := Nat.cast_nonneg d
   have hlog₁ : 0 ≤ log ((d : ℝ) + 1) := log_nonneg (by linarith)
-  have hlog₂ : 0 ≤ (d : ℝ) * log (2 * (d + 1)) :=
-    mul_nonneg hd₀ (log_nonneg (by linarith))
+  have hlog₂ : 0 ≤ (d : ℝ) * log (2 * d) :=
+    mul_nonneg hd₀ (mod_cast log_natCast_nonneg (2 * d))
   have hc₀ : 0 ≤ (d ^ 2 + 1 : ℝ)
       * max |log ‖a d 0‖| |log ‖meromorphicTrailingCoeffAt (a d) 0‖| :=
     mul_nonneg (by positivity) (le_max_of_le_left (abs_nonneg _))

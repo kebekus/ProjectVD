@@ -30,7 +30,7 @@ the Nevanlinna characteristic `ValueDistribution.characteristic · ⊤`, and `1 
 ```
 (AD)  f^d + a_{d-1} f^{d-1} + … + a₀ = 0        ⟹  T(r, f) ≤ Σ_{j<d} T(r, aⱼ) + log d
 
-(★)   f^d + a_{d-1} f^{d-1} + … + a₀ = g        ⟹  d·T(r, f) ≤ T(r, g) + d·Σ_{j<d} T(r, aⱼ) + d·log(2(d+1))
+(★)   f^d + a_{d-1} f^{d-1} + … + a₀ = g        ⟹  d·T(r, f) ≤ T(r, g) + d·Σ_{j<d} T(r, aⱼ) + d·log(2d)
 
 (VM)  P(w) = Σ_{j≤d} aⱼ wʲ, a_d ≢ 0              ⟹  |T(r, P(f)) − d·T(r, f)| ≤ C·Σ_{j≤d} T(r, aⱼ) + c
 
@@ -60,7 +60,7 @@ theorem ValueDistribution.nsmul_characteristic_le_of_monic_eq {f g : ℂ → ℂ
     (h : f ^ d + ∑ j ∈ range d, a j * f ^ j =ᶠ[codiscrete ℂ] g) {r : ℝ} (hr : 1 ≤ r) :
     d * characteristic f ⊤ r
       ≤ characteristic g ⊤ r + d * ∑ j ∈ range d, characteristic (a j) ⊤ r
-        + d * log (2 * (d + 1))
+        + d * log (2 * d)
 
 -- (T2) The algebraic dependence bound (AD).
 theorem ValueDistribution.characteristic_le_sum_characteristic_of_monic_eq_zero {f : ℂ → ℂ}
@@ -152,7 +152,7 @@ theorem MeromorphicOn.FunctionRing.exists_abs_characteristic_aeval_div_sub_le {l
 
 4. **Non-asymptotic statements with explicit constants, for all `1 ≤ r`.** As in
    `characteristic_add_top_le`. Asymptotic corollaries (`=O`, `=o`, growth classes) are derived,
-   never primary. The constants are not optimized (`log (2 * (d + 1))` in (★)); the sharp
+   never primary. The constants are not optimized (`log (2 * d)` in (★)); the sharp
    `log d` in (T2) is kept because it is free.
 
 5. **"Small functions" as growth classes.** A structure `IsGrowthClass l G` (constants, sums,
@@ -241,9 +241,38 @@ theorem MeromorphicOn.FunctionRing.exists_abs_characteristic_aeval_div_sub_le {l
 
 ## 3. Work package A — pointwise estimates ✅ **DONE** (2026-10-06; G2 added 2026-10-08)
 
-*File `VD/AlgebraicDependence/PointwiseEstimates.lean`. Pure `NormedField` algebra, no
-meromorphy, no integration. Mathlib target: `Mathlib/Analysis/SpecialFunctions/Log/PosLog.lean`
-(or a new `PosLog/Polynomial.lean`). Independent of everything else.*
+*File `VD/AlgebraicDependence/PointwiseEstimates.lean`. Pure normed-ring algebra, no
+meromorphy, no integration. Mathlib target: a new file
+`Mathlib/Analysis/SpecialFunctions/Log/PosLogPolynomial.lean`, plus one lemma in
+`Mathlib/Analysis/SpecialFunctions/Log/PosLog.lean`. Independent of everything else.*
+
+**A reworked for submission (2026-11-25).** `PointwiseEstimates.lean` is now PR-ready (~130 lines
+of Lean code, down from ~200) and carries its own upstreaming plan. The Bezout estimate G2 moved
+to the new file `VD/AlgebraicDependence/BezoutEstimate.lean`, for a second PR; see §9. Changes
+against the implementation notes and the sketch below:
+
+- *Statements.* The weighted bound is stated for the monic expression itself, without the
+  auxiliary `g`, like its divisor counterpart `MeromorphicOn.nsmul_negPart_divisor_le_of_monic_eq`
+  in package B, and its constant improved from `d · log (2 (d + 1))` to `d · log (2 d)`, which is
+  optimal for `d = 1`. The better constant is propagated to C1, T1 and D2. The upper bound and
+  the weighted bound take `d`, `a`, `w` as explicit arguments. Lagrange's bound
+  `‖w‖ ≤ max 1 (Σ_{j<d} ‖aⱼ‖)` is a theorem in its own right
+  (`norm_le_max_one_sum_norm_of_pow_add_sum_eq_zero`); the unweighted bound is its logarithmic
+  form.
+- *Generality.* Nothing uses commutativity or division. The upper bound holds in seminormed rings
+  with `‖1‖ = 1`, the Mohon'ko estimate in normed rings, and the other results in seminormed
+  rings with `‖1‖ = 1` and multiplicative norm (`NormMulClass`). The norm lemmas live in the
+  root namespace, not in `Real`.
+- *Names.* `Real.nsmul_posLog_norm_le_of_monic_eq` → `Real.mul_posLog_norm_le_posLog_norm_pow_add_sum`,
+  `Real.posLog_norm_le_of_monic_eq_zero` → `Real.posLog_norm_le_of_pow_add_sum_eq_zero`,
+  `Real.posLog_norm_le_of_pow_mul_eq` → `Real.posLog_norm_sum_mul_pow_le_of_pow_mul_eq`,
+  `Real.posLog_norm_inv_le_of_eq_zero` → `Real.posLog_inv_norm_le_of_sum_mul_pow_eq_zero`,
+  `Real.pow_le_two_mul_norm_monic` → `norm_pow_le_two_mul_norm_pow_add_sum`. The two variants of
+  `norm_sum_mul_pow_le_of_one_le_norm` are merged into one lemma for arbitrary finsets.
+- *Proofs.* The weighted bound splits at `‖w‖ = max 1 (2 Σ ‖aⱼ‖)` and uses `posLog_sum` instead
+  of `Finset.exists_max_image`; the dominance of the leading term is the separate lemma
+  `two_mul_norm_sum_mul_pow_le_norm_pow` with two corollaries. All `log⁺` estimates are `grw`
+  chains over the norm estimates. New in `PosLog.lean`: `Real.posLog_le_posLog_of_le_max_one`.
 
 *Implementation notes.* All four lemmas below are proved with exactly the planned statements
 and constants (~230 lines, builds warning-free). Two public helpers carry the norm estimates:
@@ -415,7 +444,7 @@ not need `hg : Meromorphic g` — `characteristic_congr_codiscrete` is hypothesi
 argument was dropped; (ii) T2 does need the codiscrete-monotonicity lemma
 `circleAverage_mono_codiscreteWithin` after all (the unweighted pointwise bound requires the
 relation *at the point*), so the file imports `VD/LLD/LogDerivEstimates.lean`; the alternative
-of deriving T2 from T1 with `g = 0` would only give the constant `log (2(d+1))`; (iii) T2 also
+of deriving T2 from T1 with `g = 0` would only give the constant `log (2d)`; (iii) T2 also
 needs `d ≠ 0`, which follows from the relation because `codiscrete ℂ` is `NeBot`
 (`IsPreconnected.codiscreteWithin_neBot` from `VD/Field/CodiscreteWithinNeBot.lean`) — for
 `d = 0` the hypothesis reads `1 =ᶠ 0`. Lean trivia: all circle-average algebra is done with the
@@ -444,11 +473,11 @@ theorem ValueDistribution.nsmul_proximity_le_of_monic_eq {f : ℂ → ℂ} {a : 
     (hf : Meromorphic f) (ha : ∀ j, Meromorphic (a j)) (r : ℝ) :
     d * proximity f ⊤ r
       ≤ proximity (f ^ d + ∑ j ∈ range d, a j * f ^ j) ⊤ r
-        + d * ∑ j ∈ range d, proximity (a j) ⊤ r + d * log (2 * (d + 1))
+        + d * ∑ j ∈ range d, proximity (a j) ⊤ r + d * log (2 * d)
 ```
 
-Unfold `proximity_top`; the pointwise estimate `nsmul_posLog_norm_le_of_monic_eq` holds at
-every `z` with `g := (f ^ d + ∑ …) z` (`simp [Finset.sum_apply]` evaluates the `Pi`-expression);
+Unfold `proximity_top`; the pointwise estimate `mul_posLog_norm_le_posLog_norm_pow_add_sum` holds
+at every `z` (`simpa` evaluates the `Pi`-expression `(f ^ d + ∑ …) z`);
 `circleAverage_mono` with integrability from `MeromorphicOn.circleIntegrable_posLog_norm` for
 `f`, `h`, every `a j`, and `circleAverage_add/_sum/_smul/_const` to split the right-hand side.
 
@@ -469,7 +498,7 @@ theorem ValueDistribution.nsmul_logCounting_le_of_monic_eq … {r : ℝ} (hr : 1
 T1: `characteristic_congr_codiscrete h.symm (by positivity)` replaces `T(r, g)` by `T(r, h)`,
 then C1 + C2 add up (`characteristic = proximity + logCounting` definitionally). T2: the same
 with `g = 0` (`characteristic_zero_top`), but using the sharper pointwise bound
-`posLog_norm_le_of_monic_eq_zero` in C1 and B2 with `(div h)⁻ = 0` in C2 (both re-run for the
+`posLog_norm_le_of_pow_add_sum_eq_zero` in C1 and B2 with `(div h)⁻ = 0` in C2 (both re-run for the
 unweighted constant; ~30 extra lines).
 
 ### C5. Asymptotic corollaries
@@ -516,7 +545,7 @@ deviations from the sketch below, both in the constants:
    `d² + 1` times (the sketch below miscounted `d · Σ_{j<d} T(a_d)` as `d · T(a_d)`). A linear
    constant `d + 1` would require redoing A1 and B2 with a leading coefficient (threshold
    `|w| ≥ 2A/|a_d|`); not done, since no application cares about the constant. D2 is stated
-   with the explicit constant `c = d·log(2(d+1)) + (d²+1)·c_d`, T3 with `c + log(d+1)`.
+   with the explicit constant `c = d·log(2d) + (d²+1)·c_d`, T3 with `c + log(d+1)`.
 
 Lean trivia: the nonvanishing set of `a_d` is
 `MeromorphicOn.eventually_codiscreteWithin_apply_ne_zero` (there is no
@@ -546,11 +575,11 @@ Let `h := Σ_{j≤d} aⱼ fʲ` with `a_d ≢ 0`. Then `a_d⁻¹ · h = f^d + Σ_
 `=ᶠ[codiscrete ℂ]` (division by `a_d` is legitimate off its zeros and poles —
 `MeromorphicOn.ne_zero_mem_codiscreteWithin` after converting `hd` with
 `exists_meromorphicOrderAt_eq_top_iff_eventually_zero`). T1 gives
-`d·T(f) ≤ T(a_d⁻¹ h) + d·Σ_{j<d} T(aⱼ/a_d) + d·log(2(d+1))`, and C0 + FMT inversion
+`d·T(f) ≤ T(a_d⁻¹ h) + d·Σ_{j<d} T(aⱼ/a_d) + d·log(2d)`, and C0 + FMT inversion
 (`characteristic_sub_characteristic_inv_le`, constant
 `c_d := max |log ‖a_d 0‖| |log ‖meromorphicTrailingCoeffAt a_d 0‖|`) turn every
 `T(·/a_d)` into `T(·) + T(a_d) + c_d`. Collecting: `d·T(f) ≤ T(h) + (2d+1)·Σ_{j≤d} T(aⱼ) + c`
-with `c := d·log(2(d+1)) + (d+1)·c_d`. Together with D1 this is T3 (the D1 side is even
+with `c := d·log(2d) + (d+1)·c_d`. Together with D1 this is T3 (the D1 side is even
 sharper). The constant `c` is existential in the statement; its value is irrelevant.
 
 ### D3. Growth-class form
@@ -602,7 +631,7 @@ written `Finset.Ico`.
 ### E1 = T4, Clunie's lemma (algebraic case)
 
 Unfold `proximity_top`. The relation `h` holds on a codiscrete set `S`; on `S` the pointwise
-estimate `posLog_norm_le_of_pow_mul_eq` applies with `w := f z`; integrate with
+estimate `posLog_norm_sum_mul_pow_le_of_pow_mul_eq` applies with `w := f z`; integrate with
 `circleAverage_mono_codiscreteWithin hr` (`codiscreteWithin (sphere 0 |r|)` is coarser than
 `codiscrete ℂ` restricted to the sphere: `codiscreteWithin_mono`/`Filter.EventuallyEq.filter_mono`
 with `mem_codiscreteWithin` — the same device as in the LLD two-radius file). Integrability as
@@ -799,12 +828,33 @@ Estimated size: F0–F1 ~250, F2 ~200, F3 ~120, F4 ~80, F5 ~120 lines. Difficult
 
 ## 9. Work package G — the sharp rational identity (T8, T9) ✅ **DONE** (2026-10-08)
 
-*New file `VD/AlgebraicDependence/RationalCharacteristic.lean`. Depends on A (Bezout
-pointwise lemma, to be added to A), B3, F. The mathematically heaviest package; implement last.*
+*New file `VD/AlgebraicDependence/RationalCharacteristic.lean`. Depends on A, on the Bezout
+pointwise lemma G2 (now `VD/AlgebraicDependence/BezoutEstimate.lean`), B3, F. The mathematically
+heaviest package; implement last.*
+
+**G2 reworked for submission (2026-11-25).** The Bezout estimate was split off from
+`PointwiseEstimates.lean` into `VD/AlgebraicDependence/BezoutEstimate.lean` (~75 lines of Lean
+code, down from ~180), which is PR-ready and carries its own upstreaming plan. Changes against
+item 2 of the implementation notes and the sketch in "G2" below:
+
+- *Statement.* The estimate reads
+  `p · log⁺ ‖w‖ + log⁺ ‖Q(w)‖⁻¹ ≤ log⁺ ‖P(w)/Q(w)‖ + q · log⁺ ‖w‖ + (p + m + n + 3) · Λ`, with
+  the same `Λ` as before. There is no truncated subtraction `p - q` any more, and the hypothesis
+  `q ≤ p` is gone; the consumer in `RationalCharacteristic.lean` rewrites with `Nat.cast_sub`.
+  The statements hold in normed division rings.
+- *Names.* `Real.posLog_norm_inv_le_of_bezout` → `Real.posLog_inv_norm_le_of_mul_add_mul_eq_one`,
+  `Real.nsmul_posLog_norm_add_posLog_norm_inv_le_of_bezout` →
+  `Real.mul_posLog_norm_add_posLog_inv_norm_le_of_mul_add_mul_eq_one`.
+- *Proofs.* The scalar lemma is `posLog_norm_add_le` applied to the Bezout identity divided by
+  `y`, without case analysis on `‖v y‖`. In the main estimate, the region where the leading
+  terms dominate is `1 < ‖w‖`, `2A < ‖w‖`, `2B < ‖w‖` (no radius `R`), where `P(w)` and `Q(w)`
+  are comparable to `w ^ p` and `w ^ q` up to factors of two
+  (`norm_pow_le_two_mul_norm_pow_add_sum`, `norm_pow_add_sum_le_two_mul_norm_pow` of package A).
 
 *Implementation notes.* G1–G5 are proved as planned: G2 in `PointwiseEstimates.lean` (~240
-lines), the `orderAt`-valuation lemmas in `VD/Field/MeromorphicFunctionFieldAPI.lean` (~70 lines), B3, the
-integration, G1, G3, T8, T9 in `RationalCharacteristic.lean` (~900 lines); all warning-free.
+lines; since 2026-11-25 in `BezoutEstimate.lean`, see above), the `orderAt`-valuation lemmas in
+`VD/Field/MeromorphicFunctionFieldAPI.lean` (~70 lines), B3, the integration, G1, G3, T8, T9 in
+`RationalCharacteristic.lean` (~900 lines); all warning-free.
 Deviations and findings:
 
 1. **Monic normalization at the field level.** G2 and B3 are stated for *monic* `P, Q`
@@ -883,7 +933,7 @@ Induction on `q` (strong induction `Nat.strong_induction_on`), statement quantif
   degree `p < q`: induction hypothesis gives `max q p · T(a) = q·T(a)`.
 Coprimality is **not** needed for the upper bound.
 
-### G2. Pointwise Bezout estimate (goes to package A)
+### G2. Pointwise Bezout estimate (now `BezoutEstimate.lean`)
 
 ```lean
 theorem Real.nsmul_posLog_norm_add_posLog_norm_inv_le {p q : ℕ} (hqp : q ≤ p)
@@ -959,7 +1009,8 @@ algebroid characteristic theorem (requires the vector characteristic, decision 8
 ```
 VD/AlgebraicDependence/
   PLAN-AlgebraicDependence.md      this file
-  PointwiseEstimates.lean          A  (+ G2)
+  PointwiseEstimates.lean          A  ✅ PR-ready (2026-11-25), with upstreaming plan
+  BezoutEstimate.lean              G2 ✅ PR-ready (2026-11-25), with upstreaming plan
   DivisorEstimates.lean            B  🚀 (now `VD/MathlibSubmitted/`, PR #44629)
   MonicRelation.lean               C  (T1, T2, C0, C5)
   GrowthClass.lean                 D3 (IsGrowthClass; used by F2)
@@ -970,8 +1021,8 @@ VD/AlgebraicDependence/
   RationalCharacteristic.lean      G  (B3, G1, G3, T8, T9)
 ```
 
-Dependency graph: `A, B` independent; `C ← A, B`; `D ← C`; `E ← A`; `F ← D, VD/Field`;
-`G ← F, B3, A(G2)`.
+Dependency graph: `A, B` independent; `C ← A, B`; `D ← C`; `E ← A`; `G2 ← A`;
+`F ← D, VD/Field`; `G ← F, B3, G2`.
 
 Mathlib PRs, in order:
 
@@ -979,12 +1030,17 @@ Mathlib PRs, in order:
    together with item 4 as **PR #44629** (2026-10-08).
 2. `characteristic_mul_top_le'`/`_zero'` (C0) → `ValueDistribution/CharacteristicFunction.lean`.
    Tiny; also upstream `circleAverage_mono_codiscreteWithin` if not yet merged with the LLD.
-3. Package A → `SpecialFunctions/Log/PosLog.lean` (or a new file). Independent.
+3. Package A → new file `SpecialFunctions/Log/PosLogPolynomial.lean`, plus
+   `Real.posLog_le_posLog_of_le_max_one` in `SpecialFunctions/Log/PosLog.lean`. Independent.
+   ✅ PR-ready (2026-11-25); the upstreaming plan, with PR title and description, is in
+   `PointwiseEstimates.lean`.
 4. B2 → `Analysis/Meromorphic/Divisor.lean`. 🚀 Part of **PR #44629** (see item 1).
 5. C + D → new `ValueDistribution/AlgebraicDependence.lean` (T1, T2, T3). The citable core.
 6. E → new `ValueDistribution/Clunie.lean`.
-7. F, G, B3, G2: after `VD/Field/` is upstream (separate track; the field of meromorphic functions is the
-   prerequisite for everything that mentions "field").
+7. F, G, B3: after `VD/Field/` is upstream (separate track; the field of meromorphic functions is the
+   prerequisite for everything that mentions "field"). G2 (`BezoutEstimate.lean`, ✅ PR-ready
+   2026-11-25) needs item 3 only and is appended to the file of item 3; its upstreaming plan
+   recommends to submit it shortly before G, when its consumer is in sight.
 
 PRs 1–6 need nothing from `VD/Field/`.
 

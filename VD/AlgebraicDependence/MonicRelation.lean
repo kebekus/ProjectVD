@@ -33,7 +33,7 @@ degree `d` in `f` with coefficients `a j`.
 - C1/C2, `nsmul_proximity_le_of_monic_eq`, `nsmul_logCounting_le_of_monic_eq`: the pointwise
   estimate of package A and the divisor estimate of package B, integrated.
 - T1, `ValueDistribution.nsmul_characteristic_le_of_monic_eq`: the **master inequality**
-  `d · T(r, f) ≤ T(r, g) + d · Σ_{j<d} T(r, a j) + d · log (2 (d + 1))` whenever
+  `d · T(r, f) ≤ T(r, g) + d · Σ_{j<d} T(r, a j) + d · log (2 d)` whenever
   `f ^ d + Σ_{j<d} a j * f ^ j =ᶠ[codiscrete ℂ] g`.
 - T2, `ValueDistribution.characteristic_le_sum_characteristic_of_monic_eq_zero`: the
   **algebraic dependence bound** `T(r, f) ≤ Σ_{j<d} T(r, a j) + log d` for `g = 0`.
@@ -85,13 +85,13 @@ theorem _root_.Meromorphic.monic (hf : Meromorphic f) (ha : ∀ j, Meromorphic (
     Meromorphic (f ^ d + ∑ j ∈ range d, a j * f ^ j) :=
   hf.pow.add (Meromorphic.sum fun j _ ↦ (ha j).mul hf.pow)
 
-/-- C1: the weighted root bound `Real.nsmul_posLog_norm_le_of_monic_eq`, integrated over the
-circle of radius `r`. -/
+/-- C1: the lower bound for monic polynomial expressions,
+`Real.mul_posLog_norm_le_posLog_norm_pow_add_sum`, integrated over the circle of radius `r`. -/
 theorem nsmul_proximity_le_of_monic_eq (hf : Meromorphic f) (ha : ∀ j, Meromorphic (a j))
     (r : ℝ) :
     d * proximity f ⊤ r
       ≤ proximity (f ^ d + ∑ j ∈ range d, a j * f ^ j) ⊤ r
-        + d * ∑ j ∈ range d, proximity (a j) ⊤ r + d * log (2 * (d + 1)) := by
+        + d * ∑ j ∈ range d, proximity (a j) ⊤ r + d * log (2 * d) := by
   have hint : ∀ {u : ℂ → ℂ}, Meromorphic u → CircleIntegrable (fun z ↦ log⁺ ‖u z‖) 0 r :=
     fun hu ↦ hu.meromorphicOn.circleIntegrable_posLog_norm
   have hcoef : ∀ j ∈ range d, CircleIntegrable (fun z ↦ log⁺ ‖a j z‖) 0 r :=
@@ -101,18 +101,17 @@ theorem nsmul_proximity_le_of_monic_eq (hf : Meromorphic f) (ha : ∀ j, Meromor
   have hA := hint (hf.monic ha (d := d))
   have hB : CircleIntegrable ((d : ℝ) • ∑ j ∈ range d, (fun z ↦ log⁺ ‖a j z‖)) 0 r :=
     IntervalIntegrable.const_mul (CircleIntegrable.sum (range d) hcoef) _
-  have hC : CircleIntegrable (fun _ : ℂ ↦ (d : ℝ) * log (2 * (d + 1))) 0 r :=
+  have hC : CircleIntegrable (fun _ : ℂ ↦ (d : ℝ) * log (2 * d)) 0 r :=
     circleIntegrable_const _ _ _
   simp only [proximity_top]
   -- The pointwise estimate, integrated.
   have key : circleAverage ((d : ℝ) • fun z ↦ log⁺ ‖f z‖) 0 r
       ≤ circleAverage ((fun z ↦ log⁺ ‖(f ^ d + ∑ j ∈ range d, a j * f ^ j) z‖)
           + (d : ℝ) • ∑ j ∈ range d, (fun z ↦ log⁺ ‖a j z‖)
-          + fun _ ↦ (d : ℝ) * log (2 * (d + 1))) 0 r := by
+          + fun _ ↦ (d : ℝ) * log (2 * d)) 0 r := by
     apply circleAverage_mono hF ((hA.add hB).add hC)
     intro z _
-    simp only [Pi.add_apply, Pi.smul_apply, Finset.sum_apply, smul_eq_mul]
-    exact nsmul_posLog_norm_le_of_monic_eq (a := fun j ↦ a j z) (by simp)
+    simpa using mul_posLog_norm_le_posLog_norm_pow_add_sum d (fun j ↦ a j z) (f z)
   rwa [circleAverage_smul, circleAverage_add (hA.add hB) hC, circleAverage_add hA hB,
     circleAverage_smul, circleAverage_sum hcoef, circleAverage_const, smul_eq_mul,
     smul_eq_mul] at key
@@ -134,14 +133,14 @@ theorem nsmul_logCounting_le_of_monic_eq (hf : Meromorphic f) (ha : ∀ j, Merom
 -/
 
 /-- **The master inequality** (T1): if `f ^ d + Σ_{j<d} a j * f ^ j = g` away from a discrete
-set, then `d · T(r, f) ≤ T(r, g) + d · Σ_{j<d} T(r, a j) + d · log (2 (d + 1))` for `1 ≤ r`.
+set, then `d · T(r, f) ≤ T(r, g) + d · Σ_{j<d} T(r, a j) + d · log (2 d)` for `1 ≤ r`.
 The factor `d` on the left is the source of the factor `deg P` in the Valiron–Mohon'ko
 identity. -/
 theorem nsmul_characteristic_le_of_monic_eq (hf : Meromorphic f) (ha : ∀ j, Meromorphic (a j))
     (h : f ^ d + ∑ j ∈ range d, a j * f ^ j =ᶠ[codiscrete ℂ] g) {r : ℝ} (hr : 1 ≤ r) :
     d * characteristic f ⊤ r
       ≤ characteristic g ⊤ r + d * ∑ j ∈ range d, characteristic (a j) ⊤ r
-        + d * log (2 * (d + 1)) := by
+        + d * log (2 * d) := by
   rw [← characteristic_congr_codiscrete h (zero_lt_one.trans_le hr).ne']
   simp only [characteristic, Pi.add_apply, Finset.sum_add_distrib]
   linarith [nsmul_proximity_le_of_monic_eq (d := d) hf ha r,
@@ -165,7 +164,8 @@ theorem characteristic_le_sum_characteristic_of_monic_eq_zero (hf : Meromorphic 
       simp at hz
     · positivity
   simp only [characteristic, Pi.add_apply, Finset.sum_add_distrib]
-  -- The proximity part: the unweighted root bound, integrated where the relation holds.
+  -- The proximity part: Lagrange's bound in logarithmic form, integrated where the relation
+  -- holds.
   have hm : proximity f ⊤ r ≤ ∑ j ∈ range d, proximity (a j) ⊤ r + log d := by
     have hint : ∀ {u : ℂ → ℂ}, Meromorphic u → CircleIntegrable (fun z ↦ log⁺ ‖u z‖) 0 r :=
       fun hu ↦ hu.meromorphicOn.circleIntegrable_posLog_norm
@@ -179,7 +179,7 @@ theorem characteristic_le_sum_characteristic_of_monic_eq_zero (hf : Meromorphic 
       apply circleAverage_mono_codiscreteWithin hr0 (hint hf) (hB.add hC)
       filter_upwards [h.filter_mono (codiscreteWithin_mono (subset_univ _))] with z hz
       simp only [Pi.add_apply, Finset.sum_apply]
-      exact posLog_norm_le_of_monic_eq_zero (a := fun j ↦ a j z)
+      exact posLog_norm_le_of_pow_add_sum_eq_zero (a := fun j ↦ a j z)
         (by simpa [Finset.sum_apply] using hz)
     rwa [circleAverage_add hB hC, circleAverage_sum hcoef, circleAverage_const] at key
   -- The counting part: the divisor estimate, with the relation's divisor being zero.

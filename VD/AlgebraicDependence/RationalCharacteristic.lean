@@ -7,6 +7,7 @@ module
 
 public import Mathlib.Algebra.Polynomial.FieldDivision
 public import Mathlib.RingTheory.Coprime.Basic
+public import VD.AlgebraicDependence.BezoutEstimate
 public import VD.AlgebraicDependence.GrowthField
 
 /-!
@@ -15,8 +16,9 @@ public import VD.AlgebraicDependence.GrowthField
 See `VD/AlgebraicDependence/PLAN-AlgebraicDependence.md`, §9.
 
 Mathlib target: follows the field of meromorphic functions `VD/Field/` upstream. Dependencies:
-package F, the pointwise Bezout estimate `Real.nsmul_posLog_norm_add_posLog_norm_inv_le_of_bezout`
-of package A (G2), and the divisor estimate B3 proved here in `K`.
+package F, the pointwise Bezout estimate
+`Real.mul_posLog_norm_add_posLog_inv_norm_le_of_mul_add_mul_eq_one` of
+`VD/AlgebraicDependence/BezoutEstimate.lean` (G2), and the divisor estimate B3 proved here in `K`.
 
 Throughout, `K := MeromorphicOn.functionRing ℂ ℂ Set.univ` is the field of meromorphic functions
 on `ℂ`, `F := growthField hG` is the growth field of a growth class `G`, `P Q : F[X]`, and
@@ -420,7 +422,8 @@ theorem nsmul_characteristic_add_characteristic_inv_le_of_bezout {a : functionRi
         norm_inv] at hzP hzQ hzU hzV hzg hzB ⊢
       rw [hzg, hzP, hzQ, hK, hC]
       rw [hzU, hzP, hzV, hzQ] at hzB
-      linarith [nsmul_posLog_norm_add_posLog_norm_inv_le_of_bezout hqp hzB]
+      rw [Nat.cast_sub hqp]
+      linarith [mul_posLog_norm_add_posLog_inv_norm_le_of_mul_add_mul_eq_one hzB]
     rwa [circleAverage_add hA hintQ, circleAverage_smul, circleAverage_add (hint _) hKS,
       circleAverage_smul, circleAverage_add (((hSc.add hSb).add hSu).add hSv) hCi,
       circleAverage_add ((hSc.add hSb).add hSu) hSv, circleAverage_add (hSc.add hSb) hSu,
