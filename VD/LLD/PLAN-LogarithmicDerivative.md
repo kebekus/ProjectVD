@@ -287,6 +287,24 @@ additional (necessary) hypothesis `R ≠ 0`; the norm bound
 `Complex.norm_logDeriv_canonicalFactor_le` needs no `w ≠ a` hypothesis — at `w = a` both sides
 degenerate gracefully (`0 ≤ …` by the junk-value conventions).
 
+**B4 reworked for submission (2026-11-25).** `VD/LLD/PoissonSchwarzDeriv.lean` is now PR-ready
+(~90 lines of Lean code) and carries its own upstreaming plan. Changes against the sketch below:
+
+- *Generality.* `MeromorphicOn.logDeriv_eq_circleAverage` holds for an arbitrary centre `c`, like
+  the Poisson–Jensen formula; it is derived by translation from a private centred lemma. The
+  kernel is `derivHerglotzRieszKernel c w z = 2 * (z - c) / (z - w) ^ 2`, with the centre as first
+  argument like `herglotzRieszKernel` and `poissonKernel`, and comes with
+  `hasDerivAt_herglotzRieszKernel`. The boundary special case is renamed to
+  `circleAverage_derivHerglotzRieszKernel_smul_log`, mirroring `circleAverage_poissonKernel_smul_log`.
+- *Proof.* Steps 3–4 are replaced by a shorter argument that needs no primitive of `logDeriv h`:
+  by step 2, `exp ∘ F` and `h` have the same norm near `w`, and holomorphic functions with the
+  same norm have the same logarithmic derivative (maximum modulus principle applied to the
+  quotient; new lemma `AnalyticAt.logDeriv_eq_of_eventually_norm_eq`). The imports of
+  `HasPrimitives` and `OpenMapping` are gone.
+- *Split-offs.* Step 2 is the public theorem
+  `MeromorphicOn.circleAverage_poissonKernel_smul_log_norm_of_ne_zero` (Poisson integral formula
+  for `log ‖h ·‖`, any centre); `CircleIntegrable.ofReal` is new.
+
 ### B4. Differentiated Poisson representation for ball-nonvanishing functions
 
 ```lean
@@ -351,7 +369,9 @@ Renamed 2026-09-20 (the statement is an `=ᶠ`, not a `Set.EqOn`), and the hypot
 quantifies over `u ∈ closedBall 0 R` rather than over the subtype. The derived kernel `2ζ/(ζ−w)²` is
 now the def `derivHerglotzRieszKernel` (in `PoissonSchwarzDeriv.lean`, with `_def`/`_fun_def`
 lemmas mirroring `herglotzRieszKernel_def`), used in the statements of B4, B5's boundary case, B6
-and the pointwise estimate.
+and the pointwise estimate. Since 2026-11-25 the kernel takes the centre as its first argument, so
+B6 and the pointwise estimate read `derivHerglotzRieszKernel 0 w ζ`, and the sphere-divisor
+cancellation uses `circleAverage_derivHerglotzRieszKernel_smul_log`.
 
 Mirror the proof of `MeromorphicOn.log_norm_meromorphicTrailingCoeffAt₀` in Mathlib's
 `Mathlib/Analysis/Complex/JensenFormula.lean`:
@@ -603,7 +623,7 @@ one local file per future Mathlib target:
 | 2 | *(merged)* | `Analysis/SpecialFunctions/Log/PosLog.lean` (extend) | `posLog_rpow`, `abs_log_…` (done, in Mathlib) | — |
 | 3 | *(merged)* | `MeasureTheory/Function/BorelGrowth.lean` | package D (T2, done, in Mathlib) | — |
 | 4 | *(merged)* | `MeasureTheory/Integral/CircleIntegral.lean` (extend) | B1–B3 (done, in Mathlib) | — |
-| 5 | `PoissonSchwarzDeriv.lean` ✅ | `Analysis/Complex/Poisson.lean` (extend) | B4 (done) | 4, **Poisson–Jensen chain** |
+| 5 | `PoissonSchwarzDeriv.lean` ✅ | `Analysis/Complex/JensenFormula.lean` (extend), with the kernel going to `Analysis/Complex/Poisson.lean` and one lemma each to `Analysis/Complex/AbsMax.lean` and `MeasureTheory/Integral/CircleIntegral.lean`; see the file's upstreaming plan | B4 (done, PR-ready) | 4, **Poisson–Jensen chain** |
 | 5a | `MathlibSubmitted/CanonicalFactor.lean` 🚀 | `Analysis/Complex/CanonicalDecomposition.lean` (extend) | B5: `logDeriv` of the canonical factor and its norm bound, plus `one_lt_norm_canonicalFactor`, **submitted as PR #43985 (draft)** | — |
 | 6 | `PoissonJensenDeriv.lean` ✅ | `Analysis/Complex/PoissonJensenDeriv.lean` | B6 + the pointwise estimate `MeromorphicOn.eventually_norm_logDeriv_le` (done) | 1, 5 |
 | 7 | `CircleAverageEstimates.lean` ✅ | new file `Analysis/SpecialFunctions/Integrals/CircleAverageRpow.lean`; `circleIntegrable_iff_intervalIntegrable_add` goes to `MeasureTheory/Integral/CircleIntegral.lean` | C2 (done; C1 is in `MathlibSubmitted/JensenInequality.lean`) | — |

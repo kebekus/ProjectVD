@@ -25,7 +25,7 @@ This file establishes the **differentiated Poisson–Jensen formula**
 agrees, away from a discrete subset of the open ball, with
 
 - the circle average of `log ‖f ·‖` against the derived Herglotz–Riesz kernel
-  `derivHerglotzRieszKernel w ζ = 2ζ/(ζ-w)²`, minus
+  `derivHerglotzRieszKernel 0 w ζ = 2ζ/(ζ-w)²`, minus
 - the sum of the logarithmic derivatives of the canonical factors, weighted by the divisor
   of `f` on the ball.
 
@@ -37,7 +37,7 @@ take the extended canonical decomposition (`exists_ecanonicalDecomp`), apply the
 `logDeriv` arithmetic from work package A, and rewrite `logDeriv h` of the nonvanishing factor
 via the differentiated Poisson representation (B4). On the sphere the canonical-factor terms
 vanish (`norm_canonicalFactor_eval_circle_eq_one`), and each boundary-divisor term integrates
-to `(w - v)⁻¹` (`circleAverage_smul_log_norm_sub_sphere`), cancelling exactly against the
+to `(w - v)⁻¹` (`circleAverage_derivHerglotzRieszKernel_smul_log`), cancelling exactly against the
 logarithmic derivatives of the boundary factors.
 -/
 
@@ -52,7 +52,7 @@ open Complex Filter Function MeromorphicOn Metric Real Set Topology
 /-- The derived Herglotz–Riesz kernel `ζ ↦ 2ζ/(ζ-w)²` is continuous on the circle
 `sphere 0 |R|` whenever `w ∈ ball 0 R`. -/
 lemma continuousOn_derivHerglotzRieszKernel {w : ℂ} {R : ℝ} (hw : w ∈ ball 0 R) :
-    ContinuousOn (derivHerglotzRieszKernel w) (sphere (0 : ℂ) |R|) := by
+    ContinuousOn (derivHerglotzRieszKernel 0 w) (sphere (0 : ℂ) |R|) := by
   rw [derivHerglotzRieszKernel_fun_def]
   apply ContinuousOn.div (by fun_prop) (by fun_prop)
   intro z hz
@@ -64,7 +64,7 @@ lemma continuousOn_derivHerglotzRieszKernel {w : ℂ} {R : ℝ} (hw : w ∈ ball
 `ζ ↦ (2ζ/(ζ-w)²) • log ‖g ζ‖` is circle integrable. -/
 lemma circleIntegrable_derivHerglotzRieszKernel_smul_log_norm {g : ℂ → ℂ} {w : ℂ} {R : ℝ}
     (hg : MeromorphicOn g (closedBall 0 R)) (hw : w ∈ ball 0 R) :
-    CircleIntegrable (fun ζ ↦ derivHerglotzRieszKernel w ζ • (Real.log ‖g ζ‖ : ℂ)) 0 R := by
+    CircleIntegrable (fun ζ ↦ derivHerglotzRieszKernel 0 w ζ • (Real.log ‖g ζ‖ : ℂ)) 0 R := by
   have hR : 0 < R := pos_of_mem_ball hw
   have h₁ : CircleIntegrable (fun ζ ↦ Real.log ‖g ζ‖) 0 R :=
     MeromorphicOn.circleIntegrable_log_norm
@@ -102,7 +102,7 @@ theorem MeromorphicOn.logDeriv_eventuallyEq_circleAverage_sub_finsum {f : ℂ �
     (h₁f : MeromorphicOn f (closedBall 0 R))
     (h₂f : ∀ u ∈ closedBall (0 : ℂ) R, meromorphicOrderAt f u ≠ ⊤) :
     logDeriv f =ᶠ[codiscreteWithin (ball 0 R)]
-      fun w ↦ circleAverage (fun ζ ↦ derivHerglotzRieszKernel w ζ • (Real.log ‖f ζ‖ : ℂ)) 0 R
+      fun w ↦ circleAverage (fun ζ ↦ derivHerglotzRieszKernel 0 w ζ • (Real.log ‖f ζ‖ : ℂ)) 0 R
         - ∑ᶠ a, (divisor f (ball 0 R) a) • logDeriv (canonicalFactor R a) w := by
   -- The statement is vacuous for `R ≤ 0`, where the ball is empty.
   by_cases hR : 0 < R
@@ -194,14 +194,15 @@ theorem MeromorphicOn.logDeriv_eventuallyEq_circleAverage_sub_finsum {f : ℂ �
   -- representation (B4). On the sphere, the canonical factors have norm one and drop out; each
   -- boundary factor integrates to `(w - v)⁻¹`.
   have key : ∀ w ∈ ball (0 : ℂ) R,
-      circleAverage (fun ζ ↦ derivHerglotzRieszKernel w ζ • (Real.log ‖f ζ‖ : ℂ)) 0 R
+      circleAverage (fun ζ ↦ derivHerglotzRieszKernel 0 w ζ • (Real.log ‖f ζ‖ : ℂ)) 0 R
         = (∑ v ∈ h₃f.toFinset, (divisor f (sphere 0 R) v) • (w - v)⁻¹) + logDeriv h w := by
     intro w hw
     -- Integrability of the individual summands
-    have ιh : CircleIntegrable (fun ζ ↦ derivHerglotzRieszKernel w ζ • (Real.log ‖h ζ‖ : ℂ)) 0 R :=
+    have ιh : CircleIntegrable
+        (fun ζ ↦ derivHerglotzRieszKernel 0 w ζ • (Real.log ‖h ζ‖ : ℂ)) 0 R :=
       circleIntegrable_derivHerglotzRieszKernel_smul_log_norm D.analyticOnNhd.meromorphicOn hw
     have ιv : ∀ v ∈ h₃f.toFinset, CircleIntegrable (fun ζ ↦ (divisor f (sphere 0 R) v : ℂ) •
-        (derivHerglotzRieszKernel w ζ • (Real.log ‖ζ - v‖ : ℂ))) 0 R :=
+        (derivHerglotzRieszKernel 0 w ζ • (Real.log ‖ζ - v‖ : ℂ))) 0 R :=
       fun v _ ↦
         (circleIntegrable_derivHerglotzRieszKernel_smul_log_norm (by fun_prop) hw).const_fun_smul
     -- Nonvanishing of the boundary factors away from the boundary divisor
@@ -211,9 +212,9 @@ theorem MeromorphicOn.logDeriv_eventuallyEq_circleAverage_sub_finsum {f : ℂ �
       refine zpow_ne_zero _ (norm_ne_zero_iff.2 (sub_ne_zero.2 ?_))
       rintro rfl
       exact (h₃f.mem_toFinset.1 hb) ha
-    calc circleAverage (fun ζ ↦ derivHerglotzRieszKernel w ζ • (Real.log ‖f ζ‖ : ℂ)) 0 R
+    calc circleAverage (fun ζ ↦ derivHerglotzRieszKernel 0 w ζ • (Real.log ‖f ζ‖ : ℂ)) 0 R
       -- Replace `f` by its canonical decomposition
-      _ = circleAverage (fun ζ ↦ derivHerglotzRieszKernel w ζ •
+      _ = circleAverage (fun ζ ↦ derivHerglotzRieszKernel 0 w ζ •
             (Real.log ‖(((∏ᶠ u, canonicalFactor R u ^ (-divisor f (ball 0 R) u))
               * (∏ᶠ v, (· - v) ^ divisor f (sphere 0 R) v)) • h) ζ‖ : ℂ)) 0 R := by
           apply circleAverage_congr_codiscreteWithin _ hR.ne'
@@ -222,7 +223,7 @@ theorem MeromorphicOn.logDeriv_eventuallyEq_circleAverage_sub_finsum {f : ℂ �
             (codiscreteWithin_mono sphere_subset_closedBall)] with a ha
           simp only [ha, Function.factorizedRational]
       -- The canonical factors have norm one on the sphere
-      _ = circleAverage (fun ζ ↦ derivHerglotzRieszKernel w ζ •
+      _ = circleAverage (fun ζ ↦ derivHerglotzRieszKernel 0 w ζ •
             (Real.log ‖((∏ᶠ v, (· - v) ^ divisor f (sphere 0 R) v) • h) ζ‖ : ℂ)) 0 R := by
           apply circleAverage_congr_sphere
           intro a ha
@@ -236,7 +237,7 @@ theorem MeromorphicOn.logDeriv_eventuallyEq_circleAverage_sub_finsum {f : ℂ �
               ((divisor f (ball 0 R)).supportWithinDomain (h₄f.mem_toFinset.1 hb)) ha, one_zpow]
           simp only [Pi.smul_apply', Pi.mul_apply, norm_smul, norm_mul, hBa, one_mul]
       -- Expand the logarithm of the remaining product
-      _ = circleAverage (fun ζ ↦ derivHerglotzRieszKernel w ζ •
+      _ = circleAverage (fun ζ ↦ derivHerglotzRieszKernel 0 w ζ •
             ((∑ v ∈ h₃f.toFinset, (divisor f (sphere 0 R) v) * Real.log ‖ζ - v‖
               + Real.log ‖h ζ‖ : ℝ) : ℂ)) 0 R := by
           apply circleAverage_congr_codiscreteWithin _ hR.ne'
@@ -254,8 +255,8 @@ theorem MeromorphicOn.logDeriv_eventuallyEq_circleAverage_sub_finsum {f : ℂ �
           exact Finset.sum_congr rfl fun v _ ↦ log_zpow ‖a - v‖ _
       -- Distribute the kernel over the sum
       _ = circleAverage ((∑ v ∈ h₃f.toFinset, fun ζ ↦ (divisor f (sphere 0 R) v : ℂ) •
-              (derivHerglotzRieszKernel w ζ • (Real.log ‖ζ - v‖ : ℂ)))
-            + fun ζ ↦ derivHerglotzRieszKernel w ζ • (Real.log ‖h ζ‖ : ℂ)) 0 R := by
+              (derivHerglotzRieszKernel 0 w ζ • (Real.log ‖ζ - v‖ : ℂ)))
+            + fun ζ ↦ derivHerglotzRieszKernel 0 w ζ • (Real.log ‖h ζ‖ : ℂ)) 0 R := by
           apply circleAverage_congr_sphere
           intro a _
           simp only [Pi.add_apply, Finset.sum_apply, smul_eq_mul]
@@ -265,8 +266,9 @@ theorem MeromorphicOn.logDeriv_eventuallyEq_circleAverage_sub_finsum {f : ℂ �
           exact Finset.sum_congr rfl fun v _ ↦ by ring
       -- Integrate term by term
       _ = (∑ v ∈ h₃f.toFinset, (divisor f (sphere 0 R) v : ℂ) •
-              circleAverage (fun ζ ↦ derivHerglotzRieszKernel w ζ • (Real.log ‖ζ - v‖ : ℂ)) 0 R)
-            + circleAverage (fun ζ ↦ derivHerglotzRieszKernel w ζ • (Real.log ‖h ζ‖ : ℂ)) 0 R := by
+              circleAverage (fun ζ ↦ derivHerglotzRieszKernel 0 w ζ • (Real.log ‖ζ - v‖ : ℂ)) 0 R)
+            + circleAverage
+              (fun ζ ↦ derivHerglotzRieszKernel 0 w ζ • (Real.log ‖h ζ‖ : ℂ)) 0 R := by
           rw [circleAverage_add (CircleIntegrable.sum _ ιv) ιh, circleAverage_sum ιv]
           congr 1
           exact Finset.sum_congr rfl fun v _ ↦ circleAverage_fun_smul
@@ -277,7 +279,7 @@ theorem MeromorphicOn.logDeriv_eventuallyEq_circleAverage_sub_finsum {f : ℂ �
             (fun z hz ↦ D.ne_zero z (ball_subset_closedBall hz)) hw]
           congr 1
           refine Finset.sum_congr rfl fun v hv ↦ ?_
-          rw [circleAverage_smul_log_norm_sub_sphere
+          rw [circleAverage_derivHerglotzRieszKernel_smul_log
             ((divisor f (sphere 0 R)).supportWithinDomain (h₃f.mem_toFinset.1 hv)) hw,
             Int.cast_smul_eq_zsmul]
   -- Final assembly: combine the eventual equalities and evaluate at a point `w`.
@@ -316,7 +318,7 @@ theorem MeromorphicOn.logDeriv_eventuallyEq_circleAverage_sub_finsum {f : ℂ �
     rw [finsum_eq_sum_of_support_subset _ hsub₃]
     exact Finset.sum_congr rfl fun v _ ↦ by rw [logDeriv_id_sub_const]
   change logDeriv f w
-      = circleAverage (fun ζ ↦ derivHerglotzRieszKernel w ζ • (Real.log ‖f ζ‖ : ℂ)) 0 R
+      = circleAverage (fun ζ ↦ derivHerglotzRieszKernel 0 w ζ • (Real.log ‖f ζ‖ : ℂ)) 0 R
         - ∑ᶠ a, (divisor f (ball 0 R) a) • logDeriv (canonicalFactor R a) w
   rw [hw₀, hw₁]
   simp only [Pi.add_apply]
@@ -330,12 +332,12 @@ theorem MeromorphicOn.logDeriv_eventuallyEq_circleAverage_sub_finsum {f : ℂ �
 /-- Norm bound for the derived Herglotz–Riesz kernel for `‖ζ‖ = ρ` and `‖w‖ = r < ρ`. -/
 private lemma norm_derivHerglotzRieszKernel_le {ζ w : ℂ} {r ρ : ℝ} (hζ : ‖ζ‖ = ρ) (hw : ‖w‖ = r)
     (hrρ : r < ρ) :
-    ‖derivHerglotzRieszKernel w ζ‖ ≤ 2 * ρ / (ρ - r) ^ 2 := by
+    ‖derivHerglotzRieszKernel 0 w ζ‖ ≤ 2 * ρ / (ρ - r) ^ 2 := by
   have hρ₀ : 0 < ρ := by linarith [norm_nonneg w]
   have hρr : 0 < ρ - r := by linarith
   have h₁ : ρ - r ≤ ‖ζ - w‖ := by linarith [hζ ▸ hw ▸ norm_sub_norm_le ζ w]
   have h₂ : ‖(2 : ℂ)‖ = 2 := by norm_num
-  rw [derivHerglotzRieszKernel_def, norm_div, norm_mul, norm_pow, hζ, h₂]
+  rw [derivHerglotzRieszKernel_def, sub_zero, norm_div, norm_mul, norm_pow, hζ, h₂]
   gcongr
 
 /-- **Pointwise estimate for the logarithmic derivative on interior circles.** Let `f` be
@@ -368,12 +370,12 @@ theorem MeromorphicOn.eventually_norm_logDeriv_le {f : ℂ → ℂ} {r ρ : ℝ}
       (MeromorphicOn.circleIntegrable_log_norm
         (h₁f.mono_set (by rw [abs_of_pos hρ₀]; exact sphere_subset_closedBall))).abs
     have hint₁ : CircleIntegrable
-        (fun ζ ↦ ‖derivHerglotzRieszKernel w ζ • (Real.log ‖f ζ‖ : ℂ)‖) 0 ρ :=
+        (fun ζ ↦ ‖derivHerglotzRieszKernel 0 w ζ • (Real.log ‖f ζ‖ : ℂ)‖) 0 ρ :=
       IntervalIntegrable.norm (circleIntegrable_derivHerglotzRieszKernel_smul_log_norm h₁f hwball)
     have hint₂ : CircleIntegrable (fun ζ ↦ 2 * ρ / (ρ - r) ^ 2 * |Real.log ‖f ζ‖|) 0 ρ := by
       fun_prop
-    calc ‖circleAverage (fun ζ ↦ derivHerglotzRieszKernel w ζ • (Real.log ‖f ζ‖ : ℂ)) 0 ρ‖
-        ≤ circleAverage (fun ζ ↦ ‖derivHerglotzRieszKernel w ζ • (Real.log ‖f ζ‖ : ℂ)‖) 0 ρ :=
+    calc ‖circleAverage (fun ζ ↦ derivHerglotzRieszKernel 0 w ζ • (Real.log ‖f ζ‖ : ℂ)) 0 ρ‖
+        ≤ circleAverage (fun ζ ↦ ‖derivHerglotzRieszKernel 0 w ζ • (Real.log ‖f ζ‖ : ℂ)‖) 0 ρ :=
           norm_circleAverage_le_circleAverage_norm
       _ ≤ circleAverage (fun ζ ↦ 2 * ρ / (ρ - r) ^ 2 * |Real.log ‖f ζ‖|) 0 ρ := by
           refine circleAverage_mono hint₁ hint₂ fun ζ hζ ↦ ?_
@@ -410,13 +412,13 @@ zero at the origin, and `logDeriv (canonicalFactor 1 0) w = -w⁻¹`.
 -/
 
 example {w : ℂ} (hw' : w ≠ 0) :
-    circleAverage (fun ζ ↦ derivHerglotzRieszKernel w ζ • (Real.log ‖(id : ℂ → ℂ) ζ‖ : ℂ)) 0 1
+    circleAverage (fun ζ ↦ derivHerglotzRieszKernel 0 w ζ • (Real.log ‖(id : ℂ → ℂ) ζ‖ : ℂ)) 0 1
       - ∑ᶠ a, (divisor (id : ℂ → ℂ) (ball 0 1) a) • logDeriv (canonicalFactor 1 a) w
     = logDeriv id w := by
   have hmero : MeromorphicOn (id : ℂ → ℂ) (ball 0 1) := by fun_prop
   -- The kernel term vanishes on the unit circle
   have h₁ : circleAverage
-      (fun ζ ↦ derivHerglotzRieszKernel w ζ • (Real.log ‖(id : ℂ → ℂ) ζ‖ : ℂ)) 0 1 = 0 := by
+      (fun ζ ↦ derivHerglotzRieszKernel 0 w ζ • (Real.log ‖(id : ℂ → ℂ) ζ‖ : ℂ)) 0 1 = 0 := by
     apply circleAverage_const_on_circle
     intro a ha
     rw [abs_one, mem_sphere_zero_iff_norm] at ha
