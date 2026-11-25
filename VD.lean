@@ -14,7 +14,6 @@ public import VD.LLD.LogDerivEstimates
 public import VD.LLD.LogDerivLemma
 public import VD.LLD.LogDerivTwoRadius
 public import VD.LLD.PoissonJensenDeriv
-public import VD.LLD.PoissonSchwarzDeriv
 public import VD.LinearDiffOp.Basic
 public import VD.LinearDiffOp.Regularity
 public import VD.LinearDiffOp.Wirtinger
@@ -31,6 +30,7 @@ public import VD.MathlibSubmitted.GermAlgebra
 public import VD.MathlibSubmitted.JensenInequality
 public import VD.MathlibSubmitted.MeromorphicFunctionField
 public import VD.MathlibSubmitted.MeromorphicGermZero
+public import VD.MathlibSubmitted.PoissonSchwarzDeriv
 public import VD.SMT.Deficiency
 public import VD.SMT.Picard
 public import VD.SMT.ProximityEstimates

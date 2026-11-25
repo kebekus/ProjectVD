@@ -6,7 +6,7 @@ Authors: Stefan Kebekus
 module
 
 public import Mathlib.Analysis.Meromorphic.LogDeriv
-public import VD.LLD.PoissonSchwarzDeriv
+public import VD.MathlibSubmitted.PoissonSchwarzDeriv
 public import VD.MathlibSubmitted.CanonicalFactor
 
 /-!
