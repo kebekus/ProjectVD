@@ -7,7 +7,6 @@ public import VD.AlgebraicDependence.GrowthClass
 public import VD.AlgebraicDependence.GrowthClass'
 public import VD.AlgebraicDependence.GrowthField
 public import VD.AlgebraicDependence.MonicRelation
-public import VD.AlgebraicDependence.PointwiseEstimates
 public import VD.AlgebraicDependence.PolynomialCharacteristic
 public import VD.AlgebraicDependence.RationalCharacteristic
 public import VD.Field.MeromorphicFunctionFieldAPI
@@ -31,6 +30,7 @@ public import VD.MathlibSubmitted.GermAlgebra
 public import VD.MathlibSubmitted.JensenInequality
 public import VD.MathlibSubmitted.MeromorphicFunctionField
 public import VD.MathlibSubmitted.MeromorphicGermZero
+public import VD.MathlibSubmitted.PointwiseEstimates
 public import VD.MathlibSubmitted.PoissonSchwarzDeriv
 public import VD.SMT.Deficiency
 public import VD.SMT.Picard

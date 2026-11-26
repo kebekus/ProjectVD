@@ -8,7 +8,7 @@ module
 public import Mathlib.Analysis.Complex.ValueDistribution.FirstMainTheorem
 public import Mathlib.Analysis.Meromorphic.RCLike
 public import VD.AlgebraicDependence.GrowthClass
-public import VD.AlgebraicDependence.PointwiseEstimates
+public import VD.MathlibSubmitted.PointwiseEstimates
 public import VD.LLD.LogDerivEstimates
 
 /-!

@@ -5,7 +5,7 @@ Authors: Stefan Kebekus
 -/
 module
 
-public import VD.AlgebraicDependence.PointwiseEstimates
+public import VD.MathlibSubmitted.PointwiseEstimates
 
 /-!
 # A Bézout Estimate for `log⁺` of Quotients of Polynomial Expressions

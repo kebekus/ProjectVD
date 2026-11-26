@@ -7,7 +7,7 @@ module
 
 public import Mathlib.Analysis.Complex.ValueDistribution.CharacteristicFunction
 public import Mathlib.Analysis.Meromorphic.RCLike
-public import VD.AlgebraicDependence.PointwiseEstimates
+public import VD.MathlibSubmitted.PointwiseEstimates
 public import VD.MathlibSubmitted.CodiscreteWithinNeBot
 public import VD.LLD.LogDerivEstimates
 public import VD.MathlibSubmitted.DivisorEstimates
