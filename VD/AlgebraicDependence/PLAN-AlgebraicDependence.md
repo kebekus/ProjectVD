@@ -255,7 +255,7 @@ against the implementation notes and the sketch below:
   auxiliary `g`, like its divisor counterpart `MeromorphicOn.nsmul_negPart_divisor_le_of_monic_eq`
   in package B, and its constant improved from `d · log (2 (d + 1))` to `d · log (2 d)`, which is
   optimal for `d = 1`. The better constant is propagated to C1, T1 and D2. The upper bound and
-  the weighted bound take `d`, `a`, `w` as explicit arguments. Lagrange's bound
+  the weighted bound take `d`, `a`, `w` as explicit arguments. The root bound
   `‖w‖ ≤ max 1 (Σ_{j<d} ‖aⱼ‖)` is a theorem in its own right
   (`norm_le_max_one_sum_norm_of_pow_add_sum_eq_zero`); the unweighted bound is its logarithmic
   form.

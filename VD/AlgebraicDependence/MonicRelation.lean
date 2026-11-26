@@ -164,8 +164,8 @@ theorem characteristic_le_sum_characteristic_of_monic_eq_zero (hf : Meromorphic 
       simp at hz
     · positivity
   simp only [characteristic, Pi.add_apply, Finset.sum_add_distrib]
-  -- The proximity part: Lagrange's bound in logarithmic form, integrated where the relation
-  -- holds.
+  -- The proximity part: the bound for the norm of a root in logarithmic form, integrated where
+  -- the relation holds.
   have hm : proximity f ⊤ r ≤ ∑ j ∈ range d, proximity (a j) ⊤ r + log d := by
     have hint : ∀ {u : ℂ → ℂ}, Meromorphic u → CircleIntegrable (fun z ↦ log⁺ ‖u z‖) 0 r :=
       fun hu ↦ hu.meromorphicOn.circleIntegrable_posLog_norm

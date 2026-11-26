@@ -32,10 +32,11 @@ coefficients.
 
 Bounds for roots.
 
-- `norm_le_max_one_sum_norm_of_pow_add_sum_eq_zero`: Lagrange's bound. If
+- `norm_le_max_one_sum_norm_of_pow_add_sum_eq_zero`: a variant of Cauchy's bound, with the sum of
+  the norms of the coefficients in place of their maximum. If
   `w ^ d + ∑ j ∈ range d, a j * w ^ j = 0`, then `‖w‖ ≤ max 1 (∑ j ∈ range d, ‖a j‖)`.
 - `Real.posLog_norm_le_of_pow_add_sum_eq_zero`: the logarithmic form
-  `log⁺ ‖w‖ ≤ ∑ j ∈ range d, log⁺ ‖a j‖ + log d` of Lagrange's bound.
+  `log⁺ ‖w‖ ≤ ∑ j ∈ range d, log⁺ ‖a j‖ + log d` of this bound.
 - `Real.posLog_inv_norm_le_of_sum_mul_pow_eq_zero`: roots are not small, either. If
   `∑ j ∈ range (d + 1), a j * w ^ j = 0` and `a 0 ≠ 0`, then `log⁺ ‖w‖⁻¹` is at most
   `log⁺ ‖a 0‖⁻¹`, plus the sum of the `log⁺ ‖a j‖` for `1 ≤ j ≤ d`, plus `log d`.
@@ -66,6 +67,10 @@ of meromorphic functions. Averaged over circles, the estimates compare the growt
 function `f` with the growth of polynomials in `f`, they bound the growth of functions that are
 algebraic over a field of meromorphic functions, and they yield the algebraic cases of the lemmas
 of Clunie and Mohon'ko.
+
+## References
+
+* <https://en.wikipedia.org/wiki/Geometrical_properties_of_polynomial_roots#Bounds_on_all_roots>
 -/
 
 @[expose] public section
@@ -75,8 +80,8 @@ of Clunie and Mohon'ko.
 
 Project context: this file is work package A of the project's treatment of algebraic dependence,
 see `VD/AlgebraicDependence/PLAN-AlgebraicDependence.md`, §3. Its consumers apply the estimates to
-the values of meromorphic functions and integrate them over circles: the lower bound and
-Lagrange's bound are used in `VD/AlgebraicDependence/MonicRelation.lean`, the upper bound in
+the values of meromorphic functions and integrate them over circles: the lower bound and the bound
+for the norm of a root are used in `VD/AlgebraicDependence/MonicRelation.lean`, the upper bound in
 `VD/AlgebraicDependence/PolynomialCharacteristic.lean`, and the last two estimates in
 `VD/AlgebraicDependence/ClunieMohonko.lean`. Until 2026-11-25, this file also contained the Bézout
 estimate for quotients of polynomial expressions. That estimate is now the file
@@ -125,8 +130,8 @@ keeps `PosLog.lean` at its present size of 280 lines. The alternatives are worse
 - Appending to `PosLog.lean` puts six lemmas about norms in rings, which do not mention `log⁺`,
   into a file about a real function.
 - `Mathlib/Analysis/Polynomial/` holds `CauchyBound.lean`, which is the natural neighbour of
-  Lagrange's bound. But the files in that directory are about `Polynomial`, and the results here
-  deliberately are not; see the implementation notes in the module docstring.
+  the bound for the norm of a root. But the files in that directory are about `Polynomial`, and
+  the results here deliberately are not; see the implementation notes in the module docstring.
 - The six norm lemmas could go to `Mathlib/Analysis/Normed/Ring/Basic.lean`. That file has 1200
   lines and is imported by most of analysis; the lemmas are special enough to stay with their
   only consumers.
@@ -140,14 +145,20 @@ The file name is a suggestion. Reviewers may prefer another one; nothing depends
   monic `p : R[X]`, the identity
   `p.eval w = w ^ p.natDegree + ∑ j ∈ range p.natDegree, p.coeff j * w ^ j` is proved by
   `rw [eval_eq_sum_range, sum_range_succ, hp.coeff_natDegree, one_mul, add_comm]`. Rewriting with
-  it turns the lower bound and Lagrange's bound into statements about `p.eval w` and
-  `p.IsRoot w`; for the upper bound, `rw [eval_eq_sum_range]` suffices. Offer these in the PR
+  it turns the lower bound and the bound for the norm of a root into statements about `p.eval w`
+  and `p.IsRoot w`; for the upper bound, `rw [eval_eq_sum_range]` suffices. Offer these in the PR
   description and add them only on request: they would be the only declarations of the PR without
   a consumer.
 - The name `Real.mul_posLog_norm_le_posLog_norm_pow_add_sum`. It follows the statement literally.
   The analogous divisor estimate in the project's PR #44629 is called
   `MeromorphicOn.nsmul_negPart_divisor_le_of_monic_eq`; whatever the reviewers of that PR decide
   about the token `monic` should be applied to both.
+- A name for the bound `‖w‖ ≤ max 1 (∑ j ∈ range d, ‖a j‖)`. The docstrings give none, on
+  purpose. Wikipedia calls it Lagrange's bound and cites his *Traité de la résolution des
+  équations numériques*. The third edition (1826) does not contain it: Chap. I, n° 12 and 13,
+  bound the positive real roots only, and never by the sum of the coefficients. Other sources
+  speak of Montel's bound (Horn–Johnson, *Matrix Analysis*, §5.6; not checked against the book),
+  or count it as a form of Cauchy's bound.
 
 ## PR title and description (draft)
 
@@ -171,8 +182,9 @@ Description:
       degree `d`, the number `d * log⁺ ‖w‖` is at most `log⁺` of the norm of the expression, up to
       an error term. Root bounds such as Cauchy's do not give the factor `d`.
     - `norm_le_max_one_sum_norm_of_pow_add_sum_eq_zero` and
-      `Real.posLog_norm_le_of_pow_add_sum_eq_zero`: Lagrange's bound for the roots of a monic
-      polynomial, and its logarithmic form.
+      `Real.posLog_norm_le_of_pow_add_sum_eq_zero`: a bound for the roots of a monic polynomial
+      in terms of the sum of the norms of its coefficients, and its logarithmic form. This is a
+      variant of Cauchy's bound, which uses the maximum instead of the sum.
     - `Real.posLog_inv_norm_le_of_sum_mul_pow_eq_zero`: the analogous lower bound for the roots of
       a polynomial whose constant coefficient is not zero.
     - `Real.posLog_norm_sum_mul_pow_le_of_pow_mul_eq`: if `w ^ n * P = Q` for polynomial
@@ -229,8 +241,10 @@ open Finset Real
 -- The following lemma belongs in `Mathlib/Analysis/SpecialFunctions/Log/PosLog.lean`; see step 1
 -- of the upstreaming plan.
 
-/-- Monotonicity of `log⁺`, ignoring values below one: if `0 ≤ x` and `x ≤ max 1 y`, then
-`log⁺ x ≤ log⁺ y`. See `Real.posLog_le_posLog` for the plain monotonicity statement. -/
+/--
+Monotonicity of `log⁺`, ignoring values below one: if `0 ≤ x` and `x ≤ max 1 y`, then
+`log⁺ x ≤ log⁺ y`. See `Real.posLog_le_posLog` for the plain monotonicity statement.
+-/
 lemma Real.posLog_le_posLog_of_le_max_one {x y : ℝ} (hx : 0 ≤ x) (h : x ≤ max 1 y) :
     log⁺ x ≤ log⁺ y := by
   grind [posLog_eq_zero_iff, posLog_nonneg, posLog_le_posLog]
@@ -241,15 +255,19 @@ variable {R : Type*} [SeminormedRing R] [NormOneClass R] {a : ℕ → R} {w : R}
 ## Norm Estimates for Polynomial Expressions
 -/
 
-/-- If `‖w‖ ≤ 1`, then the norm of a polynomial expression in `w` is at most the sum of the norms
-of its coefficients. -/
+/--
+If `‖w‖ ≤ 1`, then the norm of a polynomial expression in `w` is at most the sum of the norms of its
+coefficients.
+-/
 lemma norm_sum_mul_pow_le_of_norm_le_one {s : Finset ℕ} (hw : ‖w‖ ≤ 1) :
     ‖∑ j ∈ s, a j * w ^ j‖ ≤ ∑ j ∈ s, ‖a j‖ := by
   refine norm_sum_le_of_le s fun j _ ↦ ?_
   grw [norm_mul_le, norm_pow_le, pow_le_one₀ (norm_nonneg w) hw, mul_one]
 
-/-- If `1 ≤ ‖w‖`, then the norm of a polynomial expression in `w` whose exponents are at most `d`
-is at most `‖w‖ ^ d` times the sum of the norms of its coefficients. -/
+/--
+If `1 ≤ ‖w‖`, then the norm of a polynomial expression in `w` whose exponents are at most `d` is at
+most `‖w‖ ^ d` times the sum of the norms of its coefficients.
+-/
 lemma norm_sum_mul_pow_le_of_one_le_norm {s : Finset ℕ} {d : ℕ} (hw : 1 ≤ ‖w‖)
     (hs : ∀ j ∈ s, j ≤ d) :
     ‖∑ j ∈ s, a j * w ^ j‖ ≤ (∑ j ∈ s, ‖a j‖) * ‖w‖ ^ d := by
@@ -257,8 +275,10 @@ lemma norm_sum_mul_pow_le_of_one_le_norm {s : Finset ℕ} {d : ℕ} (hw : 1 ≤ 
   refine norm_sum_le_of_le s fun j hj ↦ ?_
   grw [norm_mul_le, norm_pow_le, pow_le_pow_right₀ hw (hs j hj)]
 
-/-- If `‖w‖` is at least one and at least twice the sum of the norms of the coefficients, then a
-polynomial expression of degree less than `d` in `w` is at most half as large as `‖w‖ ^ d`. -/
+/--
+If `‖w‖` is at least one and at least twice the sum of the norms of the coefficients, then a
+polynomial expression of degree less than `d` in `w` is at most half as large as `‖w‖ ^ d`.
+-/
 lemma two_mul_norm_sum_mul_pow_le_norm_pow {d : ℕ} (hw₁ : 1 ≤ ‖w‖)
     (hw₂ : 2 * ∑ j ∈ range d, ‖a j‖ ≤ ‖w‖) :
     2 * ‖∑ j ∈ range d, a j * w ^ j‖ ≤ ‖w‖ ^ d := by
@@ -267,9 +287,11 @@ lemma two_mul_norm_sum_mul_pow_le_norm_pow {d : ℕ} (hw₁ : 1 ≤ ‖w‖)
   grw [norm_sum_mul_pow_le_of_one_le_norm hw₁ fun _ ↦ mem_range_succ_iff.1, ← mul_assoc, hw₂,
     pow_succ']
 
-/-- If `‖w‖` is at least one and at least twice the sum of the norms of the coefficients, then a
-monic polynomial expression of degree `d` in `w` is at most twice as large as `‖w‖ ^ d`. See
-`norm_pow_le_two_mul_norm_pow_add_sum` for the converse estimate. -/
+/--
+If `‖w‖` is at least one and at least twice the sum of the norms of the coefficients, then a monic
+polynomial expression of degree `d` in `w` is at most twice as large as `‖w‖ ^ d`. See
+`norm_pow_le_two_mul_norm_pow_add_sum` for the converse estimate.
+-/
 lemma norm_pow_add_sum_le_two_mul_norm_pow {d : ℕ} (hw₁ : 1 ≤ ‖w‖)
     (hw₂ : 2 * ∑ j ∈ range d, ‖a j‖ ≤ ‖w‖) :
     ‖w ^ d + ∑ j ∈ range d, a j * w ^ j‖ ≤ 2 * ‖w‖ ^ d := by
@@ -277,10 +299,12 @@ lemma norm_pow_add_sum_le_two_mul_norm_pow {d : ℕ} (hw₁ : 1 ≤ ‖w‖)
   linarith [two_mul_norm_sum_mul_pow_le_norm_pow hw₁ hw₂,
     norm_nonneg (∑ j ∈ range d, a j * w ^ j)]
 
-/-- If `‖w‖` is at least one and at least twice the sum of the norms of the coefficients, then the
+/--
+If `‖w‖` is at least one and at least twice the sum of the norms of the coefficients, then the
 leading term of a monic polynomial expression of degree `d` in `w` dominates: `‖w‖ ^ d` is at most
 twice as large as the expression. See `norm_pow_add_sum_le_two_mul_norm_pow` for the converse
-estimate. -/
+estimate.
+-/
 lemma norm_pow_le_two_mul_norm_pow_add_sum [NormMulClass R] {d : ℕ} (hw₁ : 1 ≤ ‖w‖)
     (hw₂ : 2 * ∑ j ∈ range d, ‖a j‖ ≤ ‖w‖) :
     ‖w‖ ^ d ≤ 2 * ‖w ^ d + ∑ j ∈ range d, a j * w ^ j‖ := by
@@ -292,13 +316,15 @@ lemma norm_pow_le_two_mul_norm_pow_add_sum [NormMulClass R] {d : ℕ} (hw₁ : 1
 ## Growth of Polynomial Expressions
 -/
 
-/-- **Upper bound for polynomial expressions**: `log⁺` of the norm of a polynomial expression of
-degree at most `d` in `w` is at most `d * log⁺ ‖w‖`, plus the sum of `log⁺` of the norms of the
+/--
+**Upper bound for polynomial expressions**: `log⁺` of the norm of a polynomial expression of degree
+at most `d` in `w` is at most `d * log⁺ ‖w‖`, plus the sum of `log⁺` of the norms of the
 coefficients, plus `log (d + 1)`.
 
-The constant `log (d + 1)` accounts for the number of terms, as in `Real.posLog_sum`. The factor
-of `log⁺ ‖w‖` is the degree `d`. Estimating the terms one by one, with `Real.posLog_norm_sum_le`
-and `Real.posLog_mul`, gives the larger factor `∑ j ∈ range (d + 1), j` instead. -/
+The constant `log (d + 1)` accounts for the number of terms, as in `Real.posLog_sum`. The factor of
+`log⁺ ‖w‖` is the degree `d`. Estimating the terms one by one, with `Real.posLog_norm_sum_le` and
+`Real.posLog_mul`, gives the larger factor `∑ j ∈ range (d + 1), j` instead.
+-/
 theorem Real.posLog_norm_sum_mul_pow_le (d : ℕ) (a : ℕ → R) (w : R) :
     log⁺ ‖∑ j ∈ range (d + 1), a j * w ^ j‖
       ≤ d * log⁺ ‖w‖ + ∑ j ∈ range (d + 1), log⁺ ‖a j‖ + log (d + 1) := by
@@ -312,21 +338,23 @@ theorem Real.posLog_norm_sum_mul_pow_le (d : ℕ) (a : ℕ → R) (w : R) :
     · linarith
     · exact neg_one_lt_zero.le.trans (norm_nonneg _)
 
-/-- **Lower bound for monic polynomial expressions**: `d * log⁺ ‖w‖` is at most `log⁺` of the norm
-of the monic polynomial expression `w ^ d + ∑ j ∈ range d, a j * w ^ j`, plus `d` times the sum of
+/--
+**Lower bound for monic polynomial expressions**: `d * log⁺ ‖w‖` is at most `log⁺` of the norm of
+the monic polynomial expression `w ^ d + ∑ j ∈ range d, a j * w ^ j`, plus `d` times the sum of
 `log⁺` of the norms of the coefficients, plus `d * log (2 * d)`. See
 `Real.posLog_norm_sum_mul_pow_le` for the upper bound.
 
 The point of the estimate is the factor `d` on the left. Write `g` for the value of the monic
-expression. Then `w` is a root of a monic polynomial of degree `d` whose constant coefficient is
-`a 0 - g`, but bounds for the roots of this polynomial, such as
-`Real.posLog_norm_le_of_pow_add_sum_eq_zero`, only bound `log⁺ ‖w‖` by `log⁺ ‖g‖` and an error
-term, without the factor `d`.
+expression. Then `w` is a root of a monic polynomial of degree `d` whose constant coefficient is `a
+0 - g`, but bounds for the roots of this polynomial, such as
+`Real.posLog_norm_le_of_pow_add_sum_eq_zero`, only bound `log⁺ ‖w‖` by `log⁺ ‖g‖` and an error term,
+without the factor `d`.
 
-In the constant, `log d` accounts for the number of coefficients, as in `Real.posLog_sum`, and
-`log 2` for the threshold `max 1 (2 * ∑ j ∈ range d, ‖a j‖)`: if `‖w‖` exceeds it, then the
-leading term `w ^ d` dominates the monic expression. For `d = 1`, the estimate is an instance of
-`Real.posLog_norm_add_le`. -/
+In the constant, `log d` accounts for the number of coefficients, as in `Real.posLog_sum`, and `log
+2` for the threshold `max 1 (2 * ∑ j ∈ range d, ‖a j‖)`: if `‖w‖` exceeds it, then the leading term
+`w ^ d` dominates the monic expression. For `d = 1`, the estimate is an instance of
+`Real.posLog_norm_add_le`.
+-/
 theorem Real.mul_posLog_norm_le_posLog_norm_pow_add_sum [NormMulClass R] (d : ℕ) (a : ℕ → R)
     (w : R) :
     d * log⁺ ‖w‖ ≤ log⁺ ‖w ^ d + ∑ j ∈ range d, a j * w ^ j‖
@@ -353,10 +381,15 @@ theorem Real.mul_posLog_norm_le_posLog_norm_pow_add_sum [NormMulClass R] (d : �
 ## Bounds for Roots
 -/
 
-/-- **Lagrange's bound** for the roots of a monic polynomial: if
-`w ^ d + ∑ j ∈ range d, a j * w ^ j = 0`, then `‖w‖ ≤ max 1 (∑ j ∈ range d, ‖a j‖)`. See
-`Polynomial.IsRoot.norm_lt_cauchyBound` for Cauchy's bound, and
-`Real.posLog_norm_le_of_pow_add_sum_eq_zero` for the logarithmic form of Lagrange's bound. -/
+/--
+**Bound for the roots of a monic polynomial**: if `w ^ d + ∑ j ∈ range d, a j * w ^ j = 0`, then
+`‖w‖ ≤ max 1 (∑ j ∈ range d, ‖a j‖)`. This is a variant of Cauchy's bound,
+`Polynomial.IsRoot.norm_lt_cauchyBound`, with the sum of the norms of the coefficients in place of
+their maximum. Both bounds are discussed in
+<https://en.wikipedia.org/wiki/Geometrical_properties_of_polynomial_roots#Bounds_on_all_roots>,
+where the present one is listed as Lagrange's bound. See
+`Real.posLog_norm_le_of_pow_add_sum_eq_zero` for the logarithmic form.
+-/
 theorem norm_le_max_one_sum_norm_of_pow_add_sum_eq_zero [NormMulClass R] {d : ℕ}
     (h : w ^ d + ∑ j ∈ range d, a j * w ^ j = 0) :
     ‖w‖ ≤ max 1 (∑ j ∈ range d, ‖a j‖) := by
@@ -367,12 +400,15 @@ theorem norm_le_max_one_sum_norm_of_pow_add_sum_eq_zero [NormMulClass R] {d : �
   rw [eq_neg_of_add_eq_zero_right h, norm_neg, norm_pow, pow_succ'] at key
   exact le_of_mul_le_mul_right key (pow_pos (zero_lt_one.trans_le hw) d)
 
-/-- **Lagrange's bound, logarithmic form**: if `w ^ d + ∑ j ∈ range d, a j * w ^ j = 0`, then
-`log⁺ ‖w‖` is at most the sum of `log⁺` of the norms of the coefficients, plus `log d`. The
-constant accounts for the number of coefficients, as in `Real.posLog_sum`. See
+/--
+**Bound for the roots of a monic polynomial, logarithmic form**: if
+`w ^ d + ∑ j ∈ range d, a j * w ^ j = 0`, then `log⁺ ‖w‖` is at most the sum of `log⁺` of the
+norms of the coefficients, plus `log d`. The constant accounts for the number of coefficients, as
+in `Real.posLog_sum`. See
 `norm_le_max_one_sum_norm_of_pow_add_sum_eq_zero` for the bound on `‖w‖` itself, and
 `Real.mul_posLog_norm_le_posLog_norm_pow_add_sum` for an estimate that does not require the monic
-expression to vanish. -/
+expression to vanish.
+-/
 theorem Real.posLog_norm_le_of_pow_add_sum_eq_zero [NormMulClass R] {d : ℕ}
     (h : w ^ d + ∑ j ∈ range d, a j * w ^ j = 0) :
     log⁺ ‖w‖ ≤ ∑ j ∈ range d, log⁺ ‖a j‖ + log d := by
@@ -383,15 +419,17 @@ section NormedRing
 
 variable {R : Type*} [NormedRing R] {a : ℕ → R} {w : R}
 
-/-- **Lower bound for roots**: if `∑ j ∈ range (d + 1), a j * w ^ j = 0` and the constant
-coefficient `a 0` is not zero, then `log⁺ ‖w‖⁻¹` is at most `log⁺ ‖a 0‖⁻¹`, plus the sum of `log⁺`
-of the norms of the other coefficients, plus `log d`. In other words, a root is small only if the
-constant coefficient is small or another coefficient is large.
+/--
+**Lower bound for roots**: if `∑ j ∈ range (d + 1), a j * w ^ j = 0` and the constant coefficient
+`a 0` is not zero, then `log⁺ ‖w‖⁻¹` is at most `log⁺ ‖a 0‖⁻¹`, plus the sum of `log⁺` of the norms
+of the other coefficients, plus `log d`. In other words, a root is small only if the constant
+coefficient is small or another coefficient is large.
 
-This is the counterpart of `Real.posLog_norm_le_of_pow_add_sum_eq_zero` for small roots: the
-inverse of an invertible root is a root of the polynomial with the coefficients in reverse order,
-whose leading coefficient is `a 0`. The assumption `a 0 ≠ 0` cannot be dropped: if all
-coefficients vanish, then every `w` is a root, but the right-hand side is the constant `log d`. -/
+This is the counterpart of `Real.posLog_norm_le_of_pow_add_sum_eq_zero` for small roots: the inverse
+of an invertible root is a root of the polynomial with the coefficients in reverse order, whose
+leading coefficient is `a 0`. The assumption `a 0 ≠ 0` cannot be dropped: if all coefficients
+vanish, then every `w` is a root, but the right-hand side is the constant `log d`.
+-/
 theorem Real.posLog_inv_norm_le_of_sum_mul_pow_eq_zero {d : ℕ}
     (h : ∑ j ∈ range (d + 1), a j * w ^ j = 0) (h₀ : a 0 ≠ 0) :
     log⁺ ‖w‖⁻¹ ≤ log⁺ ‖a 0‖⁻¹ + ∑ j ∈ Ico 1 (d + 1), log⁺ ‖a j‖ + log d := by
@@ -418,14 +456,16 @@ end NormedRing
 ## Polynomial Relations
 -/
 
-/-- If `w ^ n * P = Q`, where `P = ∑ j ∈ range (p + 1), a j * w ^ j` and
-`Q = ∑ k ∈ range (n + 1), b k * w ^ k` are polynomial expressions in `w` and `Q` has degree at
-most `n`, then `log⁺ ‖P‖` is bounded in terms of the coefficients of `P` and `Q`, independently
-of `w`: it is at most the sum of `log⁺` of the norms of all coefficients, plus the logarithm of
-the larger of the two numbers of coefficients. Indeed, the coefficients of `P` bound `P` if
-`‖w‖ ≤ 1`, and by the relation, the coefficients of `Q` bound `P` if `1 ≤ ‖w‖`.
+/--
+If `w ^ n * P = Q`, where `P = ∑ j ∈ range (p + 1), a j * w ^ j` and
+`Q = ∑ k ∈ range (n + 1), b k * w ^ k` are polynomial expressions in `w` and `Q` has degree at most
+`n`, then `log⁺ ‖P‖` is bounded in terms of the coefficients of `P` and `Q`, independently of `w`:
+it is at most the sum of `log⁺` of the norms of all coefficients, plus the logarithm of the larger
+of the two numbers of coefficients. Indeed, the coefficients of `P` bound `P` if `‖w‖ ≤ 1`, and by
+the relation, the coefficients of `Q` bound `P` if `1 ≤ ‖w‖`.
 
-This is the pointwise estimate behind Clunie's lemma in value distribution theory. -/
+This is the pointwise estimate behind Clunie's lemma in value distribution theory.
+-/
 theorem Real.posLog_norm_sum_mul_pow_le_of_pow_mul_eq [NormMulClass R] {n p : ℕ} {b : ℕ → R}
     (h : w ^ n * ∑ j ∈ range (p + 1), a j * w ^ j = ∑ k ∈ range (n + 1), b k * w ^ k) :
     log⁺ ‖∑ j ∈ range (p + 1), a j * w ^ j‖
