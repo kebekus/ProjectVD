@@ -7,7 +7,7 @@ module
 
 public import Mathlib.Topology.Algebra.Order.LiminfLimsup
 public import VD.MathlibPending.BoundednessCharacteristic
-public import VD.SMT.Deficiency.Basic
+public import VD.MathlibSubmitted.BasicDeficiency
 public import VD.SMT.SecondMainTheorem
 
 /-!

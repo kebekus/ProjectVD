@@ -5,7 +5,7 @@ Authors: Stefan Kebekus
 -/
 module
 
-public import VD.SMT.Deficiency.Basic
+public import VD.MathlibSubmitted.BasicDeficiency
 public import VD.SMT.SecondMainTheoremRamification
 
 /-!
