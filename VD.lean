@@ -19,6 +19,7 @@ public import VD.LinearDiffOp.Wirtinger
 public import VD.MathlibPending.BoundednessCharacteristic
 public import VD.MathlibPending.CharacteristicIsBigOLog
 public import VD.MathlibPending.ProximityBounded
+public import VD.MathlibSubmitted.BasicDeficiency
 public import VD.MathlibSubmitted.CanonicalFactor
 public import VD.MathlibSubmitted.CircleAverageEstimates
 public import VD.MathlibSubmitted.CodiscreteWithinEventually
@@ -32,7 +33,6 @@ public import VD.MathlibSubmitted.MeromorphicGermZero
 public import VD.MathlibSubmitted.PointwiseEstimates
 public import VD.MathlibSubmitted.PoissonSchwarzDeriv
 public import VD.SMT.Deficiency
-public import VD.SMT.Deficiency.Basic
 public import VD.SMT.Picard
 public import VD.SMT.ProximityEstimates
 public import VD.SMT.SecondMainTheorem
