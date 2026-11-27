@@ -5,6 +5,7 @@ Authors: Stefan Kebekus
 -/
 module
 
+public import VD.SMT.Deficiency.Basic
 public import VD.SMT.SecondMainTheoremRamification
 
 /-!
@@ -16,7 +17,10 @@ Mathlib target: `Mathlib/Analysis/Complex/ValueDistribution/SecondMainTheorem.le
 (part 3 of 3).
 Dependencies: `Mathlib/Analysis/Complex/ValueDistribution/LogCounting/Truncated.lean`
 (package A, now in Mathlib), `VD/MathlibSubmitted/DivisorDeriv.lean` (package B, PR #44428),
-`VD/SMT/SecondMainTheoremRamification.lean` (package E).
+`VD/SMT/SecondMainTheoremRamification.lean` (package E). The combined First Main Theorem,
+`ValueDistribution.abs_characteristic_top_sub_characteristic_coe_le`, comes from
+`VD/SMT/Deficiency/Basic.lean`, which prepares it for upstreaming into
+`Mathlib/Analysis/Complex/ValueDistribution/FirstMainTheorem.lean`.
 
 This file proves the **Second Main Theorem** of value distribution theory in its classical
 truncated form: for `f` meromorphic on `ℂ` and a finite set `S : Finset (WithTop ℂ)` of
@@ -41,11 +45,6 @@ cardinality assumption on `S`.
 - `ValueDistribution.secondMainTheorem_posPart`: the `posPart` reformulation (S2′), a
   filter-algebra-composable `IsBigO` statement.
 
-- Helpers flagged for possible upstreaming into `FirstMainTheorem.lean`:
-  `ValueDistribution.characteristic_coe_eq_characteristic_shift_inv` and the combined First
-  Main Theorem, `ValueDistribution.exists_abs_characteristic_coe_sub_characteristic_top_le`
-  (`|T(r, a) − T(r, ∞)| ≤ C`).
-
 The proof combines the Second Main Theorem with ramification term (S1, package E) with the
 First Main Theorem to convert proximity into counting functions, and then absorbs the
 multiplicity excess into the ramification term using the two counting inequalities of
@@ -60,48 +59,6 @@ VII.2.2; [Hayman, *Meromorphic Functions*][MR164038], §2.3.
 open Asymptotics Filter MeasureTheory Metric Real Set Topology
 
 namespace ValueDistribution
-
-/-!
-## The First Main Theorem, Combined Form
-
-The two helpers below combine both parts of the First Main Theorem into the statement that
-the characteristic functions of `f` for a finite value and for `⊤` agree up to a bounded
-function.  They are flagged for possible upstreaming into
-`Mathlib/Analysis/Complex/ValueDistribution/FirstMainTheorem.lean`.
--/
-
-/--
-The characteristic function of `f` for a finite value `a₀` is the characteristic function
-of the shifted inverse `(f - a₀)⁻¹` for the value `⊤`.
--/
-lemma characteristic_coe_eq_characteristic_shift_inv {f : ℂ → ℂ} {a₀ : ℂ} :
-    characteristic f a₀ = characteristic (f · - a₀)⁻¹ ⊤ := by
-  have h₁ : proximity f ↑a₀ = proximity (f · - a₀)⁻¹ ⊤ := by
-    rw [proximity_inv, proximity_coe, proximity_zero]
-  have h₂ : logCounting f ↑a₀ = logCounting (f · - a₀)⁻¹ ⊤ := by
-    rw [logCounting_inv, logCounting_coe, logCounting_zero]
-  unfold characteristic
-  rw [h₁, h₂]
-
-/--
-**First Main Theorem, combined form**: for every finite value `a₀`, the characteristic
-functions `characteristic f a₀` and `characteristic f ⊤` differ by a bounded function.
--/
-theorem exists_abs_characteristic_coe_sub_characteristic_top_le {f : ℂ → ℂ}
-    (hf : Meromorphic f) (a₀ : ℂ) :
-    ∃ C, ∀ r, |characteristic f a₀ r - characteristic f ⊤ r| ≤ C := by
-  have hshift : Meromorphic (f · - a₀) := by fun_prop
-  refine ⟨max |log ‖f 0 - a₀‖| |log ‖meromorphicTrailingCoeffAt (f · - a₀) 0‖|
-    + (log⁺ ‖a₀‖ + log 2), fun r ↦ ?_⟩
-  -- First part of the FMT, for the shifted function `f - a₀` …
-  have h₁ := characteristic_sub_characteristic_inv_le (R := r) hshift
-  -- … and the second part, for the shift itself.
-  have h₂ := abs_characteristic_sub_characteristic_shift_le (a₀ := a₀) (r := r) hf
-  have h₃ := abs_sub_le (characteristic (f · - a₀)⁻¹ ⊤ r) (characteristic (f · - a₀) ⊤ r)
-    (characteristic f ⊤ r)
-  rw [characteristic_coe_eq_characteristic_shift_inv]
-  rw [abs_sub_comm] at h₁ h₂
-  linarith
 
 /-!
 ## The Second Main Theorem
@@ -125,7 +82,9 @@ private lemma secondMainTheorem_aux {f : ℂ → ℂ} (hf : Meromorphic f) (s : 
   -- The Second Main Theorem with ramification term (S1) …
   obtain ⟨c₀, hc₀⟩ := secondMainTheorem_ramification hf s
   -- … and one combined FMT constant for every target.
-  choose C hC using fun a : ℂ ↦ exists_abs_characteristic_coe_sub_characteristic_top_le hf a
+  choose C hC using fun a : ℂ ↦
+    (⟨_, fun _ ↦ abs_characteristic_top_sub_characteristic_coe_le hf⟩ :
+      ∃ C, ∀ r, |characteristic f ⊤ r - characteristic f a r| ≤ C)
   refine ⟨c₀ + max (∑ a ∈ s, C a) 0, ?_⟩
   filter_upwards [hc₀, mem_inf_of_right (eventually_ge_atTop (Real.exp 1))] with r hS1 hre
   have hr1 : (1 : ℝ) ≤ r := by linarith [Real.add_one_le_exp 1]
@@ -139,7 +98,7 @@ private lemma secondMainTheorem_aux {f : ℂ → ℂ} (hf : Meromorphic f) (s : 
   -- Combined FMT: convert the proximity for each target into the characteristic.
   have hprox : ∀ a ∈ s, characteristic f ⊤ r - C a - logCounting f a r ≤ proximity f a r := by
     intro a _
-    have h₁ := (abs_le.1 (hC a r)).1
+    have h₁ := (abs_le.1 (hC a r)).2
     have h₂ : characteristic f a r = proximity f a r + logCounting f a r := rfl
     linarith
   have hsum : (s.card : ℝ) * characteristic f ⊤ r - (∑ a ∈ s, C a)

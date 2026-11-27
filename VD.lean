@@ -4,7 +4,6 @@ public import VD.AlgebraicDependence.BezoutEstimate
 public import VD.AlgebraicDependence.ClunieMohonko
 public import VD.AlgebraicDependence.FunctionRingCharacteristic
 public import VD.AlgebraicDependence.GrowthClass
-public import VD.AlgebraicDependence.GrowthClass'
 public import VD.AlgebraicDependence.GrowthField
 public import VD.AlgebraicDependence.MonicRelation
 public import VD.AlgebraicDependence.PolynomialCharacteristic
@@ -33,6 +32,7 @@ public import VD.MathlibSubmitted.MeromorphicGermZero
 public import VD.MathlibSubmitted.PointwiseEstimates
 public import VD.MathlibSubmitted.PoissonSchwarzDeriv
 public import VD.SMT.Deficiency
+public import VD.SMT.Deficiency.Basic
 public import VD.SMT.Picard
 public import VD.SMT.ProximityEstimates
 public import VD.SMT.SecondMainTheorem

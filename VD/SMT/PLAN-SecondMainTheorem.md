@@ -710,6 +710,29 @@ package H's `Omits` predicate; the extra bridge
 `tendsto_characteristic_atTop_of_log_isLittleO` (transcendence ⟹ unbounded `T`) is
 public. The sharpness example for `exp` is not formalized (needs `T(r, exp) = r/π`).*
 
+*Split and reworked for submission (2026-11-27): the definitions `deficiency` and
+`truncatedDeficiency` moved to the new file `VD/SMT/Deficiency/Basic.lean`, prepared as a PR
+(see its upstreaming plan). That file depends on Mathlib master only. The eight private
+helpers bounding the defining quotients did not survive as they were: "eventually in
+`[0, 2]`" used an arbitrary constant, and the `limsup ≤ 1` helper was generic in the
+numerator. They are replaced by four statements in the language of asymptotics, each with a
+proof of one line: `isEquivalent_characteristic_characteristic_top` (`T_a ~ T` if `T → ∞`)
+and `isBigO_{proximity,logCounting,truncatedLogCounting}_characteristic_top`. These rest on
+three statements without assumptions on `f` (`isBigO_proximity_characteristic`,
+`isBigO_logCounting_characteristic`, `isBigO_truncatedLogCounting_logCounting`). The combined
+First Main Theorem moved there from `VD/SMT/SecondMainTheorem.lean` and now follows the
+pattern of `FirstMainTheorem.lean`: the quantitative
+`abs_characteristic_top_sub_characteristic_coe_le` with an explicit constant (used by package
+F), and the qualitative `isBigO_characteristic_top_sub_characteristic` for all values of
+`WithTop ℂ`. The identity behind it is split into `characteristic_inv` and
+`characteristic_coe_eq_characteristic_sub_const_zero`. In `VD/SMT/Deficiency.lean`,
+boundedness of the quotients now comes from the big-O statements, through
+`div_isBoundedUnder_of_isBigO` and `isBoundedUnder_le_abs`; `deficiency_le_one` and
+`truncatedDeficiency_nonneg` are derived from the FMT bridge and from
+`deficiency_le_truncatedDeficiency`, so that no `limsup ≤ 1` lemma is needed. That file keeps
+the `NeBot` instance, the basic API (Mathlib-only as well, a candidate for the follow-up PR),
+the two bridges and the defect relation.*
+
 ```lean
 namespace ValueDistribution   -- generality f : ℂ → E where meaningful
 
@@ -890,7 +913,8 @@ local file per future Mathlib PR target, each registered by an import line in th
 | 4 | `ProximityEstimates.lean` | `…/ValueDistribution/SecondMainTheorem.lean` (part 1) | package D | 3, **LLD (T3)** |
 | 5 | `SecondMainTheoremRamification.lean` | `…/ValueDistribution/SecondMainTheorem.lean` (part 2) | package E (S1) | 2, 4 |
 | 6 | `SecondMainTheorem.lean` | `…/ValueDistribution/SecondMainTheorem.lean` (part 3) | package F (S2, S2′) | 1, 2, 5 |
-| 7 | `Deficiency.lean` | **new** `…/ValueDistribution/Deficiency.lean` | package G (S3) | 6 |
+| 7a | `Deficiency/Basic.lean` (ready, 2026-11-27) | `…/ValueDistribution/CharacteristicFunction.lean`, `…/LogCounting/Truncated.lean`, `…/FirstMainTheorem.lean` (extend) + **new** `…/ValueDistribution/Deficiency/Basic.lean` | package G: definitions, combined FMT, comparison with the characteristic | — |
+| 7 | `Deficiency.lean` | further files in `…/ValueDistribution/Deficiency/` | package G (basic API, S3) | 6, 7a |
 | 8 | `Picard.lean` | **new** `Analysis/Complex/Picard.lean` | package H (S4) | 6, pending `CharacteristicIsBigOLog` |
 
 - Status (2026-10-06): items 1 and 3 are merged into Mathlib; item 2 is in review as
